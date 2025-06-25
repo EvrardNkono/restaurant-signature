@@ -1,0 +1,66 @@
+.popup-back-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #f5f3ff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.4); /* État initial */
+  animation: shadowBlink 3s ease-in-out infinite;
+}
+
+@keyframes shadowBlink {
+  0% {
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+  }
+  25% {
+    box-shadow: 0 0 15px 3px rgba(124, 58, 237, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px 6px rgba(124, 58, 237, 0.8);
+  }
+  75% {
+    box-shadow: 0 0 15px 3px rgba(124, 58, 237, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+  }
+}
+
+.popup-back-button {
+  background: none;
+  border: none;
+  color: #7c3aed;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-back-content {
+  color: #4a0072;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* 📱 Media query pour petits écrans */
+@media (max-width: 600px) {
+  .popup-back-container {
+    top: 5px;
+    left: 10px;
+    padding: 8px 12px;
+    gap: 8px;
+    
+  }
+
+  .popup-back-button {
+    font-size: 1rem;
+  }
+
+  .popup-back-content h2 {
+    font-size: 0.9rem;
+  }
+}

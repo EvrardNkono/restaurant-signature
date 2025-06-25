@@ -170,17 +170,20 @@
   background-color: #7c3aed;
   color: white;
   border: none;
-  padding: 8px 10px;
+  padding: 8px 3px;
   border-radius: 20px;
   cursor: pointer;
   font-weight: bold;
   transition: background 0.3s;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: -5px !important;
   flex-shrink: 0;
-  margin-left: -8px;
+  margin-left: -10px ;
 }
+
+
+
 .details-button{
 background-color: #d83aed;
 
@@ -215,3 +218,4 @@ background-color: #d83aed;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+

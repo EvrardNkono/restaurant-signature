@@ -1,0 +1,40 @@
+.scroll-top-popup-overlay {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  /* On le déplace en bas à droite pour pas gêner, mais tu peux changer */
+  background: rgba(245, 243, 255, 0.9);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
+  z-index: 10000;
+  user-select: none;
+  cursor: default;
+  max-width: 280px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.scroll-top-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.scroll-btn {
+  padding: 10px 20px;
+  background-color: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.scroll-btn:hover {
+  background-color: #5b21b6;
+}
