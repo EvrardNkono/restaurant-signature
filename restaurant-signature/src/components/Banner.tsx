@@ -24,12 +24,14 @@ const Banner = () => {
 
         <div className="btn-group">
           <button className="banner-button" onClick={() => navigate('/special-weekend')}>
-            <FontAwesomeIcon icon={faStar} className="icon green-icon" />
-            Special Weekend
-          </button>
+  <FontAwesomeIcon icon={faStar} className="icon green-icon" />
+  
+  Special<br /> Weekend
+</button>
+
           <button className="banner-button" onClick={() => navigate('/concept-chef')}>
             <FontAwesomeIcon icon={faAward} className="icon gold-icon" />
-            Le concept du Chef
+            Le concept<br />du Chef
           </button>
         </div>
       </div>
