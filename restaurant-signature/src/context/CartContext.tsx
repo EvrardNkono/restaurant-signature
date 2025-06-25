@@ -10,7 +10,7 @@ interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addToCart: (dish: Dish) => void;
-  removeFromCart: (dishId: number) => void;
+  removeFromCart: (dish: Dish) => void;
   clearCart: () => void;
   totalItems: number;
 }
@@ -34,8 +34,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
-  const removeFromCart = (dishId: number) => {
-    setItems(prevItems => prevItems.filter(i => i.dish.id !== dishId));
+  const removeFromCart = (dish: Dish) => {
+    setItems(prevItems => prevItems.filter(i => i.dish.id !== dish.id));
   };
 
   const clearCart = () => setItems([]);
