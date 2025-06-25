@@ -1,18 +1,18 @@
-// src/components/FloatingCartIcon.tsx
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';  // <-- import
 
 const FloatingCartIcon = () => {
   const { totalItems } = useCart();
+  const navigate = useNavigate();  // <-- hook navigate
 
   return (
     <div
       style={{
         position: 'fixed',
         top: '110px',
-        left: '48%',
+        left: '50%',
         transform: 'translateX(-50%)',
         backgroundColor: '#7C3AED',
         color: 'white',
@@ -29,7 +29,7 @@ const FloatingCartIcon = () => {
         zIndex: 9999,
       }}
       title="Voir le panier"
-      onClick={() => alert('Ici tu peux ouvrir le panier (à implémenter)')}
+      onClick={() => navigate('/panier')}  // <-- navigation réelle ici
     >
       <FontAwesomeIcon icon={faShoppingCart} />
       {totalItems > 0 && (

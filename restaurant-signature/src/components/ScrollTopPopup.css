@@ -18,7 +18,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  height: 90px;
 }
 
 .scroll-btn {
@@ -33,8 +33,24 @@
   align-items: center;
   gap: 8px;
   transition: background-color 0.3s ease;
+  margin-top: -10px !important;
 }
 
 .scroll-btn:hover {
   background-color: #5b21b6;
+}
+
+@media (max-width: 600px) {
+  .scroll-top-popup-overlay {
+    max-width: 180px;   /* plus petit sur mobile */
+    padding: 4px 0px; /* moins de padding */
+    bottom: 20px;       /* un peu plus proche du bas */
+    right: 20px;        /* un peu plus proche du bord */
+    font-size: 0.9rem;  /* texte un peu plus petit */
+  }
+
+  .scroll-btn {
+    padding: 8px 12px;  /* boutons un peu plus petits */
+    font-size: 0.85rem;
+  }
 }

@@ -7,9 +7,11 @@ import { useCart } from '../context/CartContext';
 
 interface DishCardProps {
   dish: Dish;
+  quantity?: number;         // Quantité optionnelle à afficher
+  showQuantityControls?: boolean;    // Contrôle affichage quantité, false par défaut
 }
 
-const DishCard: React.FC<DishCardProps> = ({ dish }) => {
+const DishCard: React.FC<DishCardProps> = ({ dish, quantity = 0, showQuantityControls = false }) => {
   const [showDetails, setShowDetails] = useState(false);
   const { addToCart, removeFromCart } = useCart();
 
@@ -30,31 +32,35 @@ const DishCard: React.FC<DishCardProps> = ({ dish }) => {
         <h3 className="dish-name">{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
 
+        {showQuantityControls && quantity > 0 && (
+          <p className="dish-quantity">Quantité dans le panier : {quantity}</p>
+        )}
+
         <div className="dish-buttons-row">
-  <button
-    className="dish-button"
-    onClick={() => addToCart(dish)}
-  >
-    <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
-    Ajouter
-  </button>
+          <button
+            className="dish-button"
+            onClick={() => addToCart(dish)}
+          >
+            <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
+            Ajouter
+          </button>
 
-  <button
-    className="dish-button remove-button"
-    onClick={() => removeFromCart(dish)}
-  >
-    <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
-    Enlever
-  </button>
+          <button
+            className="dish-button remove-button"
+            onClick={() => removeFromCart(dish)}
+          >
+            <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
+            Enlever
+          </button>
 
-  <button
-    className="dish-button details-button"
-    onClick={() => setShowDetails(prev => !prev)}
-  >
-    <FontAwesomeIcon icon={faClone} className="button-icon" />
-    {showDetails ? "Cacher" : "Détails"}
-  </button>
-</div>
+          <button
+            className="dish-button details-button"
+            onClick={() => setShowDetails(prev => !prev)}
+          >
+            <FontAwesomeIcon icon={faClone} className="button-icon" />
+            {showDetails ? "Cacher" : "Détails"}
+          </button>
+        </div>
       </div>
     </div>
   );

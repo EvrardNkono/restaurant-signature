@@ -1,45 +1,133 @@
+/* Banner.css */
 .banner {
   position: relative;
-  background-image: url('../assets/images/banner-bg.jpg');
+  width: 100%;        /* plutôt que 100vw */
+  height: 100vh;
   background-size: cover;
-  background-position: center;
-  height: 350px;
+  background-position: center top;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: white;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
   overflow: hidden;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
-.banner::before {
-  content: '';
+.overlay {
   position: absolute;
   inset: 0;
-  background: rgba(102, 51, 153, 0.6); /* violet semi-transparent */
+  background-color: rgba(102, 51, 153, 0.4);
   z-index: 1;
 }
 
 .banner-content {
   position: relative;
-  z-index: 2;
   max-width: 800px;
-  padding: 0 1rem;
+  z-index: 2;
+  width: 100%;
 }
 
-.banner h1 {
+h1 {
   font-size: 3rem;
-  font-weight: 700;
-  margin: 0;
-  color: #e6e6fa; /* lavande très clair pour le blanc/violet */
-  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.3em;
 }
 
-.banner p {
-  margin-top: 1rem;
-  font-size: 1.25rem;
-  color: #f5f5f5;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+p {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.banner-button {
+  border: none;
+  padding: 0.75rem 2.5rem;
+  font-size: 1.2rem;
+  border-radius: 30px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  font-weight: 600;
+  user-select: none;
+  background-color: white; /* Fond blanc pour tous les boutons */
+  color: #333; /* Texte foncé */
+}
+
+.banner-button:hover {
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* Icônes colorées */
+.banner-button .icon {
+  font-size: 1.4rem;
+  vertical-align: middle;
+}
+
+/* Couleurs spécifiques pour les icônes */
+.purple-icon {
+  color: #663399; /* violet */
+}
+
+.green-icon {
+  color: #28a745; /* vert */
+}
+
+.gold-icon {
+  color: #b8860b; /* doré */
+}
+
+/* Conteneur des deux boutons en bas */
+.btn-group {
+  max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;  /* sécurité */
+  flex-wrap: nowrap;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 30px;
+}
+
+/* Chaque bouton prend la moitié de la largeur dispo */
+.btn-group .banner-button {
+  flex: 1 1 0;
+  max-width: calc(50% - 0.5rem);
+  min-width: 140px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2rem;
+  }
+  p {
+    font-size: 1.1rem;
+  }
+  .banner-button {
+    font-size: 1rem;
+    padding: 0.6rem 1.8rem;
+  }
+  .btn-group {
+    gap: 0.6rem;
+  }
+  .btn-group .banner-button {
+    max-width: calc(50% - 0.3rem);
+    min-width: 120px;
+  }
+}
+
+/* Réduction de la hauteur sur petit écran */
+@media (max-height: 700px) {
+  .banner {
+    height: 70vh;
+  }
 }

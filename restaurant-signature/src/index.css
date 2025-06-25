@@ -66,3 +66,11 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* bloque le scroll horizontal global */
+  width: 100vw;
+  box-sizing: border-box;
+}

@@ -49,3 +49,17 @@
 .title{
   margin-left: 45%;
 }
+
+.centered-message {
+  display: flex;
+  justify-content: center;  /* centre horizontalement */
+  align-items: center;      /* centre verticalement */
+  height: 100%;             /* prend toute la hauteur du parent */
+  font-size: 1.4rem;
+  color: #7c3aed;           /* violet stylé */
+  font-weight: 600;
+  text-align: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}

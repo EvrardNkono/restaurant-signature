@@ -1,10 +1,11 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
+import CartPage from './pages/CartPage';  // <-- Import de la page panier
 import PopupBack from './components/PopupBack';
 import ScrollTopPopup from './components/ScrollTopPopup';
 import FloatingCartIcon from './components/FloatingCartIcon';
-import { CartProvider } from './context/CartContext'; // ✅ Import OK
+import { CartProvider } from './context/CartContext';
 
 function App() {
   const location = useLocation();
@@ -12,7 +13,7 @@ function App() {
   const shouldShowPopup = location.pathname !== '/';
 
   return (
-    <CartProvider> {/* ✅ Utilisation du CartProvider ici */}
+    <CartProvider>
       {shouldShowPopupBack && <PopupBack />}
       {shouldShowPopup && <ScrollTopPopup />}
       <FloatingCartIcon />
@@ -20,7 +21,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/menu" element={<Menu />} />
-        {/* D'autres routes ici */}
+        <Route path="/panier" element={<CartPage />} /> {/* Route panier */}
+        {/* Ajoute d’autres routes ici */}
       </Routes>
     </CartProvider>
   );

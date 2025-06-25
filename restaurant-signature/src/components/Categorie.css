@@ -1,9 +1,16 @@
-.categorie-section {
-  padding: 20px;
-}
-
 .dish-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  gap: 60px;
+  justify-content: center;
+  padding: 20px ;
+  margin-left: -35px;
+}
+
+.categorie-section h2 {
+  color: #4a0072;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }

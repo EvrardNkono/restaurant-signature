@@ -1,49 +1,37 @@
+// Banner.tsx
 import { useNavigate } from 'react-router-dom';
-import bannerBg from '../assets/images/banner-bg.jpg'; // ajuste le chemin selon ta structure
+import bannerBg from '../assets/images/banner-bg.jpg'; 
 import './Banner.css';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUtensils, faStar, faAward } from '@fortawesome/free-solid-svg-icons';
 
 const Banner = () => {
   const navigate = useNavigate();
 
-  const goToMenu = () => {
-    navigate('/menu');
-  };
-
   return (
-    <div
-      className="banner"
-      style={{
-        backgroundImage: `url(${bannerBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        position: 'relative',
-        width: '100vw',
-        height: '100vh',
-        color: 'white',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        textAlign: 'center',
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        overflow: 'hidden',
-      }}
-    >
-      {/* Overlay violet semi-transparent */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: 'rgba(102, 51, 153, 0.4)', // opacité 40%
-          zIndex: 1,
-        }}
-      />
+    <div className="banner" style={{ backgroundImage: `url(${bannerBg})` }}>
+      <div className="overlay" />
 
-      <div className="banner-content" style={{ position: 'relative', zIndex: 2, maxWidth: 800, padding: '0 1rem' }}>
+      <div className="banner-content">
         <h1>Bienvenue sur Restaurant Signature</h1>
         <p>Découvrez nos saveurs exotiques</p>
-        <button className="banner-button" onClick={goToMenu}>
-          Voir le menu
+
+        <button className="banner-button" onClick={() => navigate('/menu')}>
+          <FontAwesomeIcon icon={faUtensils} className="icon purple-icon" />
+          Menu Classique
         </button>
+
+        <div className="btn-group">
+          <button className="banner-button" onClick={() => navigate('/special-weekend')}>
+            <FontAwesomeIcon icon={faStar} className="icon green-icon" />
+            Special Weekend
+          </button>
+          <button className="banner-button" onClick={() => navigate('/concept-chef')}>
+            <FontAwesomeIcon icon={faAward} className="icon gold-icon" />
+            Le concept du chef
+          </button>
+        </div>
       </div>
     </div>
   );
