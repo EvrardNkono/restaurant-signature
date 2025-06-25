@@ -29,7 +29,7 @@ const Banner = () => {
           </button>
           <button className="banner-button" onClick={() => navigate('/concept-chef')}>
             <FontAwesomeIcon icon={faAward} className="icon gold-icon" />
-            Le concept du chef
+            Le concept du Chef
           </button>
         </div>
       </div>
