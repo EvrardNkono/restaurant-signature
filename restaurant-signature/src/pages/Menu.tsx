@@ -3,7 +3,7 @@ import Entrées from '../components/Entrées';
 import Plats from '../components/Plats';
 import Desserts from '../components/Desserts';
 import Boissons from '../components/Boissons';
-import backgroundMenu from '../assets/images/background-menu.jpeg';
+import backgroundMenu from '../assets/images/banner2.jpeg';
 
 
 
