@@ -1,45 +1,28 @@
-.menu-page {
-  text-align: center;
-  padding: 2rem;
-}
-
-/* Container de la bannière avec image de fond + boutons superposés */
-.menu-banner-with-buttons {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  border-radius: 12px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  margin-bottom: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-/* Boutons posés au-dessus de la bannière, centrés avec espace */
 .menu-buttons-overlay {
   position: absolute;
-  width: 100%;
+  top: 50%;               /* centrer verticalement */
+  left: 50%;              /* centrer horizontalement */
+  transform: translate(-50%, -50%);
+  width: 90%;             /* occuper 90% largeur bannière */
   display: flex;
+  flex-wrap: wrap;        /* permet de passer à la ligne */
   justify-content: center;
   gap: 1rem;
   z-index: 10;
 }
 
-/* Style boutons */
 .menu-buttons-overlay button {
+  flex: 1 1 45%;          /* base 45% largeur, peut s’ajuster */
+  max-width: 200px;       /* largeur max par bouton */
   padding: 0.7rem 1.5rem;
-  background-color: #6a1b9a; /* Violet */
+  background-color: #6a1b9a;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   transition: transform 0.2s ease, background-color 0.3s ease;
+  text-align: center;
 }
 
 .menu-buttons-overlay button:hover {
@@ -47,16 +30,18 @@
   background-color: #8e24aa;
 }
 
-/* Pour ta section menu-content en dessous */
-.menu-content {
-  margin-top: 1rem;
-  /* Si tu veux aussi une image de fond ici, garde ton style inline */
-}
+/* Sur écrans plus larges (>600px), tous les boutons sur la même ligne */
+@media (min-width: 600px) {
+  .menu-buttons-overlay {
+    flex-wrap: nowrap;
+    width: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
-/* Ta mini bannière si tu en veux une */
-.menu-mini-banner {
-  width: 100%;
-  /* filter: brightness(0.7); */
-  transition: all 0.3s ease;
-  cursor: default;
+  .menu-buttons-overlay button {
+    flex: none;
+    width: auto;
+  }
 }
