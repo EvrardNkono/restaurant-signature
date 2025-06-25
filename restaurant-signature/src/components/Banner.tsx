@@ -53,7 +53,7 @@ const Banner = () => {
       <div className="contact-floating-card">
         <h4>Contact</h4>
         <p><FontAwesomeIcon icon={faPhone} className="contact-icon" /> <a href="tel:+33644951184">+33 6 44 95 11 84</a></p>
-        <p><FontAwesomeIcon icon={faEnvelope} className="contact-icon" /> <a href="mailto:restaurantsignature@outlook.fr">Mail</a></p>
+        <p><FontAwesomeIcon icon={faEnvelope} className="contact-icon" /> <a href="mailto:restaurantsignature@outlook.fr">Mail: restaurantsignature <></>@outlook.fr</a></p>
         <p><FontAwesomeIcon icon={faMapMarkerAlt} className="contact-icon" /> 13 rue St-Barthélemy, 77000 Melun </p>
       </div>
     </div>

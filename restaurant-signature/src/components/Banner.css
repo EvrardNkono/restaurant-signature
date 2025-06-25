@@ -28,6 +28,7 @@
   max-width: 800px;
   z-index: 2;
   width: 100%;
+  margin-top: -100px !important;
 }
 
 h1 {
@@ -181,11 +182,22 @@ p {
     right: 50%;
     transform: translateX(50%);
     bottom: 20px;
-    max-width: 90%;
+    width: 80vw;              /* ✅ Largeur explicite */
+    max-width: 95%;           /* ✅ Pour garder une marge */
     text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .contact-floating-card h4 {
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
   }
 
   .contact-floating-card p {
     justify-content: center;
+    margin: 0.2rem 0;
   }
 }
+
+
