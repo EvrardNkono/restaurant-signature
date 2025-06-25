@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import Entrées from '../components/Entrées';
 import Plats from '../components/Plats';
 import Desserts from '../components/Desserts';
