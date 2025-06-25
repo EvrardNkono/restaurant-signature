@@ -235,7 +235,55 @@ const menuData: Dish[] = [
     category: "Boissons",
     image: "assets/images/Boissons/icetea-peche.png",
     details: "La douceur de la pêche combinée à la fraîcheur du thé glacé, pour une pause zen."
-  }
+  },
+
+  {
+  id: 27,
+  name: "Eru - Water Fufu",
+  description: "Feuilles d’éru mijotées avec water fufu moelleux, un classique du Cameroun.",
+  price: 12.50,
+  category: "Spécial Weekend",
+  image: "/assets/images/special-weekend/eru-water-fufu.png",
+  details: "Un plat riche en saveurs, parfait pour un weekend réconfortant et authentique."
+},
+{
+  id: 28,
+  name: "Okok - Bâton de Manioc",
+  description: "Okok frais accompagné de bâton de manioc, recette traditionnelle et savoureuse.",
+  price: 11.80,
+  category: "Spécial Weekend",
+  image: "/assets/images/special-weekend/okok-baton-manioc.png",
+  details: "Une alliance de textures et de goûts pour les amoureux de la cuisine africaine."
+},
+{
+  id: 29,
+  name: "Ndolé - Plantain mûr",
+  description: "Feuilles d’amarante (Ndolé) avec plantains mûrs frits, un incontournable du terroir.",
+  price: 13.20,
+  category: "Spécial Weekend",
+  image: "/assets/images/special-weekend/ndole-plantain-mur.png",
+  details: "Un plat équilibré, riche et légèrement sucré grâce au plantain."
+},
+{
+  id: 30,
+  name: "Taro - Sauce Jaune",
+  description: "Taro local accompagné d’une sauce jaune épicée et onctueuse.",
+  price: 12.00,
+  category: "Spécial Weekend",
+  image: "/assets/images/special-weekend/taro-sauce-jaune.png",
+  details: "Un mariage de saveurs épicées et terreuses pour une expérience unique."
+},
+{
+  id: 31,
+  name: "Poulet DG",
+  description: "Poulet braisé aux légumes, un plat festif et délicieux pour le weekend.",
+  price: 14.50,
+  category: "Spécial Weekend",
+  image: "/assets/images/special-weekend/poulet-dg.png",
+  details: "Un classique apprécié qui réunit saveurs et convivialité."
+},
+
+
 ];
 
 export default menuData;

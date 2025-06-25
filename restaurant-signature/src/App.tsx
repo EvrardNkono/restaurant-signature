@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import CartPage from './pages/CartPage';  // <-- Import de la page panier
+import SpecialWeekend from './pages/SpecialWeekend'; // <-- Import nouvelle page
 import PopupBack from './components/PopupBack';
 import ScrollTopPopup from './components/ScrollTopPopup';
 import FloatingCartIcon from './components/FloatingCartIcon';
@@ -22,6 +23,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/menu" element={<Menu />} />
         <Route path="/panier" element={<CartPage />} /> {/* Route panier */}
+        <Route path="/special-weekend" element={<SpecialWeekend />} /> {/* Nouvelle route */}
         {/* Ajoute d’autres routes ici */}
       </Routes>
     </CartProvider>

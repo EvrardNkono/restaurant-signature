@@ -1,9 +1,9 @@
-export interface Dish {
+export type Dish = {
   id: number;
   name: string;
   description: string;
   price: number;
-  category: "Entrées" | "Plats" | "Desserts" | "Boissons";
+  category: "Boissons" | "Entrées" | "Plats" | "Desserts" | "Spécial Weekend";
   image: string;
-  details?: string; // ✅ ← Ajout du champ details
-}
+  details: string;
+};
