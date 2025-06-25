@@ -200,4 +200,37 @@ p {
   }
 }
 
+.social-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.social-icons a {
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+}
+
+.social-icons a:hover {
+  transform: scale(1.2);
+}
+
+/* Couleurs spécifiques */
+.icon-instagram {
+  color: #E1306C !important;
+}
+
+.icon-facebook {
+  color: #1877F2 !important;
+}
+
+.icon-whatsapp {
+  color: #25D366 !important;
+}
+
+.icon-tiktok {
+  color: #ffffff;
+}
 

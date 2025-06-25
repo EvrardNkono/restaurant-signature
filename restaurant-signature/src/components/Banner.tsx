@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import './Banner.css';
+import { faInstagram, faTiktok, faFacebookF, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faStar, faAward, faEnvelope, faPhone, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
@@ -55,6 +56,43 @@ const Banner = () => {
         <p><FontAwesomeIcon icon={faPhone} className="contact-icon" /> <a href="tel:+33644951184">+33 6 44 95 11 84</a></p>
         <p><FontAwesomeIcon icon={faEnvelope} className="contact-icon" /> <a href="mailto:restaurantsignature@outlook.fr">Mail: restaurantsignature <></>@outlook.fr</a></p>
         <p><FontAwesomeIcon icon={faMapMarkerAlt} className="contact-icon" /> 13 rue St-Barthélemy, 77000 Melun </p>
+        <div className="social-icons">
+  <a
+    href="https://www.instagram.com/restaurantsignature"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="icon-instagram"
+  >
+    <FontAwesomeIcon icon={faInstagram} />
+  </a>
+  <a
+    href="https://www.tiktok.com/@restaurantsignature"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="icon-tiktok"
+  >
+    <FontAwesomeIcon icon={faTiktok} />
+  </a>
+  <a
+    href="https://www.facebook.com/restaurantsignature"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="icon-facebook"
+  >
+    <FontAwesomeIcon icon={faFacebookF} />
+  </a>
+  <a
+    href="https://wa.me/33644951184"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="icon-whatsapp"
+  >
+    <FontAwesomeIcon icon={faWhatsapp} />
+  </a>
+</div>
+
+
+
       </div>
     </div>
   );
