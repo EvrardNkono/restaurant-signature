@@ -1,0 +1,217 @@
+.dish-card {
+  position: relative; /* 👈 Ajout nécessaire */
+  background-color: white;
+  border: 2px solid #7c3aed;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  color: #4a0072;
+  box-shadow: 0 4px 8px rgba(124, 58, 237, 0.2);
+  transition: transform 0.2s;
+}
+
+
+.dish-top-bar {
+  height: 8px;
+  width: 100%;
+  position: relative;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+
+  /* Nouveau dégradé */
+  background: linear-gradient(to right, #7c3aed, #d83aed);
+}
+
+
+.dish-price-bubble {
+  position: absolute;
+  top: 50%;
+  right: -20px; /* Décalage pour bien coller à la bordure */
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  background-color: #d83aed;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 3003;
+}
+
+/* Bande en diagonale */
+/* Stripes derrière l’image */
+.dish-image-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #7c3aed,
+    #7c3aed 10px,
+    #ec920a00 10px,
+    #9f7aea00 15px,
+    #d7cef000 15px,
+    #a78bfa 25px
+  );
+  clip-path: polygon(100% 0, 0 100%, 0 0);
+  opacity: 0.3;
+  z-index: 2;
+  pointer-events: none;
+  transition: all 1s ease;
+}
+
+.dish-details-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  background-color: rgba(238, 184, 243, 0.801); /* Violet semi-transparent */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  z-index: 3001;
+  transform: translateY(10px);
+  margin-left: -20px;
+  
+}
+
+.dish-image-wrapper.show-details .dish-details-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  z-index: 3002 !important;
+}
+
+
+
+/* Quand show-details est activé */
+.dish-image-wrapper.show-details::before {
+  background-color: #c1e7b03a;
+  background-image: none;
+  opacity: 1;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.dish-card:hover {
+  transform: scale(1.03);
+}
+
+.dish-image {
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  background-color: #3c3c6300;
+  border-radius: 8px;
+  position: relative;
+  z-index: 3000;
+  transition: opacity 0.6s ease;
+  opacity: 1; /* par défaut visible */
+}
+
+/* Quand showDetails est actif */
+.dish-image-wrapper.show-details .dish-image {
+  opacity: 0; /* devient invisible */
+}
+
+
+.dish-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f9f9ff;
+}
+
+.dish-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 10px 0 5px;
+}
+
+.dish-description {
+  font-size: 0.9rem;
+  color: #5e5e5e;
+  margin-bottom: 10px;
+}
+
+
+.dish-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.dish-buttons-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto; /* pousse ce bloc en bas */
+  margin-top: 10px; /* un petit espace au dessus */
+    /* pour un petit espace minimal entre eux au cas où */
+}
+
+.dish-button {
+  background-color: #7c3aed;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: -8px;
+}
+.details-button{
+background-color: #d83aed;
+
+}
+
+.dish-button:hover {
+  background-color: #0077ff;
+}
+
+.button-icon {
+  font-size: 18px;
+}
+
+.dish-side-icon-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #7c3aed;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.dish-side-icon-right .icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.dish-side-icon-right .details {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

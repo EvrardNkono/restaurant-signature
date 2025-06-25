@@ -1,0 +1,62 @@
+.menu-page {
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Container de la bannière avec image de fond + boutons superposés */
+.menu-banner-with-buttons {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Boutons posés au-dessus de la bannière, centrés avec espace */
+.menu-buttons-overlay {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10;
+}
+
+/* Style boutons */
+.menu-buttons-overlay button {
+  padding: 0.7rem 1.5rem;
+  background-color: #6a1b9a; /* Violet */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.menu-buttons-overlay button:hover {
+  transform: scale(1.05);
+  background-color: #8e24aa;
+}
+
+/* Pour ta section menu-content en dessous */
+.menu-content {
+  margin-top: 1rem;
+  /* Si tu veux aussi une image de fond ici, garde ton style inline */
+}
+
+/* Ta mini bannière si tu en veux une */
+.menu-mini-banner {
+  width: 100%;
+  /* filter: brightness(0.7); */
+  transition: all 0.3s ease;
+  cursor: default;
+}
