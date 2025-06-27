@@ -148,20 +148,38 @@ const menuData: Dish[] = [
   },
   {
     id: 17,
-    name: "Tarte à la mangue",
+    name: "SALADE EXOTIQUE",
     description: "Tarte fine à la mangue fraîche, légère et sucrée",
     price: 3_500,
     category: "Desserts",
-    image: "/assets/images/tarte-mangue.png",
+    image: "/assets/images/Dessert/tarte-mangue.png",
     details: "Un dessert ensoleillé à la pâte croustillante et à la douceur fruitée."
   },
   {
     id: 18,
-    name: "Flan coco",
+    name: "Tendresse DU MBOA",
     description: "Flan onctueux à la noix de coco parfumée",
     price: 3_000,
     category: "Desserts",
-    image: "/assets/images/flan-coco.png",
+    image: "/assets/images/Dessert/TendresseDUMBOA.png",
+    details: "Crémeux et exotique, un classique des îles à savourer bien frais."
+  },
+  {
+    id: 17,
+    name: "Triot vegetal croquant",
+    description: "Tarte fine à la mangue fraîche, légère et sucrée",
+    price: 3_500,
+    category: "Desserts",
+    image: "/assets/images/Dessert/triovegetal.png",
+    details: "Un dessert ensoleillé à la pâte croustillante et à la douceur fruitée."
+  },
+  {
+    id: 18,
+    name: "Tendresse DU MBOA",
+    description: "Flan onctueux à la noix de coco parfumée",
+    price: 3_000,
+    category: "Desserts",
+    image: "/assets/images/Dessert/TendresseDUMBOA.png",
     details: "Crémeux et exotique, un classique des îles à savourer bien frais."
   },
   {
@@ -282,6 +300,45 @@ const menuData: Dish[] = [
   image: "/assets/images/special-weekend/poulet-dg.png",
   details: "Un classique apprécié qui réunit saveurs et convivialité."
 },
+
+// Ajout à ton tableau menuData
+{
+  id: 32,
+  name: "Filet de Tilapia Coco-Citronnelle",
+  description: "Un filet de tilapia poêlé nappé d’une sauce coco-citronnelle, accompagné d’un écrasé de patate douce.",
+  price: 16.5,
+  category: "Concept du Chef",
+  image: "/images/tilapia-coco.jpg",
+  details: "Une création signature du chef : fusion subtile entre les parfums tropicaux et la tendresse du poisson."
+},
+{
+  id: 33,
+  name: "Magret de Canard au Bissap",
+  description: "Magret de canard laqué au jus de bissap, servi avec une purée de manioc et légumes croquants.",
+  price: 19.0,
+  category: "Concept du Chef",
+  image: "/images/canard-bissap.jpg",
+  details: "Alliance surprenante du terroir et des saveurs africaines, le tout revisité à la française."
+},
+{
+  id: 34,
+  name: "Risotto Crémeux à la Banane Plantain",
+  description: "Un risotto fondant twisté à la banane plantain, relevé d’un filet de gingembre.",
+  price: 14.8,
+  category: "Concept du Chef",
+  image: "/images/risotto-plantain.jpg",
+  details: "Une douceur salée inattendue qui fond sous la langue, pour les amateurs d’originalité."
+},
+{
+  id: 35,
+  name: "Risotto Crémeux à la Banane Plantain",
+  description: "Un risotto fondant twisté à la banane plantain, relevé d’un filet de gingembre.",
+  price: 14.8,
+  category: "Concept du Chef",
+  image: "/images/risotto-plantain.jpg",
+  details: "Une douceur salée inattendue qui fond sous la langue, pour les amateurs d’originalité."
+}
+
 
 
 ];

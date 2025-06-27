@@ -219,3 +219,101 @@ background-color: #d83aed;
   letter-spacing: 1px;
 }
 
+
+/* 🌿 STYLES SPÉCIAUX WEEKEND (verts) */
+
+.dish-card-special {
+  border-color: #1f9d55;
+  color: #1f6f3f;
+  box-shadow: 0 4px 8px rgba(23, 157, 84, 0.3);
+}
+
+
+
+/* === BULLE ÉTOILE POUR SPÉCIAL WEEKEND === */
+.dish-card.dish-card-special .dish-price-bubble {
+  width: 100px;
+  height: 100px;
+  background-color: rgba(238, 111, 227, 0.425) !important;
+  color: #1f9d55; /* vert */
+  font-size: 1.8rem;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  right: -25px;
+  transform: translateY(-50%);
+  z-index: 3003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dish-card.dish-card-special .special-weekend-icon {
+  font-size: 4rem !important;
+  color: #1f9d55; /* vert éclatant */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3004;
+}
+
+.dish-card.dish-card-special .special-price-text {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1f9d55;
+  z-index: 3005;
+  pointer-events: none;
+}
+
+
+
+/* ===== STYLE CONCEPT DU CHEF ===== */
+.dish-card-chef-concept .dish-price-bubble {
+  width: 100px;
+  height: auto;
+  background-color: rgba(238, 111, 227, 0.425) !important;
+  color: inherit;
+  font-size: 1.2rem !important;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  right: -25px;
+  transform: translateY(-50%);
+  z-index: 3003;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  pointer-events: none;
+  padding: 5px 0;
+}
+
+.dish-card-chef-concept .chef-medal-icon {
+  font-size: 4rem; /* ajuste la taille */
+  margin-bottom: 5px; /* espace entre médaille et prix */
+  color: var(--medal-color, #DAA520);
+  pointer-events: none;
+}
+
+.chef-price-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  pointer-events: none;
+  color: rgb(73, 65, 19) !important;
+  
+}
+
+.dish-card-chef-concept {
+  border: 3px solid #DAA520; /* Bordure dorée */
+  color: #1a237e;
+  box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4); /* Ombre subtile dorée */
+  
+}

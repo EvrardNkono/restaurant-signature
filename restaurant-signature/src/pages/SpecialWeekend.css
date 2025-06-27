@@ -1,47 +1,112 @@
 .special-weekend-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  color: #333;
-  font-family: 'Arial', sans-serif;
+  padding: 0;
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background-color: #ffffff;
+  padding-bottom: 300px; /* pour scroller plus bas */
 }
 
+/* === Bannière === */
+.special-banner {
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  height: 300px;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(193, 120, 245, 0.65); /* voile violet */
+  z-index: 1;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 60px;
+  color: #fff;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+.banner-content h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.banner-content p {
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: #f0eaff;
+  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* === Citation inspirante === */
+.chef-quote {
+  text-align: center;
+  font-style: italic;
+  font-size: 1.2rem;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  color: #6a0dad;
+}
+
+/* === Zone contenant la grille === */
+.dishes-section {
+  background: linear-gradient(to bottom, #f7f3fc, #ffffff);
+  padding: 50px;
+  border-top: 3px solid #c39be2;
+  border-radius: 30px 30px 0 0;
+  margin-top: 60px;
+  box-shadow: 0 -5px 20px rgba(106, 13, 173, 0.1);
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* === Grille de plats === */
 .dishes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.dish-card {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
-  padding: 1rem;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.dish-card:hover {
-  transform: scale(1.03);
-}
-
-.dish-image {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-left: -70px !important;
   width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 0.8rem;
 }
 
-.dish-description {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 0.6rem;
-}
 
-.dish-price {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #E67E22; /* Une couleur chaude pour le prix */
+/* === Animation titre === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Bande verte sous la bannière */
+.green-bar {
+  height: 6px;
+  width: 100%;
+  background-color: #1f9d55; /* Vert foncé et doux */
+  margin-top: -4px; /* Colle bien à la bannière, écrase le petit espace */
+  box-shadow: 0 2px 6px rgba(31, 157, 85, 0.5); /* Un chouilla de glow pour le relief */
+  z-index: 5;
+  position: relative;
 }

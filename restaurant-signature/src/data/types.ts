@@ -3,7 +3,13 @@ export type Dish = {
   name: string;
   description: string;
   price: number;
-  category: "Boissons" | "Entrées" | "Plats" | "Desserts" | "Spécial Weekend";
+  category: 
+    | "Boissons"
+    | "Entrées"
+    | "Plats"
+    | "Desserts"
+    | "Spécial Weekend"
+    | "Concept du Chef"; // ✅ nouvelle catégorie ajoutée
   image: string;
   details: string;
 };
