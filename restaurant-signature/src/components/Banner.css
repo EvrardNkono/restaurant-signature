@@ -28,13 +28,14 @@
   max-width: 800px;
   z-index: 2;
   width: 100%;
-  margin-top: -100px !important;
+  margin-top: -200px !important;
 }
 
 h1 {
   font-size: 3rem;
   margin-bottom: 0.3em;
 }
+
 
 p {
   font-size: 1.5rem;
@@ -108,7 +109,7 @@ p {
 /* Responsive */
 @media (max-width: 600px) {
   h1 {
-    font-size: 2rem;
+    font-size: 2rem !important;
   }
   p {
     font-size: 1.1rem;
@@ -233,4 +234,3 @@ p {
 .icon-tiktok {
   color: #ffffff;
 }
-

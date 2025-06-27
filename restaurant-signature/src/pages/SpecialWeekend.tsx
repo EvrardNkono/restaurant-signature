@@ -2,7 +2,7 @@ import React from 'react';
 import type { Dish } from '../data/types';
 import menuData from '../data/menuData';
 import DishCard from '../components/DishCard';
-import bannerImage from '../assets/chef-banner.jpeg'; // 👈 ici
+import bannerImage from '../assets/Week-end-banner.jpg'; // 👈 ici
 import './SpecialWeekend.css';
 
 const SpecialWeekend: React.FC = () => {
