@@ -29,7 +29,7 @@ const Banner = () => {
       <div className="overlay" />
 
       <div className="banner-content">
-        <h1>Bienvenue sur Restaurant Signature</h1>
+        <h1 className='bienvenue' >Bienvenue sur Restaurant Signature</h1>
         <p>Découvrez nos saveurs exotiques</p>
 
         <button className="banner-button" onClick={() => navigate('/menu')}>

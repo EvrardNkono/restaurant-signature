@@ -35,6 +35,10 @@
   z-index: 1;
 }
 
+.surprise{
+    margin-top: 50px;
+}
+
 .banner-content {
   position: relative;
   z-index: 2;
@@ -46,8 +50,8 @@
 }
 
 .banner-content h1 {
-  font-size: 3rem;
-  margin-bottom: 15px;
+  font-size: 1.7rem !important;
+  margin-top: 0px ;
 }
 
 .banner-content p {

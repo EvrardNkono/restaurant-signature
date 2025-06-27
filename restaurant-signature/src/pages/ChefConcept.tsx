@@ -19,7 +19,7 @@ const ChefConcept: React.FC = () => {
         <div className="banner-overlay" />
         <div className="banner-content">
           <h1>✨ Concept du Chef ✨</h1>
-          <p>Laissez-vous surprendre par des créations uniques, pensées pour éveiller vos papilles !</p>
+          <p className='surprise'>Laissez-vous surprendre par des créations uniques, pensées pour éveiller vos papilles !</p>
         </div>
       </div>
 
