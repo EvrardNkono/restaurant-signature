@@ -1,10 +1,12 @@
 import { useCart } from '../context/CartContext';
-import DishCard from '../components/DishCard'; // Import du composant DishCard
-import backgroundImg from '../assets/ton-image.jpeg'; // ajuste le chemin vers ton image
+import { useNavigate } from 'react-router-dom'; // ✅ Ajout pour navigation
+import DishCard from '../components/DishCard';
+import backgroundImg from '../assets/ton-image.jpeg';
 import './CartPage.css';
 
 const CartPage = () => {
   const { items } = useCart();
+  const navigate = useNavigate(); // ✅ Hook de navigation
 
   const total = items.reduce((acc, item) => acc + item.dish.price * item.quantity, 0);
 
@@ -35,7 +37,6 @@ const CartPage = () => {
 
       {items.length === 0 ? (
         <p className="empty-cart-message">Votre panier est vide pour le moment.</p>
-
       ) : (
         <>
           <div className="cart-items">
@@ -44,7 +45,7 @@ const CartPage = () => {
                 key={dish.id}
                 dish={dish}
                 quantity={quantity}
-                showQuantityControls={true} // active l'affichage quantité + boutons dans DishCard
+                showQuantityControls={true}
               />
             ))}
           </div>
@@ -53,7 +54,7 @@ const CartPage = () => {
             <h3>Total : {total.toFixed(2)} €</h3>
             <button
               className="order-btn"
-              onClick={() => alert("Fonction de commande à venir...")}
+              onClick={() => navigate('/commande')} // ✅ Redirection vers la page commande
             >
               Passer la commande
             </button>

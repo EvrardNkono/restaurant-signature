@@ -7,7 +7,8 @@ import PopupBack from './components/PopupBack';
 import ScrollTopPopup from './components/ScrollTopPopup';
 import FloatingCartIcon from './components/FloatingCartIcon';
 import { CartProvider } from './context/CartContext';
-import ChefConcept from './pages/ChefConcept'
+import ChefConcept from './pages/ChefConcept';
+import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   const location = useLocation();
@@ -26,6 +27,7 @@ function App() {
         <Route path="/panier" element={<CartPage />} /> {/* Route panier */}
         <Route path="/special-weekend" element={<SpecialWeekend />} /> {/* Nouvelle route */}
         <Route path="/concept-chef" element={<ChefConcept />} />
+         <Route path="/commande" element={<CheckoutPage />} /> {/* ✅ nouvelle route */}
       </Routes>
     </CartProvider>
   );

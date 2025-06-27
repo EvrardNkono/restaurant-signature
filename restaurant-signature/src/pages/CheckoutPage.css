@@ -1,0 +1,99 @@
+.checkout-page {
+  padding: 2rem;
+  max-width: 600px;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.checkout-page h1 {
+  color: #6a0dad;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.order-options {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.order-btn {
+  padding: 10px 20px;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.advance-btn {
+  background-color: #6a0dad;
+  color: white;
+}
+
+.advance-btn:hover {
+  background-color: #550aa1;
+}
+
+.reserve-btn {
+  background-color: white;
+  border: 2px solid #6a0dad;
+  color: #6a0dad;
+}
+
+.reserve-btn:hover {
+  background-color: #f5e6ff;
+}
+
+.reservation-form {
+  background: #f9f4ff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.reservation-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #6a0dad;
+}
+
+.reservation-form input,
+.reservation-form select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.validate-btn {
+  background-color: #6a0dad;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.validate-btn:hover {
+  background-color: #550aa1;
+}
+
+.reservation-warning {
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  color: #a80000;
+  background: #ffeaea;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ffcccc;
+}
