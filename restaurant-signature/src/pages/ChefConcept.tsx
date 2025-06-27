@@ -11,7 +11,7 @@ const ChefConcept: React.FC = () => {
     <div className="chef-concept-container">
   <div className="chef-banner">
     <img
-      src="/public/images/Week-end-banner.jpg"
+      src="/src/assets/Week-end-banner.jpg"
       alt="Bannière Concept du Chef"
       className="banner-image"
     />

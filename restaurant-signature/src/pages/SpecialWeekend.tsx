@@ -11,7 +11,7 @@ const SpecialWeekend: React.FC = () => {
     <div className="special-weekend-container">
   <div className="special-banner">
     <img
-      src="/public/images/week-end-banner.jpg"
+      src="/src/assets/week-end-banner.jpg"
       alt="Bannière Spécial Weekend"
       className="banner-image"
     />
