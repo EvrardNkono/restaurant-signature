@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Dish } from '../data/types';
+
 import menuData from '../data/menuData';
 import DishCard from '../components/DishCard';
 import './ChefConcept.css';
