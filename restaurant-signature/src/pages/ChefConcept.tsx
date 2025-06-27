@@ -2,7 +2,7 @@ import React from 'react';
 
 import menuData from '../data/menuData';
 import DishCard from '../components/DishCard';
-import bannerImage from '../assets/week-end-banner.jpg'; // ✅ Import correct de l’image
+import bannerImage from '../assets/Week-end-banner.jpg'; // ✅ Import correct de l’image
 import './ChefConcept.css';
 
 const ChefConcept: React.FC = () => {
