@@ -103,42 +103,51 @@ const menuData: Dish[] = [
     details: "Un voyage direct à La Réunion avec ce plat intense et authentique."
   },
   {
-    id: 17,
-    name: "SALADE EXOTIQUE",
-    description: "Tarte fine à la mangue fraîche, légère et sucrée",
-    price: 3_500,
-    category: "Desserts",
-    image: "/assets/images/Dessert/tarte-mangue.png",
-    details: "Un dessert ensoleillé à la pâte croustillante et à la douceur fruitée."
-  },
-  {
-    id: 18,
-    name: "Tendresse DU MBOA",
-    description: "Flan onctueux à la noix de coco parfumée",
-    price: 3_000,
-    category: "Desserts",
-    image: "/assets/images/Dessert/TendresseDUMBOA.png",
-    details: "Crémeux et exotique, un classique des îles à savourer bien frais."
-  },
-  {
-    id: 17,
-    name: "Triot vegetal croquant",
-    description: "Tarte fine à la mangue fraîche, légère et sucrée",
-    price: 3_500,
-    category: "Desserts",
-    image: "/assets/images/Dessert/triovegetal.png",
-    details: "Un dessert ensoleillé à la pâte croustillante et à la douceur fruitée."
-  },
-  {
-    id: 18,
-    name: "Tendresse DU MBOA",
-    description: "Flan onctueux à la noix de coco parfumée",
-    price: 3_000,
-    category: "Desserts",
-    image: "/assets/images/Dessert/TendresseDUMBOA.png",
-    details: "Crémeux et exotique, un classique des îles à savourer bien frais."
-  },
-  {
+  id: 20,
+  name: "Degue",
+  description: "Dessert traditionnel au mil et yaourt, frais et nourrissant",
+  price: 2500,
+  category: "Desserts",
+  image: "/src/assets/images/Dessert/degue.png",
+  details: "Un grand classique des desserts africains, crémeux et rafraîchissant."
+},
+{
+  id: 21,
+  name: "Sorbet",
+  description: "Glace légère et fruitée pour une pause fraîcheur",
+  price: 2500,
+  category: "Desserts",
+  image: "/src/assets/images/Dessert/sorbet.png",
+  details: "Sorbet onctueux aux saveurs naturelles, idéal pour finir le repas en douceur."
+},
+{
+  id: 22,
+  name: "Jus de Baobab",
+  description: "Boisson douce et onctueuse au fruit du baobab",
+  price: 2500,
+  category: "Desserts",
+  image: "/src/assets/images/Dessert/jus-baobab.png",
+  details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
+},
+{
+  id: 23,
+  name: "Jus de Tamarin",
+  description: "Boisson acidulée au tamarin, sucrée et désaltérante",
+  price: 2500,
+  category: "Desserts",
+  image: "/src/assets/images/Dessert/jus-tamarin.png",
+  details: "Une touche exotique et énergisante venue tout droit des saveurs africaines."
+},
+{
+  id: 24,
+  name: "Kossam",
+  description: "Lait caillé traditionnel, frais et crémeux",
+  price: 2500,
+  category: "Desserts",
+  image: "/src/assets/images/Dessert/kossam.png",
+  details: "Un incontournable du dessert africain, à savourer bien frais pour plus de plaisir."
+},
+   {
     id: 19,
     name: "Jus de bissap",
     description: "Verre de jus de bissap frais et sucré, servi bien frais",
@@ -162,7 +171,7 @@ const menuData: Dish[] = [
     description: "Boisson pétillante à l'orange avec pulpe",
     price: 2.00,
     category: "Boissons",
-    image: "assets/images/Boissons/orangina.png",
+    image: "assets/images/Boissons/orangina.jpg",
     details: "Le goût unique de l’orange avec pulpe, pour une pause pleine de pep’s."
   },
   {
@@ -210,6 +219,215 @@ const menuData: Dish[] = [
     image: "assets/images/Boissons/icetea-peche.png",
     details: "La douceur de la pêche combinée à la fraîcheur du thé glacé, pour une pause zen."
   },
+  // Ajouts de tes boissons mentionnées
+  {
+    id: 27,
+    name: "Castel",
+    description: "Bière blonde légère et rafraîchissante, parfaite pour les moments conviviaux",
+    price: 3.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/castel.png",
+    details: "La bière camerounaise incontournable, à déguster bien fraîche."
+  },
+  {
+    id: 28,
+    name: "Mutzig",
+    description: "Bière premium au goût équilibré, très populaire en Afrique centrale",
+    price: 3.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/mutzig.webp",
+    details: "Une bière légère et savoureuse pour accompagner tous vos plats."
+  },
+  {
+    id: 29,
+    name: "Guinness",
+    description: "Bière stout irlandaise au goût corsé et crémeux",
+    price: 3.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/guiness.webp",
+    details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
+  },
+  {
+    id: 30,
+    name: "Vimto",
+    description: "Boisson fruitée pétillante à base de fruits rouges",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/vimto.webp",
+    details: "Un classique britannique apprécié pour son goût sucré et rafraîchissant."
+  },
+  {
+    id: 31,
+    name: "Djino",
+    description: "Boisson énergétique à base de plantes africaines",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/djino.jpg",
+    details: "Pour un coup de boost naturel et savoureux."
+  },
+  {
+    id: 32,
+    name: "Booster",
+    description: "Boisson énergisante pour garder la pêche toute la journée",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/booster.jpeg",
+    details: "Une formule tonique pour une énergie rapide."
+  },
+  {
+    id: 33,
+    name: "Kadji Bière",
+    description: "Bière artisanale locale au goût authentique",
+    price: 3.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/kadji.png",
+    details: "Un savoir-faire brassicole pour une dégustation unique."
+  },
+  {
+    id: 34,
+    name: "33 Export",
+    description: "Bière blonde très appréciée en Afrique, rafraîchissante et légère",
+    price: 3.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/33export.png",
+    details: "Un classique des bières africaines, parfaite pour vos moments festifs."
+  },
+  {
+    id: 35,
+    name: "Cola Champion",
+    description: "Boisson gazeuse sucrée et rafraîchissante",
+    price: 2.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/colachampion.png",
+    details: "Un cola au goût authentique, très populaire localement."
+  },
+  {
+    id: 36,
+    name: "Eau de coco",
+    description: "Boisson naturelle et désaltérante, directement issue de la noix de coco",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/eau-coco.png",
+    details: "Parfait pour rester hydraté avec une touche exotique."
+  },
+  {
+    id: 37,
+    name: "Vitamalt",
+    description: "Boisson maltée non alcoolisée, pleine de vitamines",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/vitamalt.png",
+    details: "L’option gourmande et vitaminée pour petits et grands."
+  },
+  {
+    id: 38,
+    name: "Isembeck",
+    description: "Bière locale artisanale au goût unique",
+    price: 3.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/isembeck.png",
+    details: "Brassée avec passion pour les amateurs de bière authentique."
+  },
+  {
+    id: 39,
+    name: "Malta Guinness",
+    description: "Boisson maltée non alcoolisée à base de Guinness",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/maltaguinness.png",
+    details: "Le goût Guinness en version douce et rafraîchissante."
+  },
+  {
+    id: 40,
+    name: "Malta Vanille",
+    description: "Boisson maltée sucrée avec un soupçon de vanille",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/maltavanille.png",
+    details: "Une douceur maltée qui séduit les palais gourmands."
+  },
+  {
+    id: 41,
+    name: "Fanta",
+    description: "Boisson gazeuse fruitée à l’orange",
+    price: 2.00,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/fanta.png",
+    details: "Un classique pétillant et fruité pour rafraîchir vos journées."
+  },
+  {
+    id: 42,
+    name: "Jus de mangue",
+    description: "Jus naturel de mangue, sucré et onctueux",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/jus-mangue.png",
+    details: "Un goût exotique et sucré, parfait pour se rafraîchir."
+  },
+  {
+    id: 43,
+    name: "Jus de goyave",
+    description: "Jus naturel de goyave, riche en saveurs",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/jus-goyave.png",
+    details: "Un fruit tropical délicieux et vitaminé."
+  },
+  {
+    id: 44,
+    name: "Jus tropical",
+    description: "Mélange de fruits tropicaux pour une explosion de saveurs",
+    price: 2.50,
+    category: "Boissons",
+    image: "/src/assets/images/Boissons/jus-tropical.webp",
+    details: "Un cocktail vitaminé pour un moment de fraîcheur."
+  },
+  {
+  id: 44,
+  name: "Thé bissap",
+  description: "Verre de jus de bissap frais et sucré, servi bien frais",
+  price: 1.00,
+  category: "Boissons",
+  image: "/src/assets/images/Boissons/verrebissap.png",
+  details: "Infusé à base de fleurs d’hibiscus, riche en antioxydants et très rafraîchissant."
+},
+{
+  id: 45,
+  name: "Thé gingembre",
+  description: "Boisson africaine épicée, tonifiante et servie fraîche",
+  price: 1.00,
+  category: "Boissons",
+  image: "/src/assets/images/Boissons/the-gingembre.png",
+  details: "Le célèbre ‘Gnamakoudji’ à base de gingembre frais pour booster l’énergie."
+},
+{
+  id: 46,
+  name: "Thé moringa",
+  description: "Boisson naturelle aux bienfaits du moringa, légère et revitalisante",
+  price: 1.00,
+  category: "Boissons",
+  image: "/src/assets/images/Boissons/jus-moringa.png",
+  details: "Riche en vitamines et antioxydants, idéale pour une pause santé."
+},
+{
+  id: 47,
+  name: "Citronnelle",
+  description: "Infusion fraîche et parfumée de citronnelle, pour une sensation apaisante",
+  price: 1.00,
+  category: "Boissons",
+  image: "/src/assets/images/Boissons/jus-citronnelle.png",
+  details: "Saveur citronnée douce, parfaite pour se désaltérer en douceur."
+},
+{
+  id: 48,
+  name: "Menthe",
+  description: "Boisson rafraîchissante à la menthe, idéale pour les journées chaudes",
+  price: 1.00,
+  category: "Boissons",
+  image: "/src/assets/images/Boissons/jus-menthe.png",
+  details: "Saveur mentholée légère qui désaltère et rafraîchit instantanément."
+},
+  
 
   {
   id: 27,
