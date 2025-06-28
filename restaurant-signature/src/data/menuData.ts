@@ -8,126 +8,82 @@ const menuData: Dish[] = [
     description: "Mélange frais de mangue, avocat et crevettes",
     price: 8.40,
     category: "Entrées",
-    image: "/assets/images/entree/salade-exotique.png",
+    image: "/src/assets/images/entree/salade-exotique.png",
     details: "Une entrée légère et colorée aux saveurs tropicales, parfaite pour éveiller les papilles."
   },
   {
     id: 2,
-    name: "Accras de morue",
-    description: "Beignets croustillants de morue aux épices antillaises",
+    name: "Salade signature",
+    description: "Salade fraîche au poulet, avocat, maïs et laitue croquante, ensoleillée.",
     price: 6.10,
     category: "Entrées",
-    image: "/assets/images/entree/accras-morue.png",
-    details: "Frits à la perfection, ces accras sont une explosion d’épices et de tradition créole."
+    image: "/src/assets/images/entree/salade-signature.png",
+    details: "Salade fraîche aux feuilles de laitue, poulet grillé émietté, avocat et maïs doux. Une entrée légère, colorée et pleine de saveurs."
   },
   {
     id: 3,
-    name: "Tartare de thon",
-    description: "Thon frais coupé au couteau, agrémenté d’une vinaigrette citronnée",
+    name: "Memaya Gourmette",
+    description: "La gourmandise n'a jamais ete aussi intense",
     price: 10.70,
     category: "Entrées",
-    image: "/assets/images/entree/tartare-thon.png",
-    details: "Fraîcheur marine et acidité équilibrée pour un démarrage raffiné."
+    image: "/src/assets/images/entree/memaya-gourmette.png",
+    details: "Gésier de poulet grillé tendre, servi sur un lit de feuilles de laitue croquantes : un plat savoureux, léger et riche en protéines."
   },
   {
     id: 4,
-    name: "Soupe de patate douce",
-    description: "Velouté onctueux aux épices douces et lait de coco",
+    name: "Fraîcheur exotique",
+    description: "Salade fraîche, laitue vapeur, maïs doux et poisson grillé.",
     price: 6.90,
     category: "Entrées",
-    image: "/assets/images/entree/soupe-patate-douce.png",
-    details: "Un concentré de douceur et d’arômes qui réchauffe le corps et le cœur."
+    image: "/src/assets/images/entree/fraîcheur-exotique.png",
+    details: "Salade fraîche aux feuilles de laitue vapeur, maïs doux croquant et poisson grillé savoureux, un mariage léger et plein de fraîcheur.."
   },
   {
     id: 5,
-    name: "Brochettes de poulet mariné",
-    description: "Poulet grillé au paprika et citron vert",
+    name: "Samoussa et Salade",
+    description: "Samoussa croustillant avec salade fraîche et croquante.",
     price: 7.60,
     category: "Entrées",
-    image: "/assets/images/entree/brochettes-poulet.png",
-    details: "Saveurs fumées et acidulées pour une entrée gourmande et généreuse."
+    image: "/src/assets/images/entree/samoussaetsalade.webp",
+    details: "Samoussa croustillant accompagné d'une salade fraîche et colorée, un duo gourmand qui réveille les papilles avec saveur et légèreté."
   },
   {
     id: 6,
-    name: "Salade de papaye verte",
-    description: "Papaye râpée, cacahuètes grillées et piment doux",
+    name: "Tendredde du Mboa",
+    description: "Salade fraîche, poisson grillé, avocat crémeux et maïs doux.",
     price: 7.90,
     category: "Entrées",
-    image: "/assets/images/entree/salade-papaye.png",
-    details: "Une entrée fraîche et croquante avec une pointe de piquant maîtrisée."
+    image: "/src/assets/images/entree/TendresseDUMBOA.png",
+    details: "Salade fraîche et colorée, avec poisson grillé émietté, avocat crémeux et maïs doux, pour un équilibre parfait entre saveurs et textures légères."
   },
   {
     id: 7,
-    name: "Ceviche de poisson",
+    name: "Triot vegetal",
     description: "Poisson blanc mariné au citron vert, coriandre et oignon rouge",
     price: 11.50,
     category: "Entrées",
-    image: "/assets/images/entree/ceviche-poisson.png",
+    image: "/src/assets/images/entree/triovegetal.png",
     details: "Alliance parfaite entre acidité et fraîcheur pour un plaisir gustatif intense."
   },
   {
     id: 8,
-    name: "Samoussas aux légumes",
-    description: "Triangles croustillants farcis aux légumes épicés",
+    name: "Pastel et Salade",
+    description: "Pastel croustillant avec salade fraîche, un combo savoureux et léger à déguster.",
     price: 6.40,
     category: "Entrées",
-    image: "/assets/images/entree/samoussas-legumes.png",
-    details: "Une bouchée croustillante et parfumée, idéale pour débuter le repas."
+    image: "/src/assets/images/entree/pastel-salade.png",
+    details: "Pastel doré et croustillant, accompagné d'une salade fraîche et croquante, pour une explosion de saveurs à chaque bouchée, simple et savoureuse."
   },
   {
     id: 9,
-    name: "Terrine de légumes",
-    description: "Terrine colorée aux légumes de saison et herbes fraîches",
+    name: "Beignets d'acra et Salade",
+    description: "Acra croustillants avec salade fraîche et pleine de peps.",
     price: 8.90,
     category: "Entrées",
-    image: "/assets/images/entree/terrine-legumes.png",
-    details: "Subtil mélange de textures et de saveurs naturelles, délicatement relevé."
+    image: "/src/assets/images/entree/BeignetsacraSalade.png",
+    details: "Beignets d’acra dorés et épicés servis avec une salade croquante et fraîche pour une entrée pleine de peps et de saveurs exotiques."
   },
-  {
-    id: 10,
-    name: "Salade de concombre et menthe",
-    description: "Concombre frais, menthe, citron et une touche de yaourt",
-    price: 6.10,
-    category: "Entrées",
-    image: "/assets/images/entree/salade-concombre.png",
-    details: "Une entrée rafraîchissante, légère et pleine de vitalité."
-  },
-  {
-    id: 11,
-    name: "Beignets de banane plantain",
-    description: "Plantains mûrs frits, croustillants à l’extérieur et fondants à l’intérieur",
-    price: 6.90,
-    category: "Entrées",
-    image: "/scr/assets/images/entree/beignets-plantain.png",
-    details: "Douceur tropicale et gourmandise dans chaque bouchée dorée."
-  },
-  {
-    id: 12,
-    name: "Salade de chou créole",
-    description: "Chou finement râpé, carottes, oignons et sauce vinaigrette relevée",
-    price: 7.20,
-    category: "Entrées",
-    image: "/assets/images/entree/salade-chou.png",
-    details: "Un classique créole frais et croquant, parfait pour démarrer en légèreté."
-  },
-  {
-    id: 13,
-    name: "Crabe farci",
-    description: "Crabe décortiqué, épices et fines herbes, gratiné au four",
-    price: 12.20,
-    category: "Entrées",
-    image: "/assets/images/entree/crabe-farci.png",
-    details: "Un délice riche et savoureux pour les amateurs de fruits de mer."
-  },
-  {
-    id: 14,
-    name: "Soupe froide de concombre",
-    description: "Velouté rafraîchissant à base de concombre et yaourt grec",
-    price: 6.60,
-    category: "Entrées",
-    image: "/assets/images/entree/soupe-concombre.png",
-    details: "Une entrée légère et désaltérante, idéale pour les journées chaudes."
-  },
+  
   {
     id: 15,
     name: "Poulet Colombo",
@@ -303,41 +259,24 @@ const menuData: Dish[] = [
 
 // Ajout à ton tableau menuData
 {
-  id: 32,
-  name: "Filet de Tilapia Coco-Citronnelle",
-  description: "Un filet de tilapia poêlé nappé d’une sauce coco-citronnelle, accompagné d’un écrasé de patate douce.",
-  price: 16.5,
+  id: 1001,
+  name: "Poulet du Chef",
+  description: "Poulet mijoté ou grillé, préparé avec soin selon l'inspiration du Chef.",
+  price: 8.0,
   category: "Concept du Chef",
-  image: "/images/tilapia-coco.jpg",
-  details: "Une création signature du chef : fusion subtile entre les parfums tropicaux et la tendresse du poisson."
+  image: "/assets/images/concept/poulet.png",
+  details: "Un classique réinventé, servi avec votre choix de sauce et d’accompagnement."
 },
 {
-  id: 33,
-  name: "Magret de Canard au Bissap",
-  description: "Magret de canard laqué au jus de bissap, servi avec une purée de manioc et légumes croquants.",
-  price: 19.0,
+  id: 1002,
+  name: "Poisson du Chef",
+  description: "Poisson savoureux et fondant, sublimé par une touche exotique du Chef.",
+  price: 8.0,
   category: "Concept du Chef",
-  image: "/images/canard-bissap.jpg",
-  details: "Alliance surprenante du terroir et des saveurs africaines, le tout revisité à la française."
-},
-{
-  id: 34,
-  name: "Risotto Crémeux à la Banane Plantain",
-  description: "Un risotto fondant twisté à la banane plantain, relevé d’un filet de gingembre.",
-  price: 14.8,
-  category: "Concept du Chef",
-  image: "/images/risotto-plantain.jpg",
-  details: "Une douceur salée inattendue qui fond sous la langue, pour les amateurs d’originalité."
-},
-{
-  id: 35,
-  name: "Risotto Crémeux à la Banane Plantain",
-  description: "Un risotto fondant twisté à la banane plantain, relevé d’un filet de gingembre.",
-  price: 14.8,
-  category: "Concept du Chef",
-  image: "/images/risotto-plantain.jpg",
-  details: "Une douceur salée inattendue qui fond sous la langue, pour les amateurs d’originalité."
+  image: "/assets/images/concept/poisson.png",
+  details: "Une option fraîche et légère, à composer selon vos envies."
 }
+
 
 
 

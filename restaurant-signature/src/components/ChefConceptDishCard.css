@@ -1,0 +1,57 @@
+.chef-card {
+  background-color: white;
+  border: 2px solid #6a0dad;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  margin: auto;
+}
+
+.dish-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.options {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.options label {
+  display: block;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #6a0dad;
+}
+
+.options select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.price {
+  margin-top: 12px;
+  font-weight: bold;
+  color: #DAA520;
+}
+
+.add-to-cart {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #6a0dad;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-to-cart:hover {
+  background-color: #550aa1;
+}

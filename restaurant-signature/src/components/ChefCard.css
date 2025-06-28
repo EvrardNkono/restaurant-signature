@@ -1,0 +1,65 @@
+.chef-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff9f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(218, 165, 32, 0.2);
+  border: 2px solid #f4e1b6;
+  transition: transform 0.3s ease;
+}
+
+.chef-card:hover {
+  transform: scale(1.015);
+}
+
+.chef-card-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.chef-card-content {
+  padding: 16px;
+}
+
+.chef-card-content h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #7c3aed;
+}
+
+.chef-description {
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.chef-options label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.chef-options select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chef-price {
+  margin-top: 12px;
+  font-size: 1rem;
+  color: #8b4513;
+  font-weight: bold;
+}
