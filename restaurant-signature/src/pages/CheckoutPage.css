@@ -1,99 +1,81 @@
-.checkout-page {
-  padding: 2rem;
+.checkout-container {
   max-width: 600px;
-  margin: auto;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(126, 63, 242, 0.1);
   font-family: 'Segoe UI', sans-serif;
 }
 
-.checkout-page h1 {
-  color: #6a0dad;
-  margin-bottom: 0.5rem;
+h1 {
+  text-align: center;
+  color: #6C2BD9;
+  margin-bottom: 2rem;
+  font-size: 2rem;
 }
 
-.subtitle {
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-}
-
-.order-options {
+.checkout-form {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #4B0082;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.choice-buttons {
+  display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.order-btn {
-  padding: 10px 20px;
-  border: none;
-  font-weight: bold;
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.advance-btn {
-  background-color: #6a0dad;
-  color: white;
-}
-
-.advance-btn:hover {
-  background-color: #550aa1;
-}
-
-.reserve-btn {
-  background-color: white;
-  border: 2px solid #6a0dad;
-  color: #6a0dad;
-}
-
-.reserve-btn:hover {
-  background-color: #f5e6ff;
-}
-
-.reservation-form {
-  background: #f9f4ff;
-  border: 1px solid #ddd;
+.choice-buttons button {
+  padding: 0.7rem 1.4rem;
   border-radius: 10px;
-  padding: 20px;
-}
-
-.reservation-form label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #6a0dad;
-}
-
-.reservation-form input,
-.reservation-form select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 16px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.validate-btn {
-  background-color: #6a0dad;
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
+  border: 2px solid #C6B5F2;
+  background: #f7f3fc;
+  color: #6C2BD9;
+  font-weight: 500;
   cursor: pointer;
+  transition: 0.3s ease;
 }
 
-.validate-btn:hover {
-  background-color: #550aa1;
+.choice-buttons button:hover {
+  background-color: #E9DEFF;
 }
 
-.reservation-warning {
-  font-size: 0.95rem;
-  margin-bottom: 16px;
-  color: #a80000;
-  background: #ffeaea;
-  padding: 10px;
+.choice-buttons button.active {
+  background-color: #6C2BD9;
+  color: white;
+  border-color: #6C2BD9;
+}
+
+input[type="time"] {
+  padding: 0.6rem;
   border-radius: 8px;
-  border: 1px solid #ffcccc;
+  border: 2px solid #C6B5F2;
+  width: 100%;
+  font-size: 1rem;
+  background-color: #fdfbff;
+  color: #4B0082;
+}
+
+.submit-button {
+  background-color: #7E3FF2;
+  border: none;
+  color: white;
+  padding: 0.9rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #5A1DB0;
 }

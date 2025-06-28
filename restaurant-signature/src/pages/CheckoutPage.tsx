@@ -1,92 +1,106 @@
 import React, { useState } from 'react';
-import menuData from '../data/menuData';
-import DishCard from '../components/DishCard';
-import bannerImage from '../assets/Week-end-banner.jpg';
-import './ChefConcept.css';
+import './CheckoutPage.css';
 
-const accompaniments = [
-  'Riz blanc',
-  'Riz sauté',
-  'Frites de Patate douce',
-  'Atieke',
-  'Frites de plantain',
-  'Chikwangue',
-  'Bâton de manioc'
-];
+const CheckoutPage: React.FC = () => {
+  const [mode, setMode] = useState<'reservation' | 'surPlace' | ''>('');
+  const [time, setTime] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'carte' | 'caisse' | ''>('');
 
-const ChefConcept: React.FC = () => {
-  const chefDishes = menuData.filter(dish => dish.category === "Concept du Chef");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const [choices, setChoices] = useState<{ [key: number]: { accompaniment: string, withDrink: boolean } }>({});
+    // Vérification des horaires côté JS
+    if (mode === 'reservation' && (time < '10:00' || time > '22:00')) {
+      alert("L'heure de réservation doit être comprise entre 10h00 et 22h00.");
+      return;
+    }
 
-  const handleChange = (dishId: number, field: 'accompaniment' | 'withDrink', value: string | boolean) => {
-    setChoices(prev => ({
-      ...prev,
-      [dishId]: {
-        ...prev[dishId],
-        [field]: value
-      }
-    }));
+    alert('Commande enregistrée !');
   };
 
   return (
-    <div className="chef-concept-container">
-      <div className="chef-banner">
-        <img src={bannerImage} alt="Bannière Concept du Chef" className="banner-image" />
-        <div className="banner-overlay" />
-        <div className="banner-content">
-          <h1>✨ Concept du Chef ✨</h1>
-          <p className='surprise'>Laissez-vous surprendre par des créations uniques, pensées pour éveiller vos papilles !</p>
+    <div className="checkout-container">
+      <h1>🍽️ Finaliser votre commande</h1>
+
+      <form onSubmit={handleSubmit} className="checkout-form">
+
+        <div className="form-group">
+          <label>Souhaitez-vous réserver ou venir directement ?</label>
+          <div className="choice-buttons">
+            <button
+              type="button"
+              className={mode === 'reservation' ? 'active' : ''}
+              onClick={() => {
+                setMode('reservation');
+                setPaymentMethod('carte');
+              }}
+            >
+              Réserver
+            </button>
+            <button
+              type="button"
+              className={mode === 'surPlace' ? 'active' : ''}
+              onClick={() => {
+                setMode('surPlace');
+                setPaymentMethod('caisse');
+                setTime('');
+              }}
+            >
+              Manger sur place
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="dishes-section">
-        <div className="dishes-grid">
-          {chefDishes.length === 0 && <p>Le chef mijote encore... Revenez bientôt !</p>}
-          {chefDishes.map((dish) => {
-            const withDrink = choices[dish.id]?.withDrink || false;
-            const price = dish.price + (withDrink ? 0.9 : 0);
-            return (
-              <div key={dish.id} className="dish-card-with-options">
-                <DishCard
-                  dish={dish}
-                  showQuantityControls={true}
-                  isChefConcept={true}
-                  medalColor="#DAA520"
-                />
+        {mode === 'reservation' && (
+          <div className="form-group">
+            <label>Choisissez votre heure de réservation :</label>
+            <input
+              type="time"
+              min="10:00"
+              max="22:00"
+              step={60}  // ← Ajouté pour que minute soit sélectionnable
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+            />
+          </div>
+        )}
 
-                <div className="extra-options">
-                  <label className="extra-label">
-                    🥗 Accompagnement :
-                    <select
-                      value={choices[dish.id]?.accompaniment || ''}
-                      onChange={(e) => handleChange(dish.id, 'accompaniment', e.target.value)}
-                    >
-                      <option value="">-- Sélectionner --</option>
-                      {accompaniments.map(acc => (
-                        <option key={acc} value={acc}>{acc}</option>
-                      ))}
-                    </select>
-                  </label>
+        {mode && (
+          <div className="form-group">
+            <label>Méthode de paiement :</label>
+            <div className="choice-buttons">
+              {mode === 'reservation' ? (
+                <button
+                  type="button"
+                  className={paymentMethod === 'carte' ? 'active' : ''}
+                  onClick={() => setPaymentMethod('carte')}
+                >
+                  💳 Paiement en ligne
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="active"
+                  disabled
+                >
+                  💵 Paiement à la caisse
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={withDrink}
-                      onChange={(e) => handleChange(dish.id, 'withDrink', e.target.checked)}
-                    />
-                    Ajouter une boisson (+0,90 €)
-                  </label>
-
-                  <p className="price-display">Prix total : <strong>{price.toFixed(2)} €</strong></p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+        {mode && (
+          <div className="form-group">
+            <button type="submit" className="submit-button">
+              Confirmer ma commande
+            </button>
+          </div>
+        )}
+      </form>
     </div>
   );
 };
 
-export default ChefConcept;
+export default CheckoutPage;
