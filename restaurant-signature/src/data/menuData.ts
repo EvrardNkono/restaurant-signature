@@ -156,7 +156,7 @@ const menuData: Dish[] = [
   id: 20,
   name: "Degue",
   description: "Dessert traditionnel au mil et yaourt, frais et nourrissant",
-  price: 2500,
+  price: 1.00,
   category: "Desserts",
   image: "/src/assets/images/Dessert/degue.png",
   details: "Un grand classique des desserts africains, crémeux et rafraîchissant."
@@ -165,7 +165,7 @@ const menuData: Dish[] = [
   id: 21,
   name: "Sorbet",
   description: "Glace légère et fruitée pour une pause fraîcheur",
-  price: 2500,
+  price: 1.00,
   category: "Desserts",
   image: "/src/assets/images/Dessert/sorbet.png",
   details: "Sorbet onctueux aux saveurs naturelles, idéal pour finir le repas en douceur."
@@ -174,7 +174,7 @@ const menuData: Dish[] = [
   id: 22,
   name: "Jus de Baobab",
   description: "Boisson douce et onctueuse au fruit du baobab",
-  price: 2500,
+  price: 1.00,
   category: "Desserts",
   image: "/src/assets/images/Dessert/baobab.png",
   details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
@@ -183,7 +183,7 @@ const menuData: Dish[] = [
   id: 23,
   name: "Jus de Tamarin",
   description: "Boisson acidulée au tamarin, sucrée et désaltérante",
-  price: 2500,
+  price: 1.00,
   category: "Desserts",
   image: "/src/assets/images/Dessert/jus-tamarin.png",
   details: "Une touche exotique et énergisante venue tout droit des saveurs africaines."
@@ -192,7 +192,7 @@ const menuData: Dish[] = [
   id: 24,
   name: "Kossam",
   description: "Lait caillé traditionnel, frais et crémeux",
-  price: 2500,
+  price: 1.00,
   category: "Desserts",
   image: "/src/assets/images/Dessert/juskossam.png",
   details: "Un incontournable du dessert africain, à savourer bien frais pour plus de plaisir."
