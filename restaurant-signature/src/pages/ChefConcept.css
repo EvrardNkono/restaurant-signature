@@ -9,7 +9,7 @@
 /* Bannière Concept du Chef améliorée */
 .chef-banner {
   position: relative;
-  height: 300px;
+  height: 301px;
   text-align: center;
   overflow: hidden;
   box-shadow: inset 0 0 60px 15px rgba(218, 165, 32, 0.35); /* effet doré doux */
