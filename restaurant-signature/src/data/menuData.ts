@@ -90,7 +90,7 @@ const menuData: Dish[] = [
   description: "Petites brochettes grillées, savoureuses et économiques",
   price: 1.900,
   category: "Entrées",
-  image: "/assets/images/entree/brochettes-viande.png",
+  image: "/src/assets/images/entree/brochettes-viande.png",
   details: "5 brochettes de viande tendres, parfaites pour une pause gourmande sans se ruiner."
 },
 {
