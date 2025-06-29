@@ -19,7 +19,8 @@ function App() {
     <CartProvider>
       {shouldShowPopupBack && <PopupBack />}
       {shouldShowPopup && <ScrollTopPopup />}
-      <FloatingCartIcon />
+      {location.pathname !== '/' && <FloatingCartIcon />}
+
 
       <Routes>
         <Route path="/" element={<Home />} />

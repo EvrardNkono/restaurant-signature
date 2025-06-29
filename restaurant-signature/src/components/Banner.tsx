@@ -9,6 +9,8 @@ import { faUtensils, faStar, faAward, faEnvelope, faPhone, faMapMarkerAlt } from
 import banner1 from '../assets/images/banner-bg.jpg';
 import banner2 from '../assets/images/banner2.jpeg';
 import banner3 from '../assets/images/banner3.jpg';
+import logo from '../assets/logo.png';
+
 
 const images = [banner1, banner2, banner3];
 
@@ -27,6 +29,10 @@ const Banner = () => {
   return (
     <div className="banner" style={{ backgroundImage: `url(${images[currentImageIndex]})` }}>
       <div className="overlay" />
+      <div className="logo-container">
+  <img src={logo} alt="Logo Restaurant Signature" className="logo-img" />
+</div>
+
 
       <div className="banner-content">
         <h1 className='bienvenue' >Bienvenue sur Restaurant Signature</h1>
