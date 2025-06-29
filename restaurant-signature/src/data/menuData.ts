@@ -144,7 +144,7 @@ const menuData: Dish[] = [
   description: "Lait caillé traditionnel, frais et crémeux",
   price: 2500,
   category: "Desserts",
-  image: "/src/assets/images/Dessert/kossam.png",
+  image: "/src/assets/images/Dessert/juskossam.png",
   details: "Un incontournable du dessert africain, à savourer bien frais pour plus de plaisir."
 },
    {
