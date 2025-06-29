@@ -14,12 +14,20 @@ const accompaniments = [
   'Bâton de manioc'
 ];
 
-const sauces = [
-  'Sauce arachide',
-  'Sauce tomate',
-  'Sauce gombo',
-  'Sauce coco-citronnelle'
-];
+// 👇 Sauces par jour (0 = dimanche, 1 = lundi, ..., 6 = samedi)
+const saucesParJour: { [key: number]: string[] } = {
+  1: ['Sauce arachide', 'Sauce tomate'],          // Lundi
+  2: ['Sauce gombo', 'Sauce coco-citronnelle'],  // Mardi
+  3: ['Sauce pistache', 'Sauce jaune'],          // Mercredi
+  4: ['Ndolé', 'Mbongo Tchobi'],                 // Jeudi
+  5: ['sauce tomate', 'Sauce aubergine'],                 // Vendredi
+  6: ['Sauce d’arachide piquante', 'Sauce claire'], // Samedi
+  0: ['Sauce tomate', 'Sauce creme fraiche']         // Dimanche
+};
+
+// 👇 On récupère le jour actuel
+const jourActuel = new Date().getDay();
+const saucesDuJour = saucesParJour[jourActuel] || [];
 
 const ChefConcept: React.FC = () => {
   const chefDishes = menuData.filter(dish => dish.category === "Concept du Chef");
@@ -50,6 +58,7 @@ const ChefConcept: React.FC = () => {
         <div className="banner-content">
           <h1>✨ Concept du Chef ✨</h1>
           <p className="surprise">Laissez-vous surprendre par des créations uniques, pensées pour éveiller vos papilles !</p>
+          <p className="today-sauce">🍲 Sauces du jour : {saucesDuJour.join(' & ')}</p>
         </div>
       </div>
 
@@ -82,7 +91,7 @@ const ChefConcept: React.FC = () => {
                       onChange={(e) => handleChange(dish.id, 'sauce', e.target.value)}
                     >
                       <option value="">-- Sélectionner --</option>
-                      {sauces.map((sauce) => (
+                      {saucesDuJour.map((sauce) => (
                         <option key={sauce} value={sauce}>{sauce}</option>
                       ))}
                     </select>
