@@ -461,7 +461,7 @@ const menuData: Dish[] = [
 },
 {
   id: 47,
-  name: "Citronnelle",
+  name: "Thé Citronnelle",
   description: "Infusion fraîche et parfumée de citronnelle, pour une sensation apaisante",
   price: 1.00,
   category: "Boissons",
@@ -470,7 +470,7 @@ const menuData: Dish[] = [
 },
 {
   id: 48,
-  name: "Menthe",
+  name: "Thé Menthe",
   description: "Boisson rafraîchissante à la menthe, idéale pour les journées chaudes",
   price: 1.00,
   category: "Boissons",
@@ -544,7 +544,7 @@ const menuData: Dish[] = [
 },
 {
   id: 34,
-  name: "Mbongo Tchobi",
+  name: "Mbongo Tchobi-Plantain Mur ou cuit a la vapeur ",
   description: "Poisson mijoté dans une sauce noire aux épices brûlées.",
   price: 13.50,
   category: "Spécial Weekend",
