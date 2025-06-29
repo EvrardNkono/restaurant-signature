@@ -84,24 +84,69 @@ const menuData: Dish[] = [
     details: "Beignets d’acra dorés et épicés servis avec une salade croquante et fraîche pour une entrée pleine de peps et de saveurs exotiques."
   },
   
-  {
-    id: 15,
-    name: "Poulet Colombo",
-    description: "Poulet mijoté aux épices Colombo et légumes frais",
-    price: 8_000,
-    category: "Plats",
-    image: "/assets/images/poulet-colombo.png",
-    details: "Un plat emblématique des Antilles, relevé, parfumé, et tendre à souhait."
-  },
-  {
-    id: 16,
-    name: "Cabri massalé",
-    description: "Cabri épicé à la mode réunionnaise",
-    price: 9_500,
-    category: "Plats",
-    image: "/assets/images/entree/cabri-massale.png",
-    details: "Un voyage direct à La Réunion avec ce plat intense et authentique."
-  },
+{
+  id: 17,
+  name: "Brochettes de viande (x5)",
+  description: "Petites brochettes grillées, savoureuses et économiques",
+  price: 1.900,
+  category: "Entrées",
+  image: "/assets/images/entree/brochettes-viande.png",
+  details: "5 brochettes de viande tendres, parfaites pour une pause gourmande sans se ruiner."
+},
+{
+  id: 18,
+  name: "Tieb Boudienne au poisson",
+  description: "Riz sénégalais au poisson et légumes",
+  price: 8.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/tieb-poisson.png",
+  details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés."
+},
+{
+  id: 19,
+  name: "Tieb Boudienne au poulet",
+  description: "Riz sénégalais au poulet et légumes",
+  price: 8.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/tieb-poulet.png",
+  details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille."
+},
+{
+  id: 20,
+  name: "Pintade braisée",
+  description: "Pintade grillée lentement, saveurs intenses",
+  price: 15.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/pintade-braisee.png",
+  details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur."
+},
+{
+  id: 21,
+  name: "Soya",
+  description: "Viande grillée à la camerounaise, épicée et savoureuse",
+  price: 10.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/soya.png",
+  details: "Un incontournable du street food africain : lamelles de viande marinées, épicées et grillées au charbon."
+},
+{
+  id: 22,
+  name: "Bokit Poulet",
+  description: "Bokit garni de poulet, frit et croustillant",
+  price: 10.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/bokit-poulet.png",
+  details: "Pain frit antillais généreusement garni de poulet, avec des compléments au choix."
+},
+{
+  id: 23,
+  name: "Bokit Morue",
+  description: "Bokit à la morue bien assaisonnée",
+  price: 10.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/bokit-morue.png",
+  details: "Une version marine du Bokit, à la morue épicée et moelleuse, croustillant et plein de caractère."
+},
   {
   id: 20,
   name: "Degue",
