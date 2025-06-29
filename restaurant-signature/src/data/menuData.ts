@@ -435,7 +435,7 @@ const menuData: Dish[] = [
   description: "Feuilles d’amarante mijotées servies avec des frites de plantain croustillantes.",
   price: 13.20,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/ndole-frites-plantain.png",
+  image: "/src/assets/images/specialweekend/ndole-frites-plantain.png",
   details: "Un plat classique alliant douceur et caractère pour un weekend aux saveurs du pays."
 },
 {
@@ -444,7 +444,7 @@ const menuData: Dish[] = [
   description: "Trio populaire camerounais : beignets dorés, haricots fondants, bouillie onctueuse.",
   price: 9.50,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/beignets-haricots-bouillie.png",
+  image: "/src/assets/images/specialweekend/beignets-haricots-bouillie.png",
   details: "Un petit-déjeuner de roi ou un brunch du weekend typique et réconfortant."
 },
 {
@@ -453,7 +453,7 @@ const menuData: Dish[] = [
   description: "Feuilles d’éru mijotées accompagnées de waterfufu tendre.",
   price: 12.50,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/eru-water-fufu.png",
+  image: "/src/assets/images/specialweekend/eru-water-fufu.png",
   details: "Une spécialité du Sud-Ouest Cameroun riche en goût et en tradition."
 },
 {
@@ -462,7 +462,7 @@ const menuData: Dish[] = [
   description: "Sauce gombo glissante et parfumée servie avec du fufu de manioc.",
   price: 11.90,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/sauce-gombo-fufu-manioc.png",
+  image: "/src/assets/images/specialweekend/sauce-gombo-fufu-manioc.png",
   details: "Un plat généreux et typique aux textures uniques, très apprécié au pays."
 },
 {
@@ -471,7 +471,7 @@ const menuData: Dish[] = [
   description: "Purée de banane salée servie avec une viande de mouton ou de chèvre en sauce.",
   price: 13.00,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/banane-malaxee-mouton.png",
+  image: "/src/assets/images/specialweekend/banane-malaxee-mouton.png",
   details: "Un plat ancré dans la tradition, savoureux et consistant pour bien terminer la semaine."
 },
 {
@@ -480,7 +480,7 @@ const menuData: Dish[] = [
   description: "Bouillon parfumé de pieds de bœuf servi avec manioc ou plantain cuit vapeur.",
   price: 12.80,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/toto.png",
+  image: "/src/assets/images/specialweekend/toto.png",
   details: "Un plat riche en collagène et en arômes pour les amateurs de cuisine authentique."
 },
 {
@@ -489,7 +489,7 @@ const menuData: Dish[] = [
   description: "Taro pilé accompagné d’une sauce jaune bien relevée.",
   price: 12.00,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/taro-sauce-jaune.png",
+  image: "/src/assets/images/specialweekend/taro-sauce-jaune.png",
   details: "Un incontournable du terroir camerounais, parfait pour les grandes occasions."
 },
 {
@@ -498,7 +498,7 @@ const menuData: Dish[] = [
   description: "Poisson mijoté dans une sauce noire aux épices brûlées.",
   price: 13.50,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/mbongo-tchobi.png",
+  image: "/src/assets/images/specialweekend/mbongo-tchobi.png",
   details: "Plat emblématique de la région Bassa, intense et envoûtant."
 },
 {
@@ -507,7 +507,7 @@ const menuData: Dish[] = [
   description: "Poisson mariné et cuit dans des feuilles, aux épices douces et parfumées.",
   price: 13.00,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/ndomba-poisson.png",
+  image: "/src/assets/images/specialweekend/ndomba-poisson.png",
   details: "Une cuisson lente et naturelle pour un goût irrésistiblement fumé."
 },
 {
@@ -516,7 +516,7 @@ const menuData: Dish[] = [
   description: "Okok (feuilles d’essong) accompagné de manioc vapeur ou bâton traditionnel.",
   price: 11.80,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/okok-manioc.png",
+  image: "/src/assets/images/specialweekend/okok-manioc.png",
   details: "Plat traditionnel des Eton, riche en goût et en souvenirs familiaux."
 },
 {
@@ -525,7 +525,7 @@ const menuData: Dish[] = [
   description: "Koki à base de niébé, servi avec de la banane cuite à la vapeur.",
   price: 11.50,
   category: "Spécial Weekend",
-  image: "/src/assets/images/special-weekend/koki-banane.png",
+  image: "/src/assets/images/specialweekend/koki-banane.png",
   details: "Un plat emblématique aux saveurs douces et onctueuses, 100% camerounais."
 },
 
