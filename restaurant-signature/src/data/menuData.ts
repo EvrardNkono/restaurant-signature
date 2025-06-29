@@ -126,7 +126,7 @@ const menuData: Dish[] = [
   description: "Boisson douce et onctueuse au fruit du baobab",
   price: 2500,
   category: "Desserts",
-  image: "/src/assets/images/Dessert/jus-baobab.png",
+  image: "/src/assets/images/Dessert/baobab.png",
   details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
 },
 {
