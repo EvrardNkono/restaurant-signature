@@ -5,12 +5,13 @@ import type { Dish } from '../data/types';
 interface CartItem {
   dish: Dish;
   quantity: number;
+  selectedComplement?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (dish: Dish) => void;
-  removeFromCart: (dish: Dish) => void;
+  addToCart: (dish: Dish & { selectedComplement?: string }) => void;
+  removeFromCart: (dish: Dish & { selectedComplement?: string }) => void;
   clearCart: () => void;
   totalItems: number;
 }
@@ -20,22 +21,33 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addToCart = (dish: Dish) => {
+  const addToCart = (dish: Dish & { selectedComplement?: string }) => {
     setItems(prevItems => {
-      const itemExists = prevItems.find(i => i.dish.id === dish.id);
+      const itemExists = prevItems.find(i =>
+        i.dish.id === dish.id &&
+        i.selectedComplement === dish.selectedComplement
+      );
+
       if (itemExists) {
-        // incrémente quantité
+        // Incrémente la quantité si plat + accompagnement déjà présent
         return prevItems.map(i =>
-          i.dish.id === dish.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.dish.id === dish.id && i.selectedComplement === dish.selectedComplement
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         );
       }
-      // ajoute plat neuf
-      return [...prevItems, { dish, quantity: 1 }];
+
+      // Ajoute une nouvelle ligne (plat ou accompagnement différent)
+      return [...prevItems, { dish, quantity: 1, selectedComplement: dish.selectedComplement }];
     });
   };
 
-  const removeFromCart = (dish: Dish) => {
-    setItems(prevItems => prevItems.filter(i => i.dish.id !== dish.id));
+  const removeFromCart = (dish: Dish & { selectedComplement?: string }) => {
+    setItems(prevItems =>
+      prevItems.filter(i =>
+        !(i.dish.id === dish.id && i.selectedComplement === dish.selectedComplement)
+      )
+    );
   };
 
   const clearCart = () => setItems([]);

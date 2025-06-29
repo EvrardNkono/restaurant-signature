@@ -100,7 +100,8 @@ const menuData: Dish[] = [
   price: 8.90,
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poisson.png",
-  details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés."
+  details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
+  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 {
   id: 19,
@@ -109,7 +110,8 @@ const menuData: Dish[] = [
   price: 8.90,
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poulet.png",
-  details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille."
+  details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille.",
+  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 {
   id: 20,
@@ -118,7 +120,8 @@ const menuData: Dish[] = [
   price: 15.90,
   category: "Plats",
   image: "/src/assets/images/plats/pintade-braisee.png",
-  details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur."
+  details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur.",
+  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 {
   id: 21,
@@ -127,7 +130,8 @@ const menuData: Dish[] = [
   price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/soya.png",
-  details: "Un incontournable du street food africain : lamelles de viande marinées, épicées et grillées au charbon."
+  details: "Un incontournable du street food africain : lamelles de viande marinées, épicées et grillées au charbon.",
+  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 {
   id: 22,
@@ -137,6 +141,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/bokit-poulet.png",
   details: "Pain frit antillais généreusement garni de poulet, avec des compléments au choix."
+  
 },
 {
   id: 23,

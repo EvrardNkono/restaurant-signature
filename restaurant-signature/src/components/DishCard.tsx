@@ -7,12 +7,12 @@ import {
   faShoppingCart, 
   faMinusCircle, 
   faAward, 
-  faStar   // Voilà l’étoile qu’il nous faut !
+  faStar
 } from '@fortawesome/free-solid-svg-icons';
 import { useCart } from '../context/CartContext';
 
 interface DishCardProps {
-  dish: Dish;
+  dish: Dish & { complements?: string[] }; // compléments optionnels
   quantity?: number;
   showQuantityControls?: boolean;
   isSpecialWeekend?: boolean;
@@ -26,9 +26,10 @@ const DishCard: React.FC<DishCardProps> = ({
   showQuantityControls = false,
   isSpecialWeekend = false,
   isChefConcept = false,
-  medalColor = '#DAA520'
+  medalColor = '#7B3FBF' // violet royal
 }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [selectedComplement, setSelectedComplement] = useState<string>('');
   const { addToCart, removeFromCart } = useCart();
 
   const cardClassNames = [
@@ -36,6 +37,10 @@ const DishCard: React.FC<DishCardProps> = ({
     isSpecialWeekend && 'dish-card-special',
     isChefConcept && 'dish-card-chef-concept'
   ].filter(Boolean).join(' ');
+
+  const handleAddToCart = () => {
+    addToCart({ ...dish, selectedComplement });
+  };
 
   return (
     <div className={cardClassNames}>
@@ -50,12 +55,12 @@ const DishCard: React.FC<DishCardProps> = ({
                 title="Médaille Concept Chef"
                 style={{ color: medalColor }}
               />
-              <span className="chef-price-text">{dish.price}€</span>
+              <span className="chef-price-text" style={{ color: medalColor }}>{dish.price}€</span>
             </>
           ) : isSpecialWeekend ? (
             <>
               <FontAwesomeIcon
-                icon={faStar}  // icône étoile verte pour le weekend
+                icon={faStar}
                 className="special-weekend-icon"
                 title="Spécial Weekend"
                 style={{ color: '#1f9d55', fontSize: '2.5rem' }}
@@ -63,7 +68,7 @@ const DishCard: React.FC<DishCardProps> = ({
               <span className="special-price-text">{dish.price}€</span>
             </>
           ) : (
-            <span>{dish.price}€</span>
+            <span style={{ color: '#7B3FBF', fontWeight: '600' }}>{dish.price}€</span>
           )}
         </div>
       </div>
@@ -76,15 +81,61 @@ const DishCard: React.FC<DishCardProps> = ({
       </div>
 
       <div className="dish-info">
-        <h3 className="dish-name">{dish.name}</h3>
+        <h3 className="dish-name" style={{ color: '#7B3FBF' }}>{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
+
+        {dish.category === "Plats" && dish.complements && dish.complements.length > 0 && (
+          <div className="dish-complements" style={{ marginTop: '1rem' }}>
+            <label htmlFor={`complements-select-${dish.id}`} style={{ fontWeight: '600', color: '#5a2d91' }}>
+              Choisissez un accompagnement :
+            </label>
+            <select
+              id={`complements-select-${dish.id}`}
+              value={selectedComplement}
+              onChange={e => setSelectedComplement(e.target.value)}
+              style={{
+                marginTop: '0.3rem',
+                padding: '0.4rem 0.6rem',
+                borderRadius: '5px',
+                border: '1px solid #7B3FBF',
+                color: '#4b2e83',
+                fontWeight: '500',
+                minWidth: '180px',
+                cursor: 'pointer',
+                backgroundColor: '#f5f0fa'
+              }}
+            >
+              <option value="" disabled>-- Sélectionnez --</option>
+              {dish.complements.map((comp, idx) => (
+                <option key={idx} value={comp}>{comp}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {showQuantityControls && quantity > 0 && (
           <p className="dish-quantity">Quantité dans le panier : {quantity}</p>
         )}
 
         <div className="dish-buttons-row">
-          <button className="dish-button" onClick={() => addToCart(dish)}>
+          <button 
+            className="dish-button" 
+            onClick={handleAddToCart} 
+            disabled={dish.category === "Plats" && dish.complements && dish.complements.length > 0 && !selectedComplement}
+            style={{
+              backgroundColor: '#7B3FBF',
+              color: 'white',
+              fontWeight: '600',
+              cursor: (dish.category === "Plats" && dish.complements && dish.complements.length > 0 && !selectedComplement) ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.3s ease'
+            }}
+            onMouseEnter={e => {
+              if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#5a2d91';
+            }}
+            onMouseLeave={e => {
+              if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#7B3FBF';
+            }}
+          >
             <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
             Ajouter
           </button>

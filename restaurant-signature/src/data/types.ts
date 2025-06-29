@@ -3,7 +3,7 @@ export type Dish = {
   name: string;
   description: string;
   price: number;
-  category: 
+  category:
     | "Boissons"
     | "Entrées"
     | "Plats"
@@ -12,4 +12,5 @@ export type Dish = {
     | "Concept du Chef"; // ✅ nouvelle catégorie ajoutée
   image: string;
   details: string;
+  complements?: string[]; // 👈 accompagnements optionnels
 };
