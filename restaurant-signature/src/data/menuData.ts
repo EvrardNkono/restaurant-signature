@@ -553,7 +553,7 @@ const menuData: Dish[] = [
 },
 {
   id: 35,
-  name: "Ndomba de poisson",
+  name: "Ndomba de poisson-manioc cuit à la vapeur",
   description: "Poisson mariné et cuit dans des feuilles, aux épices douces et parfumées.",
   price: 13.00,
   category: "Spécial Weekend",
