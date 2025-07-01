@@ -446,6 +446,28 @@ const menuData: Dish[] = [
   details: "Infusé à base de fleurs d’hibiscus, riche en antioxydants et très rafraîchissant."
 },
 {
+  id: 97,
+  name: "Thé Lipton",
+  description: "Thé noir classique servi chaud, délicatement infusé",
+  price: 1.00,
+  category: "Boissons",
+  subCategory: "thé et infusion",
+  image: "/assets/images/Boissons/thelipton.png",
+  details: "Thé noir Lipton infusé à la perfection, idéal pour une pause réconfortante et pleine de saveurs."
+},
+{
+  id: 98,
+  name: "Thé Kinkéliba",
+  description: "Infusion traditionnelle aux feuilles de kinkéliba, servie chaude",
+  price: 1.00,
+  category: "Boissons",
+  subCategory: "thé et infusion",
+  image: "/assets/images/Boissons/thekinkeliba.png",
+  details: "Connu pour ses bienfaits digestifs et détox, le kinkéliba est une boisson naturelle et apaisante du Sahel."
+},
+
+
+{
   id: 45,
   name: "Thé gingembre",
   description: "Boisson africaine épicée, tonifiante et servie fraîche",
