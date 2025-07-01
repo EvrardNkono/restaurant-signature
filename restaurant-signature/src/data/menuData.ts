@@ -295,6 +295,16 @@ const menuData: Dish[] = [
     details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
   },
   {
+    id: 657,
+    name: " Grande Guinness",
+    description: "Bière stout irlandaise au goût corsé et crémeux",
+    price: 3.50,
+    category: "Boissons",
+    subCategory: "boissons alcoolisées",
+    image: "/assets/images/Boissons/guiness.webp",
+    details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
+  },
+  {
     id: 30,
     name: "Vimto",
     description: "Boisson fruitée pétillante à base de fruits rouges",
@@ -390,8 +400,18 @@ const menuData: Dish[] = [
     description: "Boisson maltée non alcoolisée à base de Guinness",
     price: 2.50,
     category: "Boissons",
-    subCategory: "boissons alcoolisées",
+    subCategory: "soda afrique",
     image: "/assets/images/Boissons/maltaguinness.png",
+    details: "Le goût Guinness en version douce et rafraîchissante."
+  },
+   {
+    id: 93,
+    name: "Guinness Irlande",
+    description: "Boisson maltée non alcoolisée à base de Guinness",
+    price: 2.50,
+    category: "Boissons",
+    subCategory: "boissons alcoolisées",
+    image: "/assets/images/Boissons/guinnessirlande.png",
     details: "Le goût Guinness en version douce et rafraîchissante."
   },
   {
