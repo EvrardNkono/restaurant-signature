@@ -79,3 +79,34 @@
     font-size: 1rem;
   }
 }
+
+.boissons-filter-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: #7B3FBF; /* violet royal */
+  font-size: 1.1rem;
+  user-select: none;
+}
+
+.boissons-filter-select {
+  width: 220px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #7B3FBF;
+  background-color: white;
+  color: #7B3FBF;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.boissons-filter-select:hover,
+.boissons-filter-select:focus {
+  border-color: #5a2d91;
+  outline: none;
+  background-color: #f5f0fa;
+  color: #5a2d91;
+}

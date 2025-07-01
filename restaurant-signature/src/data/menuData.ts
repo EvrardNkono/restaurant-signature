@@ -176,6 +176,7 @@ const menuData: Dish[] = [
   description: "Boisson douce et onctueuse au fruit du baobab",
   price: 1.00,
   category: "Desserts",
+  subCategory: "jus naturels",
   image: "/src/assets/images/Dessert/baobab.png",
   details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
 },
@@ -185,6 +186,7 @@ const menuData: Dish[] = [
   description: "Boisson acidulée au tamarin, sucrée et désaltérante",
   price: 1.00,
   category: "Desserts",
+  subCategory: "jus naturels",
   image: "/src/assets/images/Dessert/jus-tamarin.png",
   details: "Une touche exotique et énergisante venue tout droit des saveurs africaines."
 },
@@ -194,6 +196,7 @@ const menuData: Dish[] = [
   description: "Lait caillé traditionnel, frais et crémeux",
   price: 1.00,
   category: "Desserts",
+  subCategory: "jus naturels",
   image: "/src/assets/images/Dessert/juskossam.png",
   details: "Un incontournable du dessert africain, à savourer bien frais pour plus de plaisir."
 },
@@ -203,6 +206,7 @@ const menuData: Dish[] = [
     description: "Verre de jus de bissap frais et sucré, servi bien frais",
     price: 2.00,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "assets/images/Boissons/verrebissap.png",
     details: "Infusé à base de fleurs d’hibiscus, riche en antioxydants et très rafraîchissant."
   },
@@ -212,6 +216,7 @@ const menuData: Dish[] = [
     description: "Boisson gazeuse rafraîchissante, servie bien fraîche",
     price: 2.00,
     category: "Boissons",
+    subCategory: "sodas",
     image: "assets/images/Boissons/cocacola.png",
     details: "La boisson pétillante classique, toujours servie bien fraîche pour étancher la soif."
   },
@@ -221,6 +226,7 @@ const menuData: Dish[] = [
     description: "Boisson pétillante à l'orange avec pulpe",
     price: 2.00,
     category: "Boissons",
+    subCategory: "sodas",
     image: "assets/images/Boissons/orangina.jpg",
     details: "Le goût unique de l’orange avec pulpe, pour une pause pleine de pep’s."
   },
@@ -230,6 +236,7 @@ const menuData: Dish[] = [
     description: "Boisson gazeuse au goût d’agrumes",
     price: 2.00,
     category: "Boissons",
+    subCategory: "sodas",
     image: "assets/images/Boissons/schweppes.png",
     details: "Un mélange d’agrumes acidulé et tonique, avec des bulles pleines de caractère."
   },
@@ -239,6 +246,7 @@ const menuData: Dish[] = [
     description: "Boisson naturelle à base de fruit du baobab, rafraîchissante et vitaminée",
     price: 2.50,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "assets/images/Boissons/jus-baobab.png",
     details: "Riche en vitamines C et fibres, ce jus africain vous reconnecte à la nature."
   },
@@ -248,6 +256,7 @@ const menuData: Dish[] = [
     description: "Infusion chaude et épicée aux clous de girofle",
     price: 2.00,
     category: "Boissons",
+    subCategory: "thé et infusion",
     image: "assets/images/Boissons/the-girofle.png",
     details: "Parfait après un repas, ce thé digestif est un remède ancestral au goût intense."
   },
@@ -257,6 +266,7 @@ const menuData: Dish[] = [
     description: "Boisson africaine épicée, tonifiante et servie fraîche",
     price: 2.00,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "assets/images/Boissons/jus-gingembre.png",
     details: "Le célèbre ‘Gnamakoudji’ à base de gingembre frais pour booster l’énergie."
   },
@@ -266,6 +276,7 @@ const menuData: Dish[] = [
     description: "Thé glacé à la pêche, doux et désaltérant",
     price: 2.00,
     category: "Boissons",
+    subCategory: "thé et infusion",
     image: "assets/images/Boissons/icetea-peche.png",
     details: "La douceur de la pêche combinée à la fraîcheur du thé glacé, pour une pause zen."
   },
@@ -276,6 +287,7 @@ const menuData: Dish[] = [
     description: "Bière blonde légère et rafraîchissante, parfaite pour les moments conviviaux",
     price: 3.00,
     category: "Boissons",
+    subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/castel.png",
     details: "La bière camerounaise incontournable, à déguster bien fraîche."
   },
@@ -285,6 +297,7 @@ const menuData: Dish[] = [
     description: "Bière premium au goût équilibré, très populaire en Afrique centrale",
     price: 3.00,
     category: "Boissons",
+    subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/mutzig.webp",
     details: "Une bière légère et savoureuse pour accompagner tous vos plats."
   },
@@ -294,6 +307,7 @@ const menuData: Dish[] = [
     description: "Bière stout irlandaise au goût corsé et crémeux",
     price: 3.50,
     category: "Boissons",
+    subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/guiness.webp",
     details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
   },
@@ -304,6 +318,7 @@ const menuData: Dish[] = [
     price: 2.50,
     category: "Boissons",
     image: "/assets/images/Boissons/vimto.webp",
+    subCategory: "soda",
     details: "Un classique britannique apprécié pour son goût sucré et rafraîchissant."
   },
   {
@@ -313,6 +328,7 @@ const menuData: Dish[] = [
     price: 2.50,
     category: "Boissons",
     image: "/assets/images/Boissons/djino.jpg",
+    subCategory: "sodas",
     details: "Pour un coup de boost naturel et savoureux."
   },
   {
@@ -322,6 +338,7 @@ const menuData: Dish[] = [
     price: 2.50,
     category: "Boissons",
     image: "/assets/images/Boissons/booster.jpeg",
+    subCategory: "boissons alcoolisées",
     details: "Une formule tonique pour une énergie rapide."
   },
   {
@@ -331,6 +348,7 @@ const menuData: Dish[] = [
     price: 3.00,
     category: "Boissons",
     image: "/assets/images/Boissons/kadji.png",
+    subCategory: "boissons alcoolisées",
     details: "Un savoir-faire brassicole pour une dégustation unique."
   },
   {
@@ -340,6 +358,7 @@ const menuData: Dish[] = [
     price: 3.00,
     category: "Boissons",
     image: "/assets/images/Boissons/33export.png",
+    subCategory: "boissons alcoolisées",
     details: "Un classique des bières africaines, parfaite pour vos moments festifs."
   },
   {
@@ -348,6 +367,7 @@ const menuData: Dish[] = [
     description: "Boisson gazeuse sucrée et rafraîchissante",
     price: 2.00,
     category: "Boissons",
+    subCategory: "sodas",
     image: "/assets/images/Boissons/colachampion.png",
     details: "Un cola au goût authentique, très populaire localement."
   },
@@ -357,6 +377,7 @@ const menuData: Dish[] = [
     description: "Boisson naturelle et désaltérante, directement issue de la noix de coco",
     price: 2.50,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "/assets/images/Boissons/eau-coco.png",
     details: "Parfait pour rester hydraté avec une touche exotique."
   },
@@ -366,6 +387,7 @@ const menuData: Dish[] = [
     description: "Boisson maltée non alcoolisée, pleine de vitamines",
     price: 2.50,
     category: "Boissons",
+    subCategory: "sodas",
     image: "/assets/images/Boissons/vitamalt.png",
     details: "L’option gourmande et vitaminée pour petits et grands."
   },
@@ -375,6 +397,7 @@ const menuData: Dish[] = [
     description: "Bière locale artisanale au goût unique",
     price: 3.00,
     category: "Boissons",
+    subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/isembeck.png",
     details: "Brassée avec passion pour les amateurs de bière authentique."
   },
@@ -384,6 +407,7 @@ const menuData: Dish[] = [
     description: "Boisson maltée non alcoolisée à base de Guinness",
     price: 2.50,
     category: "Boissons",
+    subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/maltaguinness.png",
     details: "Le goût Guinness en version douce et rafraîchissante."
   },
@@ -393,6 +417,7 @@ const menuData: Dish[] = [
     description: "Boisson maltée sucrée avec un soupçon de vanille",
     price: 2.50,
     category: "Boissons",
+    subCategory: "sodas",
     image: "/assets/images/Boissons/maltavanille.png",
     details: "Une douceur maltée qui séduit les palais gourmands."
   },
@@ -402,6 +427,7 @@ const menuData: Dish[] = [
     description: "Boisson gazeuse fruitée à l’orange",
     price: 2.00,
     category: "Boissons",
+    subCategory: "sodas",
     image: "/assets/images/Boissons/fanta.png",
     details: "Un classique pétillant et fruité pour rafraîchir vos journées."
   },
@@ -411,6 +437,7 @@ const menuData: Dish[] = [
     description: "Jus naturel de mangue, sucré et onctueux",
     price: 2.50,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "/assets/images/Boissons/jus-mangue.png",
     details: "Un goût exotique et sucré, parfait pour se rafraîchir."
   },
@@ -420,24 +447,18 @@ const menuData: Dish[] = [
     description: "Jus naturel de goyave, riche en saveurs",
     price: 2.50,
     category: "Boissons",
+    subCategory: "jus naturels",
     image: "/assets/images/Boissons/jus-goyave.png",
     details: "Un fruit tropical délicieux et vitaminé."
   },
-  {
-    id: 44,
-    name: "Jus tropical",
-    description: "Mélange de fruits tropicaux pour une explosion de saveurs",
-    price: 2.50,
-    category: "Boissons",
-    image: "/assets/images/Boissons/jus-tropical.webp",
-    details: "Un cocktail vitaminé pour un moment de fraîcheur."
-  },
+ 
   {
   id: 44,
   name: "Thé bissap",
   description: "Verre de jus de bissap frais et sucré, servi bien frais",
   price: 1.00,
   category: "Boissons",
+  subCategory: "thé et infusion",
   image: "/assets/images/Boissons/verrebissap.png",
   details: "Infusé à base de fleurs d’hibiscus, riche en antioxydants et très rafraîchissant."
 },
@@ -447,6 +468,7 @@ const menuData: Dish[] = [
   description: "Boisson africaine épicée, tonifiante et servie fraîche",
   price: 1.00,
   category: "Boissons",
+  subCategory: "thé et infusion",
   image: "/assets/images/Boissons/the-gingembre.png",
   details: "Le célèbre ‘Gnamakoudji’ à base de gingembre frais pour booster l’énergie."
 },
@@ -456,6 +478,7 @@ const menuData: Dish[] = [
   description: "Boisson naturelle aux bienfaits du moringa, légère et revitalisante",
   price: 1.00,
   category: "Boissons",
+  subCategory: "thé et infusion",
   image: "/assets/images/Boissons/jus-moringa.png",
   details: "Riche en vitamines et antioxydants, idéale pour une pause santé."
 },
@@ -465,6 +488,7 @@ const menuData: Dish[] = [
   description: "Infusion fraîche et parfumée de citronnelle, pour une sensation apaisante",
   price: 1.00,
   category: "Boissons",
+  subCategory: "thé et infusion",
   image: "/assets/images/Boissons/jus-citronnelle.png",
   details: "Saveur citronnée douce, parfaite pour se désaltérer en douceur."
 },
@@ -474,6 +498,7 @@ const menuData: Dish[] = [
   description: "Boisson rafraîchissante à la menthe, idéale pour les journées chaudes",
   price: 1.00,
   category: "Boissons",
+  subCategory: "thé et infusion",
   image: "/assets/images/Boissons/jus-menthe.png",
   details: "Saveur mentholée légère qui désaltère et rafraîchit instantanément."
 },
