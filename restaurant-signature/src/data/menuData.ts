@@ -237,7 +237,7 @@ const menuData: Dish[] = [
     id: 24,
     name: "Thé au clou de girofle",
     description: "Infusion chaude et épicée aux clous de girofle",
-    price: 3.90,
+    price: 1.00,
     category: "Boissons",
     subCategory: "thé et infusion",
     image: "assets/images/Boissons/the-girofle.png",
