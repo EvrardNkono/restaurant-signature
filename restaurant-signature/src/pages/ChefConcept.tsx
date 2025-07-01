@@ -14,33 +14,43 @@ const accompaniments = [
   'Bâton de manioc'
 ];
 
-// 👇 Sauces par jour (0 = dimanche, 1 = lundi, ..., 6 = samedi)
 const saucesParJour: { [key: number]: string[] } = {
-  1: ['Sauce arachide', 'Sauce tomate'],          // Lundi
-  2: ['Sauce gombo', 'Sauce coco-citronnelle'],  // Mardi
-  3: ['Sauce pistache', 'Sauce jaune'],          // Mercredi
-  4: ['Ndolé', 'Mbongo Tchobi'],                 // Jeudi
-  5: ['sauce tomate', 'Sauce aubergine'],                 // Vendredi
-  6: ['Sauce d’arachide piquante', 'Sauce claire'], // Samedi
-  0: ['Sauce tomate', 'Sauce creme fraiche']         // Dimanche
+  1: ['Sauce arachide', 'Sauce tomate'],
+  2: ['Sauce gombo', 'Sauce coco-citronnelle'],
+  3: ['Sauce pistache', 'Sauce jaune'],
+  4: ['Ndolé', 'Mbongo Tchobi'],
+  5: ['sauce tomate', 'Sauce aubergine'],
+  6: ['Sauce d’arachide piquante', 'Sauce claire'],
+  0: ['Sauce tomate', 'Sauce creme fraiche']
 };
 
-// 👇 On récupère le jour actuel
 const jourActuel = new Date().getDay();
 const saucesDuJour = saucesParJour[jourActuel] || [];
 
 const ChefConcept: React.FC = () => {
   const chefDishes = menuData.filter(dish => dish.category === "Concept du Chef");
+  const boissons = menuData.filter(dish => dish.category === "Boissons");
+
+  const boissonsParSousCategorie = boissons.reduce((acc, boisson) => {
+    const key = boisson.subCategory || 'Autres';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(boisson);
+    return acc;
+  }, {} as Record<string, typeof boissons>);
 
   const [choices, setChoices] = useState<{
     [key: number]: {
       sauce: string;
       accompaniment: string;
-      withDrink: boolean;
+      selectedDrinkId: number | null;
     };
   }>({});
 
-  const handleChange = (dishId: number, field: 'sauce' | 'accompaniment' | 'withDrink', value: string | boolean) => {
+  const handleChange = (
+    dishId: number,
+    field: 'sauce' | 'accompaniment' | 'selectedDrinkId',
+    value: string | number | null
+  ) => {
     setChoices(prev => ({
       ...prev,
       [dishId]: {
@@ -69,10 +79,11 @@ const ChefConcept: React.FC = () => {
             const selected = choices[dish.id] || {
               sauce: '',
               accompaniment: '',
-              withDrink: false
+              selectedDrinkId: null
             };
-            const basePrice = 8.0;
-            const finalPrice = selected.withDrink ? basePrice + 0.9 : basePrice;
+
+            const selectedDrink = boissons.find(b => b.id === selected.selectedDrinkId);
+            const finalPrice = 8.0 + (selectedDrink ? 0.9 : 0.0);
 
             return (
               <div key={dish.id} className="dish-card-with-options">
@@ -110,13 +121,23 @@ const ChefConcept: React.FC = () => {
                     </select>
                   </label>
 
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={selected.withDrink}
-                      onChange={(e) => handleChange(dish.id, 'withDrink', e.target.checked)}
-                    />
-                    Ajouter une boisson (+0,90 €)
+                  <label className="extra-label">
+                    🥤 Boisson :
+                    <select
+                      value={selected.selectedDrinkId ?? ''}
+                      onChange={(e) => handleChange(dish.id, 'selectedDrinkId', e.target.value ? Number(e.target.value) : null)}
+                    >
+                      <option value="">-- Aucune boisson --</option>
+                      {Object.entries(boissonsParSousCategorie).map(([subCat, boissons]) => (
+                        <optgroup key={subCat} label={subCat.charAt(0).toUpperCase() + subCat.slice(1)}>
+                          {boissons.map((boisson) => (
+                            <option key={boisson.id} value={boisson.id}>
+                              {boisson.name} (+0,90 €)
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
                   </label>
 
                   <p className="price-display">Prix total : <strong>{finalPrice.toFixed(2)} €</strong></p>
