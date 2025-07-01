@@ -259,7 +259,7 @@ const menuData: Dish[] = [
     description: "Thé glacé à la pêche, doux et désaltérant",
     price: 3.90,
     category: "Boissons",
-    subCategory: "thé et infusion",
+    subCategory: "sodas",
     image: "assets/images/Boissons/icetea-peche.png",
     details: "La douceur de la pêche combinée à la fraîcheur du thé glacé, pour une pause zen."
   },
