@@ -6,7 +6,7 @@ const menuData: Dish[] = [
     id: 1,
     name: "Salade exotique",
     description: "Mélange frais de mangue, avocat et crevettes",
-    price: 8.40,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/salade-exotique.png",
     details: "Une entrée légère et colorée aux saveurs tropicales, parfaite pour éveiller les papilles."
@@ -15,7 +15,7 @@ const menuData: Dish[] = [
     id: 2,
     name: "Salade signature",
     description: "Salade fraîche au poulet, avocat, maïs et laitue croquante, ensoleillée.",
-    price: 6.10,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/salade-signature.png",
     details: "Salade fraîche aux feuilles de laitue, poulet grillé émietté, avocat et maïs doux. Une entrée légère, colorée et pleine de saveurs."
@@ -24,12 +24,12 @@ const menuData: Dish[] = [
     id: 3,
     name: "Memaya Gourmette",
     description: "La gourmandise n'a jamais ete aussi intense",
-    price: 10.70,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/memaya-gourmette.png",
     details: "Gésier de poulet grillé tendre, servi sur un lit de feuilles de laitue croquantes : un plat savoureux, léger et riche en protéines."
   },
-  {
+  /*{
     id: 4,
     name: "Fraîcheur exotique",
     description: "Salade fraîche, laitue vapeur, maïs doux et poisson grillé.",
@@ -37,39 +37,31 @@ const menuData: Dish[] = [
     category: "Entrées",
     image: "/src/assets/images/entree/fraîcheur-exotique.png",
     details: "Salade fraîche aux feuilles de laitue vapeur, maïs doux croquant et poisson grillé savoureux, un mariage léger et plein de fraîcheur.."
-  },
+  },*/
   {
     id: 5,
     name: "Samoussa et Salade",
     description: "Samoussa croustillant avec salade fraîche et croquante.",
-    price: 7.60,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/samoussaetsalade.webp",
     details: "Samoussa croustillant accompagné d'une salade fraîche et colorée, un duo gourmand qui réveille les papilles avec saveur et légèreté."
   },
   {
     id: 6,
-    name: "Tendredde du Mboa",
+    name: "Tendresse du Mboa",
     description: "Salade fraîche, poisson grillé, avocat crémeux et maïs doux.",
-    price: 7.90,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/TendresseDUMBOA.png",
     details: "Salade fraîche et colorée, avec poisson grillé émietté, avocat crémeux et maïs doux, pour un équilibre parfait entre saveurs et textures légères."
   },
-  {
-    id: 7,
-    name: "Triot vegetal",
-    description: "Poisson blanc mariné au citron vert, coriandre et oignon rouge",
-    price: 11.50,
-    category: "Entrées",
-    image: "/src/assets/images/entree/triovegetal.png",
-    details: "Alliance parfaite entre acidité et fraîcheur pour un plaisir gustatif intense."
-  },
+  
   {
     id: 8,
     name: "Pastel et Salade",
     description: "Pastel croustillant avec salade fraîche, un combo savoureux et léger à déguster.",
-    price: 6.40,
+    price: 8.90,
     category: "Entrées",
     image: "/src/assets/images/entree/pastel-salade.png",
     details: "Pastel doré et croustillant, accompagné d'une salade fraîche et croquante, pour une explosion de saveurs à chaque bouchée, simple et savoureuse."
@@ -86,10 +78,10 @@ const menuData: Dish[] = [
   
 {
   id: 17,
-  name: "Brochettes de viande (x5)",
+  name: "Brochettes de viande (x4)",
   description: "Petites brochettes grillées, savoureuses et économiques",
-  price: 1.900,
-  category: "Entrées",
+  price: 10.00,
+  category: "Plats",
   image: "/src/assets/images/entree/brochettes-viande.png",
   details: "5 brochettes de viande tendres, parfaites pour une pause gourmande sans se ruiner."
 },
@@ -156,12 +148,12 @@ const menuData: Dish[] = [
   id: 20,
   name: "Degue",
   description: "Dessert traditionnel au mil et yaourt, frais et nourrissant",
-  price: 1.00,
+  price: 3.90,
   category: "Desserts",
   image: "/src/assets/images/Dessert/degue.png",
   details: "Un grand classique des desserts africains, crémeux et rafraîchissant."
 },
-{
+/*{
   id: 21,
   name: "Sorbet",
   description: "Glace légère et fruitée pour une pause fraîcheur",
@@ -169,13 +161,13 @@ const menuData: Dish[] = [
   category: "Desserts",
   image: "/src/assets/images/Dessert/sorbet.png",
   details: "Sorbet onctueux aux saveurs naturelles, idéal pour finir le repas en douceur."
-},
+},*/
 {
   id: 22,
   name: "Jus de Baobab",
   description: "Boisson douce et onctueuse au fruit du baobab",
   price: 1.00,
-  category: "Desserts",
+  category: "Boissons",
   subCategory: "jus naturels",
   image: "/src/assets/images/Dessert/baobab.png",
   details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
@@ -184,21 +176,20 @@ const menuData: Dish[] = [
   id: 23,
   name: "Jus de Tamarin",
   description: "Boisson acidulée au tamarin, sucrée et désaltérante",
-  price: 1.00,
-  category: "Desserts",
+  price: 3.90,
+  category: "Boissons",
   subCategory: "jus naturels",
   image: "/src/assets/images/Dessert/jus-tamarin.png",
   details: "Une touche exotique et énergisante venue tout droit des saveurs africaines."
 },
 {
   id: 24,
-  name: "Kossam",
-  description: "Lait caillé traditionnel, frais et crémeux",
-  price: 1.00,
+  name: "Tiramisu",
+  description: "Dessert italien crémeux au café et mascarpone délicat.",
+  price: 3.90,
   category: "Desserts",
-  subCategory: "jus naturels",
-  image: "/src/assets/images/Dessert/juskossam.png",
-  details: "Un incontournable du dessert africain, à savourer bien frais pour plus de plaisir."
+  image: "/src/assets/images/Dessert/tiramisu.png",
+  details: "Délicieux tiramisu italien, mariage parfait de café, mascarpone crémeux et biscuits trempés, pour un dessert léger et irrésistible."
 },
    {
     id: 19,
