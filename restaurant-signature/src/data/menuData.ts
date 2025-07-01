@@ -162,16 +162,7 @@ const menuData: Dish[] = [
   image: "/src/assets/images/Dessert/sorbet.png",
   details: "Sorbet onctueux aux saveurs naturelles, idéal pour finir le repas en douceur."
 },*/
-{
-  id: 22,
-  name: "Jus de Baobab",
-  description: "Boisson douce et onctueuse au fruit du baobab",
-  price: 1.00,
-  category: "Boissons",
-  subCategory: "jus naturels",
-  image: "/src/assets/images/Dessert/baobab.png",
-  details: "Un concentré d’énergie et de fraîcheur, naturellement riche en nutriments."
-},
+
 {
   id: 23,
   name: "Jus de Tamarin",
@@ -198,7 +189,7 @@ const menuData: Dish[] = [
     price: 3.90,
     category: "Boissons",
     subCategory: "jus naturels",
-    image: "assets/images/Boissons/verrebissap.png",
+    image: "assets/images/Boissons/verrebissap.webp",
     details: "Infusé à base de fleurs d’hibiscus, riche en antioxydants et très rafraîchissant."
   },
   {
@@ -309,7 +300,7 @@ const menuData: Dish[] = [
     price: 2.50,
     category: "Boissons",
     image: "/assets/images/Boissons/vimto.webp",
-    subCategory: "soda",
+    subCategory: "soda afrique",
     details: "Un classique britannique apprécié pour son goût sucré et rafraîchissant."
   },
   {
