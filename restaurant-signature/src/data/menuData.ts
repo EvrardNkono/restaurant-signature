@@ -77,19 +77,10 @@ const menuData: Dish[] = [
   },
   
 {
-  id: 17,
-  name: "Brochettes de viande (x4)",
-  description: "Petites brochettes grillées, savoureuses et économiques",
-  price: 10.00,
-  category: "Plats",
-  image: "/src/assets/images/entree/brochettes-viande.png",
-  details: "5 brochettes de viande tendres, parfaites pour une pause gourmande sans se ruiner."
-},
-{
   id: 18,
   name: "Tieb Boudienne au poisson",
   description: "Riz sénégalais au poisson et légumes",
-  price: 8.90,
+  price: 10.00,
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poisson.png",
   details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
@@ -99,7 +90,7 @@ const menuData: Dish[] = [
   id: 19,
   name: "Tieb Boudienne au poulet",
   description: "Riz sénégalais au poulet et légumes",
-  price: 8.90,
+  price: 10.00,
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poulet.png",
   details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille.",
@@ -115,16 +106,49 @@ const menuData: Dish[] = [
   details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur.",
   complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
+
 {
   id: 21,
-  name: "Soya",
-  description: "Viande grillée à la camerounaise, épicée et savoureuse",
-  price: 10.90,
+  name: "Poisson braisé",
+  description: "Poisson grillé à la braise, parfumé aux épices africaines",
+  price: 13.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/poisson-braise.png",
+  details: "Un poisson entier grillé lentement, assaisonné maison, croustillant à l'extérieur et tendre à cœur.",
+  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
+},
+{
+  id: 22,
+  name: "Dorade braisée",
+  description: "Dorade entière, grillée façon camerounaise",
+  price: 15.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/dorade-braisee.png",
+  details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
+  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
+},
+{
+  id: 23,
+  name: "Maquereau Oya-Oya",
+  description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
+  price: 15.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/poisson-braise.png",
+  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food d’Afrique de l’Ouest.",
+  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
+},
+
+{
+  id: 24,
+  name: "Brochettes de viande X4",
+  description: " 4 Brochettes de viande grillés, marinés aux épices",
+  price: 10.00,
   category: "Plats",
   image: "/src/assets/images/plats/soya.png",
-  details: "Un incontournable du street food africain : lamelles de viande marinées, épicées et grillées au charbon.",
-  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
+  details: "De savoureuses brochettes de viande tendres et juteuses, grillées à la braise avec une marinade relevée à souhait.",
+  complements: ["Frites de plantain", "Attiéké", "Chikwang", "Bâton de manioc",]
 },
+
 {
   id: 22,
   name: "Bokit Poulet",
@@ -132,7 +156,8 @@ const menuData: Dish[] = [
   price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/bokit-poulet.png",
-  details: "Pain frit antillais généreusement garni de poulet, avec des compléments au choix."
+  details: "Pain frit antillais généreusement garni de poulet, avec des compléments au choix.",
+  complements: ["Frittes de plantain","Frittes de patates douces"]
   
 },
 {
@@ -142,7 +167,8 @@ const menuData: Dish[] = [
   price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/bokit-morue.png",
-  details: "Une version marine du Bokit, à la morue épicée et moelleuse, croustillant et plein de caractère."
+  details: "Une version marine du Bokit, à la morue épicée et moelleuse, croustillant et plein de caractère.",
+  complements: ["Frittes de plantain","Frittes de patates douces"]
 },
   {
   id: 20,
@@ -168,7 +194,7 @@ const menuData: Dish[] = [
   id: 24,
   name: "Tiramisu",
   description: "Dessert italien crémeux au café et mascarpone délicat.",
-  price: 3.90,
+  price: 3.50,
   category: "Desserts",
   image: "/src/assets/images/Dessert/tiramisu.png",
   details: "Délicieux tiramisu italien, mariage parfait de café, mascarpone crémeux et biscuits trempés, pour un dessert léger et irrésistible."
@@ -408,7 +434,7 @@ const menuData: Dish[] = [
   id: 400,
   name: "Top Pamplemousse",
   description: "Soda pétillant au goût intense de pamplemousse",
-  price: 1.20,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/toppamplemousse.png",
@@ -418,7 +444,7 @@ const menuData: Dish[] = [
   id: 401,
   name: "Top Ananas",
   description: "Soda doux et fruité à l’ananas",
-  price: 1.20,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/topananas.png",
@@ -428,7 +454,7 @@ const menuData: Dish[] = [
   id: 402,
   name: "Top Grenadine",
   description: "Boisson gazeuse au goût sucré de grenadine",
-  price: 1.20,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/topgrenadine.png",
