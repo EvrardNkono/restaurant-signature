@@ -643,16 +643,16 @@ const menuData: Dish[] = [
   id: 27,
   name: "Ndolé - Frites de plantain",
   description: "Feuilles d’amarante mijotées servies avec des frites de plantain croustillantes.",
-  price: 13.20,
+  price: 25.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/ndole-frites-plantain.png",
   details: "Un plat classique alliant douceur et caractère pour un weekend aux saveurs du pays."
 },
 {
   id: 28,
-  name: "Beignets Haricots Bouillie",
+  name: "Beignets mais ou farine Haricots Bouillie",
   description: "Trio populaire camerounais : beignets dorés, haricots fondants, bouillie onctueuse.",
-  price: 9.50,
+  price: 10.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/beignets-haricots-bouillie.png",
   details: "Un petit-déjeuner de roi ou un brunch du weekend typique et réconfortant."
@@ -661,7 +661,7 @@ const menuData: Dish[] = [
   id: 29,
   name: "Eru - Waterfufu",
   description: "Feuilles d’éru mijotées accompagnées de waterfufu tendre.",
-  price: 12.50,
+  price: 25.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/eru-water-fufu.png",
   details: "Une spécialité du Sud-Ouest Cameroun riche en goût et en tradition."
@@ -670,7 +670,7 @@ const menuData: Dish[] = [
   id: 30,
   name: "Sauce Gombo - Fufu Manioc",
   description: "Sauce gombo glissante et parfumée servie avec du fufu de manioc.",
-  price: 11.90,
+  price: 15.90,
   category: "Spécial Weekend",
   image: "/images/special-weekend/sauce-gombo-fufu-manioc.png",
   details: "Un plat généreux et typique aux textures uniques, très apprécié au pays."
@@ -679,7 +679,7 @@ const menuData: Dish[] = [
   id: 31,
   name: "Banane malaxée - Mouton ou chèvre",
   description: "Purée de banane salée servie avec une viande de mouton ou de chèvre en sauce.",
-  price: 13.00,
+  price: 15.90,
   category: "Spécial Weekend",
   image: "/images/special-weekend/banane-malaxee-mouton.png",
   details: "Un plat ancré dans la tradition, savoureux et consistant pour bien terminer la semaine."
@@ -688,7 +688,7 @@ const menuData: Dish[] = [
   id: 32,
   name: "Bouillon de pieds de bœuf - Manioc ou plantain",
   description: "Bouillon parfumé de pieds de bœuf servi avec manioc ou plantain cuit vapeur.",
-  price: 12.80,
+  price: 15.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/toto.png",
   details: "Un plat riche en collagène et en arômes pour les amateurs de cuisine authentique."
@@ -697,7 +697,7 @@ const menuData: Dish[] = [
   id: 33,
   name: "Taro - Sauce Jaune",
   description: "Taro pilé accompagné d’une sauce jaune bien relevée.",
-  price: 12.00,
+  price: 25.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/taro-sauce-jaune.png",
   details: "Un incontournable du terroir camerounais, parfait pour les grandes occasions."
@@ -706,25 +706,17 @@ const menuData: Dish[] = [
   id: 34,
   name: "Mbongo Tchobi-Plantain Mur ou cuit a la vapeur ",
   description: "Poisson mijoté dans une sauce noire aux épices brûlées.",
-  price: 13.50,
+  price: 15.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/mbongo-tchobi.png",
   details: "Plat emblématique de la région Bassa, intense et envoûtant."
 },
-{
-  id: 35,
-  name: "Ndomba de poisson-manioc cuit à la vapeur",
-  description: "Poisson mariné et cuit dans des feuilles, aux épices douces et parfumées.",
-  price: 13.00,
-  category: "Spécial Weekend",
-  image: "/images/special-weekend/ndomba-poisson.png",
-  details: "Une cuisson lente et naturelle pour un goût irrésistiblement fumé."
-},
+
 {
   id: 36,
   name: "Okok Eton - Manioc vapeur ou bâton",
   description: "Okok (feuilles d’essong) accompagné de manioc vapeur ou bâton traditionnel.",
-  price: 11.80,
+  price: 15.00,
   category: "Spécial Weekend",
   image: "/images/special-weekend/okok-manioc.png",
   details: "Plat traditionnel des Eton, riche en goût et en souvenirs familiaux."
@@ -733,7 +725,7 @@ const menuData: Dish[] = [
   id: 37,
   name: "Koki - Banane",
   description: "Koki à base de niébé, servi avec de la banane cuite à la vapeur.",
-  price: 11.50,
+  price: 15.90,
   category: "Spécial Weekend",
   image: "/images/special-weekend/koki-banane.png",
   details: "Un plat emblématique aux saveurs douces et onctueuses, 100% camerounais."

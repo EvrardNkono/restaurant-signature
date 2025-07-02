@@ -15,13 +15,13 @@ const accompaniments = [
 ];
 
 const saucesParJour: { [key: number]: string[] } = {
-  1: ['Sauce arachide', 'Sauce tomate'],
-  2: ['Sauce gombo', 'Sauce coco-citronnelle'],
-  3: ['Sauce pistache', 'Sauce jaune'],
-  4: ['Ndolé', 'Mbongo Tchobi'],
-  5: ['sauce tomate', 'Sauce aubergine'],
-  6: ['Sauce d’arachide piquante', 'Sauce claire'],
-  0: ['Sauce tomate', 'Sauce creme fraiche']
+  1: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  2: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  3: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  4: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  5: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  6: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
+  0: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme']
 };
 
 const jourActuel = new Date().getDay();
