@@ -472,7 +472,7 @@ const menuData: Dish[] = [
   price: 1.50,
   category: "Boissons",
   subCategory: "soda afrique",
-  image: "/assets/images/Boissons/youzou.webp",
+  image: "/assets/images/Boissons/youzou.png",
   details: "Une boisson qui allie originalité et rafraîchissement, très populaire au Cameroun."
 },
 
