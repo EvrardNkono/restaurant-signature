@@ -210,7 +210,7 @@ const menuData: Dish[] = [
     price: 0.90,
     category: "Boissons",
     subCategory: "sodas",
-    image: "assets/images/Boissons/orangina.jpg",
+    image: "assets/images/Boissons/orangina.png",
     details: "Le goût unique de l’orange avec pulpe, pour une pause pleine de pep’s."
   },
   {
@@ -308,7 +308,7 @@ const menuData: Dish[] = [
     id: 30,
     name: "Vimto",
     description: "Boisson fruitée pétillante à base de fruits rouges",
-    price: 0.90,
+    price: 2.90,
     category: "Boissons",
     image: "/assets/images/Boissons/vimto.webp",
     subCategory: "soda afrique",
@@ -320,7 +320,7 @@ const menuData: Dish[] = [
     description: "Boisson énergétique à base de plantes africaines",
     price: 0.90,
     category: "Boissons",
-    image: "/assets/images/Boissons/djino.jpg",
+    image: "/assets/images/Boissons/djino.png",
     subCategory: "sodas",
     details: "Pour un coup de boost naturel et savoureux."
   },
@@ -398,12 +398,96 @@ const menuData: Dish[] = [
     id: 39,
     name: "Malta Guinness",
     description: "Boisson maltée non alcoolisée à base de Guinness",
-    price: 2.50,
+    price: 1.90,
     category: "Boissons",
     subCategory: "soda afrique",
     image: "/assets/images/Boissons/maltaguinness.png",
     details: "Le goût Guinness en version douce et rafraîchissante."
   },
+  {
+  id: 400,
+  name: "Top Pamplemousse",
+  description: "Soda pétillant au goût intense de pamplemousse",
+  price: 1.20,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/toppamplemousse.png",
+  details: "Rafraîchissant et légèrement amer, un classique camerounais très apprécié en été."
+},
+{
+  id: 401,
+  name: "Top Ananas",
+  description: "Soda doux et fruité à l’ananas",
+  price: 1.20,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/topananas.png",
+  details: "Son goût sucré et sa bulle légère en font la boisson parfaite pour accompagner un repas africain."
+},
+{
+  id: 402,
+  name: "Top Grenadine",
+  description: "Boisson gazeuse au goût sucré de grenadine",
+  price: 1.20,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/topgrenadine.png",
+  details: "Un soda vif et fruité qui plait à tous les âges, idéal bien frais."
+},
+{
+  id: 403,
+  name: "Top Orange",
+  description: "Soda pétillant au goût d’orange douce",
+  price: 1.20,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/toporange.png",
+  details: "Un grand classique des sodas africains, au goût sucré et acidulé bien équilibré."
+},
+{
+  id: 404,
+  name: "D’jino Cocktail",
+  description: "Soda africain fruité au goût unique de cocktail tropical",
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/djinococktail.png",
+  details: "Un soda sucré et coloré, star des fêtes camerounaises et ivoiriennes."
+},
+
+{
+  id: 407,
+  name: "Fanta Citron",
+  description: "Boisson gazeuse au citron, version Afrique",
+  price: 1.30,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/fantacitron.png",
+  details: "Plus acidulé que son cousin européen, le Fanta Citron africain désaltère à fond."
+},
+{
+  id: 408,
+  name: "Youzou",
+  description: "Soda camerounais aromatisé, au goût fruité et unique",
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "soda afrique",
+  image: "/assets/images/Boissons/youzou.webp",
+  details: "Une boisson qui allie originalité et rafraîchissement, très populaire au Cameroun."
+},
+
+
+   {
+  id: 390,
+  name: "Café noir",
+  description: "Tasse de café noir corsé, servi chaud pour un coup de boost",
+  price: 1.00,
+  category: "Boissons",
+  subCategory: "Café",
+  image: "/assets/images/Boissons/cafe.png",
+  details: "Infusé à partir de grains soigneusement sélectionnés, ce café offre une saveur intense et revigorante."
+},
+
    {
     id: 93,
     name: "Guinness Irlande",
