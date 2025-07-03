@@ -331,16 +331,7 @@ const menuData: Dish[] = [
     subCategory: "soda afrique",
     details: "Un classique britannique apprécié pour son goût sucré et rafraîchissant."
   },
-  {
-    id: 31,
-    name: "Djino",
-    description: "Boisson énergétique à base de plantes africaines",
-    price: 0.90,
-    category: "Boissons",
-    image: "/assets/images/Boissons/djino.png",
-    subCategory: "sodas",
-    details: "Pour un coup de boost naturel et savoureux."
-  },
+  
   {
     id: 32,
     name: "Booster",
@@ -391,16 +382,7 @@ const menuData: Dish[] = [
     image: "/assets/images/Boissons/eau-coco.png",
     details: "Parfait pour rester hydraté avec une touche exotique."
   },
-  {
-    id: 37,
-    name: "Vitamalt",
-    description: "Boisson maltée non alcoolisée, pleine de vitamines",
-    price: 0.90,
-    category: "Boissons",
-    subCategory: "sodas",
-    image: "/assets/images/Boissons/vitamalt.png",
-    details: "L’option gourmande et vitaminée pour petits et grands."
-  },
+ 
   {
     id: 38,
     name: "Isembeck",
@@ -474,13 +456,13 @@ const menuData: Dish[] = [
 
 {
   id: 407,
-  name: "Fanta Citron",
+  name: "Fanta ",
   description: "Boisson gazeuse au citron, version Afrique",
-  price: 1.30,
+  price: 1.90,
   category: "Boissons",
   subCategory: "soda afrique",
-  image: "/assets/images/Boissons/fantacitron.png",
-  details: "Plus acidulé que son cousin européen, le Fanta Citron africain désaltère à fond."
+  image: "/assets/images/Boissons/fanta2.png",
+  details: "Plus acidulé que son cousin européen, le Fanta africain désaltère à fond."
 },
 {
   id: 408,
@@ -515,16 +497,7 @@ const menuData: Dish[] = [
     image: "/assets/images/Boissons/guinnessirlande.png",
     details: "Le goût Guinness en version douce et rafraîchissante."
   },
-  {
-    id: 40,
-    name: "Malta Vanille",
-    description: "Boisson maltée sucrée avec un soupçon de vanille",
-    price: 0.90,
-    category: "Boissons",
-    subCategory: "sodas",
-    image: "/assets/images/Boissons/maltavanille.png",
-    details: "Une douceur maltée qui séduit les palais gourmands."
-  },
+ 
   {
     id: 41,
     name: "Fanta",
@@ -535,6 +508,46 @@ const menuData: Dish[] = [
     image: "/assets/images/Boissons/fanta.png",
     details: "Un classique pétillant et fruité pour rafraîchir vos journées."
   },
+  {
+  id: 42,
+  name: "7UP",
+  description: "Boisson gazeuse citron-lime, légère et désaltérante",
+  price: 0.90,
+  category: "Boissons",
+  subCategory: "soda",
+  image: "/assets/images/Boissons/7up.png",
+  details: "Parfaite pour se rafraîchir sans caféine, goût citron-lime."
+},
+{
+  id: 43,
+  name: "Oasis Tropical",
+  description: "Boisson aux fruits exotiques sans bulles",
+  price: 0.90,
+  category: "Boissons",
+  subCategory: "soda",
+  image: "/assets/images/Boissons/oasis-tropical.png",
+  details: "Un mélange fruité tropical sans gaz, pour les amateurs de douceur."
+},
+{
+  id: 44,
+  name: "Fanta Cassis",
+  description: "Boisson gazeuse au cassis au goût intense et sucré",
+  price: 0.90,
+  category: "Boissons",
+  subCategory: "soda",
+  image: "/assets/images/Boissons/fanta-cassis.png",
+  details: "Une explosion de cassis dans une boisson gazeuse rafraîchissante."
+},
+{
+  id: 45,
+  name: "Tropico",
+  description: "Boisson fruitée sans bulles au goût tropical",
+  price: 0.90,
+  category: "Boissons",
+  subCategory: "soda",
+  image: "/assets/images/Boissons/tropico.png",
+  details: "Un goût exotique emblématique, parfait pour une pause fruitée."
+},
   {
     id: 42,
     name: "Jus de mangue",
