@@ -5,19 +5,12 @@ import { faInstagram, faTiktok, faFacebookF, faWhatsapp } from '@fortawesome/fre
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faStar, faAward, faEnvelope, faPhone, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
-import banner1 from '/images/special-weekend/ndole-frites-plantain.png';
-import banner2 from '/images/special-weekend/beignets-haricots-bouillie.png';
-import banner3 from '/images/special-weekend/eru-water-fufu.png';
-import banner4 from '/images/special-weekend/sauce-gombo-fufu-manioc.png';
-import banner5 from '/images/special-weekend/banane-malaxee-mouton.png';
-import banner6 from '/images/special-weekend/toto.png'; // Bouillon pieds de bœuf
-import banner7 from '/images/special-weekend/taro-sauce-jaune.png';
-import banner8 from '/images/special-weekend/mbongo-tchobi.png';
-
-
+import banner1 from '../assets/images/banner-bg.jpg';
+import banner2 from '../assets/images/banner2.jpeg';
+import banner3 from '../assets/images/banner3.jpg';
 import logo from '../assets/logo.png';
 
-const images = [banner1, banner2, banner3, banner4, banner5, banner6, banner7, banner8];
+const images = [banner1, banner2, banner3];
 
 const Banner = () => {
   const navigate = useNavigate();
