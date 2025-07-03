@@ -115,7 +115,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/pintade-braisee.png",
   details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur.",
-  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
+  complements: ["Riz blanc", "Riz cantonais", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 
 
