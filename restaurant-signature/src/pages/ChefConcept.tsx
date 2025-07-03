@@ -26,8 +26,6 @@ const ChefConcept: React.FC = () => {
     dish => dish.category === "Boissons" && dish.subCategory?.toLowerCase() === "sodas"
   );
 
-  
-
   const [choices, setChoices] = useState<{
     [key: number]: {
       sauce: string;
@@ -92,7 +90,7 @@ const ChefConcept: React.FC = () => {
             const finalPrice = 8.0 + (selectedDrink ? 0.9 : 0.0);
 
             return (
-              <div key={dish.id} className="dish-card-with-options">
+              <div key={dish.id} className="dish-card-with-options" style={{ position: 'relative', overflow: 'visible', zIndex: 1 }}>
                 <DishCard
                   dish={{ ...dish, price: finalPrice }}
                   showQuantityControls={true}
@@ -100,7 +98,7 @@ const ChefConcept: React.FC = () => {
                   medalColor="#DAA520"
                 />
 
-                <div className="extra-options">
+                <div className="extra-options" style={{ position: 'relative', overflow: 'visible', zIndex: 1 }}>
                   <label className="extra-label">
                     🍲 Sauce :
                     <select
@@ -135,6 +133,11 @@ const ChefConcept: React.FC = () => {
                       onChange={(option) => handleChange(dish.id, 'selectedDrinkId', option ? option.value : null)}
                       isClearable
                       placeholder="-- Selectionner --"
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: base => ({ ...base, zIndex: 9999 }),
+                        menu: base => ({ ...base, zIndex: 9999 }),
+                      }}
                     />
                   </label>
 

@@ -124,3 +124,10 @@
   font-weight: bold;
   margin-top: 6px;
 }
+
+.dish-card-with-options,
+.extra-options {
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
