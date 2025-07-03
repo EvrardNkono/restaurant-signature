@@ -5,6 +5,7 @@
   height: 100vh;
   background-size: cover;
   background-position: center top;
+  background-repeat: no-repeat !; /* pas de répétition */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: white;
   display: flex;
@@ -15,6 +16,7 @@
   padding: 0 1rem;
   box-sizing: border-box;
 }
+
 
 .overlay {
   position: absolute;
