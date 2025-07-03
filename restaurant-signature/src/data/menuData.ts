@@ -514,7 +514,7 @@ const menuData: Dish[] = [
   description: "Boisson gazeuse citron-lime, légère et désaltérante",
   price: 0.90,
   category: "Boissons",
-  subCategory: "soda",
+  subCategory: "sodas",
   image: "/assets/images/Boissons/7up.png",
   details: "Parfaite pour se rafraîchir sans caféine, goût citron-lime."
 },
@@ -524,7 +524,7 @@ const menuData: Dish[] = [
   description: "Boisson aux fruits exotiques sans bulles",
   price: 0.90,
   category: "Boissons",
-  subCategory: "soda",
+  subCategory: "sodas",
   image: "/assets/images/Boissons/oasis-tropical.png",
   details: "Un mélange fruité tropical sans gaz, pour les amateurs de douceur."
 },
@@ -534,7 +534,7 @@ const menuData: Dish[] = [
   description: "Boisson gazeuse au cassis au goût intense et sucré",
   price: 0.90,
   category: "Boissons",
-  subCategory: "soda",
+  subCategory: "sodas",
   image: "/assets/images/Boissons/fanta-cassis.png",
   details: "Une explosion de cassis dans une boisson gazeuse rafraîchissante."
 },
@@ -544,7 +544,7 @@ const menuData: Dish[] = [
   description: "Boisson fruitée sans bulles au goût tropical",
   price: 0.90,
   category: "Boissons",
-  subCategory: "soda",
+  subCategory: "sodas",
   image: "/assets/images/Boissons/tropico.png",
   details: "Un goût exotique emblématique, parfait pour une pause fruitée."
 },
