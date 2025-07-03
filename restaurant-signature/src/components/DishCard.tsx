@@ -12,7 +12,7 @@ import {
 import { useCart } from '../context/CartContext';
 
 interface DishCardProps {
-  dish: Dish & { complements?: string[] }; // compléments optionnels
+  dish: Dish & { complements?: string[] };
   quantity?: number;
   showQuantityControls?: boolean;
   isSpecialWeekend?: boolean;
@@ -20,13 +20,22 @@ interface DishCardProps {
   medalColor?: string;
 }
 
+// 🧼 Format propre du prix
+const formatPrice = (price: number) =>
+  price.toLocaleString('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 const DishCard: React.FC<DishCardProps> = ({
   dish,
   quantity = 0,
   showQuantityControls = false,
   isSpecialWeekend = false,
   isChefConcept = false,
-  medalColor = '#7B3FBF' // violet royal
+  medalColor = '#7B3FBF'
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedComplement, setSelectedComplement] = useState<string>('');
@@ -55,7 +64,9 @@ const DishCard: React.FC<DishCardProps> = ({
                 title="Médaille Concept Chef"
                 style={{ color: medalColor }}
               />
-              <span className="chef-price-text" style={{ color: medalColor }}>{dish.price}€</span>
+              <span className="chef-price-text" style={{ color: medalColor }}>
+                {formatPrice(dish.price)}
+              </span>
             </>
           ) : isSpecialWeekend ? (
             <>
@@ -65,10 +76,12 @@ const DishCard: React.FC<DishCardProps> = ({
                 title="Spécial Weekend"
                 style={{ color: '#1f9d55', fontSize: '2.5rem' }}
               />
-              <span className="special-price-text">{dish.price}€</span>
+              <span className="special-price-text">{formatPrice(dish.price)}</span>
             </>
           ) : (
-            <span style={{ color: '#7B3FBF', fontWeight: '600' }}>{dish.price}€</span>
+            <span style={{ color: '#7B3FBF', fontWeight: '600' }}>
+              {formatPrice(dish.price)}
+            </span>
           )}
         </div>
       </div>
