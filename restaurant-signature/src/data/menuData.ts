@@ -84,7 +84,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poisson.png",
   details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
-  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
+ 
 },
 {
   id: 19,
@@ -94,7 +94,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/tieb-poulet.png",
   details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille.",
-  complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
+ 
 },
 {
   id: 20,
@@ -107,16 +107,7 @@ const menuData: Dish[] = [
   complements: ["Riz blanc", "Riz sauté", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
 },
 
-{
-  id: 21,
-  name: "Poisson braisé",
-  description: "Poisson grillé à la braise, parfumé aux épices africaines",
-  price: 13.90,
-  category: "Plats",
-  image: "/src/assets/images/plats/poisson-braise.png",
-  details: "Un poisson entier grillé lentement, assaisonné maison, croustillant à l'extérieur et tendre à cœur.",
-  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
-},
+
 {
   id: 22,
   name: "Dorade braisée",
