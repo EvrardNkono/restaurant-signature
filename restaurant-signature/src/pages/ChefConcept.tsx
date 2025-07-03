@@ -5,13 +5,7 @@ import bannerImage from '../assets/Chef.png';
 import './ChefConcept.css';
 
 const accompaniments = [
-  'Riz blanc',
-  'Riz sauté',
-  'Frites de Patate douce',
-  'Atieke',
-  'Frites de plantain',
-  'Chikwangue',
-  'Bâton de manioc'
+  'Riz blanc', 'Riz cantonais'
 ];
 
 const saucesParJour: { [key: number]: string[] } = {
@@ -29,8 +23,11 @@ const saucesDuJour = saucesParJour[jourActuel] || [];
 
 const ChefConcept: React.FC = () => {
   const chefDishes = menuData.filter(dish => dish.category === "Concept du Chef");
-  const boissons = menuData.filter(dish => dish.category === "Boissons");
+  const boissons = menuData.filter(
+  dish => dish.category === "Boissons" && dish.subCategory?.toLowerCase() === "sodas"
+);
 
+  
   const boissonsParSousCategorie = boissons.reduce((acc, boisson) => {
     const key = boisson.subCategory || 'Autres';
     if (!acc[key]) acc[key] = [];
