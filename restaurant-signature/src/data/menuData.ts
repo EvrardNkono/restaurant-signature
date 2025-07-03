@@ -650,7 +650,7 @@ const menuData: Dish[] = [
 },
 {
   id: 28,
-  name: "Beignets mais ou farine Haricots Bouillie",
+  name: "Beignets maïs ou farine Haricots Bouillie",
   description: "Trio populaire camerounais : beignets dorés, haricots fondants, bouillie onctueuse.",
   price: 10.00,
   category: "Spécial Weekend",
