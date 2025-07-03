@@ -4,7 +4,7 @@ import './CheckoutPage.css';
 const CheckoutPage: React.FC = () => {
   const [mode, setMode] = useState<'reservation' | 'surPlace' | ''>('');
   const [time, setTime] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'carte' | 'caisse' | ''>('');
+  const [, setPaymentMethod] = useState<'carte' | 'caisse' | ''>('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,34 +67,28 @@ const CheckoutPage: React.FC = () => {
         )}
 
         {mode && (
-          <div className="form-group">
-            <label>Méthode de paiement :</label>
-            <div className="choice-buttons">
-              {mode === 'reservation' ? (
-                <button
-                  type="button"
-                  className={paymentMethod === 'carte' ? 'active' : ''}
-                  onClick={() => setPaymentMethod('carte')}
-                >
-                  💳 Paiement en ligne
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="active"
-                  disabled
-                >
-                  💵 Paiement à la caisse
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+  <div className="form-group">
+    <label>Méthode de paiement :</label>
+    <div className="payment-info">
+      {mode === 'reservation' ? (
+        <span className="payment-tag carte">
+          🧾 Vous paierez en ligne
+        </span>
+      ) : (
+        <span className="payment-tag caisse">
+          🧾 Rendez-vous à la caisse pour payer
+        </span>
+      )}
+    </div>
+  </div>
+)}
+
+
 
         {mode && (
           <div className="form-group">
             <button type="submit" className="submit-button">
-              Confirmer ma commande
+              💳Confirmer ma commande
             </button>
           </div>
         )}
