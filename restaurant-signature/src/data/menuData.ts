@@ -136,7 +136,7 @@ const menuData: Dish[] = [
   price: 15.90,
   category: "Plats",
   image: "/src/assets/images/plats/poisson-braise.png",
-  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food d’Afrique de l’Ouest.",
+  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
   complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
 },
 
