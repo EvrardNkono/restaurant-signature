@@ -86,6 +86,17 @@ const menuData: Dish[] = [
   details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
  
 },
+
+{
+  id: 4630, // Choisis un ID unique qui ne clash pas avec les autres
+  name: "Shandwich pain viande",
+  description: "Pain garni de viande savoureuse, façon snack gourmand",
+  price: 5.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/chandwich-viande.png",
+  details: "Un en-cas copieux : pain croustillant garni de viande marinée, idéal pour combler les petites faims."
+},
+
 {
   id: 19,
   name: "Tieb Boudienne au poulet",
@@ -509,7 +520,7 @@ const menuData: Dish[] = [
     details: "Un classique pétillant et fruité pour rafraîchir vos journées."
   },
   {
-  id: 42,
+  id: 4232,
   name: "7UP",
   description: "Boisson gazeuse citron-lime, légère et désaltérante",
   price: 0.90,
@@ -519,7 +530,7 @@ const menuData: Dish[] = [
   details: "Parfaite pour se rafraîchir sans caféine, goût citron-lime."
 },
 {
-  id: 43,
+  id: 4013,
   name: "Oasis Tropical",
   description: "Boisson aux fruits exotiques sans bulles",
   price: 0.90,
@@ -529,7 +540,7 @@ const menuData: Dish[] = [
   details: "Un mélange fruité tropical sans gaz, pour les amateurs de douceur."
 },
 {
-  id: 44,
+  id: 4094,
   name: "Fanta Cassis",
   description: "Boisson gazeuse au cassis au goût intense et sucré",
   price: 0.90,
@@ -539,7 +550,7 @@ const menuData: Dish[] = [
   details: "Une explosion de cassis dans une boisson gazeuse rafraîchissante."
 },
 {
-  id: 45,
+  id: 4655,
   name: "Tropico",
   description: "Boisson fruitée sans bulles au goût tropical",
   price: 0.90,

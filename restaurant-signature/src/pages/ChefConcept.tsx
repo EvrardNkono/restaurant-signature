@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
+import Select from 'react-select';
 import menuData from '../data/menuData';
 import DishCard from '../components/DishCard';
 import bannerImage from '../assets/Chef.png';
 import './ChefConcept.css';
 
-const accompaniments = [
-  'Riz blanc', 'Riz cantonais'
-];
+const accompaniments = ['Riz blanc', 'Riz cantonais'];
 
 const saucesParJour: { [key: number]: string[] } = {
-  1: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  2: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  3: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  4: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  5: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  6: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
-  0: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème']
+  0: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  1: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  2: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  3: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  4: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  5: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
+  6: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry', 'Sauce crème'],
 };
 
 const jourActuel = new Date().getDay();
@@ -24,16 +23,10 @@ const saucesDuJour = saucesParJour[jourActuel] || [];
 const ChefConcept: React.FC = () => {
   const chefDishes = menuData.filter(dish => dish.category === "Concept du Chef");
   const boissons = menuData.filter(
-  dish => dish.category === "Boissons" && dish.subCategory?.toLowerCase() === "sodas"
-);
+    dish => dish.category === "Boissons" && dish.subCategory?.toLowerCase() === "sodas"
+  );
 
   
-  const boissonsParSousCategorie = boissons.reduce((acc, boisson) => {
-    const key = boisson.subCategory || 'Autres';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(boisson);
-    return acc;
-  }, {} as Record<string, typeof boissons>);
 
   const [choices, setChoices] = useState<{
     [key: number]: {
@@ -52,8 +45,24 @@ const ChefConcept: React.FC = () => {
       ...prev,
       [dishId]: {
         ...prev[dishId],
-        [field]: value
-      }
+        [field]: value,
+      },
+    }));
+  };
+
+  const generateDrinkOptions = () => {
+    return boissons.map(boisson => ({
+      value: boisson.id,
+      label: (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img
+            src={boisson.image}
+            alt={boisson.name}
+            style={{ width: 24, height: 24, borderRadius: '50%' }}
+          />
+          <span>{boisson.name} (+0,90 €)</span>
+        </div>
+      )
     }));
   };
 
@@ -76,7 +85,7 @@ const ChefConcept: React.FC = () => {
             const selected = choices[dish.id] || {
               sauce: '',
               accompaniment: '',
-              selectedDrinkId: null
+              selectedDrinkId: null,
             };
 
             const selectedDrink = boissons.find(b => b.id === selected.selectedDrinkId);
@@ -120,21 +129,13 @@ const ChefConcept: React.FC = () => {
 
                   <label className="extra-label">
                     🥤 Boisson :
-                    <select
-                      value={selected.selectedDrinkId ?? ''}
-                      onChange={(e) => handleChange(dish.id, 'selectedDrinkId', e.target.value ? Number(e.target.value) : null)}
-                    >
-                      <option value="">-- Aucune boisson --</option>
-                      {Object.entries(boissonsParSousCategorie).map(([subCat, boissons]) => (
-                        <optgroup key={subCat} label={subCat.charAt(0).toUpperCase() + subCat.slice(1)}>
-                          {boissons.map((boisson) => (
-                            <option key={boisson.id} value={boisson.id}>
-                              {boisson.name} (+0,90 €)
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
+                    <Select
+                      options={generateDrinkOptions()}
+                      value={generateDrinkOptions().find(opt => opt.value === selected.selectedDrinkId) || null}
+                      onChange={(option) => handleChange(dish.id, 'selectedDrinkId', option ? option.value : null)}
+                      isClearable
+                      placeholder="-- Selectionner --"
+                    />
                   </label>
 
                   <p className="price-display">Prix total : <strong>{finalPrice.toFixed(2)} €</strong></p>
