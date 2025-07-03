@@ -7,8 +7,7 @@ interface Props {
 }
 
 const accompaniments = [
-  'Riz blanc', 'Riz sauté', 'Frites de Patate douce',
-  'Atieke', 'Frites de plantain', 'Chikwangue', 'Bâton de manioc'
+  'Riz blanc', 'Riz cantonais'
 ];
 
 const ChefConceptDishCard: React.FC<Props> = ({ dish }) => {
