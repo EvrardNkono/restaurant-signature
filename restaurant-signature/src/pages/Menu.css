@@ -44,11 +44,26 @@
     flex: none;
     width: auto;
   }
+
+  .title{
+  margin-left: 0% !important;
+}
 }
 
+@media (max-width: 600px) {
+
 .title{
-  margin-left: 45%;
+  position: absolute;
+  margin-left: 40%;
+  margin-top: -10px;
 }
+
+}
+
+
+
+
+
 
 .centered-message {
   display: flex;
