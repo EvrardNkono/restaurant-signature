@@ -15,13 +15,13 @@ const accompaniments = [
 ];
 
 const saucesParJour: { [key: number]: string[] } = {
-  1: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  2: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  3: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  4: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  5: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  6: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme'],
-  0: ['Sauce mafe', 'Sauce tomate', 'Sauce au cury','Sauce creme']
+  1: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  2: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  3: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  4: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  5: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  6: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème'],
+  0: ['Sauce mafe', 'Sauce tomate', 'Sauce au curry','Sauce crème']
 };
 
 const jourActuel = new Date().getDay();
