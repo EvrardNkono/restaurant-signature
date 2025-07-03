@@ -52,7 +52,7 @@ const Menu = () => {
       case 'Boissons':
         return <Boissons />;
       default:
-        return <p className="centered-message">Choisissez une catégorie pour voir les plats.</p>;
+        return <p className="centered-message">Explorez nos délices : choisissez une catégorie pour éveiller vos papilles.</p>;
 
     }
   };
