@@ -115,7 +115,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/pintade-braisee.png",
   details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur.",
-  complements: ["Riz blanc", "Riz cantonais", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chikwang", "Bâton de manioc"]
+  complements: ["Riz blanc", "Riz cantonais", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chinkwangue", "Bâton de manioc"]
 },
 
 
@@ -127,7 +127,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/dorade-braisee.png",
   details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
-  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",]
 },
 {
   id: 23,
@@ -137,7 +137,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/poisson-braise.png",
   details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
-  complements: ["Frites de plantain", "Atieke", "Chikwang", "Baton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",]
 },
 
 {
@@ -148,7 +148,7 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/soya.png",
   details: "De savoureuses brochettes de viande tendres et juteuses, grillées à la braise avec une marinade relevée à souhait.",
-  complements: ["Frites de plantain", "Attiéké", "Chikwang", "Bâton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc",]
 },
 
 {
@@ -285,7 +285,7 @@ const menuData: Dish[] = [
     id: 26,
     name: "Ice Tea Pêche",
     description: "Thé glacé à la pêche, doux et désaltérant",
-    price: 3.90,
+    price: 1.00,
     category: "Boissons",
     subCategory: "sodas",
     image: "assets/images/Boissons/icetea-peche.png",
@@ -448,7 +448,7 @@ const menuData: Dish[] = [
   id: 403,
   name: "Top Orange",
   description: "Soda pétillant au goût d’orange douce",
-  price: 1.20,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/toporange.png",
@@ -458,7 +458,7 @@ const menuData: Dish[] = [
   id: 404,
   name: "D’jino Cocktail",
   description: "Soda africain fruité au goût unique de cocktail tropical",
-  price: 1.50,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/djinococktail.png",
@@ -479,7 +479,7 @@ const menuData: Dish[] = [
   id: 408,
   name: "Youzou",
   description: "Soda camerounais aromatisé, au goût fruité et unique",
-  price: 1.50,
+  price: 2.90,
   category: "Boissons",
   subCategory: "soda afrique",
   image: "/assets/images/Boissons/youzou.png",
