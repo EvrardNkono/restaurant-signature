@@ -66,12 +66,13 @@ const ChefConcept: React.FC = () => {
   };
 
   const generateSupplementOptions = (dishName: string) => {
-    const options = [...saucesDuJour, dishName, ...accompaniments];
-    return options.map(item => ({
-      value: item,
-      label: `${item} (+3,50 €)`
-    }));
-  };
+  const options = [dishName, ...accompaniments]; // sauces retirées ici
+  return options.map(item => ({
+    value: item,
+    label: `${item} (+3,50 €)`
+  }));
+};
+
 
   return (
     <div className="chef-concept-container">
