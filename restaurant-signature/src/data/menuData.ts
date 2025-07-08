@@ -75,39 +75,8 @@ const menuData: Dish[] = [
     image: "/src/assets/images/entree/BeignetsacraSalade.png",
     details: "Beignets d’acra dorés et épicés servis avec une salade croquante et fraîche pour une entrée pleine de peps et de saveurs exotiques."
   },
-  
-{
-  id: 18,
-  name: "Tieb Boudienne au poisson",
-  description: "Riz sénégalais au poisson et légumes",
-  price: 10.00,
-  category: "Plats",
-  image: "/src/assets/images/plats/tieb-poisson.png",
-  details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
- 
-},
 
-{
-  id: 4630, // Choisis un ID unique qui ne clash pas avec les autres
-  name: "Shandwich pain viande",
-  description: "Pain garni de viande savoureuse, façon snack gourmand",
-  price: 5.00,
-  category: "Plats",
-  image: "/src/assets/images/plats/chandwich-viande.png",
-  details: "Un en-cas copieux : pain croustillant garni de viande marinée, idéal pour combler les petites faims."
-},
-
-{
-  id: 19,
-  name: "Tieb Boudienne au poulet",
-  description: "Riz sénégalais au poulet et légumes",
-  price: 10.00,
-  category: "Plats",
-  image: "/src/assets/images/plats/tieb-poulet.png",
-  details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille.",
- 
-},
-{
+  {
   id: 20,
   name: "Pintade braisée",
   description: "Pintade grillée lentement, saveurs intenses",
@@ -135,36 +104,16 @@ const menuData: Dish[] = [
   ]
 },
 
-
 {
-  id: 22,
-  name: "Dorade braisée",
-  description: "Dorade entière, grillée façon camerounaise",
-  price: 15.90,
+  id: 205,
+  name: "Poulet braisé",
+  description: "Poulet croustillant à l’extérieur, juteux à l’intérieur",
+  price: 15.00,
   category: "Plats",
-  image: "/src/assets/images/plats/dorade-braisee.png",
-  details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
-   sauces: [
-    "Sauce moutarde",
-    "Sauce chien",
-    "Sauce créoline",
-    "Sauce verte",
-    "Poudre de kankan",
-    "Sauce piquante",
-    "Sauce mayonnaise"
-  ]
-},
-{
-  id: 23,
-  name: "Maquereau Oya-Oya",
-  description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
-  price: 15.90,
-  category: "Plats",
-  image: "/src/assets/images/plats/poisson-braise.png",
-  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
-   sauces: [
+  image: "/src/assets/images/plats/poulet-braise.png",
+  details: "Un classique revisité par le Chef : poulet braisé lentement pour révéler toutes ses saveurs.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc"],
+  sauces: [
     "Sauce moutarde",
     "Sauce chien",
     "Sauce créoline",
@@ -196,15 +145,15 @@ const menuData: Dish[] = [
 },
 
 {
-  id: 205,
-  name: "Poulet braisé",
-  description: "Poulet croustillant à l’extérieur, juteux à l’intérieur",
-  price: 15.00,
+  id: 22,
+  name: "Dorade braisée",
+  description: "Dorade entière, grillée façon camerounaise",
+  price: 15.90,
   category: "Plats",
-  image: "/src/assets/images/plats/poulet-braise.png",
-  details: "Un classique revisité par le Chef : poulet braisé lentement pour révéler toutes ses saveurs.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc"],
-  sauces: [
+  image: "/src/assets/images/plats/dorade-braisee.png",
+  details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
     "Sauce moutarde",
     "Sauce chien",
     "Sauce créoline",
@@ -215,6 +164,35 @@ const menuData: Dish[] = [
   ]
 },
 
+
+{
+  id: 23,
+  name: "Maquereau Oya-Oya",
+  description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
+  price: 15.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/poisson-braise.png",
+  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
+},
+{
+  id: 4630, // Choisis un ID unique qui ne clash pas avec les autres
+  name: "Shandwich pain viande",
+  description: "Pain garni de viande savoureuse, façon snack gourmand",
+  price: 5.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/chandwich-viande.png",
+  details: "Un en-cas copieux : pain croustillant garni de viande marinée, idéal pour combler les petites faims."
+},  
 {
   id: 22,
   name: "Bokit Poulet",
@@ -254,6 +232,34 @@ const menuData: Dish[] = [
     "Sauce mayonnaise"
   ]
 },
+
+{
+  id: 18,
+  name: "Tieb Boudienne au poisson",
+  description: "Riz sénégalais au poisson et légumes",
+  price: 10.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/tieb-poisson.png",
+  details: "Le classique sénégalais : du riz parfumé accompagné de poisson et de légumes bien mijotés.",
+ 
+},
+
+
+
+{
+  id: 19,
+  name: "Tieb Boudienne au poulet",
+  description: "Riz sénégalais au poulet et légumes",
+  price: 10.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/tieb-poulet.png",
+  details: "Une version savoureuse du Tieb au poulet, tendre et épicé, pour les amateurs de volaille.",
+ 
+},
+
+
+
+
   {
   id: 20,
   name: "Degue",
