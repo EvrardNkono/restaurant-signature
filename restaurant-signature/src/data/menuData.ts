@@ -143,6 +143,25 @@ const menuData: Dish[] = [
     "Sauce mayonnaise"
   ]
 },
+{
+  id: 205,
+  name: "Ntaba braisé",
+  description: "Chèvre grillée au feu de bois, aux saveurs africaines authentiques",
+  price: 15.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/ntaba.webp",
+  details: "Viande de chèvre tendre et savoureuse, marinée aux épices et braisée à la perfection pour un goût inoubliable.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc"],
+  sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
+},
 
 {
   id: 22,
@@ -184,6 +203,9 @@ const menuData: Dish[] = [
     "Sauce mayonnaise"
   ]
 },
+
+
+
 {
   id: 4630, // Choisis un ID unique qui ne clash pas avec les autres
   name: "Shandwich pain viande",
