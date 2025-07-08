@@ -147,7 +147,7 @@ const menuData: Dish[] = [
   id: 205,
   name: "Ntaba braisé",
   description: "Chèvre grillée au feu de bois, aux saveurs africaines authentiques",
-  price: 15.00,
+  price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/ntaba.webp",
   details: "Viande de chèvre tendre et savoureuse, marinée aux épices et braisée à la perfection pour un goût inoubliable.",
