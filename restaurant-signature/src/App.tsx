@@ -24,7 +24,8 @@ function App() {
 
       {/* ✅ Affiche le popup de jeu uniquement sur la page concept-chef */}
       {location.pathname === '/concept-chef' && (
-        <GamePopup message="🍽️ L’Énigme du Chef commence ! Prépare-toi..." />
+        <GamePopup message="🧩 Un nouvel indice est apparu..." />
+
       )}
 
       <Routes>

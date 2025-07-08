@@ -719,7 +719,7 @@ const menuData: Dish[] = [
 },
 {
   id: 34,
-  name: "Mbongo Tchobi-Plantain Mur ou cuit a la vapeur ",
+  name: " Mbongo tchobi plantain mur ou manioc cuit à la vapeur ",
   description: "Poisson mijoté dans une sauce noire aux épices brûlées.",
   price: 15.00,
   category: "Spécial Weekend",
