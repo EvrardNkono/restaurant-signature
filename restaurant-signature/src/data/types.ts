@@ -14,4 +14,5 @@ export type Dish = {
   image: string;
   details: string;
   complements?: string[]; // 👈 accompagnements optionnels
+  sauces?: string[];
 };

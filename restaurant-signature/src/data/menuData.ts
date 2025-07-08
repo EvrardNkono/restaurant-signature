@@ -115,7 +115,24 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/pintade-braisee.png",
   details: "Volaille braisée à la perfection, croustillante à l’extérieur, juteuse à l’intérieur.",
-  complements: ["Riz blanc", "Riz cantonais", "Frites de patate douce", "Attiéké", "Frites de plantain", "Chinkwangue", "Bâton de manioc"]
+  complements: [
+    "Riz blanc",
+    "Riz cantonais",
+    "Frites de patate douce",
+    "Attiéké",
+    "Frites de plantain",
+    "Chinkwangue",
+    "Bâton de manioc"
+  ],
+  sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
 },
 
 
@@ -127,7 +144,16 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/dorade-braisee.png",
   details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
 },
 {
   id: 23,
@@ -137,7 +163,16 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/poisson-braise.png",
   details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
 },
 
 {
@@ -148,7 +183,16 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/soya.png",
   details: "De savoureuses brochettes de viande tendres et juteuses, grillées à la braise avec une marinade relevée à souhait.",
-  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc",]
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
 },
 
 {

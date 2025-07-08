@@ -12,7 +12,7 @@ import {
 import { useCart } from '../context/CartContext';
 
 interface DishCardProps {
-  dish: Dish & { complements?: string[] };
+  dish: Dish & { complements?: string[]; sauces?: string[] };
   quantity?: number;
   showQuantityControls?: boolean;
   isSpecialWeekend?: boolean;
@@ -125,6 +125,47 @@ const DishCard: React.FC<DishCardProps> = ({
             </select>
           </div>
         )}
+        {dish.category === "Plats" && dish.sauces && dish.sauces.length > 0 && (
+  <div
+    className="dish-sauces"
+    style={{
+      marginTop: '1rem',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center' // ✅ Centre le label et le menu déroulant horizontalement
+    }}
+  >
+    <label
+      htmlFor={`sauces-select-${dish.id}`}
+      style={{
+        fontWeight: '600',
+        color: '#5a2d91',
+        marginBottom: '4px'
+      }}
+    >
+      Choisissez une sauce :
+    </label>
+    <select
+      id={`sauces-select-${dish.id}`}
+      style={{
+        padding: '0.4rem 0.6rem',
+        borderRadius: '5px',
+        border: '1px solid #7B3FBF',
+        color: '#4b2e83',
+        fontWeight: '500',
+        minWidth: '180px',
+        maxWidth: '190px',
+        cursor: 'pointer',
+        backgroundColor: '#f5f0fa'
+      }}
+    >
+      <option value="" disabled>-- Sélectionnez --</option>
+      {dish.sauces.map((sauce, idx) => (
+        <option key={idx} value={sauce}>{sauce}</option>
+      ))}
+    </select>
+  </div>
+)}
 
         {showQuantityControls && quantity > 0 && (
           <p className="dish-quantity">Quantité dans le panier : {quantity}</p>
