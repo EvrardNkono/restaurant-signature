@@ -100,7 +100,7 @@ const DishCard: React.FC<DishCardProps> = ({
         {dish.category === "Plats" && dish.complements && dish.complements.length > 0 && (
           <div className="dish-complements" style={{ marginTop: '1rem' }}>
             <label htmlFor={`complements-select-${dish.id}`} style={{ fontWeight: '600', color: '#5a2d91' }}>
-              Choisissez un accompagnement :
+              Choisissez un accompagnement:
             </label>
             <select
               id={`complements-select-${dish.id}`}

@@ -223,7 +223,16 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/bokit-poulet.png",
   details: "Pain frit antillais généreusement garni de poulet, avec des compléments au choix.",
-  complements: ["Frittes de plantain","Frittes de patates douces"]
+  complements: ["Frittes de plantain","Frittes de patates douces"],
+    sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
   
 },
 {
@@ -234,7 +243,16 @@ const menuData: Dish[] = [
   category: "Plats",
   image: "/src/assets/images/plats/bokit-morue.png",
   details: "Une version marine du Bokit, à la morue épicée et moelleuse, croustillant et plein de caractère.",
-  complements: ["Frittes de plantain","Frittes de patates douces"]
+  complements: ["Frittes de plantain","Frittes de patates douces"],
+    sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
 },
   {
   id: 20,
