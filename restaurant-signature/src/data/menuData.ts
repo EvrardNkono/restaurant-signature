@@ -745,6 +745,15 @@ const menuData: Dish[] = [
   image: "/images/special-weekend/koki-banane.png",
   details: "Un plat emblématique aux saveurs douces et onctueuses, 100% camerounais."
 },
+{
+  id: 307,
+  name: "Mets de pistache",
+  description: "Pistache de courge cuisinée avec viande ou poisson, servie avec banane ou manioc vapeur.",
+  price: 15.90,
+  category: "Spécial Weekend",
+  image: "/images/special-weekend/mets-pistache.png",
+  details: "Un plat camerounais authentique à base de graines de courge pilées, mijoté dans des feuilles et servi bien chaud. Doux, parfumé, et 100% fait maison."
+},
 
 // Ajout à ton tableau menuData
 {
