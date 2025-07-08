@@ -40,7 +40,7 @@ const DishCard: React.FC<DishCardProps> = ({
   const [showDetails, setShowDetails] = useState(false);
   const [selectedComplement, setSelectedComplement] = useState<string>('');
   const { addToCart, removeFromCart } = useCart();
-
+  const [selectedSauce, setSelectedSauce] = useState<string>('');
   const cardClassNames = [
     'dish-card',
     isSpecialWeekend && 'dish-card-special',
@@ -48,8 +48,24 @@ const DishCard: React.FC<DishCardProps> = ({
   ].filter(Boolean).join(' ');
 
   const handleAddToCart = () => {
-    addToCart({ ...dish, selectedComplement });
-  };
+  const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
+  const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
+
+  const missingComplement = needsComplement && !selectedComplement;
+  const missingSauce = needsSauce && !selectedSauce;
+
+  if (missingComplement || missingSauce) {
+    const messageParts = [];
+    if (missingComplement) messageParts.push("un accompagnement");
+    if (missingSauce) messageParts.push("une sauce");
+
+    alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
+    return;
+  }
+
+  addToCart({ ...dish, selectedComplement, selectedSauce });
+};
+
 
   return (
     <div className={cardClassNames}>
@@ -146,24 +162,27 @@ const DishCard: React.FC<DishCardProps> = ({
       Choisissez une sauce :
     </label>
     <select
-      id={`sauces-select-${dish.id}`}
-      style={{
-        padding: '0.4rem 0.6rem',
-        borderRadius: '5px',
-        border: '1px solid #7B3FBF',
-        color: '#4b2e83',
-        fontWeight: '500',
-        minWidth: '180px',
-        maxWidth: '190px',
-        cursor: 'pointer',
-        backgroundColor: '#f5f0fa'
-      }}
-    >
-      <option value="" disabled>-- Sélectionnez --</option>
-      {dish.sauces.map((sauce, idx) => (
-        <option key={idx} value={sauce}>{sauce}</option>
-      ))}
-    </select>
+  id={`sauces-select-${dish.id}`}
+  value={selectedSauce}
+  onChange={e => setSelectedSauce(e.target.value)} // ✅ c’est ça qui manquait !
+  style={{
+    padding: '0.4rem 0.6rem',
+    borderRadius: '5px',
+    border: '1px solid #7B3FBF',
+    color: '#4b2e83',
+    fontWeight: '500',
+    minWidth: '180px',
+    maxWidth: '190px',
+    cursor: 'pointer',
+    backgroundColor: '#f5f0fa'
+  }}
+>
+  <option value="" disabled>-- Sélectionnez --</option>
+  {dish.sauces.map((sauce, idx) => (
+    <option key={idx} value={sauce}>{sauce}</option>
+  ))}
+</select>
+
   </div>
 )}
 
@@ -173,26 +192,26 @@ const DishCard: React.FC<DishCardProps> = ({
 
         <div className="dish-buttons-row">
           <button 
-            className="dish-button" 
-            onClick={handleAddToCart} 
-            disabled={dish.category === "Plats" && dish.complements && dish.complements.length > 0 && !selectedComplement}
-            style={{
-              backgroundColor: '#7B3FBF',
-              color: 'white',
-              fontWeight: '600',
-              cursor: (dish.category === "Plats" && dish.complements && dish.complements.length > 0 && !selectedComplement) ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.3s ease'
-            }}
-            onMouseEnter={e => {
-              if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#5a2d91';
-            }}
-            onMouseLeave={e => {
-              if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#7B3FBF';
-            }}
-          >
-            <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
-            Ajouter
-          </button>
+  className="dish-button" 
+  onClick={handleAddToCart}
+  style={{
+    backgroundColor: '#7B3FBF',
+    color: 'white',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease'
+  }}
+  onMouseEnter={e => {
+    e.currentTarget.style.backgroundColor = '#5a2d91';
+  }}
+  onMouseLeave={e => {
+    e.currentTarget.style.backgroundColor = '#7B3FBF';
+  }}
+>
+  <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
+  Ajouter
+</button>
+
 
           <button className="dish-button remove-button" onClick={() => removeFromCart(dish)}>
             <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />

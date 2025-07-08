@@ -6,12 +6,13 @@ interface CartItem {
   dish: Dish;
   quantity: number;
   selectedComplement?: string;
+  selectedSauce?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (dish: Dish & { selectedComplement?: string }) => void;
-  removeFromCart: (dish: Dish & { selectedComplement?: string }) => void;
+  addToCart: (dish: Dish & { selectedComplement?: string; selectedSauce?: string }) => void;
+  removeFromCart: (dish: Dish & { selectedComplement?: string; selectedSauce?: string }) => void;
   clearCart: () => void;
   totalItems: number;
 }
@@ -21,31 +22,44 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
 
-  const addToCart = (dish: Dish & { selectedComplement?: string }) => {
+  const addToCart = (dish: Dish & { selectedComplement?: string; selectedSauce?: string }) => {
     setItems(prevItems => {
       const itemExists = prevItems.find(i =>
         i.dish.id === dish.id &&
-        i.selectedComplement === dish.selectedComplement
+        i.selectedComplement === dish.selectedComplement &&
+        i.selectedSauce === dish.selectedSauce
       );
 
       if (itemExists) {
-        // Incrémente la quantité si plat + accompagnement déjà présent
         return prevItems.map(i =>
-          i.dish.id === dish.id && i.selectedComplement === dish.selectedComplement
+          i.dish.id === dish.id &&
+          i.selectedComplement === dish.selectedComplement &&
+          i.selectedSauce === dish.selectedSauce
             ? { ...i, quantity: i.quantity + 1 }
             : i
         );
       }
 
-      // Ajoute une nouvelle ligne (plat ou accompagnement différent)
-      return [...prevItems, { dish, quantity: 1, selectedComplement: dish.selectedComplement }];
+      return [
+        ...prevItems,
+        {
+          dish,
+          quantity: 1,
+          selectedComplement: dish.selectedComplement,
+          selectedSauce: dish.selectedSauce
+        }
+      ];
     });
   };
 
-  const removeFromCart = (dish: Dish & { selectedComplement?: string }) => {
+  const removeFromCart = (dish: Dish & { selectedComplement?: string; selectedSauce?: string }) => {
     setItems(prevItems =>
       prevItems.filter(i =>
-        !(i.dish.id === dish.id && i.selectedComplement === dish.selectedComplement)
+        !(
+          i.dish.id === dish.id &&
+          i.selectedComplement === dish.selectedComplement &&
+          i.selectedSauce === dish.selectedSauce
+        )
       )
     );
   };
