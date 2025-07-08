@@ -40,7 +40,7 @@ const menuData: Dish[] = [
   },*/
   {
     id: 5,
-    name: "Samoussa et Salade",
+    name: "Samoussa, Salade et sauce tomate",
     description: "Samoussa croustillant avec salade fraîche et croquante.",
     price: 8.90,
     category: "Entrées",
