@@ -108,7 +108,7 @@ const menuData: Dish[] = [
   id: 205,
   name: "Poulet braisé",
   description: "Poulet croustillant à l’extérieur, juteux à l’intérieur",
-  price: 15.00,
+  price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/poulet-braise.png",
   details: "Un classique revisité par le Chef : poulet braisé lentement pour révéler toutes ses saveurs.",
