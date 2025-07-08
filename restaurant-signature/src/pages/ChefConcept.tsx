@@ -31,13 +31,14 @@ const ChefConcept: React.FC = () => {
       sauce: string;
       accompaniment: string;
       selectedDrinkId: number | null;
+      selectedSupplements: string[];
     };
   }>({});
 
   const handleChange = (
     dishId: number,
-    field: 'sauce' | 'accompaniment' | 'selectedDrinkId',
-    value: string | number | null
+    field: 'sauce' | 'accompaniment' | 'selectedDrinkId' | 'selectedSupplements',
+    value: string | number | null | string[]
   ) => {
     setChoices(prev => ({
       ...prev,
@@ -64,6 +65,14 @@ const ChefConcept: React.FC = () => {
     }));
   };
 
+  const generateSupplementOptions = (dishName: string) => {
+    const options = [...saucesDuJour, dishName, ...accompaniments];
+    return options.map(item => ({
+      value: item,
+      label: `${item} (+3,50 €)`
+    }));
+  };
+
   return (
     <div className="chef-concept-container">
       <div className="chef-banner">
@@ -84,10 +93,12 @@ const ChefConcept: React.FC = () => {
               sauce: '',
               accompaniment: '',
               selectedDrinkId: null,
+              selectedSupplements: [],
             };
 
             const selectedDrink = boissons.find(b => b.id === selected.selectedDrinkId);
-            const finalPrice = 8.0 + (selectedDrink ? 0.9 : 0.0);
+            const supplementCount = selected.selectedSupplements?.length || 0;
+            const finalPrice = 8.0 + (selectedDrink ? 0.9 : 0.0) + supplementCount * 3.5;
 
             return (
               <div key={dish.id} className="dish-card-with-options" style={{ position: 'relative', overflow: 'visible', zIndex: 1 }}>
@@ -133,6 +144,27 @@ const ChefConcept: React.FC = () => {
                       onChange={(option) => handleChange(dish.id, 'selectedDrinkId', option ? option.value : null)}
                       isClearable
                       placeholder="-- Selectionner --"
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: base => ({ ...base, zIndex: 9999 }),
+                        menu: base => ({ ...base, zIndex: 9999 }),
+                      }}
+                    />
+                  </label>
+
+                  <label className="extra-label">
+                    🧂 Suppléments :
+                    <Select
+                      options={generateSupplementOptions(dish.name)}
+                      value={(selected.selectedSupplements || []).map(sup => ({
+                        value: sup,
+                        label: `${sup} (+3,50 €)`
+                      }))}
+                      onChange={(options) =>
+                        handleChange(dish.id, 'selectedSupplements', options.map(opt => opt.value))
+                      }
+                      isMulti
+                      placeholder="-- Ajouter des suppléments --"
                       menuPortalTarget={document.body}
                       styles={{
                         menuPortal: base => ({ ...base, zIndex: 9999 }),
