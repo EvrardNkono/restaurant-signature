@@ -144,6 +144,26 @@ const menuData: Dish[] = [
   ]
 },
 {
+  id: 250,
+  name: "Porc braisé",
+  description: "Porc braisé croustillant à l’extérieur et fondant à l’intérieur",
+  price: 10.00,
+  category: "Plats",
+  image: "/src/assets/images/plats/porc_braise.png",
+  details: "Un classique savoureux : morceaux de porc lentement braisés à la braise, subtilement marinés aux épices locales pour un goût inoubliable.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Bâton de manioc"],
+  sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
+},
+
+{
   id: 205,
   name: "Ntaba braisé",
   description: "Chèvre grillée au feu de bois, aux saveurs africaines authentiques",
