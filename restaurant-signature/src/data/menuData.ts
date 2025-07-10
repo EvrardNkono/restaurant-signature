@@ -147,7 +147,7 @@ const menuData: Dish[] = [
   id: 250,
   name: "Porc braisé",
   description: "Porc braisé croustillant à l’extérieur et fondant à l’intérieur",
-  price: 10.00,
+  price: 10.90,
   category: "Plats",
   image: "/src/assets/images/plats/porc_braise.png",
   details: "Un classique savoureux : morceaux de porc lentement braisés à la braise, subtilement marinés aux épices locales pour un goût inoubliable.",
