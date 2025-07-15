@@ -3,16 +3,18 @@ export type Dish = {
   name: string;
   description: string;
   price: number;
+  takeawayPrice?: number; // prix à emporter facultatif
+  isTakeaway?: boolean;   // flag prise en compte optionnelle
   category:
     | "Boissons"
     | "Entrées"
     | "Plats"
     | "Desserts"
     | "Spécial Weekend"
-    | "Concept du Chef"; // ✅ nouvelle catégorie ajoutée
-  subCategory?: string; // 👈 sous-catégorie facultative, ex : "jus naturels", "bières", etc.
+    | "Concept du Chef";
+  subCategory?: string;
   image: string;
   details: string;
-  complements?: string[]; // 👈 accompagnements optionnels
+  complements?: string[];
   sauces?: string[];
 };

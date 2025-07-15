@@ -20,7 +20,6 @@ interface DishCardProps {
   medalColor?: string;
 }
 
-// 🧼 Format propre du prix
 const formatPrice = (price: number) =>
   price.toLocaleString('fr-FR', {
     style: 'currency',
@@ -39,38 +38,51 @@ const DishCard: React.FC<DishCardProps> = ({
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedComplement, setSelectedComplement] = useState<string>('');
-  const { addToCart, removeFromCart } = useCart();
   const [selectedSauce, setSelectedSauce] = useState<string>('');
+  const [isTakeaway, setIsTakeaway] = useState(false);
+
+  const { addToCart, removeFromCart } = useCart();
+
   const cardClassNames = [
     'dish-card',
     isSpecialWeekend && 'dish-card-special',
     isChefConcept && 'dish-card-chef-concept'
   ].filter(Boolean).join(' ');
 
+  // Prix dynamique selon le choix "sur place" ou "à emporter"
+  const displayedPrice = isTakeaway && dish.takeawayPrice !== undefined
+    ? dish.takeawayPrice
+    : dish.price;
+
+  // Couleur bulle prix : violet ou bleu ciel selon takeaway ou pas
+  const bubbleColor = isTakeaway ? '#00BFFF' : '#7B3FBF';
+
   const handleAddToCart = () => {
-  const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
-  const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
+    const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
+    const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
 
-  const missingComplement = needsComplement && !selectedComplement;
-  const missingSauce = needsSauce && !selectedSauce;
+    const missingComplement = needsComplement && !selectedComplement;
+    const missingSauce = needsSauce && !selectedSauce;
 
-  if (missingComplement || missingSauce) {
-    const messageParts = [];
-    if (missingComplement) messageParts.push("un accompagnement");
-    if (missingSauce) messageParts.push("une sauce");
+    if (missingComplement || missingSauce) {
+      const messageParts = [];
+      if (missingComplement) messageParts.push("un accompagnement");
+      if (missingSauce) messageParts.push("une sauce");
 
-    alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
-    return;
-  }
+      alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
+      return;
+    }
 
-  addToCart({ ...dish, selectedComplement, selectedSauce });
-};
-
+    addToCart({ ...dish, selectedComplement, selectedSauce, isTakeaway, price: displayedPrice });
+  };
 
   return (
     <div className={cardClassNames}>
       <div className="dish-top-bar">
-        <div className="dish-price-bubble">
+        <div 
+          className="dish-price-bubble"
+          style={{ backgroundColor: bubbleColor, color: 'white', fontWeight: '700' }}
+        >
           {isChefConcept ? (
             <>
               <span className="chef-medal-circle"></span>
@@ -81,7 +93,7 @@ const DishCard: React.FC<DishCardProps> = ({
                 style={{ color: medalColor }}
               />
               <span className="chef-price-text" style={{ color: medalColor }}>
-                {formatPrice(dish.price)}
+                {formatPrice(displayedPrice)}
               </span>
             </>
           ) : isSpecialWeekend ? (
@@ -92,11 +104,11 @@ const DishCard: React.FC<DishCardProps> = ({
                 title="Spécial Weekend"
                 style={{ color: '#1f9d55', fontSize: '2.5rem' }}
               />
-              <span className="special-price-text">{formatPrice(dish.price)}</span>
+              <span className="special-price-text">{formatPrice(displayedPrice)}</span>
             </>
           ) : (
-            <span style={{ color: '#7B3FBF', fontWeight: '600' }}>
-              {formatPrice(dish.price)}
+            <span>
+              {formatPrice(displayedPrice)}
             </span>
           )}
         </div>
@@ -113,6 +125,33 @@ const DishCard: React.FC<DishCardProps> = ({
         <h3 className="dish-name" style={{ color: '#7B3FBF' }}>{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
 
+        {/* Toggle Sur place / À emporter si prix à emporter dispo */}
+        {dish.takeawayPrice !== undefined && (
+          <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
+            <label style={{ fontWeight: '600', color: '#5a2d91', marginRight: '1rem' }}>
+              <input
+                type="radio"
+                name={`takeaway-${dish.id}`}
+                checked={!isTakeaway}
+                onChange={() => setIsTakeaway(false)}
+                style={{ marginRight: '0.3rem' }}
+              />
+              Sur place
+            </label>
+            <label style={{ fontWeight: '600', color: '#5a2d91' }}>
+              <input
+                type="radio"
+                name={`takeaway-${dish.id}`}
+                checked={isTakeaway}
+                onChange={() => setIsTakeaway(true)}
+                style={{ marginRight: '0.3rem' }}
+              />
+              À emporter
+            </label>
+          </div>
+        )}
+
+        {/* Sélections compléments et sauces */}
         {dish.category === "Plats" && dish.complements && dish.complements.length > 0 && (
           <div className="dish-complements" style={{ marginTop: '1rem' }}>
             <label htmlFor={`complements-select-${dish.id}`} style={{ fontWeight: '600', color: '#5a2d91' }}>
@@ -142,49 +181,48 @@ const DishCard: React.FC<DishCardProps> = ({
           </div>
         )}
         {dish.category === "Plats" && dish.sauces && dish.sauces.length > 0 && (
-  <div
-    className="dish-sauces"
-    style={{
-      marginTop: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center' // ✅ Centre le label et le menu déroulant horizontalement
-    }}
-  >
-    <label
-      htmlFor={`sauces-select-${dish.id}`}
-      style={{
-        fontWeight: '600',
-        color: '#5a2d91',
-        marginBottom: '4px'
-      }}
-    >
-      Choisissez une sauce :
-    </label>
-    <select
-  id={`sauces-select-${dish.id}`}
-  value={selectedSauce}
-  onChange={e => setSelectedSauce(e.target.value)} // ✅ c’est ça qui manquait !
-  style={{
-    padding: '0.4rem 0.6rem',
-    borderRadius: '5px',
-    border: '1px solid #7B3FBF',
-    color: '#4b2e83',
-    fontWeight: '500',
-    minWidth: '180px',
-    maxWidth: '190px',
-    cursor: 'pointer',
-    backgroundColor: '#f5f0fa'
-  }}
->
-  <option value="" disabled>-- Sélectionnez --</option>
-  {dish.sauces.map((sauce, idx) => (
-    <option key={idx} value={sauce}>{sauce}</option>
-  ))}
-</select>
-
-  </div>
-)}
+          <div
+            className="dish-sauces"
+            style={{
+              marginTop: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <label
+              htmlFor={`sauces-select-${dish.id}`}
+              style={{
+                fontWeight: '600',
+                color: '#5a2d91',
+                marginBottom: '4px'
+              }}
+            >
+              Choisissez une sauce :
+            </label>
+            <select
+              id={`sauces-select-${dish.id}`}
+              value={selectedSauce}
+              onChange={e => setSelectedSauce(e.target.value)}
+              style={{
+                padding: '0.4rem 0.6rem',
+                borderRadius: '5px',
+                border: '1px solid #7B3FBF',
+                color: '#4b2e83',
+                fontWeight: '500',
+                minWidth: '180px',
+                maxWidth: '190px',
+                cursor: 'pointer',
+                backgroundColor: '#f5f0fa'
+              }}
+            >
+              <option value="" disabled>-- Sélectionnez --</option>
+              {dish.sauces.map((sauce, idx) => (
+                <option key={idx} value={sauce}>{sauce}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {showQuantityControls && quantity > 0 && (
           <p className="dish-quantity">Quantité dans le panier : {quantity}</p>
@@ -192,26 +230,25 @@ const DishCard: React.FC<DishCardProps> = ({
 
         <div className="dish-buttons-row">
           <button 
-  className="dish-button" 
-  onClick={handleAddToCart}
-  style={{
-    backgroundColor: '#7B3FBF',
-    color: 'white',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease'
-  }}
-  onMouseEnter={e => {
-    e.currentTarget.style.backgroundColor = '#5a2d91';
-  }}
-  onMouseLeave={e => {
-    e.currentTarget.style.backgroundColor = '#7B3FBF';
-  }}
->
-  <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
-  Ajouter
-</button>
-
+            className="dish-button" 
+            onClick={handleAddToCart}
+            style={{
+              backgroundColor: '#7B3FBF',
+              color: 'white',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#5a2d91';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#7B3FBF';
+            }}
+          >
+            <FontAwesomeIcon icon={faShoppingCart} className="button-icon" />
+            Ajouter
+          </button>
 
           <button className="dish-button remove-button" onClick={() => removeFromCart(dish)}>
             <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
