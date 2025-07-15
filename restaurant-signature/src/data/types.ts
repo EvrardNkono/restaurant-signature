@@ -1,10 +1,16 @@
+export type PromoPack = {
+  quantity: number; // Nombre de bières dans le pack
+  price: number;    // Prix total du pack
+};
+
 export type Dish = {
   id: number;
   name: string;
   description: string;
   price: number;
-  takeawayPrice?: number; // prix à emporter facultatif
-  isTakeaway?: boolean;   // flag prise en compte optionnelle
+  takeawayPrice?: number;     // Prix à emporter facultatif
+  isTakeaway?: boolean;       // Indique si le plat est à emporter
+  promoPack?: PromoPack;      // Formule promotionnelle si disponible
   category:
     | "Boissons"
     | "Entrées"

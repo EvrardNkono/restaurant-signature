@@ -453,28 +453,36 @@ const menuData: Dish[] = [
     image: "/assets/images/Boissons/mutzig.webp",
     details: "Une bière légère et savoureuse pour accompagner tous vos plats."
   },
+ {
+  id: 29,
+  name: "Guinness",
+  description: "Bière stout irlandaise au goût corsé et crémeux",
+  takeawayPrice: 3.50,
+  price: 3.90,
+  category: "Boissons",
+  subCategory: "boissons alcoolisées",
+  image: "/assets/images/Boissons/guiness.webp",
+  details: "Une icône mondiale, parfaite pour les amateurs de bière noire.",
+  promoPack: {
+    quantity: 3,
+    price: 10.00
+  }
+},
   {
-    id: 29,
-    name: "Guinness",
-    description: "Bière stout irlandaise au goût corsé et crémeux",
-    takeawayPrice: 3.50,
-    price: 3.90,
-    category: "Boissons",
-    subCategory: "boissons alcoolisées",
-    image: "/assets/images/Boissons/guiness.webp",
-    details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
-  },
-  {
-    id: 657,
-    name: " Grande Guinness",
-    description: "Bière stout irlandaise au goût corsé et crémeux",
-    takeawayPrice: 5.90,
-    price: 6.90,
-    category: "Boissons",
-    subCategory: "boissons alcoolisées",
-    image: "/assets/images/Boissons/guiness.webp",
-    details: "Une icône mondiale, parfaite pour les amateurs de bière noire."
-  },
+  id: 657,
+  name: "Grande Guinness",
+  description: "Bière stout irlandaise au goût corsé et crémeux",
+  takeawayPrice: 5.90,
+  price: 6.90,
+  category: "Boissons",
+  subCategory: "boissons alcoolisées",
+  image: "/assets/images/Boissons/guiness.webp",
+  details: "Une icône mondiale, parfaite pour les amateurs de bière noire.",
+  promoPack: {
+    quantity: 3,
+    price: 15.50
+  }
+},
   {
     id: 30,
     name: "Vimto",
@@ -835,7 +843,11 @@ const menuData: Dish[] = [
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/heineken-65cl.png",
-  details: "Goût équilibré avec une légère amertume, parfaite pour toutes occasions."
+  details: "Goût équilibré avec une légère amertume, parfaite pour toutes occasions.",
+  promoPack: {
+    quantity: 3,
+    price: 10.00
+  }
 },
 {
   id: 51,
@@ -846,7 +858,11 @@ const menuData: Dish[] = [
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/1664-65cl.png",
-  details: "Saveurs fruitées et houblonnées, une bière élégante et rafraîchissante."
+  details: "Saveurs fruitées et houblonnées, une bière élégante et rafraîchissante.",
+  promoPack: {
+    quantity: 3,
+    price: 10.00
+  }
 },
 {
   id: 52,
@@ -857,7 +873,11 @@ const menuData: Dish[] = [
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-65cl.png",
-  details: "Une bière originale aux notes épicées et fraîches, parfaite pour les fêtes."
+  details: "Une bière originale aux notes épicées et fraîches, parfaite pour les fêtes.",
+  promoPack: {
+    quantity: 3,
+    price: 13.50
+  }
 },
 {
   id: 53,
@@ -868,7 +888,11 @@ const menuData: Dish[] = [
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-33cl.png",
-  details: "Une version plus légère de Desperados, idéale pour une pause rafraîchissante."
+  details: "Une version plus légère de Desperados, idéale pour une pause rafraîchissante.",
+  promoPack: {
+    quantity: 4,
+    price: 10.00
+  }
 },
 {
   id: 54,
@@ -883,14 +907,18 @@ const menuData: Dish[] = [
 },
 {
   id: 55,
-  name: "Super Bock 33cl",
+  name: "Super Boock 33cl",
   description: "Bière portugaise blonde en bouteille de 33 cl",
   takeawayPrice: 2.50,
   price: 2.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/super-bock-33cl.png",
-  details: "Une bière légère et rafraîchissante, parfaite pour accompagner vos repas."
+  details: "Une bière légère et rafraîchissante, parfaite pour accompagner vos repas.",
+  promoPack: {
+    quantity: 4,
+    price: 10.00
+  }
 },
 
   {

@@ -8,7 +8,15 @@ const CartPage = () => {
   const { items } = useCart();
   const navigate = useNavigate(); // ✅ Hook de navigation
 
-  const total = items.reduce((acc, item) => acc + item.dish.price * item.quantity, 0);
+ const total = items.reduce((acc, item) => {
+  const dish = item.dish;
+  const unitPrice = dish.promoPack
+    ? dish.promoPack.price / dish.promoPack.quantity
+    : dish.price;
+  return acc + unitPrice * item.quantity;
+}, 0);
+
+
 
   return (
     <div className="cart-page">
@@ -40,15 +48,27 @@ const CartPage = () => {
       ) : (
         <>
           <div className="cart-items">
-            {items.map(({ dish, quantity }) => (
-              <DishCard
-                key={dish.id}
-                dish={dish}
-                quantity={quantity}
-                showQuantityControls={true}
-              />
-            ))}
-          </div>
+  {items.map(({ dish, quantity }) => {
+    // Calcul du prix à passer dans DishCard, promo ou prix normal
+    const unitPrice = dish.promoPack
+      ? dish.promoPack.price / dish.promoPack.quantity
+      : dish.price;
+
+    return (
+      <DishCard
+        key={`${dish.id}-${dish.selectedComplement || 'noComp'}-${dish.selectedSauce || 'noSauce'}-${dish.isTakeaway ? 'takeaway' : 'surplace'}`}
+        dish={{
+          ...dish,
+          price: unitPrice, // on force ici le price à utiliser (promo ou non)
+        }}
+        quantity={quantity}
+        showQuantityControls={true}
+      />
+    );
+  })}
+</div>
+
+
 
           <div className="cart-total">
             <h3>Total : {total.toFixed(2)} €</h3>

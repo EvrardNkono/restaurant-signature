@@ -49,12 +49,10 @@ const DishCard: React.FC<DishCardProps> = ({
     isChefConcept && 'dish-card-chef-concept'
   ].filter(Boolean).join(' ');
 
-  // Prix dynamique selon le choix "sur place" ou "à emporter"
   const displayedPrice = isTakeaway && dish.takeawayPrice !== undefined
     ? dish.takeawayPrice
     : dish.price;
 
-  // Couleur bulle prix : violet ou bleu ciel selon takeaway ou pas
   const bubbleColor = isTakeaway ? '#00BFFF' : '#7B3FBF';
 
   const handleAddToCart = () => {
@@ -107,9 +105,7 @@ const DishCard: React.FC<DishCardProps> = ({
               <span className="special-price-text">{formatPrice(displayedPrice)}</span>
             </>
           ) : (
-            <span>
-              {formatPrice(displayedPrice)}
-            </span>
+            <span>{formatPrice(displayedPrice)}</span>
           )}
         </div>
       </div>
@@ -125,7 +121,6 @@ const DishCard: React.FC<DishCardProps> = ({
         <h3 className="dish-name" style={{ color: '#7B3FBF' }}>{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
 
-        {/* Toggle Sur place / À emporter si prix à emporter dispo */}
         {dish.takeawayPrice !== undefined && (
           <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
             <label style={{ fontWeight: '600', color: '#5a2d91', marginRight: '1rem' }}>
@@ -151,7 +146,6 @@ const DishCard: React.FC<DishCardProps> = ({
           </div>
         )}
 
-        {/* Sélections compléments et sauces */}
         {dish.category === "Plats" && dish.complements && dish.complements.length > 0 && (
           <div className="dish-complements" style={{ marginTop: '1rem' }}>
             <label htmlFor={`complements-select-${dish.id}`} style={{ fontWeight: '600', color: '#5a2d91' }}>
@@ -250,7 +244,15 @@ const DishCard: React.FC<DishCardProps> = ({
             Ajouter
           </button>
 
-          <button className="dish-button remove-button" onClick={() => removeFromCart(dish)}>
+          <button
+            className="dish-button remove-button"
+            onClick={() => removeFromCart({
+              ...dish,
+              selectedComplement,
+              selectedSauce,
+              isTakeaway
+            })}
+          >
             <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
             Enlever
           </button>
