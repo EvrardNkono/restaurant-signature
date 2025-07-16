@@ -457,30 +457,30 @@ const menuData: Dish[] = [
   id: 29,
   name: "Guinness",
   description: "Bière stout irlandaise au goût corsé et crémeux",
-  takeawayPrice: 3.50,
-  price: 3.90,
+  takeawayPrice: 4.50,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/guiness.webp",
   details: "Une icône mondiale, parfaite pour les amateurs de bière noire.",
   promoPack: {
     quantity: 3,
-    price: 10.00
+    price: 12.00
   }
 },
   {
   id: 657,
-  name: "Grande Guinness",
+  name: "Grande Guinness 65cl",
   description: "Bière stout irlandaise au goût corsé et crémeux",
-  takeawayPrice: 5.90,
-  price: 6.90,
+  takeawayPrice: 8.00,
+  price: 8.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/guiness.webp",
   details: "Une icône mondiale, parfaite pour les amateurs de bière noire.",
   promoPack: {
     quantity: 3,
-    price: 15.50
+    price: 24
   }
 },
   {
@@ -669,12 +669,16 @@ const menuData: Dish[] = [
     id: 93,
     name: "Guinness Irlande",
     description: "Boisson maltée non alcoolisée à base de Guinness",
-    takeawayPrice: 2.90,
-    price: 3.50,
+    takeawayPrice: 4.50,
+    price: 5.00,
     category: "Boissons",
     subCategory: "boissons alcoolisées",
     image: "/assets/images/Boissons/guinnessirlande.png",
-    details: "Le goût Guinness en version douce et rafraîchissante."
+    details: "Le goût Guinness en version douce et rafraîchissante.",
+    promoPack: {
+    quantity: 3,
+    price: 12.00
+  }
   },
  
   {
@@ -838,23 +842,23 @@ const menuData: Dish[] = [
   id: 50,
   name: "Heineken 65cl",
   description: "Bière blonde légère et rafraîchissante, bouteille de 65 cl",
-  takeawayPrice: 3.50,
-  price: 3.90,
+  takeawayPrice: 4.50,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/heineken-65cl.png",
   details: "Goût équilibré avec une légère amertume, parfaite pour toutes occasions.",
   promoPack: {
     quantity: 3,
-    price: 10.00
+    price: 12.00
   }
 },
 {
   id: 51,
   name: "1664 65cl",
   description: "Bière blonde française premium en bouteille de 65 cl",
-  takeawayPrice: 3.50,
-  price: 3.90,
+  takeawayPrice: 4.50,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/1664-65cl.png",
@@ -869,7 +873,7 @@ const menuData: Dish[] = [
   name: "Desperados 65cl",
   description: "Bière aromatisée à la tequila, bouteille de 65 cl",
   takeawayPrice: 4.50,
-  price: 4.90,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-65cl.png",
@@ -883,8 +887,8 @@ const menuData: Dish[] = [
   id: 53,
   name: "Desperados 33cl",
   description: "Bière aromatisée à la tequila, bouteille de 33 cl",
-  takeawayPrice: 2.50,
-  price: 2.90,
+  takeawayPrice: 3.00,
+  price: 3.50,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-33cl.png",
@@ -898,26 +902,30 @@ const menuData: Dish[] = [
   id: 54,
   name: "Leef Blonde 65cl",
   description: "Bière blonde artisanale en bouteille de 65 cl",
-  takeawayPrice: 3.50,
-  price: 3.90,
+  takeawayPrice: 4.50,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/leef-blonde-65cl.png",
-  details: "Une bière artisanale avec une saveur riche et équilibrée."
+  details: "Une bière artisanale avec une saveur riche et équilibrée.",
+  promoPack: {
+    quantity: 3,
+    price: 12.00
+  }
 },
 {
   id: 55,
   name: "Super Boock 33cl",
   description: "Bière portugaise blonde en bouteille de 33 cl",
-  takeawayPrice: 2.50,
-  price: 2.90,
+  takeawayPrice: 4.50,
+  price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/super-bock-33cl.png",
   details: "Une bière légère et rafraîchissante, parfaite pour accompagner vos repas.",
   promoPack: {
-    quantity: 4,
-    price: 10.00
+    quantity: 3,
+    price: 12.00
   }
 },
 

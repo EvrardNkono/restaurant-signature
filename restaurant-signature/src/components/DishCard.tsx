@@ -40,6 +40,7 @@ const DishCard: React.FC<DishCardProps> = ({
   const [selectedComplement, setSelectedComplement] = useState<string>('');
   const [selectedSauce, setSelectedSauce] = useState<string>('');
   const [isTakeaway, setIsTakeaway] = useState(false);
+  const [showFlyImage, setShowFlyImage] = useState(false);
 
   const { addToCart, removeFromCart } = useCart();
 
@@ -56,23 +57,29 @@ const DishCard: React.FC<DishCardProps> = ({
   const bubbleColor = isTakeaway ? '#00BFFF' : '#7B3FBF';
 
   const handleAddToCart = () => {
-    const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
-    const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
+  const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
+  const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
 
-    const missingComplement = needsComplement && !selectedComplement;
-    const missingSauce = needsSauce && !selectedSauce;
+  const missingComplement = needsComplement && !selectedComplement;
+  const missingSauce = needsSauce && !selectedSauce;
 
-    if (missingComplement || missingSauce) {
-      const messageParts = [];
-      if (missingComplement) messageParts.push("un accompagnement");
-      if (missingSauce) messageParts.push("une sauce");
+  if (missingComplement || missingSauce) {
+    const messageParts = [];
+    if (missingComplement) messageParts.push("un accompagnement");
+    if (missingSauce) messageParts.push("une sauce");
 
-      alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
-      return;
-    }
+    alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
+    return;
+  }
 
-    addToCart({ ...dish, selectedComplement, selectedSauce, isTakeaway, price: displayedPrice });
-  };
+  // Animation
+  setShowFlyImage(true);
+  setTimeout(() => setShowFlyImage(false), 1000); // durée de l'animation
+
+  // Ajout au panier
+  addToCart({ ...dish, selectedComplement, selectedSauce, isTakeaway, price: displayedPrice });
+};
+
 
   return (
     <div className={cardClassNames}>
@@ -263,6 +270,12 @@ const DishCard: React.FC<DishCardProps> = ({
           </button>
         </div>
       </div>
+      {showFlyImage && (
+  <div className="fly-popup">
+    <img src={dish.image} alt="Produit ajouté" className="fly-popup-image" />
+  </div>
+)}
+
     </div>
   );
 };

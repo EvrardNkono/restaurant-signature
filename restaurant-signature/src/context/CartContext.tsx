@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Dish } from '../data/types';
 
-// ✅ Type enrichi pour Dish avec les propriétés supplémentaires
 type DishWithExtras = Dish & {
   selectedComplement?: string;
   selectedSauce?: string;
@@ -23,12 +22,14 @@ interface CartContextType {
   removeFromCart: (dish: DishWithExtras) => void;
   clearCart: () => void;
   totalItems: number;
+  lastRemovedProduct: Dish | null; // ✅ Ajouté ici
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [lastRemovedProduct, setLastRemovedProduct] = useState<Dish | null>(null); // ✅
 
   const addToCart = (dish: DishWithExtras) => {
     setItems(prevItems => {
@@ -65,7 +66,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const removeFromCart = (dish: DishWithExtras) => {
     setItems(prevItems => {
-      return prevItems.flatMap(i => {
+      let removed = false;
+      const updatedItems = prevItems.flatMap(i => {
         if (
           i.dish.id === dish.id &&
           i.selectedComplement === dish.selectedComplement &&
@@ -73,13 +75,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           i.isTakeaway === dish.isTakeaway
         ) {
           if (i.quantity > 1) {
+            removed = true;
             return [{ ...i, quantity: i.quantity - 1 }];
           } else {
+            removed = true;
             return [];
           }
         }
         return [i];
       });
+
+      if (removed) {
+        setLastRemovedProduct(dish);
+      }
+
+      return updatedItems;
     });
   };
 
@@ -87,8 +97,27 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
+  // 🧼 Reset automatique après animation
+  useEffect(() => {
+    if (lastRemovedProduct) {
+      const timeout = setTimeout(() => {
+        setLastRemovedProduct(null);
+      }, 700); // même durée que l’animation
+      return () => clearTimeout(timeout);
+    }
+  }, [lastRemovedProduct]);
+
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, clearCart, totalItems }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        totalItems,
+        lastRemovedProduct // ✅ Ajouté ici
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

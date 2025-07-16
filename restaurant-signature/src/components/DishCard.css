@@ -317,3 +317,33 @@ background-color: #d83aed;
   box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4); /* Ombre subtile dorée */
   
 }
+
+
+.fly-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: flyUp 1s ease-out forwards;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.fly-popup-image {
+  width: 100px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  background: white;
+}
+
+@keyframes flyUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -200%) scale(0.5);
+  }
+}
