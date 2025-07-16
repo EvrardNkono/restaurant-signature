@@ -256,7 +256,7 @@ const menuData: Dish[] = [
    sauces: [
     "Sauce moutarde",
     "Sauce chien",
-    "Sauce créoline",
+    "Sauce Créoline",
     "Sauce verte",
     "Poudre de kankan",
     "Sauce piquante",
