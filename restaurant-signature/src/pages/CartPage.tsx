@@ -48,24 +48,27 @@ const CartPage = () => {
       ) : (
         <>
           <div className="cart-items">
-  {items.map(({ dish, quantity }) => {
-    // Calcul du prix à passer dans DishCard, promo ou prix normal
-    const unitPrice = dish.promoPack
-      ? dish.promoPack.price / dish.promoPack.quantity
-      : dish.price;
+  {items.map(({ dish, quantity, selectedComplement, selectedSauce, isTakeaway }) => {
+  const unitPrice = dish.promoPack
+    ? dish.promoPack.price / dish.promoPack.quantity
+    : dish.price;
 
-    return (
-      <DishCard
-        key={`${dish.id}-${dish.selectedComplement || 'noComp'}-${dish.selectedSauce || 'noSauce'}-${dish.isTakeaway ? 'takeaway' : 'surplace'}`}
-        dish={{
-          ...dish,
-          price: unitPrice, // on force ici le price à utiliser (promo ou non)
-        }}
-        quantity={quantity}
-        showQuantityControls={true}
-      />
-    );
-  })}
+  return (
+    <DishCard
+      key={`${dish.id}-${selectedComplement || 'noComp'}-${selectedSauce || 'noSauce'}-${isTakeaway ? 'takeaway' : 'surplace'}`}
+      dish={{
+        ...dish,
+        price: unitPrice,
+        selectedComplement,
+        selectedSauce,
+        isTakeaway,
+      }}
+      quantity={quantity}
+      showQuantityControls={true}
+    />
+  );
+})}
+
 </div>
 
 
