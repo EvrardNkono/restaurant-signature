@@ -790,7 +790,7 @@ const menuData: Dish[] = [
     name: "Jus de goyave",
     description: "Jus naturel de goyave, riche en saveurs",
     takeawayPrice: 1.80,
-    price: 3.90,
+    price: 2.00,
     category: "Boissons",
     subCategory: "jus naturels",
     image: "/assets/images/Boissons/jus-goyave.png",
@@ -880,8 +880,8 @@ const menuData: Dish[] = [
   id: 50,
   name: "Heineken 65cl",
   description: "Bière blonde légère et rafraîchissante, bouteille de 65 cl",
-  takeawayPrice: 7.50,
-  price: 8.00,
+  takeawayPrice: 4.50,
+  price: 4.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/heineken-65cl.jpg",
@@ -895,53 +895,53 @@ const menuData: Dish[] = [
   id: 51,
   name: "1664 65cl",
   description: "Bière blonde française premium en bouteille de 65 cl",
-  takeawayPrice: 7.50,
-  price: 8.00,
+  takeawayPrice: 4.50,
+  price: 4.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/1664-65cl.png",
   details: "Saveurs fruitées et houblonnées, une bière élégante et rafraîchissante.",
   promoPack: {
     quantity: 3,
-    price: 10.00
+    price: 12.00
   }
 },
 {
   id: 52,
   name: "Desperados 65cl",
   description: "Bière aromatisée à la tequila, bouteille de 65 cl",
-  takeawayPrice: 7.50,
-  price: 8.00,
+  takeawayPrice: 6.50,
+  price: 6.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-65cl.png",
   details: "Une bière originale aux notes épicées et fraîches, parfaite pour les fêtes.",
   promoPack: {
     quantity: 3,
-    price: 24.00
+    price: 19.00
   }
 },
 {
   id: 53,
   name: "Desperados 33cl",
   description: "Bière aromatisée à la tequila, bouteille de 33 cl",
-  takeawayPrice: 3.00,
-  price: 3.50,
+  takeawayPrice: 4.00,
+  price: 4.50,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-33cl.png",
   details: "Une version plus légère de Desperados, idéale pour une pause rafraîchissante.",
   promoPack: {
     quantity: 4,
-    price: 10.00
+    price: 12.00
   }
 },
 {
   id: 54,
   name: "Leef Blonde 65cl",
   description: "Bière blonde artisanale en bouteille de 65 cl",
-  takeawayPrice: 3.50,
-  price: 4.00,
+  takeawayPrice: 4.00,
+  price: 4.50,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/leef-blonde-65cl.png",
@@ -955,14 +955,14 @@ const menuData: Dish[] = [
   id: 55,
   name: "Super Boock 33cl",
   description: "Bière portugaise blonde en bouteille de 33 cl",
-  takeawayPrice: 3.50,
-  price: 4.00,
+  takeawayPrice: 4.00,
+  price: 4.50,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/super-bock-33cl.png",
   details: "Une bière légère et rafraîchissante, parfaite pour accompagner vos repas.",
   promoPack: {
-    quantity: 3,
+    quantity: 4,
     price: 12.00
   }
 },
