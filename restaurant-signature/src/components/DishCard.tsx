@@ -11,8 +11,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useCart } from '../context/CartContext';
 
-interface DishCardProps {
-  dish: Dish & { complements?: string[]; sauces?: string[] };
+export interface DishCardProps {
+  dish: Dish & {
+    complements?: string[];
+    sauces?: string[];
+    selectedComplement?: string;
+    selectedSauce?: string;
+    isTakeaway?: boolean;
+  };
   quantity?: number;
   showQuantityControls?: boolean;
   isSpecialWeekend?: boolean;
