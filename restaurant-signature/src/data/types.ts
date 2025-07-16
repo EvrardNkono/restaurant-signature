@@ -11,6 +11,11 @@ export type Dish = {
   takeawayPrice?: number;     // Prix à emporter facultatif
   isTakeaway?: boolean;       // Indique si le plat est à emporter
   promoPack?: PromoPack;      // Formule promotionnelle si disponible
+
+  // 🔥 Ajouts pour personnalisation utilisateur
+  selectedComplement?: string;  // Accompagnement choisi
+  selectedSauce?: string;       // Sauce choisie
+
   category:
     | "Boissons"
     | "Entrées"
@@ -18,9 +23,11 @@ export type Dish = {
     | "Desserts"
     | "Spécial Weekend"
     | "Concept du Chef";
-  subCategory?: string;
+
+  subCategory?: string;         // Par ex. "boissons alcoolisées"
   image: string;
   details: string;
-  complements?: string[];
-  sauces?: string[];
+
+  complements?: string[];       // Liste des accompagnements proposés
+  sauces?: string[];            // Liste des sauces proposées
 };
