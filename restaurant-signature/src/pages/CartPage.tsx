@@ -1,26 +1,24 @@
 import { useCart } from '../context/CartContext';
-import { useNavigate } from 'react-router-dom'; // ✅ Ajout pour navigation
+import { useNavigate } from 'react-router-dom';
 import DishCard from '../components/DishCard';
 import backgroundImg from '../assets/ton-image.jpeg';
 import './CartPage.css';
 
 const CartPage = () => {
   const { items } = useCart();
-  const navigate = useNavigate(); // ✅ Hook de navigation
+  const navigate = useNavigate();
 
- const total = items.reduce((acc, item) => {
-  const dish = item.dish;
-  const unitPrice = dish.promoPack
-    ? dish.promoPack.price / dish.promoPack.quantity
-    : dish.price;
-  return acc + unitPrice * item.quantity;
-}, 0);
-
-
+  const total = items.reduce((acc, item) => {
+    const dish = item.dish;
+    const unitPrice = dish.promoPack
+      ? dish.promoPack.price / dish.promoPack.quantity
+      : dish.price;
+    return acc + unitPrice * item.quantity;
+  }, 0);
 
   return (
     <div className="cart-page">
-      {/* Header avec image de fond */}
+      {/* En-tête avec image de fond */}
       <div
         style={{
           width: '100%',
@@ -48,36 +46,33 @@ const CartPage = () => {
       ) : (
         <>
           <div className="cart-items">
-  {items.map(({ dish, quantity, selectedComplement, selectedSauce, isTakeaway }) => {
-  const unitPrice = dish.promoPack
-    ? dish.promoPack.price / dish.promoPack.quantity
-    : dish.price;
+            {items.map(({ dish, quantity, selectedComplement, selectedSauce, isTakeaway }) => {
+              const unitPrice = dish.promoPack
+                ? dish.promoPack.price / dish.promoPack.quantity
+                : dish.price;
 
-  return (
-    <DishCard
-      key={`${dish.id}-${selectedComplement || 'noComp'}-${selectedSauce || 'noSauce'}-${isTakeaway ? 'takeaway' : 'surplace'}`}
-      dish={{
-        ...dish,
-        price: unitPrice,
-        selectedComplement,
-        selectedSauce,
-        isTakeaway,
-      }}
-      quantity={quantity}
-      showQuantityControls={true}
-    />
-  );
-})}
-
-</div>
-
-
+              return (
+                <DishCard
+                  key={`${dish.id}-${selectedComplement || 'noComp'}-${selectedSauce || 'noSauce'}-${isTakeaway ? 'takeaway' : 'surplace'}`}
+                  dish={{
+                    ...dish,
+                    price: unitPrice,
+                    selectedComplement,
+                    selectedSauce,
+                    isTakeaway,
+                  }}
+                  quantity={quantity}
+                  showQuantityControls={true}
+                />
+              );
+            })}
+          </div>
 
           <div className="cart-total">
             <h3>Total : {total.toFixed(2)} €</h3>
             <button
               className="order-btn"
-              onClick={() => navigate('/commande')} // ✅ Redirection vers la page commande
+              onClick={() => navigate('/commande')}
             >
               Passer la commande
             </button>
