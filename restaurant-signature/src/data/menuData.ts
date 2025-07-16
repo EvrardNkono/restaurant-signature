@@ -185,9 +185,29 @@ const menuData: Dish[] = [
 
 {
   id: 22,
-  name: "Dorade braisée",
+  name: "Dorade Moyenne braisée",
   description: "Dorade entière, grillée façon camerounaise",
   price: 15.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/dorade-braisee.png",
+  details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
+},
+
+{
+  id: 22,
+  name: " Grosse Dorade braisée",
+  description: "Dorade entière, grillée façon camerounaise",
+  price: 20.90,
   category: "Plats",
   image: "/src/assets/images/plats/dorade-braisee.png",
   details: "Dorade fraîche braisée aux herbes et épices africaines, avec une peau dorée et une chair fondante.",
@@ -206,7 +226,7 @@ const menuData: Dish[] = [
 
 {
   id: 23,
-  name: "Maquereau Oya-Oya",
+  name: "Maquereau Oya-Oya Moyen",
   description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
   price: 15.90,
   category: "Plats",
@@ -224,7 +244,25 @@ const menuData: Dish[] = [
   ]
 },
 
-
+{
+  id: 23,
+  name: "Gros Maquereau Oya-Oya",
+  description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
+  price: 20.90,
+  category: "Plats",
+  image: "/src/assets/images/plats/poisson-braise.png",
+  details: "Recette maison typique : maquereau braisé avec une marinade pimentée, signature de la street food au Cameroun.",
+  complements: ["Frites de plantain", "Attiéké", "Chinkwangue", "Baton de manioc",],
+   sauces: [
+    "Sauce moutarde",
+    "Sauce chien",
+    "Sauce créoline",
+    "Sauce verte",
+    "Poudre de kankan",
+    "Sauce piquante",
+    "Sauce mayonnaise"
+  ]
+},
 
 {
   id: 4630, // Choisis un ID unique qui ne clash pas avec les autres
@@ -846,7 +884,7 @@ const menuData: Dish[] = [
   price: 5.00,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
-  image: "/assets/images/Boissons/heineken-65cl.png",
+  image: "/assets/images/Boissons/heineken-65cl.jpg",
   details: "Goût équilibré avec une légère amertume, parfaite pour toutes occasions.",
   promoPack: {
     quantity: 3,
@@ -976,7 +1014,7 @@ const menuData: Dish[] = [
 },
 {
   id: 32,
-  name: "Bouillon de pieds de bœuf - Manioc ou plantain",
+  name: "Bouillon de pieds et queux de bœuf - Manioc ou plantain",
   description: "Bouillon parfumé de pieds de bœuf servi avec manioc ou plantain cuit vapeur.",
   price: 15.00,
   category: "Spécial Weekend",
