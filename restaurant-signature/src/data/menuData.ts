@@ -634,7 +634,7 @@ const menuData: Dish[] = [
  {
   id: 29,
   name: "Petite Guinness Cameroun (33cl)",
-  description: "Bière stout irlandaise au goût corsé et crémeux",
+  description: "Bière stout venu du Cameroun au goût corsé et crémeux",
   takeawayPrice: 4.50,
   price: 5.00,
   category: "Boissons",
