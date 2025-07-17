@@ -3,7 +3,7 @@ import './PwaInstallPrompt.css';  // importe le CSS
 
 const PwaInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(true);
 
   useEffect(() => {
     const handler = (e: any) => {
