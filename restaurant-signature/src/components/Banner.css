@@ -2,7 +2,7 @@
 .banner {
   position: relative;
   width: 100%;        /* plutôt que 100vw */
-  height: 100vh;
+  min-height: 100vh;
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat !; /* pas de répétition */
