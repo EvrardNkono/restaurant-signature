@@ -181,7 +181,7 @@ if (!removeSoundRef.current) {
       textAlign: 'center'
     }}
   >
-  {dish.promoPack.quantity} bières pour seulement {formatPrice(dish.promoPack.price)} !
+  Formule: {dish.promoPack.quantity} bières pour seulement {formatPrice(dish.promoPack.price)} !
   </div>
 )}
 
