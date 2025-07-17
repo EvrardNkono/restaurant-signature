@@ -1050,7 +1050,7 @@ const menuData: Dish[] = [
   id: 52,
   name: "Desperados 65cl",
   description: "Bière aromatisée à la tequila, bouteille de 65 cl",
-  takeawayPrice: 6.50,
+  takeawayPrice: 7.50,
   price: 7.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
