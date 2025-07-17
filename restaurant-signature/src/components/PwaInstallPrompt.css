@@ -1,0 +1,35 @@
+.pwa-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 5000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pwa-popup p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pwa-popup button {
+  background-color: #ffa500;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #222;
+  transition: background-color 0.25s ease;
+}
+
+.pwa-popup button:hover {
+  background-color: #e59400;
+}
