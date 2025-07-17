@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './PwaInstallPrompt.css';  // importe le CSS
+import './PwaInstallPrompt.css';
 
 const PwaInstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -14,7 +14,6 @@ const PwaInstallPrompt = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
@@ -31,12 +30,17 @@ const PwaInstallPrompt = () => {
     setShowPrompt(false);
   };
 
+  const handleClose = () => {
+    setShowPrompt(false);
+  };
+
   if (!showPrompt) return null;
 
   return (
     <div className="pwa-popup">
+      <button className="close-btn" onClick={handleClose}>&times;</button>
       <p>Installer l'application ?</p>
-      <button onClick={handleInstallClick}>
+      <button className="install-btn" onClick={handleInstallClick}>
         Installer
       </button>
     </div>

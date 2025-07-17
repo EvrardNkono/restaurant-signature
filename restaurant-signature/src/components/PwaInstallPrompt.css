@@ -2,34 +2,47 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: #333;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  z-index: 5000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1a1a1a; /* Noir profond */
+  color: #ffffff; /* Texte blanc */
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  min-width: 240px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  border-left: 6px solid #8e44ad; /* Violet vif */
 }
 
-.pwa-popup p {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.pwa-popup button {
-  background-color: #ffa500;
+.close-btn {
+  background: transparent;
   border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: bold;
+  align-self: flex-end;
+  cursor: pointer;
+  margin: 0 0 10px 0;
+}
+
+.close-btn:hover {
+  color: #8e44ad; /* Violet hover */
+}
+
+.install-btn {
+  background-color: #8e44ad; /* Violet */
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  color: #ffffff;
   cursor: pointer;
   font-weight: 600;
-  color: #222;
-  transition: background-color 0.25s ease;
+  align-self: stretch;
+  text-align: center;
+  transition: background 0.2s ease-in-out;
 }
 
-.pwa-popup button:hover {
-  background-color: #e59400;
+.install-btn:hover {
+  background-color: #732d91;
 }
