@@ -3,27 +3,35 @@ import { useState, useEffect } from 'react';
 import './Banner.css';
 import { faInstagram, faTiktok, faFacebookF, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUtensils, faStar, faAward, faEnvelope, faPhone, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUtensils, faStar, faAward, faEnvelope, faPhone, faMapMarkerAlt, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 import banner1 from '../assets/images/banner-bg.jpg';
 import banner2 from '../assets/images/banner2.jpeg';
 import banner3 from '../assets/images/banner3.jpg';
 import logo from '../assets/logo.png';
 
+import  usePwaInstall  from './usePwaInstall'; // Assure-toi que ce chemin est correct
+
 const images = [banner1, banner2, banner3];
 
 const Banner = () => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { isInstallable, promptInstall } = usePwaInstall();
+  const [showPopup, setShowPopup] = useState(false);
 
-  // 🎯 Scroll de 5px vers le haut PUIS 5px vers le bas après un court délai
+  // Affiche le popup automatiquement si l'app est installable
+  useEffect(() => {
+    if (isInstallable) {
+      setShowPopup(true);
+    }
+  }, [isInstallable]);
+
   useEffect(() => {
     window.scrollTo({ top: 5, behavior: 'smooth' });
-
     const timeoutId = setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 300); // délai de 300ms avant de revenir
-
+    }, 300);
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -64,7 +72,25 @@ const Banner = () => {
         </div>
       </div>
 
-      {/* Carte Contact Flottante */}
+      {/* === POPUP INSTALLATION PWA === */}
+      {showPopup && (
+        <div className="pwa-popup">
+          <div className="pwa-popup-content">
+            <h3>📲 Installer l'app Restaurant Signature</h3>
+            <p>Ajoutez l'application sur votre écran d'accueil pour une meilleure expérience.</p>
+            <div className="popup-buttons">
+              <button onClick={promptInstall} className="btn-install">
+                <FontAwesomeIcon icon={faDownload} /> Installer
+              </button>
+              <button onClick={() => setShowPopup(false)} className="btn-cancel">
+                Plus tard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* === Carte Contact Flottante === */}
       <div className="contact-floating-card">
         <h4>Contact</h4>
         <p><FontAwesomeIcon icon={faPhone} className="contact-icon" /> <a href="tel:+33644951184">+33 6 44 95 11 84</a></p>
