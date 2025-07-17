@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Dish } from '../data/types';
 import './DishCard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -50,6 +50,19 @@ const DishCard: React.FC<DishCardProps> = ({
 
   const { addToCart, removeFromCart } = useCart();
 
+  // Ref pour audio externe
+  const addSoundRef = useRef<HTMLAudioElement | null>(null);
+  const removeSoundRef = useRef<HTMLAudioElement | null>(null);
+
+if (!removeSoundRef.current) {
+  removeSoundRef.current = new Audio('/assets/sounds/remove_from_card.mp3');
+}
+
+
+  if (!addSoundRef.current) {
+    addSoundRef.current = new Audio('/assets/sounds/add-to-cart.mp3');
+  }
+
   const cardClassNames = [
     'dish-card',
     isSpecialWeekend && 'dish-card-special',
@@ -63,29 +76,45 @@ const DishCard: React.FC<DishCardProps> = ({
   const bubbleColor = isTakeaway ? '#00BFFF' : '#7B3FBF';
 
   const handleAddToCart = () => {
-  const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
-  const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
+    const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
+    const needsSauce = dish.category === "Plats" && (dish.sauces ?? []).length > 0;
 
-  const missingComplement = needsComplement && !selectedComplement;
-  const missingSauce = needsSauce && !selectedSauce;
+    const missingComplement = needsComplement && !selectedComplement;
+    const missingSauce = needsSauce && !selectedSauce;
 
-  if (missingComplement || missingSauce) {
-    const messageParts = [];
-    if (missingComplement) messageParts.push("un accompagnement");
-    if (missingSauce) messageParts.push("une sauce");
+    if (missingComplement || missingSauce) {
+      const messageParts = [];
+      if (missingComplement) messageParts.push("un accompagnement");
+      if (missingSauce) messageParts.push("une sauce");
 
-    alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
-    return;
-  }
+      alert(`Veuillez sélectionner ${messageParts.join(" et ")} avant d’ajouter ce plat au panier.`);
+      return;
+    }
 
-  // Animation
-  setShowFlyImage(true);
-  setTimeout(() => setShowFlyImage(false), 1000); // durée de l'animation
+    // Jouer le son à l'ajout
+    if (addSoundRef.current) {
+      addSoundRef.current.pause();
+      addSoundRef.current.currentTime = 0;
+      addSoundRef.current.play().catch(() => {
+        // En cas d'erreur (autoplay bloqué), rien à faire
+      });
+    }
+    if (removeSoundRef.current) {
+  removeSoundRef.current.pause();
+  removeSoundRef.current.currentTime = 0;
+  removeSoundRef.current.play().catch(() => {
+    // autoplay bloqué, ignorer l'erreur
+  });
+}
 
-  // Ajout au panier
-  addToCart({ ...dish, selectedComplement, selectedSauce, isTakeaway, price: displayedPrice });
-};
 
+    // Animation
+    setShowFlyImage(true);
+    setTimeout(() => setShowFlyImage(false), 1000);
+
+    // Ajout au panier
+    addToCart({ ...dish, selectedComplement, selectedSauce, isTakeaway, price: displayedPrice });
+  };
 
   return (
     <div className={cardClassNames}>
@@ -258,17 +287,30 @@ const DishCard: React.FC<DishCardProps> = ({
           </button>
 
           <button
-            className="dish-button remove-button"
-            onClick={() => removeFromCart({
-              ...dish,
-              selectedComplement,
-              selectedSauce,
-              isTakeaway
-            })}
-          >
-            <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
-            Enlever
-          </button>
+  className="dish-button remove-button"
+  onClick={() => {
+    // Joue le son de suppression
+    if (removeSoundRef.current) {
+      removeSoundRef.current.pause();
+      removeSoundRef.current.currentTime = 0;
+      removeSoundRef.current.play().catch(() => {
+        // autoplay bloqué, ignorer
+      });
+    }
+
+    // Enlève du panier
+    removeFromCart({
+      ...dish,
+      selectedComplement,
+      selectedSauce,
+      isTakeaway
+    });
+  }}
+>
+  <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
+  Enlever
+</button>
+
 
           <button className="dish-button details-button" onClick={() => setShowDetails(prev => !prev)}>
             <FontAwesomeIcon icon={faClone} className="button-icon" />
@@ -277,11 +319,10 @@ const DishCard: React.FC<DishCardProps> = ({
         </div>
       </div>
       {showFlyImage && (
-  <div className="fly-popup">
-    <img src={dish.image} alt="Produit ajouté" className="fly-popup-image" />
-  </div>
-)}
-
+        <div className="fly-popup">
+          <img src={dish.image} alt="Produit ajouté" className="fly-popup-image" />
+        </div>
+      )}
     </div>
   );
 };
