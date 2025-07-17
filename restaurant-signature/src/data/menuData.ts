@@ -648,7 +648,7 @@ const menuData: Dish[] = [
 },
   {
   id: 657,
-  name: "Grande Guinness 65cl",
+  name: "Grande Guinness Cameroun 65cl",
   description: "Bière stout irlandaise au goût corsé et crémeux",
   takeawayPrice: 8.50,
   price: 8.90,
