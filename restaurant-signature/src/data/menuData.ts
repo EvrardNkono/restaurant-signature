@@ -1051,14 +1051,14 @@ const menuData: Dish[] = [
   name: "Desperados 65cl",
   description: "Bière aromatisée à la tequila, bouteille de 65 cl",
   takeawayPrice: 6.50,
-  price: 6.90,
+  price: 7.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
   image: "/assets/images/Boissons/desperados-65cl.png",
   details: "Une bière originale aux notes épicées et fraîches, parfaite pour les fêtes.",
   promoPack: {
     quantity: 3,
-    price: 19.00
+    price: 20.90
   }
 },
 {
