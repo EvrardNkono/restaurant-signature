@@ -665,8 +665,8 @@ const menuData: Dish[] = [
     id: 30,
     name: "Vimto",
     description: "Boisson fruitée pétillante à base de fruits rouges",
-    takeawayPrice: 1.20,
-    price: 1.50,
+    takeawayPrice: 3.50,
+    price: 4.00,
     category: "Boissons",
     image: "/assets/images/Boissons/vimto.webp",
     subCategory: "soda afrique",
@@ -807,7 +807,7 @@ const menuData: Dish[] = [
   details: "Un soda sucré et coloré, star des fêtes camerounaises et ivoiriennes."
 },
 
-{
+{ 
   id: 407,
   name: "Fanta ",
   description: "Boisson gazeuse au citron, version Afrique",
