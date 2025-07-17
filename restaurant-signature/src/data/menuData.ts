@@ -1024,7 +1024,7 @@ const menuData: Dish[] = [
   price: 4.90,
   category: "Boissons",
   subCategory: "boissons alcoolisées",
-  image: "/assets/images/Boissons/heineken-65cl.jpg",
+  image: "/assets/images/Boissons/heineken-65cl.png",
   details: "Goût équilibré avec une légère amertume, parfaite pour toutes occasions.",
   promoPack: {
     quantity: 3,
