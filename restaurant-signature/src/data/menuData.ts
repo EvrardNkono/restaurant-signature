@@ -402,6 +402,86 @@ const menuData: Dish[] = [
     image: "assets/images/Boissons/cocacola.png",
     details: "La boisson pétillante classique, toujours servie bien fraîche pour étancher la soif."
   },
+
+  {
+  id: 2031,
+  name: "Soda Royal Saveur Ananas",
+  description: "Soda pétillant au goût exotique d’ananas, idéal pour se rafraîchir",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_ananas.png",
+  details: "Un soda fruité et rafraîchissant, parfait pour une pause tropicale."
+},
+{
+  id: 2032,
+  name: "Soda Royal Saveur Tropical",
+  description: "Explosion de saveurs tropicales dans un soda pétillant",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_tropical.png",
+  details: "Un mélange fruité intense qui évoque les plages ensoleillées."
+},
+{
+  id: 2356,
+  name: "Soda Royal Saveur Kampagne",
+  description: "Soda au goût doux et rafraîchissant, une saveur unique",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_kampagne.png",
+  details: "Une recette spéciale, aux notes subtiles pour une sensation de fraîcheur."
+},
+{
+  id: 2456,
+  name: "Soda Royal Saveur Banane",
+  description: "Soda pétillant au goût doux et fruité de banane",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_banane.png",
+  details: "Un soda original et gourmand, pour les amateurs de saveurs sucrées."
+},
+{
+  id: 2958,
+  name: "Soda Royal Saveur Anis",
+  description: "Soda rafraîchissant à la saveur délicate d’anis",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_anis.png",
+  details: "Un soda unique, au goût fin et légèrement épicé."
+},
+{
+  id: 2162,
+  name: "Soda Royal Saveur Grenadine",
+  description: "Soda fruité à la saveur sucrée de grenadine",
+  takeawayPrice: 1.20,
+  price: 1.50,
+  category: "Boissons",
+  subCategory: "sodas",
+  image: "assets/images/Boissons/soda_royal_grenadine.png",
+  details: "Une boisson pétillante et colorée, pour une pause pleine de douceur."
+},
+{
+  id: 2028,
+  name: "Chenet Cabernet Rouge",
+  description: "Vin rouge élégant, aux arômes riches et fruités, idéal pour accompagner vos plats",
+  takeawayPrice: 7.50,
+  price: 8.00,
+  category: "Boissons",
+  subCategory: "boissons alcoolisées",
+  image: "/assets/images/Boissons/chenet_cabernet_rouge.png",
+  details: "Un vin français raffiné, parfait pour un moment de détente ou un repas entre amis."
+},
+
+
   {
     id: 21,
     name: "Orangina",
