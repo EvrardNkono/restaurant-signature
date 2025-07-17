@@ -470,7 +470,7 @@ const menuData: Dish[] = [
   details: "Une boisson pétillante et colorée, pour une pause pleine de douceur."
 },
 {
-  id: 2028,
+  id: 20238,
   name: "Chenet Cabernet Rouge 25cl",
   description: "Vin rouge élégant, aux arômes riches et fruités, idéal pour accompagner vos plats",
   takeawayPrice: 4.50,
@@ -482,7 +482,7 @@ const menuData: Dish[] = [
 },
 
 {
-  id: 2028,
+  id: 20288,
   name: "Chenet Cabernet Blanc 25cl",
   description: "Vin rouge élégant, aux arômes riches et fruités, idéal pour accompagner vos plats",
   takeawayPrice: 4.50,
