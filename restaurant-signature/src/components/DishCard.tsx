@@ -74,6 +74,8 @@ if (!removeSoundRef.current) {
     : dish.price;
 
   const bubbleColor = isTakeaway ? '#00BFFF' : '#7B3FBF';
+  
+
 
   const handleAddToCart = () => {
     const needsComplement = dish.category === "Plats" && (dish.complements ?? []).length > 0;
@@ -135,7 +137,9 @@ if (!removeSoundRef.current) {
               <span className="chef-price-text" style={{ color: medalColor }}>
                 {formatPrice(displayedPrice)}
               </span>
+              
             </>
+            
           ) : isSpecialWeekend ? (
             <>
               <FontAwesomeIcon
@@ -151,6 +155,7 @@ if (!removeSoundRef.current) {
           )}
         </div>
       </div>
+      
 
       <div className={`dish-image-wrapper ${showDetails ? 'show-details' : ''}`}>
         <img src={dish.image} alt={dish.name} className="dish-image" />
@@ -158,11 +163,29 @@ if (!removeSoundRef.current) {
           <p>{dish.details || "Pas de détails disponibles."}</p>
         </div>
       </div>
+      
 
       <div className="dish-info">
         <h3 className="dish-name" style={{ color: '#7B3FBF' }}>{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
+        {dish.promoPack && (
+  <div
+    style={{
+      marginTop: '1rem',
+      backgroundColor: '#f4edfa',
+      border: '1px solid #d4b5f9',
+      borderRadius: '8px',
+      padding: '0.7rem 1rem',
+      color: '#bf3faeff',
+      fontWeight: '600',
+      textAlign: 'center'
+    }}
+  >
+  {dish.promoPack.quantity} bières pour seulement {formatPrice(dish.promoPack.price)} !
+  </div>
+)}
 
+          
         {dish.takeawayPrice !== undefined && (
           <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
             <label style={{ fontWeight: '600', color: '#5a2d91', marginRight: '1rem' }}>
@@ -187,7 +210,7 @@ if (!removeSoundRef.current) {
             </label>
           </div>
         )}
-
+        
         {dish.category === "Plats" && dish.complements && dish.complements.length > 0 && (
           <div className="dish-complements" style={{ marginTop: '1rem' }}>
             <label htmlFor={`complements-select-${dish.id}`} style={{ fontWeight: '600', color: '#5a2d91' }}>
