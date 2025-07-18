@@ -168,8 +168,26 @@ if (!removeSoundRef.current) {
       <div className="dish-info">
         <h3 className="dish-name" style={{ color: '#7B3FBF' }}>{dish.name}</h3>
         <p className="dish-description">{dish.description}</p>
-        {dish.promoPack && (
-  <div
+       {dish.promoPack && (
+  <button
+    onClick={() => {
+      // Joue le son d'ajout au panier
+      if (addSoundRef.current) {
+        addSoundRef.current.pause();
+        addSoundRef.current.currentTime = 0;
+        addSoundRef.current.play().catch(() => {
+          // ignore autoplay errors
+        });
+      }
+      
+      // On ajoute la quantité promo une par une au panier avec le prix promo
+      for (let i = 0; i < dish.promoPack!.quantity; i++) {
+        addToCart({
+          ...dish,
+          price: dish.promoPack!.price,
+        });
+      }
+    }}
     style={{
       marginTop: '1rem',
       backgroundColor: '#f4edfa',
@@ -178,12 +196,18 @@ if (!removeSoundRef.current) {
       padding: '0.7rem 1rem',
       color: '#bf3faeff',
       fontWeight: '600',
-      textAlign: 'center'
+      textAlign: 'center',
+      cursor: 'pointer'
     }}
+    onMouseOver={e => (e.currentTarget.style.backgroundColor = '#e6dbf7')}
+    onMouseOut={e => (e.currentTarget.style.backgroundColor = '#f4edfa')}
   >
-  Formule: {dish.promoPack.quantity} bières pour seulement {formatPrice(dish.promoPack.price)} !
-  </div>
+    🎁 Ajouter {dish.promoPack.quantity} pour {formatPrice(dish.promoPack.price)} !
+  </button>
 )}
+
+
+
 
           
         {dish.takeawayPrice !== undefined && (
