@@ -26,6 +26,7 @@ export interface DishCardProps {
   medalColor?: string;
 }
 
+
 const formatPrice = (price: number) =>
   price.toLocaleString('fr-FR', {
     style: 'currency',
@@ -48,7 +49,7 @@ const DishCard: React.FC<DishCardProps> = ({
   const [isTakeaway, setIsTakeaway] = useState(false);
   const [showFlyImage, setShowFlyImage] = useState(false);
 
-  const { addToCart, removeFromCart } = useCart();
+  const { addToCart, clearCart } = useCart();
 
   // Ref pour audio externe
   const addSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -333,30 +334,22 @@ if (!removeSoundRef.current) {
             Ajouter
           </button>
 
-          <button
-  className="dish-button remove-button"
-  onClick={() => {
-    // Joue le son de suppression
-    if (removeSoundRef.current) {
-      removeSoundRef.current.pause();
-      removeSoundRef.current.currentTime = 0;
-      removeSoundRef.current.play().catch(() => {
-        // autoplay bloqué, ignorer
-      });
-    }
-
-    // Enlève du panier
-    removeFromCart({
-      ...dish,
-      selectedComplement,
-      selectedSauce,
-      isTakeaway
-    });
-  }}
->
-  <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
-  Enlever
-</button>
+           <button
+      className="dish-button remove-button"
+      onClick={() => {
+        // Joue le son de suppression
+        if (removeSoundRef?.current) {
+          removeSoundRef.current.pause();
+          removeSoundRef.current.currentTime = 0;
+          removeSoundRef.current.play().catch(() => {});
+        }
+        // Vide le panier
+        clearCart();
+      }}
+    >
+      <FontAwesomeIcon icon={faMinusCircle} className="button-icon" />
+      enlever
+    </button>
 
 
           <button className="dish-button details-button" onClick={() => setShowDetails(prev => !prev)}>
