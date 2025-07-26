@@ -43,7 +43,7 @@ const Banner = () => {
 
       <div className="banner-content">
         <h1 className="bienvenue">Bienvenue sur Restaurant Signature</h1>
-        <p>Découvrez nos saveurs exotiques</p>
+        <p>Découvrez nos saveurs exotiques afro-caribéennes</p>
 
         <button className="banner-button" onClick={() => navigate('/menu')}>
           <FontAwesomeIcon icon={faUtensils} className="icon purple-icon" />
