@@ -1,0 +1,155 @@
+/* --- SECTION PRINCIPALE --- */
+.carte-restaurant {
+  width: 100%;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* --- BANNIERE TERRACOTTA UNIE --- */
+.carte-banner-box {
+  width: 100%;
+  background-color: #2D2422; /* Ton Terracotta */
+  padding: 80px 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 70px;
+  box-sizing: border-box;
+}
+
+/* --- HEADER DANS LA BANNIERE --- */
+.carte-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header-seal {
+  width: 55px; height: 55px;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  color: #D4AF37; font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 1.4rem;
+}
+
+.carte-badge {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.carte-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  color: #FCF9F5; /* Blanc pour le contraste */
+  margin: 15px 0;
+  text-transform: uppercase;
+}
+
+.header-double-line {
+  width: 80px; height: 4px;
+  border-top: 1px solid #D4AF37;
+  border-bottom: 1px solid #D4AF37;
+  margin: 0 auto;
+}
+
+/* --- FILTRES DANS LA BANNIERE --- */
+.carte-filtres {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
+}
+
+.filter-btn {
+  padding: 10px 25px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: transparent;
+  color: #FCF9F5;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn.active, .filter-btn:hover {
+  background: #D4AF37;
+  color: #2D2422;
+  border-color: #D4AF37;
+}
+
+/* --- GRILLE SUR FOND BLANC --- */
+.plats-grid {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 50px;
+  padding: 0 10% 100px;
+}
+
+/* --- STRUCTURE DE LA CARTE --- */
+.plat-card-outer {
+  position: relative;
+  padding: 12px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gold-thick-border {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid #D4AF37;
+  z-index: 1;
+}
+
+.plat-card-inner {
+  position: relative;
+  z-index: 2;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.plat-image-container { position: relative; height: 250px; overflow: hidden; }
+.plat-img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
+
+.price-badge-luxury {
+  position: absolute; top: 0; right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: #2D2422;
+  padding: 8px 15px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  border-left: 2px solid #D4AF37;
+  border-bottom: 2px solid #D4AF37;
+}
+
+.plat-details-terracotta {
+  background-color: #2D2422;
+  padding: 30px 20px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.plat-details-terracotta h3 { color: #D4AF37; font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 5px; }
+.title-underline-gold { width: 30px; height: 1px; background: #D4AF37; margin: 10px auto; }
+.special-label-white { color: #FFFFFF; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 3px; display: block; margin-bottom: 12px; }
+.description-text-light { color: #FFFFFF; font-size: 0.9rem; line-height: 1.6; font-weight: 300; opacity: 0.8; margin-bottom: 20px; }
+.card-footer-ornament-gold { color: #D4AF37; font-size: 0.7rem; letter-spacing: 6px; }
+
+.plat-card-outer:hover { transform: translateY(-10px); }
+.plat-card-outer:hover .plat-img { transform: scale(1.1); }
+
+@media (max-width: 768px) {
+  .carte-banner-box { padding: 60px 20px; }
+  .plats-grid { grid-template-columns: 1fr; padding: 0 20px 60px; }
+}

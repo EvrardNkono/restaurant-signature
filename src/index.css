@@ -1,0 +1,73 @@
+/* --- RESET COMPLET --- */
+* {
+  box-sizing: border-box; /* Crucial : empêche les débordements */
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-family: 'Poppins', system-ui, sans-serif;
+  line-height: 1.5;
+  background-color: #FCF9F5; /* Ton fond Ivoire */
+  color: #2D2422; /* Ton Terracotta */
+  
+  /* Supprime les filtres de couleurs sombres par défaut de Vite */
+  color-scheme: light; 
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+  /* ON SUPPRIME LE FLEX ET LE PLACE-ITEMS CENTER ICI */
+  display: block; 
+  overflow-x: hidden; /* Sécurité pour éviter le scroll horizontal */
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --- STRUCTURE DES SECTIONS --- */
+main {
+  flex: 1; /* Pousse le footer tout en bas si la page est courte */
+  width: 100%;
+}
+
+section {
+  width: 100%; /* Force chaque section à prendre toute la largeur */
+}
+
+/* --- LE FOOTER (FORCE PLEINE LARGEUR) --- */
+footer {
+  width: 100%;
+  margin: 0;
+}
+
+/* --- TYPOGRAPHIE --- */
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* --- NETTOYAGE DES STYLES VITE PAR DÉFAUT --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* On force le mode clair même si l'utilisateur est en mode sombre 
+       pour respecter ta charte Terracotta & Or */
+    color: #2D2422;
+    background-color: #FCF9F5;
+  }
+}

@@ -1,0 +1,168 @@
+.why-us-section {
+  width: 100%;
+  padding: 120px 10%; /* Marges G/D exigées */
+  background-color: #FCF9F5;
+  position: relative;
+  overflow: hidden; /* Pour couper les demi-cercles proprement */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- DEMI-CERCLES DÉLICATS --- */
+.decoration-half-circle {
+  position: absolute;
+  width: 300px;
+  height: 600px;
+  border: 1px solid rgba(212, 175, 55, 0.15); /* Or très subtil */
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.decoration-half-circle.left {
+  left: -150px;
+  border-radius: 0 300px 300px 0;
+}
+
+.decoration-half-circle.right {
+  right: -150px;
+  border-radius: 300px 0 0 300px;
+}
+
+/* --- HEADER --- */
+.why-us-header {
+  text-align: center;
+  margin-bottom: 80px;
+  z-index: 2;
+}
+
+.why-us-badge {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.why-us-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #2D2422;
+  margin-bottom: 20px;
+}
+
+.why-us-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.ornament-line {
+  width: 40px;
+  height: 1px;
+  background-color: rgba(212, 175, 55, 0.4);
+}
+
+.ornament-diamond {
+  width: 6px;
+  height: 6px;
+  background-color: #E2725B;
+  transform: rotate(45deg);
+}
+
+/* --- GRILLE ET CARTES --- */
+.why-us-grid {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 60px; /* Plus d'espace entre les éléments */
+  z-index: 2;
+}
+
+.why-us-item-wrapper {
+  position: relative;
+  padding: 20px; /* L'espace entre le cadre et le composant */
+}
+
+/* Le cadre doré qui "flotte" derrière */
+.floating-gold-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #D4AF37;
+  opacity: 0.3;
+  z-index: 1;
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+/* Le contenu de la carte */
+.why-us-card {
+  background: white;
+  padding: 40px 30px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 15px 35px rgba(45, 36, 34, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.why-us-item-wrapper:hover .floating-gold-frame {
+  transform: scale(1.05) rotate(1deg);
+  opacity: 0.8;
+}
+
+/* --- TYPOGRAPHIE ET ICONES --- */
+.why-us-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.why-us-item-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #2D2422;
+  margin-bottom: 15px;
+}
+
+.why-us-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #2D2422;
+  opacity: 0.7;
+  font-weight: 300;
+}
+
+.item-number {
+  position: absolute;
+  bottom: 15px;
+  right: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: rgba(212, 175, 55, 0.1);
+  font-style: italic;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .why-us-section {
+    padding: 80px 40px; /* Marges de sécurité sur mobile */
+  }
+  
+  .decoration-half-circle {
+    display: none; /* On épure sur mobile */
+  }
+
+  .why-us-grid {
+    gap: 40px;
+  }
+}

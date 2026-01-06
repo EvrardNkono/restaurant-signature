@@ -1,0 +1,44 @@
+/* 1. On s'assure que le calcul des largeurs inclut les bordures et paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 2. On force l'élément racine et le body à 100% de la largeur réelle */
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* Empêche le scroll horizontal indésirable */
+  background-color: var(--ivory);
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: var(--charcoal);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 3. Le main prend toute la largeur */
+main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 4. C'est ici que la magie opère : on crée un conteneur pour le contenu 
+   mais la section elle-même peut avoir un fond qui prend 100% de la largeur */
+.full-width-section {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Centre le contenu à l'intérieur */
+}
+
+.container {
+  width: 100%;
+  max-width: 1500px; /* Largeur max élégante */
+  padding: 0 2rem;
+}

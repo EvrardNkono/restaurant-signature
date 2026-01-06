@@ -1,0 +1,155 @@
+/* Section principale */
+.signature-section {
+  width: 100%;
+  padding: 30px 0%; /* 10% de marge fixe à gauche et à droite */
+  background-color: #FCF9F5; /* Ivoire */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Conteneur interne qui limite la largeur sur très grands écrans */
+.signature-inner-content {
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+/* --- PARTIE IMAGE --- */
+.signature-image-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.signature-image {
+  width: 100%;
+  height: 550px;
+  object-fit: cover;
+  border-radius: 2px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 25px 25px 70px rgba(45, 36, 34, 0.15);
+}
+
+/* Artifice : Le cadre fin doré */
+.signature-frame {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #D4AF37; /* Or */
+  z-index: 1;
+}
+
+/* --- PARTIE TEXTE --- */
+.signature-text-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.signature-badge {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+.signature-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #2D2422;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.signature-accent {
+  width: 50px;
+  height: 3px;
+  background-color: #E2725B; /* Terracotta */
+  margin-bottom: 2rem;
+}
+
+.signature-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: #2D2422;
+  font-style: italic;
+  opacity: 0.85;
+  margin-bottom: 2.5rem;
+}
+
+.signature-button {
+  background: none;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #2D2422;
+  cursor: pointer;
+  padding-bottom: 8px;
+  position: relative;
+  width: fit-content;
+}
+
+.signature-button .button-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 35px;
+  height: 2px;
+  background-color: #D4AF37;
+  transition: width 0.3s ease;
+}
+
+.signature-button:hover .button-line {
+  width: 100%;
+}
+
+/* --- LOGIQUE D'INVERSION --- */
+.signature-section.reverse .signature-inner-content {
+  flex-direction: row-reverse;
+}
+
+.signature-section.reverse .signature-frame {
+  left: auto;
+  right: -20px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+  .signature-section {
+    padding: 80px 5%; /* On réduit un peu la marge sur tablette */
+  }
+  .signature-inner-content {
+    gap: 40px;
+  }
+  .signature-title { font-size: 2.2rem; }
+}
+
+@media (max-width: 768px) {
+  .signature-section {
+    padding: 60px 24px; /* Marge fixe sur mobile */
+  }
+  .signature-inner-content {
+    flex-direction: column !important;
+    text-align: center;
+  }
+  .signature-text-block {
+    align-items: center;
+  }
+  .signature-image {
+    height: 380px;
+  }
+  .signature-frame {
+    top: -15px;
+    left: -15px; /* On réduit le décalage sur mobile */
+  }
+}

@@ -1,0 +1,187 @@
+/* --- SECTION PRINCIPALE --- */
+.cart-page {
+  width: 100%;
+  background-color: #FFFFFF;
+  min-height: 80vh;
+}
+
+/* --- BANNIERE TERRACOTTA --- */
+.cart-banner-box {
+  width: 100%;
+  background-color: #2D2422;
+  padding: 60px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.cart-header { text-align: center; }
+
+.header-seal {
+  width: 50px; height: 50px;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+  color: #D4AF37; font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.cart-main-title {
+  color: #FCF9F5;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  text-transform: uppercase;
+  margin: 10px 0;
+}
+
+/* --- CONTENU DU PANIER --- */
+.cart-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 5% 100px;
+}
+
+/* --- TABLEAU RÉCAPITULATIF (Grille à 3 colonnes) --- */
+.cart-table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr; /* Harmonisé avec le contenu */
+  padding: 15px;
+  border-bottom: 2px solid #D4AF37;
+  font-family: 'Poppins', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  color: #2D2422;
+  font-weight: 700;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  padding: 25px 15px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s ease;
+}
+
+.cart-item:hover {
+  background-color: #fcf9f5;
+}
+
+.item-info h4 {
+  font-family: 'Playfair Display', serif;
+  color: #2D2422;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.item-category {
+  font-size: 0.7rem;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.item-price {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: #2D2422;
+}
+
+/* --- BOUTON SUPPRIMER --- */
+.cart-remove-btn {
+  background: transparent;
+  border: 1px solid rgba(139, 0, 0, 0.3);
+  color: #8b0000;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.cart-remove-btn:hover {
+  background-color: #8b0000;
+  color: white;
+  border-color: #8b0000;
+}
+
+/* --- RÉSUMÉ DE COMMANDE --- */
+.cart-summary {
+  margin-top: 50px;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  background-color: #2D2422; /* Inversion de couleur pour le focus final */
+  padding: 35px;
+  color: #FCF9F5;
+  border-bottom: 5px solid #D4AF37;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-family: 'Poppins', sans-serif;
+  opacity: 0.9;
+}
+
+.summary-line.total {
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  padding-top: 20px;
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #D4AF37;
+  opacity: 1;
+}
+
+.checkout-btn {
+  width: 100%;
+  padding: 18px;
+  background-color: #D4AF37;
+  color: #2D2422;
+  border: none;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: 0.3s;
+}
+
+.checkout-btn:hover {
+  background-color: #FCF9F5;
+  color: #2D2422;
+  transform: translateY(-2px);
+}
+
+/* --- ÉTAT VIDE --- */
+.empty-cart {
+  text-align: center;
+  padding: 80px 0;
+}
+
+.title-underline-gold {
+  width: 50px;
+  height: 2px;
+  background: #D4AF37;
+  margin: 20px auto;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .cart-table-header { display: none; }
+  .cart-item {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .cart-remove-btn { margin: 0 auto; }
+  .cart-summary { margin: 40px auto 0; }
+}

@@ -1,0 +1,143 @@
+.hero {
+  position: relative;
+  min-height: 80vh; /* Plus grand pour un aspect majestueux */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 5%;
+  /* Image de fond avec un dégradé sombre pour faire ressortir l'Or et le Terracotta */
+  background: linear-gradient(rgba(45, 36, 34, 0.7), rgba(45, 36, 34, 0.7)), 
+              url('src/assets/images/hero.jpg') center/cover no-repeat;
+  overflow: hidden;
+}
+
+.hero-container {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  z-index: 2;
+}
+
+/* --- PARTIE GAUCHE : L'IMAGE --- */
+.hero-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  perspective: 1000px; /* Effet de profondeur */
+}
+
+.image-circle {
+  width: 380px;
+  height: 380px;
+  border: 1px solid var(--gold); /* Plus fin pour l'élégance */
+  padding: 15px; /* Espace entre le cercle or et l'image */
+  border-radius: 50%;
+  position: relative;
+  transition: var(--transition);
+}
+
+/* Petit cercle décoratif en arrière-plan */
+.image-circle::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  border: 1px solid var(--terracotta);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.image-circle img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: saturate(1.1);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+}
+
+/* --- PARTIE DROITE : LE TEXTE --- */
+.hero-right {
+  flex: 1;
+  text-align: left;
+}
+
+.hero-right h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem); /* Taille fluide selon l'écran */
+  color: var(--ivory);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+
+.hero-right h1 span {
+  display: block;
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.8em;
+}
+
+.hero-right p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--ivory);
+  max-width: 500px;
+  margin-bottom: 2.5rem;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+}
+
+/* --- BOUTON SIGNATURE --- */
+.reserve-btn {
+  padding: 18px 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--ivory);
+  background-color: var(--terracotta);
+  border: 1px solid var(--terracotta);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.reserve-btn:hover {
+  background-color: transparent;
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-3px);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 992px) {
+  .hero-container {
+    flex-direction: column-reverse; /* Texte au dessus de l'image sur mobile */
+    text-align: center;
+    gap: 40px;
+  }
+  
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-circle {
+    width: 280px;
+    height: 280px;
+  }
+
+  .hero {
+    padding-top: 140px; /* Plus d'espace pour la navbar mobile */
+  }
+}

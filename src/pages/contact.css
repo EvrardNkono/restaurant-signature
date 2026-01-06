@@ -1,0 +1,153 @@
+.contact-page {
+  width: 100%;
+  background-color: #FFFFFF;
+}
+
+/* --- BANNIERE TERRACOTTA --- */
+.contact-banner-box {
+  width: 100%;
+  background-color: #2D2422; /* Terracotta sombre */
+  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 80px;
+}
+
+.contact-header { text-align: center; }
+
+.header-seal {
+  width: 55px; height: 55px;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+  color: #D4AF37; font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 1.4rem;
+}
+
+.contact-badge {
+  color: #D4AF37; text-transform: uppercase;
+  letter-spacing: 5px; font-size: 0.75rem;
+}
+
+.contact-main-title {
+  color: #FCF9F5;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  text-transform: uppercase;
+  margin: 15px 0;
+}
+
+.header-double-line {
+  width: 80px; height: 4px;
+  border-top: 1px solid #D4AF37; border-bottom: 1px solid #D4AF37;
+  margin: 0 auto;
+}
+
+/* --- GRILLE DE CONTACT --- */
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10% 100px;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 80px;
+  align-items: start;
+}
+
+/* --- INFOS --- */
+.gold-section-title {
+  font-family: 'Playfair Display', serif;
+  color: #2D2422;
+  font-size: 2rem;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #D4AF37;
+  display: inline-block;
+}
+
+.info-item { margin-bottom: 30px; }
+
+.info-item h4 {
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.info-item p { color: #555; line-height: 1.6; }
+
+.contact-socials {
+  margin-top: 40px;
+  color: #D4AF37;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+
+/* --- FORMULAIRE --- */
+.contact-form-wrapper {
+  position: relative;
+  padding: 30px;
+}
+
+.contact-form {
+  position: relative;
+  z-index: 2;
+  background: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+
+.form-group label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #2D2422;
+  font-weight: 600;
+}
+
+.form-group input, .form-group textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: #D4AF37;
+}
+
+.submit-btn {
+  background: #2D2422;
+  color: #D4AF37;
+  border: none;
+  padding: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.submit-btn:hover {
+  background: #3d312e;
+  letter-spacing: 3px;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 992px) {
+  .contact-grid { grid-template-columns: 1fr; gap: 50px; }
+  .contact-container { padding: 0 5% 60px; }
+}

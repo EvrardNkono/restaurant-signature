@@ -1,0 +1,183 @@
+:root {
+  --terracotta: #E2725B;
+  --terracotta-dark: #C04E35;
+  --gold: #D4AF37;
+  --gold-light: #F9E4B7;
+  --ivory: #FCF9F5;
+  --dark: #2D2422;
+  --transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(252, 249, 245, 0.95); /* Ivoire avec légère transparence */
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- LOGO --- */
+.navbar-logo {
+  font-family: 'Playfair Display', serif; /* Assure-toi d'importer une police Serif élégante */
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.navbar-logo span {
+  color: var(--terracotta);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* --- LINKS --- */
+.navbar-links {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: var(--dark);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: var(--transition);
+  position: relative;
+}
+
+/* Soulignement élégant en Or au survol */
+.navbar-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--gold);
+  transition: var(--transition);
+}
+
+.navbar-links a:hover {
+  color: var(--terracotta);
+}
+
+.navbar-links a:hover::after {
+  width: 100%;
+}
+
+/* --- BURGER MENU --- */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.burger span {
+  width: 24px;
+  height: 2px;
+  background: var(--terracotta);
+  border-radius: 10px;
+  transition: var(--transition);
+  position: relative;
+}
+
+/* --- RESPONSIVE (Mobile) --- */
+@media (max-width: 768px) {
+  .burger {
+    display: flex;
+  }
+
+  .navbar-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 80%;
+    background: var(--dark); /* Fond sombre pour le contraste mobile */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition);
+    gap: 2rem;
+  }
+
+  .navbar-links.open {
+    right: 0;
+  }
+
+  .navbar-links a {
+    color: var(--ivory);
+    font-size: 1.2rem;
+  }
+
+  /* Animation du burger en "X" */
+  .burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); background: var(--gold); }
+  .burger.open span:nth-child(2) { opacity: 0; }
+  .burger.open span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); background: var(--gold); }
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cart-icon-link {
+  position: relative;
+  color: #2D2422; /* Ton ton sombre signature */
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.cart-icon-link:hover {
+  color: #D4AF37; /* Or au survol */
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: #D4AF37; /* Badge Or */
+  color: #2D2422;
+  font-size: 0.7rem;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Ajustement pour le mobile si besoin */
+@media (max-width: 768px) {
+  .navbar-actions {
+    gap: 15px;
+  }
+}

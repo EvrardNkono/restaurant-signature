@@ -1,0 +1,147 @@
+.highlights-section {
+  width: 100%;
+  /* Sur grand écran : 10% de marge G/D */
+  padding: 20px 10%; 
+  background-color: #FCF9F5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.highlights-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.highlights-badge {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.highlights-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  color: #2D2422;
+}
+
+/* --- GRILLE --- */
+.highlights-grid {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  /* On définit une taille minimum pour que les cartes restent fines */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 50px;
+}
+
+.highlight-item-container {
+  position: relative;
+  /* Espace interne pour que l'artifice doré ne soit pas coupé */
+  padding: 15px; 
+}
+
+.highlight-card {
+  background: white;
+  position: relative;
+  z-index: 2;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.highlight-image-wrapper {
+  position: relative;
+  height: 280px; 
+  overflow: hidden;
+}
+
+.highlight-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.highlight-price-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #2D2422;
+  color: #D4AF37;
+  padding: 8px 15px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+}
+
+.highlight-info {
+  padding: 25px 20px;
+  text-align: center;
+}
+
+.highlight-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: #2D2422;
+  margin-bottom: 10px;
+}
+
+.highlight-line {
+  width: 30px;
+  height: 1px;
+  background-color: #E2725B; /* Terracotta */
+  margin: 0 auto;
+}
+
+.highlight-corner-gold {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  border-top: 1px solid #D4AF37;
+  border-left: 1px solid #D4AF37;
+  z-index: 1;
+}
+
+/* --- RESPONSIVE MOBILE AVEC MARGES --- */
+
+@media (max-width: 768px) {
+  .highlights-section {
+    /* Sur mobile : On force une marge de 40px (20px de chaque côté) 
+       pour que la carte ne touche jamais les bords du téléphone */
+    padding: 60px 40px; 
+  }
+
+  .highlights-grid {
+    /* On force une seule colonne pour que l'image soit bien visible */
+    grid-template-columns: 1fr;
+    gap: 60px; /* Plus d'espace entre les cartes verticalement */
+  }
+
+  .highlight-image-wrapper {
+    height: 240px; /* Un peu plus petit sur mobile pour garder la finesse */
+  }
+
+  .highlight-item-container {
+    padding: 0; /* On simplifie les paddings internes */
+  }
+
+  /* On garde l'angle doré mais plus petit pour le mobile */
+  .highlight-corner-gold {
+    width: 25px;
+    height: 25px;
+    top: -10px;
+    left: -10px;
+  }
+}
+
+/* Pour les tout petits écrans (iPhone SE, etc.) */
+@media (max-width: 400px) {
+  .highlights-section {
+    padding: 50px 30px; /* Légère réduction pour les écrans minuscules */
+  }
+}

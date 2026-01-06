@@ -1,0 +1,37 @@
+/* Réseaux sociaux */
+
+body {
+  background: red !important;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.footer-socials a {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.footer-socials img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+}
+
+.footer-socials a:hover {
+  border-color: var(--gold);
+  background-color: rgba(212, 175, 55, 0.15);
+}
+
+.footer-socials a:hover img {
+  filter: none;
+}
