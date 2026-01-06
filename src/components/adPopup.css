@@ -1,0 +1,127 @@
+/* --- BANNIÈRE FLOTTANTE --- */
+.ad-floating-banner {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 380px;
+  background: #2D2422;
+  border: 1px solid #D4AF37;
+  display: flex;
+  overflow: hidden;
+  z-index: 9999;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.ad-flex-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.ad-image-box {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  background-color: #3d312e; /* Couleur de secours pendant le chargement */
+}
+
+.ad-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block; /* Évite les espaces vides sous l'image */
+}
+
+.ad-content-box {
+  padding: 15px 20px;
+  color: #FCF9F5;
+  flex-grow: 1;
+  position: relative;
+}
+
+.ad-mini-tag {
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  display: block;
+}
+
+.ad-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin: 5px 0;
+  color: #FCF9F5;
+}
+
+.ad-text {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.close-ad-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #D4AF37;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.ad-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #D4AF37;
+  width: 100%;
+  animation: adProgress 15s linear forwards;
+}
+
+@keyframes adProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* --- ANIMATIONS CORRIGÉES --- */
+.slide-in {
+  animation: adSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.slide-out {
+  animation: adSlideOut 0.5s ease-in forwards;
+}
+
+@keyframes adSlideIn {
+  from { 
+    transform: translateX(100%); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes adSlideOut {
+  from { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+  to { 
+    transform: translateX(50px); 
+    opacity: 0; 
+  }
+}
+
+@media (max-width: 480px) {
+  .ad-floating-banner {
+    width: calc(100% - 40px);
+    right: 20px;
+    bottom: 20px;
+  }
+}

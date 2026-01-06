@@ -7,13 +7,20 @@ import Menu from "./pages/Menu";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
-import Chatbot from "./components/Chatbot"; // Import du Chatbot
+import Chatbot from "./components/Chatbot"; 
+import AdPopup from "./components/AdPopup"; // Import du nouveau Popup Publicitaire
 import { CartProvider } from "./context/CartContext";
 
 export default function AppRouter() {
   return (
     <CartProvider>
       <Router>
+        {/* Le Popup s'affichera ici au chargement initial */}
+        <AdPopup 
+          word="SIGNATURE" 
+          image="https://images.unsplash.com/photo-1550966841-3ee3ad359051?auto=format&fit=crop&w=800&q=80" 
+        />
+
         <Navbar />
         
         <main>
@@ -27,7 +34,7 @@ export default function AppRouter() {
           </Routes>
         </main>
 
-        {/* Le Chatbot est placé ici pour flotter au-dessus du contenu sur toutes les pages */}
+        {/* Le Chatbot flotte au-dessus du contenu sur toutes les pages */}
         <Chatbot />
 
         <Footer />
