@@ -4,9 +4,9 @@ import "./Hero.css";
 
 // Tableau d'images pour le cercle
 const heroImages = [
-  "src/assets/images/plat1.jpg",
-  "src/assets/images/plat2.jpg",
-  "src/assets/images/plat3.jpg",
+  "/images/plat1.jpg",
+  "/images/plat2.jpg",
+  "/images/plat3.jpg",
 ];
 
 // Définition du type des props

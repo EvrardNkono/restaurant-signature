@@ -3,15 +3,15 @@ import "../../styles/SignatureCarousel.css";
 
 const slides = [
   {
-    image: "src/assets/images/plat-1.jpg",
+    image: "/images/plat-1.jpg",
     text: "Des produits frais, sublimés avec finesse",
   },
   {
-    image: "src/assets/images/plat-2.jpeg",
+    image: "/images/plat-2.jpeg",
     text: "Une cuisine expressive et généreuse",
   },
   {
-    image: "src/assets/images/poulet-braise.jfif",
+    image: "/images/poulet-braise.jfif",
     text: "Chaque assiette raconte une histoire",
   },
 ];

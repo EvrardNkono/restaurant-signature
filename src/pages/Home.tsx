@@ -18,7 +18,7 @@ export default function Home() {
       <Signature
         title="Notre Signature"
         text="Ici, la cuisine est une expression. Nous mêlons produits de caractère, créativité contemporaine et gourmandise assumée pour offrir une expérience culinaire sincère, élégante et mémorable."
-        image="src/assets/images/signature-illustration.png"
+        image="/images/signature-illustration.png"
       />
 
       {/* CAROUSEL GOURMAND */}
@@ -29,17 +29,17 @@ export default function Home() {
         items={[
           {
             name: "Poisson Braisé Signature",
-            image: "src/assets/images/poisson-braise.jpg",
+            image: "/images/poisson-braise.jpg",
             price: "18€",
           },
           {
             name: "Cocktail Maison Infusé",
-            image: "src/assets/images/cocktail.jpeg",
+            image: "/images/cocktail.jpeg",
             price: "9€",
           },
           {
             name: "Poulet Braisé Fondant",
-            image: "src/assets/images/poulet-braise.jfif",
+            image: "/images/poulet-braise.jfif",
             price: "12€",
           },
         ]}

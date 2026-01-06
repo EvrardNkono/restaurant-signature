@@ -17,7 +17,7 @@ export const carte: Plat[] = [
     description: "Mangue fraîche, avocat, coriandre et citron vert",
     price: "7€",
     category: "Entrée",
-    image: "src/assets/images/salade-mangue.jpg",
+    image: "/images/salade-mangue.jpg",
     label: "Végétarien",
   },
   {
@@ -26,7 +26,7 @@ export const carte: Plat[] = [
     description: "Poulet mariné aux épices exotiques et braisé lentement",
     price: "12€",
     category: "Plat",
-    image: "src/assets/images/poulet-braise.jfif",
+    image: "/images/poulet-braise.jfif",
     label: "Plat du chef",
   },
   {
@@ -35,7 +35,7 @@ export const carte: Plat[] = [
     description: "Cocktail frais aux fruits exotiques",
     price: "9€",
     category: "Boisson",
-    image: "src/assets/images/cocktail.jpeg",
+    image: "/images/cocktail.jpeg",
   },
   {
     id: 4,
