@@ -118,26 +118,48 @@
   transform: translateY(-3px);
 }
 
-/* --- RESPONSIVE --- */
+/* --- RESPONSIVE MOBILE --- */
 @media (max-width: 992px) {
-  .hero-container {
-    flex-direction: column-reverse; /* Texte au dessus de l'image sur mobile */
-    text-align: center;
-    gap: 40px;
+  .hero {
+    height: auto !important;
+    min-height: auto !important; /* Retire l'obligation de prendre tout l'écran */
+    padding: 80px 20px 40px 20px !important; /* Réduit le padding du haut et du bas */
   }
-  
-  .hero-right {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
+  .hero-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important; /* Réduit l'espace entre le cercle et le texte (était à 50px) */
+    padding: 0 !important;
+  }
+
+  .hero-left, .hero-right {
+    flex: none !important;
+    width: 100% !important;
   }
 
   .image-circle {
-    width: 280px;
-    height: 280px;
+
+    width: 220px !important; /* Taille légèrement plus petite pour gagner de la place */
+    height: 220px !important;
+    margin-bottom: 0px !important;
+     margin-top: 30px !important;
   }
 
-  .hero {
-    padding-top: 140px; /* Plus d'espace pour la navbar mobile */
+  .hero-right h1 {
+    font-size: 1.8rem !important; /* Titre un peu plus compact */
+    margin-bottom: 0.8rem !important;
+    margin-top: 10px !important;
+  }
+
+  .hero-right p {
+    font-size: 1rem !important;
+    margin-bottom: 1.5rem !important; /* Rapproche le bouton du texte */
+    line-height: 1.4 !important;
+  }
+
+  .reserve-btn {
+    padding: 14px 30px !important; /* Bouton un peu moins massif sur mobile */
   }
 }

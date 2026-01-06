@@ -16,7 +16,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 70px;
+  margin-bottom: 120px;
   box-sizing: border-box;
 }
 
@@ -65,7 +65,7 @@
 }
 
 .filter-btn {
-  padding: 10px 25px;
+  padding: 30px 25px;
   border: 1px solid rgba(212, 175, 55, 0.5);
   background: transparent;
   color: #FCF9F5;
@@ -89,14 +89,14 @@
   max-width: 1200px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 50px;
-  padding: 0 10% 100px;
+  gap: 80px;
+  padding: 40px 10% 100px;
 }
 
 /* --- STRUCTURE DE LA CARTE --- */
 .plat-card-outer {
   position: relative;
-  padding: 12px;
+  padding: 30px;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
