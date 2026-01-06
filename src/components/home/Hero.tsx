@@ -1,6 +1,6 @@
 // Hero.tsx
 import { useState, useEffect } from "react";
-import "./hero.css";
+import "./Highlights.css";
 
 // Tableau d'images pour le cercle
 const heroImages = [
