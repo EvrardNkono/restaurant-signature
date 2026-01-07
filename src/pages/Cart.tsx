@@ -8,6 +8,7 @@ export default function Cart() {
   
   // États de logique métier
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
+  const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in"); // Nouveau : sur place ou emporter
   const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
   
@@ -16,23 +17,19 @@ export default function Cart() {
   const [deliveryTime, setDeliveryTime] = useState("");
   const [minTime, setMinTime] = useState("");
 
-  // Calcul de l'heure minimale autorisée (Maintenant + 1h30)
   useEffect(() => {
     const updateMinTime = () => {
       const now = new Date();
-      now.setMinutes(now.getMinutes() + 90); // Ajoute 1h30
-      
+      now.setMinutes(now.getMinutes() + 90); 
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const formattedTime = `${hours}:${minutes}`;
-      
       setMinTime(formattedTime);
-      // Par défaut, on place le curseur sur l'heure min si rien n'est choisi
       if (!deliveryTime) setDeliveryTime(formattedTime);
     };
 
     updateMinTime();
-    const interval = setInterval(updateMinTime, 60000); // Mise à jour auto chaque minute
+    const interval = setInterval(updateMinTime, 60000);
     return () => clearInterval(interval);
   }, [deliveryTime]);
 
@@ -107,6 +104,23 @@ export default function Cart() {
                 </div>
 
                 <div className="dynamic-form-container">
+                  {/* CAS : SUR PLACE (Choix Emporter / Sur Place + Paiement) */}
+                  {orderMode === "on_site" && (
+                    <div className="form-fade-in">
+                      <p className="form-instruction">Type de consommation :</p>
+                      <div className="selection-grid small" style={{marginBottom: '20px'}}>
+                        <button className={`select-btn ${consumeMode === "dine_in" ? "active" : ""}`} onClick={() => setConsumeMode("dine_in")}>🍽️ À consommer sur place</button>
+                        <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
+                      </div>
+
+                      <p className="form-instruction">Souhaitez-vous régler maintenant ?</p>
+                      <div className="selection-grid small">
+                        <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
+                        <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* IDENTITÉ (Commun Livraison et Réservation) */}
                   {(orderMode === "delivery" || orderMode === "booking") && (
                     <div className="form-fade-in" style={{marginBottom: '20px'}}>
@@ -118,17 +132,6 @@ export default function Cart() {
                           value={customerName}
                           onChange={(e) => setCustomerName(e.target.value)}
                         />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* CAS : SUR PLACE */}
-                  {orderMode === "on_site" && (
-                    <div className="form-fade-in">
-                      <p className="form-instruction">Souhaitez-vous régler maintenant ?</p>
-                      <div className="selection-grid small">
-                        <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
-                        <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
                       </div>
                     </div>
                   )}
@@ -177,6 +180,15 @@ export default function Cart() {
             <div className="cart-summary">
               <h3 className="summary-title">Récapitulatif</h3>
               
+              <div className="summary-line">
+                <span>Mode</span>
+                <span style={{color: '#D4AF37'}}>
+                  {orderMode === "on_site" && (consumeMode === "dine_in" ? "Sur place" : "À emporter")}
+                  {orderMode === "booking" && "Réservation"}
+                  {orderMode === "delivery" && "Livraison"}
+                </span>
+              </div>
+
               {customerName && (
                 <div className="summary-line">
                   <span>Client</span>
@@ -209,7 +221,7 @@ export default function Cart() {
               </div>
 
               <button className={`checkout-btn ${!isAgreed ? "disabled" : ""}`} disabled={!isAgreed}>
-                {getAmountToPay() === 0 ? "Confirmer ma venue" : "Procéder au paiement"}
+                {getAmountToPay() === 0 ? "Confirmer ma commande" : "Procéder au paiement"}
               </button>
               <p className="footer-warning">* Aucun remboursement ne sera effectué après validation.</p>
             </div>

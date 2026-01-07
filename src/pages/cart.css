@@ -117,30 +117,35 @@
   transform: translateY(-2px);
 }
 
-/* --- OPTIONS DE COMMANDE (FORMS) --- */
+/* --- OPTIONS DE COMMANDE --- */
 .order-options-box {
   margin-top: 40px;
   padding: 30px;
   background-color: #FCF9F5;
   border-left: 4px solid #D4AF37;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .options-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.2rem; color: #2D2422; margin-bottom: 20px;
+  font-size: 1.2rem; color: #2D2422; margin-bottom: 25px;
 }
 
 .selection-grid {
   display: flex; gap: 15px; margin-bottom: 25px;
 }
 
-.selection-grid.small { max-width: 400px; }
+/* On force un peu plus de largeur pour les boutons de texte long */
+.selection-grid.small { max-width: 500px; }
 
 .select-btn {
   flex: 1; padding: 14px;
   background: white; border: 1px solid #D4AF37;
   color: #2D2422; font-family: 'Poppins', sans-serif;
   font-weight: 600; cursor: pointer; transition: 0.3s;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  font-size: 0.85rem;
 }
 
 .select-btn.active {
@@ -148,8 +153,12 @@
 }
 
 .form-instruction {
-  font-size: 0.85rem; font-weight: 700;
+  font-size: 0.8rem; font-weight: 800;
   color: #2D2422; margin-bottom: 15px; text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  display: inline-block;
+  padding-bottom: 4px;
 }
 
 .form-row {
@@ -170,28 +179,10 @@
   border: 1px solid #ddd; font-family: 'Poppins', sans-serif;
   outline-color: #D4AF37;
   transition: border 0.3s;
+  box-sizing: border-box;
 }
 
-.input-group input:focus {
-  border-color: #D4AF37;
-}
-
-/* --- HELPER TEXT (HEURE MIN) --- */
-.input-group small {
-  display: block;
-  margin-top: 5px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.form-fade-in {
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.input-group input:focus { border-color: #D4AF37; }
 
 /* --- RÉSUMÉ (STICKY) --- */
 .cart-summary {
@@ -212,6 +203,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 15px;
+  font-size: 0.95rem;
 }
 
 .deposit-info { color: #D4AF37; font-style: italic; font-size: 0.9rem; }
@@ -225,20 +217,11 @@
 /* --- LEGAL & CHECKBOX --- */
 .legal-notice { margin: 25px 0; }
 
-input[type="checkbox"] {
-  accent-color: #D4AF37;
-  width: 18px; height: 18px;
-  cursor: pointer;
-}
-
 .checkbox-label {
   display: flex; align-items: flex-start; gap: 12px;
   font-size: 0.85rem; cursor: pointer; line-height: 1.4;
   color: #FCF9F5; transition: color 0.3s ease;
 }
-
-.checkbox-label:hover { color: #D4AF37; }
-.checkbox-label strong { color: #D4AF37; }
 
 /* --- BOUTONS FINAUX --- */
 .checkout-btn {
@@ -258,11 +241,6 @@ input[type="checkbox"] {
   background-color: #555; color: #999; cursor: not-allowed;
 }
 
-.footer-warning {
-  font-size: 0.7rem; color: #D4AF37;
-  margin-top: 15px; text-align: center; font-style: italic;
-}
-
 /* --- RESPONSIVE --- */
 @media (max-width: 992px) {
   .cart-content { grid-template-columns: 1fr; }
@@ -271,8 +249,10 @@ input[type="checkbox"] {
 
 @media (max-width: 768px) {
   .cart-table-header { display: none; }
-  .cart-item { grid-template-columns: 1fr; text-align: center; gap: 15px; }
+  .cart-item { grid-template-columns: 1fr; text-align: center; gap: 10px; padding: 20px 10px; }
   .form-row { grid-template-columns: 1fr; }
-  .cart-remove-btn { margin: 10px auto; }
   .selection-grid { flex-direction: column; }
+  .selection-grid.small { max-width: 100%; }
+  .cart-main-title { font-size: 2rem; }
+  .order-options-box { padding: 20px; }
 }
