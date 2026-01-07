@@ -8,12 +8,13 @@ export default function Cart() {
   
   // États de logique métier
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
-  const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in"); // Nouveau : sur place ou emporter
+  const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in");
   const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
   
-  // États pour les infos client et livraison
+  // États pour les infos client / réservation
   const [customerName, setCustomerName] = useState("");
+  const [guestCount, setGuestCount] = useState("2"); // Par défaut 2 personnes
   const [deliveryTime, setDeliveryTime] = useState("");
   const [minTime, setMinTime] = useState("");
 
@@ -104,7 +105,7 @@ export default function Cart() {
                 </div>
 
                 <div className="dynamic-form-container">
-                  {/* CAS : SUR PLACE (Choix Emporter / Sur Place + Paiement) */}
+                  {/* CAS : SUR PLACE */}
                   {orderMode === "on_site" && (
                     <div className="form-fade-in">
                       <p className="form-instruction">Type de consommation :</p>
@@ -121,7 +122,7 @@ export default function Cart() {
                     </div>
                   )}
 
-                  {/* IDENTITÉ (Commun Livraison et Réservation) */}
+                  {/* IDENTITÉ (Livraison et Réservation) */}
                   {(orderMode === "delivery" || orderMode === "booking") && (
                     <div className="form-fade-in" style={{marginBottom: '20px'}}>
                        <div className="input-group full">
@@ -140,6 +141,19 @@ export default function Cart() {
                   {orderMode === "booking" && (
                     <div className="form-fade-in">
                       <p className="form-instruction">Détails de votre venue (Acompte de 50% requis) :</p>
+                      <div className="input-group full">
+                        <label>Nombre de convives</label>
+                        <select 
+                          className="luxury-select" 
+                          value={guestCount} 
+                          onChange={(e) => setGuestCount(e.target.value)}
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                            <option key={num} value={num}>{num} {num > 1 ? 'Personnes' : 'Personne'}</option>
+                          ))}
+                          <option value="9+">Plus de 8 personnes (Contactez-nous)</option>
+                        </select>
+                      </div>
                       <div className="form-row">
                         <div className="input-group">
                           <label>Date</label>
@@ -184,7 +198,7 @@ export default function Cart() {
                 <span>Mode</span>
                 <span style={{color: '#D4AF37'}}>
                   {orderMode === "on_site" && (consumeMode === "dine_in" ? "Sur place" : "À emporter")}
-                  {orderMode === "booking" && "Réservation"}
+                  {orderMode === "booking" && `Réservation (${guestCount} pers.)`}
                   {orderMode === "delivery" && "Livraison"}
                 </span>
               </div>
