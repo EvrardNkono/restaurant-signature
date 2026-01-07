@@ -1,3 +1,4 @@
+import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone } from "lucide-react";
 import "./footer.css";
 
 export default function Footer() {
@@ -10,7 +11,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-container">
-        {/* Branding - Gourmand & Délicat */}
+        {/* Branding - Raffiné */}
         <div className="footer-brand">
           <h2 className="brand-title">
             Restaurant <span className="gold-italic">Signature</span>
@@ -21,15 +22,20 @@ export default function Footer() {
           </p>
 
           <div className="footer-socials">
-            <a href="#" className="social-link">Instagram</a>
-            <span className="social-divider">/</span>
-            <a href="#" className="social-link">Facebook</a>
-            <span className="social-divider">/</span>
-            <a href="#" className="social-link">WhatsApp</a>
+            <a href="#" className="social-icon-link" aria-label="Instagram">
+              {/* strokeWidth très fin pour l'élégance */}
+              <Instagram size={22} strokeWidth={0.75} />
+            </a>
+            <a href="#" className="social-icon-link" aria-label="Facebook">
+              <Facebook size={22} strokeWidth={0.75} />
+            </a>
+            <a href="#" className="social-icon-link" aria-label="WhatsApp">
+              <MessageCircle size={22} strokeWidth={0.75} />
+            </a>
           </div>
         </div>
 
-        {/* Navigation - Soignée */}
+        {/* Navigation */}
         <div className="footer-nav">
           <h4 className="footer-label">Exploration</h4>
           <ul className="nav-list">
@@ -40,19 +46,19 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Infos - Précises & Attentionnées */}
+        {/* Infos - Icônes fines */}
         <div className="footer-contact">
           <h4 className="footer-label">Rendez-vous</h4>
           <div className="contact-item">
-            <span className="contact-icon">📍</span>
+            <MapPin size={18} className="gold-text" strokeWidth={1} />
             <p>Quartier Bastos, Yaoundé</p>
           </div>
           <div className="contact-item">
-            <span className="contact-icon">🕒</span>
+            <Clock size={18} className="gold-text" strokeWidth={1} />
             <p>Mardi — Dimanche : 12h - 23h</p>
           </div>
           <div className="contact-item">
-            <span className="contact-icon">📞</span>
+            <Phone size={18} className="gold-text" strokeWidth={1} />
             <p>+237 6XX XXX XXX</p>
           </div>
         </div>

@@ -5,10 +5,16 @@ import "./menu.css";
 
 export default function Menu() {
   const { addToCart, removeFromCart, isInCart } = useCart();
+  
+  // Mise à jour de l'état initial et des catégories disponibles
   const [filter, setFilter] = useState<Plat["category"] | "Tous">("Tous");
   
-  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Entrée", "Plat", "Dessert", "Boisson"];
-  const platsFiltres = filter === "Tous" ? carte : carte.filter(p => p.category === filter);
+  // Ajout de "Formule" dans le tableau des catégories
+  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert", "Boisson"];
+
+  const platsFiltres = filter === "Tous" 
+    ? carte 
+    : carte.filter(p => p.category === filter);
 
   return (
     <section className="menu-section">
@@ -29,7 +35,7 @@ export default function Menu() {
             className={`filter-btn ${filter === cat ? "active" : ""}`}
             onClick={() => setFilter(cat)}
           >
-            {cat}
+            {cat}s
           </button>
         ))}
       </div>
@@ -43,8 +49,17 @@ export default function Menu() {
               <div className="gold-thick-border"></div>
               
               <div className="menu-card-inner">
+                {/* Badge spécial si c'est une formule */}
+                {plat.category === "Formule" && (
+                  <div className="formula-tag">Menu Complet</div>
+                )}
+
                 <div className="menu-image-container">
-                  {plat.image && <img src={plat.image} alt={plat.name} className="menu-img" />}
+                  {plat.image ? (
+                    <img src={plat.image} alt={plat.name} className="menu-img" />
+                  ) : (
+                    <div className="placeholder-img">Signature</div>
+                  )}
                   <div className="price-badge-luxury">
                     <span>{plat.price}</span>
                   </div>
@@ -58,14 +73,16 @@ export default function Menu() {
                   
                   <p className="description-text-light">{plat.description}</p>
                   
-                  {/* ZONE DES ACTIONS (BOUTONS) */}
                   <div className="card-actions">
                     <button 
-                      className="add-to-cart-btn" 
+                      className={`add-to-cart-btn ${alreadyInCart ? "in-cart" : ""}`} 
                       onClick={() => addToCart(plat)}
+                      disabled={alreadyInCart}
                     >
-                      <span className="btn-plus">+</span>
-                      <span className="btn-text">Ajouter au panier</span>
+                      <span className="btn-plus">{alreadyInCart ? "✓" : "+"}</span>
+                      <span className="btn-text">
+                        {alreadyInCart ? "Dans le panier" : "Ajouter au panier"}
+                      </span>
                     </button>
 
                     {alreadyInCart && (
@@ -73,7 +90,7 @@ export default function Menu() {
                         className="remove-from-cart-btn" 
                         onClick={() => removeFromCart(plat.id)}
                       >
-                        <span className="btn-text">Retirer du panier</span>
+                        <span className="btn-text">Retirer</span>
                       </button>
                     )}
                   </div>

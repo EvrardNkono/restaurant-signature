@@ -2,7 +2,7 @@
 .menu-soir-section {
   width: 100%;
   padding-bottom: 100px;
-  background-color: #fdfaf7; /* Fond de page clair et propre */
+  background-color: #fdfaf7;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 60px;
-  background-color: #2D2422; /* TA CHARTE : TERRACOTTA */
+  background-color: #2D2422;
 }
 
 .header-overlay-dark {
@@ -103,46 +103,74 @@
 /* --- LE CADRE OR (CADRE PHYSIQUE) --- */
 .menu-card-outer.soir-variant {
   position: relative;
-  padding: 8px; /* Épaisseur du cadre Or */
-  background: linear-gradient(135deg, #D4AF37 0%, #FBF5B7 50%, #B8860B 100%); /* Dégradé Or métallique */
+  padding: 8px; 
+  background: linear-gradient(135deg, #D4AF37 0%, #FBF5B7 50%, #B8860B 100%);
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.menu-card-outer.soir-variant:hover {
-  transform: translateY(-10px);
+/* --- STYLE SPÉCIFIQUE FORMULE SOIR --- */
+.menu-card-outer.soir-variant.is-formula {
+  padding: 12px; /* Cadre plus épais pour la formule */
+  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.25);
 }
 
-/* --- INTÉRIEUR DE LA CARTE (BLANC) --- */
+.formula-badge-soir {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2D2422;
+  color: #D4AF37;
+  border: 1px solid #D4AF37;
+  padding: 6px 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* --- INTÉRIEUR DE LA CARTE --- */
 .menu-card-inner.dark-theme {
   background: #FFFFFF;
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-/* --- ZONE IMAGE (FONDS TERRACOTTA) --- */
 .menu-image-container {
   position: relative;
   height: 220px;
-  background-color: #2D2422; /* TA CHARTE : TERRACOTTA */
+  background-color: #2D2422;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.placeholder-soir {
+  color: #D4AF37;
+  font-family: 'Playfair Display', serif;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 1.2rem;
+}
+
 .menu-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.8s ease;
 }
 
 .price-tag-evening {
   position: absolute;
   top: 0; right: 0;
   background: #D4AF37;
-  color: white;
+  color: #2D2422; /* Meilleur contraste que blanc sur or */
   padding: 8px 15px;
   font-family: 'Playfair Display', serif;
   font-weight: 700;
@@ -154,6 +182,8 @@
   padding: 25px 20px;
   text-align: center;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .details-container-soir h3 {
@@ -178,7 +208,7 @@
   min-height: 45px;
 }
 
-/* --- BOUTONS HARMONISÉS --- */
+/* --- BOUTONS --- */
 .card-actions {
   display: flex;
   flex-direction: column;
@@ -186,7 +216,7 @@
   margin-top: auto;
 }
 
-.btn-add-soir, .btn-remove-soir {
+.btn-add-soir {
   width: 100%;
   padding: 14px;
   text-transform: uppercase;
@@ -196,28 +226,37 @@
   cursor: pointer;
   border: none;
   transition: 0.3s;
-}
-
-/* Bouton Ajouter (Style Signature) */
-.btn-add-soir {
   background-color: #2D2422;
   color: #D4AF37;
 }
 
-.btn-add-soir:hover {
+.btn-add-soir:hover:not(:disabled) {
   background-color: #3d312f;
-  transform: scale(1.02);
+  transform: translateY(-2px);
 }
 
-/* Bouton Retirer (Style Rouge Alerte) */
+.btn-add-soir:disabled {
+  background-color: #f0f0f0;
+  color: #999;
+  border: 1px solid #ddd;
+  cursor: default;
+}
+
 .btn-remove-soir {
-  background-color: #e74c3c;
-  color: white;
+  width: 100%;
+  padding: 10px;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 0.7rem;
+  background-color: transparent;
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  transition: 0.3s;
 }
 
 .btn-remove-soir:hover {
-  background-color: #c0392b;
-  transform: scale(1.02);
+  background-color: #e74c3c;
+  color: white;
 }
 
 .card-footer-star {

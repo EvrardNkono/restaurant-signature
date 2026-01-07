@@ -1,9 +1,11 @@
+// data/menuSoir.ts
+
 export interface Plat {
   id: number;
   name: string;
   description: string;
   price: string;
-  category: "Entrée" | "Plat" | "Dessert" | "Boisson";
+  category: "Entrée" | "Plat" | "Dessert" | "Boisson" | "Formule"; // Mis à jour
   image?: string;
   label?: "Végétarien" | "Épicé" | "Plat du chef";
 }
@@ -107,7 +109,7 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/porc_braise.png",
   },
   {
-    id: 206, // Changé de 205 à 206
+    id: 206,
     name: "Ntaba braisé",
     description: "Chèvre grillée au feu de bois, aux saveurs africaines authentiques",
     price: "10.90",
@@ -123,7 +125,7 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/dorade-braisee.png",
   },
   {
-    id: 222, // Changé de 22 à 222
+    id: 222,
     name: "Grosse Dorade braisée",
     description: "Dorade entière, grillée façon camerounaise",
     price: "20.90",
@@ -139,7 +141,7 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/poisson-braise.png",
   },
   {
-    id: 233, // Changé de 23 à 233
+    id: 233,
     name: "Gros Maquereau Oya-Oya",
     description: "Maquereau épicé façon Oya-Oya, grillé au feu de bois",
     price: "20.90",
@@ -155,7 +157,7 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/chandwich-viande.png",
   },   
   {
-    id: 224, // Changé de 22 à 224
+    id: 224,
     name: "Bokit Poulet",
     description: "Bokit garni de poulet, frit et croustillant",
     price: "10.90",
@@ -163,7 +165,7 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/bokit-poulet.png",
   },
   {
-    id: 234, // Changé de 23 à 234
+    id: 234,
     name: "Bokit Morue",
     description: "Bokit à la morue bien assaisonnée",
     price: "10.90",
@@ -187,11 +189,35 @@ export const carteSoir: Plat[] = [
     image: "/src/assets/images/plats/tieb-poulet.png",
   },
   {
-    id: 21, // Changé de 20 à 21
+    id: 21,
     name: "Degue",
     description: "Dessert traditionnel au mil et yaourt, frais et nourrissant",
     price: "3.90",
     category: "Dessert",
     image: "/src/assets/images/Dessert/degue.png",
   },
+
+  /* --- FORMULES DU SOIR --- */
+  {
+    id: 900,
+    name: "L'Éveil des Sens (Entrée + Plat + Dessert)",
+    description: "Le menu gastronomique complet pour une immersion totale dans notre savoir-faire.",
+    price: "35.00",
+    category: "Formule",
+    label: "Plat du chef"
+  },
+  {
+    id: 901,
+    name: "Prélude Nocturne (Entrée + Plat)",
+    description: "Une entrée délicate suivie d'un plat de résistance braisé à la perfection.",
+    price: "28.00",
+    category: "Formule"
+  },
+  {
+    id: 902,
+    name: "Douceur de Nuit (Plat + Dessert)",
+    description: "Le choix parfait pour finir sur une note sucrée après notre plat Signature.",
+    price: "26.00",
+    category: "Formule"
+  }
 ];

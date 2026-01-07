@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { carteSoir, type Plat } from "../data/menuSoir"; // On imagine un fichier de données dédié
+import { carteSoir, type Plat } from "../data/menuSoir"; 
 import { useCart } from "../context/CartContext"; 
 import "./menuSoir.css";
 
 export default function MenuSoir() {
   const { addToCart, removeFromCart, isInCart } = useCart();
+  
+  // État initial mis à jour pour supporter la catégorie Formule
   const [filter, setFilter] = useState<Plat["category"] | "Tous">("Tous");
   
-  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Entrée", "Plat", "Dessert"];
+  // Ajout de "Formule" dans la liste des filtres
+  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert"];
+  
   const platsFiltres = filter === "Tous" ? carteSoir : carteSoir.filter(p => p.category === filter);
 
   return (
@@ -18,7 +22,7 @@ export default function MenuSoir() {
         <div className="header-content-wrapper">
           <div className="header-seal-gold">S</div>
           <span className="menu-badge-gold">L'Expérience Nocturne</span>
-          <h2 className="menu-main-title-soir">Menu Du soir</h2>
+          <h2 className="menu-main-title-soir">Menu Du Soir</h2>
           <div className="header-ornament-line"></div>
         </div>
       </div>
@@ -31,7 +35,7 @@ export default function MenuSoir() {
             className={`filter-btn-soir ${filter === cat ? "active" : ""}`}
             onClick={() => setFilter(cat)}
           >
-            {cat}
+            {cat}s
           </button>
         ))}
       </div>
@@ -43,11 +47,20 @@ export default function MenuSoir() {
 
           return (
             <div key={plat.id} className="menu-card-outer soir-variant">
-              <div className="gold-frame-border"></div>
-              
+              {/* Le cadre OR qui entoure la carte */}
               <div className="menu-card-inner dark-theme">
+                
+                {/* Badge spécial pour les formules */}
+                {plat.category === "Formule" && (
+                  <div className="formula-badge-soir">Menu Signature</div>
+                )}
+
                 <div className="menu-image-container">
-                  {plat.image && <img src={plat.image} alt={plat.name} className="menu-img" />}
+                  {plat.image ? (
+                    <img src={plat.image} alt={plat.name} className="menu-img" />
+                  ) : (
+                    <div className="placeholder-soir">Signature</div>
+                  )}
                   <div className="price-tag-evening">
                     <span>{plat.price}€</span>
                   </div>
@@ -63,10 +76,11 @@ export default function MenuSoir() {
                   
                   <div className="card-actions">
                     <button 
-                      className="btn-add-soir" 
+                      className={`btn-add-soir ${alreadyInCart ? "in-cart" : ""}`} 
                       onClick={() => addToCart(plat)}
+                      disabled={alreadyInCart}
                     >
-                      Ajouter à la dégustation
+                      {alreadyInCart ? "Dans votre sélection" : "Ajouter à la dégustation"}
                     </button>
 
                     {alreadyInCart && (
