@@ -21,7 +21,7 @@ export default function Menu() {
       <div className="menu-header">
         <div className="header-overlay"></div>
         <div className="header-content-wrapper">
-          <div className="header-seal">M</div>
+          <div className="header-seal">J</div>
           <span className="menu-badge">L'Instant Gourmand</span>
           <h2 className="menu-main-title">Menu du Jour</h2>
           <div className="header-double-line"></div>
