@@ -18,7 +18,6 @@ export default function AppRouter() {
         {/* Le Popup s'affichera ici au chargement initial */}
         <AdPopup 
           word="SIGNATURE" 
-          image="https://images.unsplash.com/photo-1550966841-3ee3ad359051?auto=format&fit=crop&w=800&q=80" 
         />
 
         <Navbar />
