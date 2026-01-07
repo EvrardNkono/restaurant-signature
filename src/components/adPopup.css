@@ -1,16 +1,18 @@
-/* --- BANNIÈRE FLOTTANTE --- */
+/* --- BANNIÈRE FLOTTANTE (Positionnée à gauche) --- */
 .ad-floating-banner {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 30px; 
+  left: 30px; /* Changé de right à left pour libérer le chatbot */
   width: 380px;
   background: #2D2422;
   border: 1px solid #D4AF37;
   display: flex;
   overflow: hidden;
-  z-index: 9999;
+  z-index: 9998; /* Un cran en dessous du chatbot si nécessaire */
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
+
+/* ... (le reste du code flex, image-box et content-box reste identique) ... */
 
 .ad-flex-container {
   display: flex;
@@ -22,14 +24,14 @@
   width: 120px;
   height: 120px;
   flex-shrink: 0;
-  background-color: #3d312e; /* Couleur de secours pendant le chargement */
+  background-color: #3d312e;
 }
 
 .ad-image-box img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block; /* Évite les espaces vides sous l'image */
+  display: block;
 }
 
 .ad-content-box {
@@ -39,25 +41,46 @@
   position: relative;
 }
 
-.ad-mini-tag {
-  color: #D4AF37;
-  text-transform: uppercase;
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  display: block;
+/* ... (boutons et barres de progression identiques) ... */
+
+/* --- ANIMATIONS AJUSTÉES POUR LA GAUCHE --- */
+.slide-in {
+  animation: adSlideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-.ad-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  margin: 5px 0;
-  color: #FCF9F5;
+.slide-out {
+  animation: adSlideOutLeft 0.5s ease-in forwards;
 }
 
-.ad-text {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  margin: 0;
+@keyframes adSlideInLeft {
+  from { 
+    transform: translateX(-100%); /* Arrive de la gauche */
+    opacity: 0; 
+  }
+  to { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes adSlideOutLeft {
+  from { 
+    transform: translateX(0); 
+    opacity: 1; 
+  }
+  to { 
+    transform: translateX(-50px); /* Repart vers la gauche */
+    opacity: 0; 
+  }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 480px) {
+  .ad-floating-banner {
+    width: calc(100% - 40px);
+    left: 20px; /* Ajusté pour mobile */
+    bottom: 20px;
+  }
 }
 
 .close-ad-btn {

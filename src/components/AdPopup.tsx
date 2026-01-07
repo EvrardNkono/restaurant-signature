@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import "./adPopup.css";
 
 interface AdPopupProps {
-  image?: string;
   word?: string;
 }
 
 const AdPopup: React.FC<AdPopupProps> = ({ 
-  // On s'assure que le chemin commence par un slash pour le dossier public
-  image = "/images/plat3.jpg", 
   word = "SIGNATURE" 
 }) => {
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [isClosing, setIsClosing] = useState<boolean>(false);
+
+  // Chemin direct vers le dossier public
+  const imagePath = "/images/plat3.jpg";
 
   const handleClose = () => {
     setIsClosing(true);
@@ -39,13 +39,15 @@ const AdPopup: React.FC<AdPopupProps> = ({
       
       <div className="ad-flex-container">
         <div className="ad-image-box">
-          {/* L'image est chargée depuis le dossier public */}
           <img 
-            src={image} 
+            src={imagePath} 
             alt="Promotion" 
             onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                console.error("Image introuvable sur :", target.src);
+              // Petit fix au cas où le chemin racine "/" poserait problème en local
+              const target = e.target as HTMLImageElement;
+              if (!target.src.includes(imagePath)) {
+                target.src = "images/plat3.jpg";
+              }
             }}
           />
         </div>
