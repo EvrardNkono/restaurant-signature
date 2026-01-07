@@ -4,11 +4,12 @@ import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import CarteRestaurant from "./pages/CarteRestaurant";
 import Menu from "./pages/Menu";
+import MenuSoir from "./pages/MenuSoir"; // 1. Import de la nouvelle page
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Chatbot from "./components/Chatbot"; 
-import AdPopup from "./components/AdPopup"; // Import du nouveau Popup Publicitaire
+import AdPopup from "./components/AdPopup"; 
 import { CartProvider } from "./context/CartContext";
 
 export default function AppRouter() {
@@ -27,6 +28,10 @@ export default function AppRouter() {
             <Route path="/" element={<Home />} />
             <Route path="/carte" element={<CarteRestaurant />} />
             <Route path="/menu" element={<Menu />} />
+            
+            {/* 2. Ajout de la route pour le Menu du Soir */}
+            <Route path="/menu-soir" element={<MenuSoir />} />
+            
             <Route path="/a-propos" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/panier" element={<Cart />} />

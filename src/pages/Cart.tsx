@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import "./cart.css";
@@ -8,8 +8,33 @@ export default function Cart() {
   
   // États de logique métier
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
-  const [payNow, setPayNow] = useState<boolean>(true); // Pour le mode "Sur place"
+  const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
+  
+  // États pour les infos client et livraison
+  const [customerName, setCustomerName] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [minTime, setMinTime] = useState("");
+
+  // Calcul de l'heure minimale autorisée (Maintenant + 1h30)
+  useEffect(() => {
+    const updateMinTime = () => {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 90); // Ajoute 1h30
+      
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const formattedTime = `${hours}:${minutes}`;
+      
+      setMinTime(formattedTime);
+      // Par défaut, on place le curseur sur l'heure min si rien n'est choisi
+      if (!deliveryTime) setDeliveryTime(formattedTime);
+    };
+
+    updateMinTime();
+    const interval = setInterval(updateMinTime, 60000); // Mise à jour auto chaque minute
+    return () => clearInterval(interval);
+  }, [deliveryTime]);
 
   const calculateTotal = () => {
     return cart.reduce((acc, item) => {
@@ -19,9 +44,8 @@ export default function Cart() {
   };
 
   const totalPrice = calculateTotal();
-  const depositAmount = totalPrice / 2; // Acompte de 50%
+  const depositAmount = totalPrice / 2;
 
-  // Calcul du montant à payer immédiatement selon la logique
   const getAmountToPay = () => {
     if (orderMode === "on_site") return payNow ? totalPrice : 0;
     if (orderMode === "booking") return depositAmount;
@@ -72,7 +96,7 @@ export default function Cart() {
                 ))}
               </div>
 
-              {/* OPTIONS DE COMMANDE CONDITIONNELLES */}
+              {/* OPTIONS DE COMMANDE */}
               <div className="order-options-box">
                 <h3 className="options-title">Comment souhaitez-vous commander ?</h3>
                 
@@ -83,6 +107,21 @@ export default function Cart() {
                 </div>
 
                 <div className="dynamic-form-container">
+                  {/* IDENTITÉ (Commun Livraison et Réservation) */}
+                  {(orderMode === "delivery" || orderMode === "booking") && (
+                    <div className="form-fade-in" style={{marginBottom: '20px'}}>
+                       <div className="input-group full">
+                        <label>Nom complet</label>
+                        <input 
+                          type="text" 
+                          placeholder="Entrez votre nom" 
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* CAS : SUR PLACE */}
                   {orderMode === "on_site" && (
                     <div className="form-fade-in">
@@ -114,10 +153,19 @@ export default function Cart() {
                   {/* CAS : LIVRAISON */}
                   {orderMode === "delivery" && (
                     <div className="form-fade-in">
-                      <p className="form-instruction">Adresse de livraison :</p>
                       <div className="input-group full">
-                        <label>Votre adresse complète</label>
+                        <label>Adresse de livraison complète</label>
                         <input type="text" placeholder="Rue, étage, code postal..." />
+                      </div>
+                      <div className="input-group full">
+                        <label>Heure de livraison (Minimum 1h30 après commande)</label>
+                        <input 
+                          type="time" 
+                          min={minTime} 
+                          value={deliveryTime}
+                          onChange={(e) => setDeliveryTime(e.target.value)}
+                        />
+                        <small style={{color: '#D4AF37'}}>Heure minimale : {minTime}</small>
                       </div>
                     </div>
                   )}
@@ -128,6 +176,14 @@ export default function Cart() {
             {/* RÉSUMÉ DE COMMANDE */}
             <div className="cart-summary">
               <h3 className="summary-title">Récapitulatif</h3>
+              
+              {customerName && (
+                <div className="summary-line">
+                  <span>Client</span>
+                  <span style={{color: '#D4AF37'}}>{customerName}</span>
+                </div>
+              )}
+
               <div className="summary-line">
                 <span>Total Commande</span>
                 <span>{totalPrice.toFixed(2)}€</span>

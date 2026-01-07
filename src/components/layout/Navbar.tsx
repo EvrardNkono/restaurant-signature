@@ -21,7 +21,8 @@ export default function Navbar() {
         <nav className={`navbar-links ${open ? "open" : ""}`}>
           <Link to="/" onClick={closeMenu}>Accueil</Link>
           <Link to="/carte" onClick={closeMenu}>Notre Carte</Link>
-          <Link to="/menu" onClick={closeMenu}>Menu</Link>
+          <Link to="/menu" onClick={closeMenu}>Menu jour</Link>
+          <Link to="/menu-soir" onClick={closeMenu}>Menu soir</Link>
           <Link to="/a-propos" onClick={closeMenu}>À propos</Link>
           <Link to="/contact" onClick={closeMenu}>Contact</Link>
         </nav>

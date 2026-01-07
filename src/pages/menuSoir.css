@@ -1,0 +1,236 @@
+/* --- SECTION PRINCIPALE --- */
+.menu-soir-section {
+  width: 100%;
+  padding-bottom: 100px;
+  background-color: #fdfaf7; /* Fond de page clair et propre */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* --- HEADER NOCTURNE LUXUEUX --- */
+.menu-header-soir {
+  text-align: center;
+  position: relative;
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 60px;
+  background-color: #2D2422; /* TA CHARTE : TERRACOTTA */
+}
+
+.header-overlay-dark {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.header-content-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.header-seal-gold {
+  width: 60px; height: 60px;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37; font-weight: 700; font-size: 1.6rem;
+}
+
+.menu-badge-gold {
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.menu-main-title-soir {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #FCF9F5;
+  margin: 10px 0;
+  text-transform: uppercase;
+}
+
+.header-ornament-line {
+  width: 120px; height: 2px;
+  background: #D4AF37;
+  margin: 0 auto;
+}
+
+/* --- FILTRES --- */
+.menu-filtres-soir {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.filter-btn-soir {
+  padding: 10px 25px;
+  border: 1px solid #D4AF37;
+  background: white;
+  color: #2D2422;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.filter-btn-soir.active, .filter-btn-soir:hover {
+  background: #2D2422;
+  color: #D4AF37;
+}
+
+/* --- GRILLE --- */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px;
+  width: 90%;
+  max-width: 1200px;
+}
+
+/* --- LE CADRE OR (CADRE PHYSIQUE) --- */
+.menu-card-outer.soir-variant {
+  position: relative;
+  padding: 8px; /* Épaisseur du cadre Or */
+  background: linear-gradient(135deg, #D4AF37 0%, #FBF5B7 50%, #B8860B 100%); /* Dégradé Or métallique */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.menu-card-outer.soir-variant:hover {
+  transform: translateY(-10px);
+}
+
+/* --- INTÉRIEUR DE LA CARTE (BLANC) --- */
+.menu-card-inner.dark-theme {
+  background: #FFFFFF;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- ZONE IMAGE (FONDS TERRACOTTA) --- */
+.menu-image-container {
+  position: relative;
+  height: 220px;
+  background-color: #2D2422; /* TA CHARTE : TERRACOTTA */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.price-tag-evening {
+  position: absolute;
+  top: 0; right: 0;
+  background: #D4AF37;
+  color: white;
+  padding: 8px 15px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  z-index: 5;
+}
+
+/* --- DÉTAILS TEXTE --- */
+.details-container-soir {
+  padding: 25px 20px;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.details-container-soir h3 {
+  font-family: 'Playfair Display', serif;
+  color: #2D2422;
+  font-size: 1.4rem;
+  margin-bottom: 5px;
+}
+
+.gold-separator {
+  width: 50px;
+  height: 1px;
+  background: #D4AF37;
+  margin: 12px auto;
+}
+
+.description-soir {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  min-height: 45px;
+}
+
+/* --- BOUTONS HARMONISÉS --- */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.btn-add-soir, .btn-remove-soir {
+  width: 100%;
+  padding: 14px;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+}
+
+/* Bouton Ajouter (Style Signature) */
+.btn-add-soir {
+  background-color: #2D2422;
+  color: #D4AF37;
+}
+
+.btn-add-soir:hover {
+  background-color: #3d312f;
+  transform: scale(1.02);
+}
+
+/* Bouton Retirer (Style Rouge Alerte) */
+.btn-remove-soir {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-remove-soir:hover {
+  background-color: #c0392b;
+  transform: scale(1.02);
+}
+
+.card-footer-star {
+  color: #D4AF37;
+  margin-top: 20px;
+  letter-spacing: 8px;
+  font-size: 0.8rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+    width: 95%;
+  }
+}

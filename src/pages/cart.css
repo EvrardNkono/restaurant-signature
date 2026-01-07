@@ -95,7 +95,7 @@
   color: #2D2422;
 }
 
-/* --- BOUTON SUPPRIMER (Mis à jour) --- */
+/* --- BOUTON SUPPRIMER --- */
 .cart-remove-btn {
   background: transparent;
   border: 1px solid rgba(139, 0, 0, 0.2);
@@ -107,7 +107,7 @@
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.3s ease;
-  justify-self: center; /* Centre le bouton dans sa colonne de grille */
+  justify-self: center;
 }
 
 .cart-remove-btn:hover {
@@ -131,9 +131,7 @@
 }
 
 .selection-grid {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 25px;
+  display: flex; gap: 15px; margin-bottom: 25px;
 }
 
 .selection-grid.small { max-width: 400px; }
@@ -158,15 +156,32 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
 }
 
+/* --- INPUTS & LABELS --- */
+.input-group { margin-bottom: 15px; }
+.input-group.full { width: 100%; }
+
 .input-group label {
   display: block; font-size: 0.8rem; font-weight: 700;
-  margin-bottom: 8px; color: #2D2422;
+  margin-bottom: 8px; color: #2D2422; text-transform: uppercase;
 }
 
 .input-group input {
   width: 100%; padding: 12px;
   border: 1px solid #ddd; font-family: 'Poppins', sans-serif;
   outline-color: #D4AF37;
+  transition: border 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #D4AF37;
+}
+
+/* --- HELPER TEXT (HEURE MIN) --- */
+.input-group small {
+  display: block;
+  margin-top: 5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .form-fade-in {
@@ -193,6 +208,12 @@
   padding-bottom: 10px;
 }
 
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
 .deposit-info { color: #D4AF37; font-style: italic; font-size: 0.9rem; }
 
 .summary-line.total {
@@ -201,31 +222,23 @@
   font-size: 1.4rem; color: #D4AF37; font-weight: bold;
 }
 
+/* --- LEGAL & CHECKBOX --- */
 .legal-notice { margin: 25px 0; }
 
-/* --- STYLISATION RADIOS & CHECKBOXES (Nouveau) --- */
-input[type="radio"], 
 input[type="checkbox"] {
-  accent-color: #D4AF37; /* Force la couleur Or sur les navigateurs modernes */
-  width: 18px;
-  height: 18px;
+  accent-color: #D4AF37;
+  width: 18px; height: 18px;
   cursor: pointer;
 }
 
 .checkbox-label {
   display: flex; align-items: flex-start; gap: 12px;
   font-size: 0.85rem; cursor: pointer; line-height: 1.4;
-  color: #FCF9F5;
-  transition: color 0.3s ease;
+  color: #FCF9F5; transition: color 0.3s ease;
 }
 
-.checkbox-label:hover {
-  color: #D4AF37;
-}
-
-.checkbox-label strong {
-  color: #D4AF37;
-}
+.checkbox-label:hover { color: #D4AF37; }
+.checkbox-label strong { color: #D4AF37; }
 
 /* --- BOUTONS FINAUX --- */
 .checkout-btn {

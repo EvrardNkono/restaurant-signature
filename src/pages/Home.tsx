@@ -46,7 +46,7 @@ export default function Home() {
       />
 
       {/* CTA FINAL */}
-      <CtaFinal text="Réserver maintenant" />
+      <CtaFinal text="Commander" />
     </main>
   );
 }
