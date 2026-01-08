@@ -65,25 +65,33 @@
   margin: 0 auto;
 }
 
-/* --- FILTRES --- */
+/* --- FILTRES (Mise à jour pour alignement parfait) --- */
 .menu-filtres-soir {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 15px;
+  gap: 12px;
   margin-bottom: 50px;
+  width: 100%;
+  padding: 0 5%;
+  box-sizing: border-box;
 }
 
 .filter-btn-soir {
-  padding: 10px 25px;
+  min-width: 120px;
+  padding: 12px 20px;
   border: 1px solid #D4AF37;
   background: white;
   color: #2D2422;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: 0.3s;
+  flex-grow: 1;
+  max-width: 180px;
+  text-align: center;
 }
 
 .filter-btn-soir.active, .filter-btn-soir:hover {
@@ -109,9 +117,8 @@
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* --- STYLE SPÉCIFIQUE FORMULE SOIR --- */
 .menu-card-outer.soir-variant.is-formula {
-  padding: 12px; /* Cadre plus épais pour la formule */
+  padding: 12px;
   box-shadow: 0 15px 35px rgba(212, 175, 55, 0.25);
 }
 
@@ -170,7 +177,7 @@
   position: absolute;
   top: 0; right: 0;
   background: #D4AF37;
-  color: #2D2422; /* Meilleur contraste que blanc sur or */
+  color: #2D2422;
   padding: 8px 15px;
   font-family: 'Playfair Display', serif;
   font-weight: 700;
@@ -230,46 +237,34 @@
   color: #D4AF37;
 }
 
-.btn-add-soir:hover:not(:disabled) {
-  background-color: #3d312f;
-  transform: translateY(-2px);
-}
-
-.btn-add-soir:disabled {
-  background-color: #f0f0f0;
-  color: #999;
-  border: 1px solid #ddd;
-  cursor: default;
-}
-
-.btn-remove-soir {
-  width: 100%;
-  padding: 10px;
-  text-transform: uppercase;
-  font-weight: 500;
-  font-size: 0.7rem;
-  background-color: transparent;
-  color: #e74c3c;
-  border: 1px solid rgba(231, 76, 60, 0.3);
-  transition: 0.3s;
-}
-
-.btn-remove-soir:hover {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.card-footer-star {
-  color: #D4AF37;
-  margin-top: 20px;
-  letter-spacing: 8px;
-  font-size: 0.8rem;
-}
-
-/* RESPONSIVE */
+/* --- RESPONSIVE OPTIMISÉ --- */
 @media (max-width: 768px) {
+  .menu-filtres-soir {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 15px;
+  }
+
+  .filter-btn-soir {
+    min-width: 0;
+    max-width: none;
+    padding: 12px 5px;
+    font-size: 0.75rem;
+  }
+
+  /* Si nombre impair de boutons, le dernier prend toute la largeur */
+  .filter-btn-soir:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+
   .menu-grid {
     grid-template-columns: 1fr;
-    width: 95%;
+    width: 92%;
+    gap: 30px;
+  }
+
+  .menu-header-soir {
+    height: 300px;
   }
 }

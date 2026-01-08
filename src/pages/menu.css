@@ -63,26 +63,64 @@
   margin: 0 auto;
 }
 
-/* --- FILTRES --- */
+/* --- FILTRES (Mise à jour pour alignement parfait) --- */
 .menu-filtres {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: 15px; margin-bottom: 70px; padding: 0 10%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* Permet le passage à la ligne sur plusieurs rangées */
+  gap: 12px;
+  margin-bottom: 50px;
+  padding: 0 5%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-btn {
-  padding: 12px 30px;
+  /* On définit une largeur minimale pour que tous les boutons se ressemblent */
+  min-width: 120px; 
+  padding: 12px 20px;
   border: 1px solid rgba(212, 175, 55, 0.3);
   background: white;
   color: #2D2422;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: 0.3s;
+  flex-grow: 1; /* Permet aux boutons de remplir l'espace de manière égale */
+  max-width: 200px; /* Évite que les boutons ne deviennent trop larges */
+  text-align: center;
 }
 
 .filter-btn.active, .filter-btn:hover {
   background: #2D2422;
   color: #D4AF37;
+  border-color: #D4AF37;
+}
+
+/* --- OPTIMISATION MOBILE --- */
+@media (max-width: 768px) {
+  .menu-filtres {
+    /* Option 1 : Grille de 2 colonnes bien alignées */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 20px;
+  }
+
+  .filter-btn {
+    min-width: 0; /* Annule le min-width pour laisser la grille gérer */
+    max-width: none;
+    padding: 10px 5px;
+    font-size: 0.75rem; /* Texte légèrement plus petit pour tenir sur une ligne */
+    letter-spacing: 0.5px;
+  }
+
+  /* Optionnel : Si vous avez un nombre impair de boutons (ex: 5), 
+     le dernier bouton prend toute la largeur */
+  .filter-btn:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
 }
 
 /* --- GRILLE & CARTES --- */
