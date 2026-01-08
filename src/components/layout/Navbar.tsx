@@ -14,12 +14,17 @@ export default function Navbar() {
     <header className="navbar">
       <div className="navbar-container">
 
-        {/* REMPLACEMENT DU TEXTE PAR LE LOGO */}
+        {/* LOGOS ALIGNÉS HORIZONTALEMENT */}
         <Link to="/" className="navbar-logo-container" onClick={closeMenu}>
           <img 
             src="/images/resto.png" 
             alt="Restaurant Signature Logo" 
             className="navbar-logo-img" 
+          />
+          <img 
+            src="/images/resto2.png" 
+            alt="Signature Icon" 
+            className="navbar-logo-secondary" 
           />
         </Link>
 

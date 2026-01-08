@@ -14,24 +14,51 @@
   left: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(252, 249, 245, 0.95); /* Ivoire avec légère transparence */
+  background: rgba(252, 249, 245, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 100%; /* Changé pour permettre aux logos de toucher les bords */
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 0.5rem 10px; /* Aligné à 10px des bords gauche et droit */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 110px;
 }
 
-/* --- LOGO --- */
+/* --- LOGO OPTIMISÉ --- */
+.navbar-logo-container {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  height: 130px; 
+  overflow: hidden;
+  margin-left: 0; /* Assure le collage à gauche */
+  gap: 0px; /* Espace entre les deux images */
+}
+
+.navbar-logo-img {
+  height: 100px; /* TAILLE MAINTENUE */
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+.navbar-logo-secondary {
+  height: 30px; /* Taille pour l'image resto2.png */
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* --- LE RESTE RESTE INTACT --- */
 .navbar-logo {
-  font-family: 'Playfair Display', serif; /* Assure-toi d'importer une police Serif élégante */
+  font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--dark);
@@ -45,7 +72,6 @@
   font-weight: 400;
 }
 
-/* --- LINKS --- */
 .navbar-links {
   display: flex;
   gap: 2.5rem;
@@ -62,7 +88,6 @@
   position: relative;
 }
 
-/* Soulignement élégant en Or au survol */
 .navbar-links a::after {
   content: '';
   position: absolute;
@@ -82,7 +107,6 @@
   width: 100%;
 }
 
-/* --- BURGER MENU --- */
 .burger {
   display: none;
   flex-direction: column;
@@ -105,7 +129,6 @@
   position: relative;
 }
 
-/* --- RESPONSIVE (Mobile) --- */
 @media (max-width: 768px) {
   .burger {
     display: flex;
@@ -117,7 +140,7 @@
     right: -100%;
     height: 100vh;
     width: 80%;
-    background: var(--dark); /* Fond sombre pour le contraste mobile */
+    background: var(--dark);
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -134,7 +157,6 @@
     font-size: 1.2rem;
   }
 
-  /* Animation du burger en "X" */
   .burger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); background: var(--gold); }
   .burger.open span:nth-child(2) { opacity: 0; }
   .burger.open span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); background: var(--gold); }
@@ -148,21 +170,21 @@
 
 .cart-icon-link {
   position: relative;
-  color: #2D2422; /* Ton ton sombre signature */
+  color: #2D2422;
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
 }
 
 .cart-icon-link:hover {
-  color: #D4AF37; /* Or au survol */
+  color: #D4AF37;
 }
 
 .cart-count {
   position: absolute;
   top: -8px;
   right: -10px;
-  background-color: #D4AF37; /* Badge Or */
+  background-color: #D4AF37;
   color: #2D2422;
   font-size: 0.7rem;
   font-weight: bold;
@@ -173,49 +195,4 @@
   align-items: center;
   justify-content: center;
   font-family: 'Poppins', sans-serif;
-}
-
-/* Ajustement pour le mobile si besoin */
-@media (max-width: 768px) {
-  .navbar-actions {
-    gap: 15px;
-  }
-}
-
-/* --- LOGO OPTIMISÉ --- */
-.navbar-logo-container {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  /* On limite la hauteur du conteneur pour ne pas agrandir la navbar */
-  height: 130px; 
-  overflow: hidden; /* Empêche le logo de baver sur le contenu hors navbar */
-}
-
-.navbar-logo-img {
-  /* On définit la taille réelle de l'image à 100px */
-  height: 130px; 
-  width: auto;
-  display: block;
-  
-  /* SOLUTION POUR LES BORDURES INUTILES :
-     On utilise object-fit et on réduit les marges si l'image a trop de vide autour */
-  object-fit: contain;
-  
-  /* Si ton logo est vraiment trop petit dans un grand carré transparent, 
-     décommente la ligne ci-dessous pour zoomer à l'intérieur de l'image : */
-  /* transform: scale(1.5); */ 
-  
-  transition: var(--transition);
-}
-
-/* Ajustement de la navbar-container pour s'assurer qu'elle reste fine */
-.navbar-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.5rem 2rem; /* Réduit un peu le padding vertical */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 110px; /* Force une hauteur fixe pour la navbar */
 }
