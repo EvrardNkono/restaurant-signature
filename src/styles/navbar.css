@@ -133,6 +133,10 @@
   .burger {
     display: flex;
   }
+  .navbar-logo-secondary {
+    height: 20px !important; 
+    width: auto !important;
+  }
 
   .navbar-links {
     position: fixed;
