@@ -99,7 +99,7 @@ export default function Cart() {
                 <h3 className="options-title">Comment souhaitez-vous commander ?</h3>
                 
                 <div className="selection-grid">
-                  <button className={`select-btn ${orderMode === "on_site" ? "active" : ""}`} onClick={() => setOrderMode("on_site")}>📍 Sur place</button>
+                  <button className={`select-btn ${orderMode === "on_site" ? "active" : ""}`} onClick={() => setOrderMode("on_site")}>📍 En salle</button>
                   <button className={`select-btn ${orderMode === "booking" ? "active" : ""}`} onClick={() => setOrderMode("booking")}>📅 Réserver</button>
                   <button className={`select-btn ${orderMode === "delivery" ? "active" : ""}`} onClick={() => setOrderMode("delivery")}>🚲 Livraison</button>
                 </div>
@@ -110,7 +110,7 @@ export default function Cart() {
                     <div className="form-fade-in">
                       <p className="form-instruction">Type de consommation :</p>
                       <div className="selection-grid small" style={{marginBottom: '20px'}}>
-                        <button className={`select-btn ${consumeMode === "dine_in" ? "active" : ""}`} onClick={() => setConsumeMode("dine_in")}>🍽️ À consommer sur place</button>
+                        <button className={`select-btn ${consumeMode === "dine_in" ? "active" : ""}`} onClick={() => setConsumeMode("dine_in")}>🍽️ Sur place</button>
                         <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
                       </div>
 

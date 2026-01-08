@@ -11,7 +11,7 @@ export default function Home() {
       <Hero
         title="Bienvenue au Restaurant Signature"
         subtitle="Chaque plat est une explosion de saveurs, un voyage des sens et une émotion à partager."
-        ctaText="Réserver une table"
+        ctaText="Commander"
       />
 
       {/* NOTRE SIGNATURE – TEXTE */}
