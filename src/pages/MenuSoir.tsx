@@ -6,11 +6,11 @@ import "./menuSoir.css";
 export default function MenuSoir() {
   const { addToCart, removeFromCart, isInCart } = useCart();
   
-  // État initial mis à jour pour supporter la catégorie Formule
+  // État initial supportant les nouvelles catégories
   const [filter, setFilter] = useState<Plat["category"] | "Tous">("Tous");
   
-  // Ajout de "Formule" dans la liste des filtres
-  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert"];
+  // Ajout de "Boisson" et "Formule" dans la liste des filtres
+  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert", "Boisson"];
   
   const platsFiltres = filter === "Tous" ? carteSoir : carteSoir.filter(p => p.category === filter);
 
@@ -35,7 +35,8 @@ export default function MenuSoir() {
             className={`filter-btn-soir ${filter === cat ? "active" : ""}`}
             onClick={() => setFilter(cat)}
           >
-            {cat}s
+            {/* Gestion propre du texte pour éviter "Tous-s" ou "Boissons-s" */}
+            {cat === "Tous" ? "Tout voir" : `${cat}s`}
           </button>
         ))}
       </div>
@@ -47,19 +48,25 @@ export default function MenuSoir() {
 
           return (
             <div key={plat.id} className="menu-card-outer soir-variant">
-              {/* Le cadre OR qui entoure la carte */}
               <div className="menu-card-inner dark-theme">
                 
                 {/* Badge spécial pour les formules */}
                 {plat.category === "Formule" && (
                   <div className="formula-badge-soir">Menu Signature</div>
                 )}
+                
+                {/* Badge spécifique pour les boissons si nécessaire */}
+                {plat.category === "Boisson" && (
+                  <div className="formula-badge-soir drink-badge">Cave & Rafraîchissements</div>
+                )}
 
                 <div className="menu-image-container">
                   {plat.image ? (
                     <img src={plat.image} alt={plat.name} className="menu-img" />
                   ) : (
-                    <div className="placeholder-soir">Signature</div>
+                    <div className="placeholder-soir">
+                      {plat.category === "Boisson" ? "Sommelier" : "Signature"}
+                    </div>
                   )}
                   <div className="price-tag-evening">
                     <span>{plat.price}€</span>
