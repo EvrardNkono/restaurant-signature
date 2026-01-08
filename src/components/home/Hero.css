@@ -2,6 +2,7 @@
   position: relative;
   min-height: 80vh; /* Plus grand pour un aspect majestueux */
   width: 100%;
+  margin-top: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
