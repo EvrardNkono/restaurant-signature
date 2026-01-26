@@ -1,0 +1,18 @@
+/* Dans AdminLayout.css */
+.admin-main-content {
+  margin-left: 260px; /* Desktop */
+  transition: margin 0.4s;
+}
+
+@media (max-width: 768px) {
+  .admin-main-content {
+    margin-left: 70px; /* Tablette */
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main-content {
+    margin-left: 0;
+    margin-bottom: 60px; /* Laisse de la place pour la barre du bas */
+  }
+}

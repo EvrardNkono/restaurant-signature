@@ -1,0 +1,172 @@
+/* src/admin/components/Sidebar.css */
+
+.admin-sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: #1A1514; /* Noir encore plus profond que le terracotta */
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #D4AF37;
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Logo / Branding */
+.sidebar-brand {
+  padding: 40px 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.brand-seal {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #D4AF37;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+.sidebar-brand span {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+  color: #FCF9F5;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex-grow: 1;
+  padding: 30px 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 30px;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+.nav-item svg {
+  width: 20px;
+  transition: 0.3s;
+}
+
+.nav-item:hover {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.nav-item.active {
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.08);
+  border-right: 3px solid #D4AF37;
+}
+
+.nav-item.active svg {
+  transform: scale(1.1);
+}
+
+/* Bouton Déconnexion */
+.logout-btn {
+  margin: 20px;
+  padding: 15px;
+  background: transparent;
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  color: #ff4d4d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: #ff4d4d;
+  color: white;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 70px; /* Réduction à une barre d'icônes sur tablette */
+  }
+
+  .sidebar-brand span, 
+  .nav-item span, 
+  .logout-btn span {
+    display: none; /* Cache le texte pour ne garder que les icônes */
+  }
+
+  .sidebar-brand {
+    padding: 20px;
+    justify-content: center;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  /* Pour le contenu principal (Layout) */
+  /* Note: Il faudra mettre margin-left: 70px sur le .admin-main-content en mobile */
+}
+
+@media (max-width: 480px) {
+  .admin-sidebar {
+    width: 100%;
+    height: 60px;
+    flex-direction: row;
+    bottom: 0;
+    top: auto; /* Se place en bas de l'écran comme une barre d'app mobile */
+    border-right: none;
+    border-top: 1px solid #D4AF37;
+  }
+
+  .sidebar-brand {
+    display: none; /* Cache le logo sur tout petit écran */
+  }
+
+  .sidebar-nav {
+    display: flex;
+    padding: 0;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+  }
+
+  .nav-item {
+    padding: 0;
+    height: 100%;
+    flex: 1;
+  }
+
+  .nav-item.active {
+    border-right: none;
+    border-top: 3px solid #D4AF37;
+  }
+
+  .logout-btn {
+    display: none; /* On cache la déconnexion dans la barre de navigation mobile */
+  }
+}

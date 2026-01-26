@@ -1,0 +1,129 @@
+/* src/admin/pages/Dashboard.css */
+
+.admin-dashboard-signature {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Style (Repris de ton menu-header) */
+.admin-header-gold {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.header-seal-small {
+  width: 45px; height: 45px;
+  border: 1px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37; font-weight: 700;
+}
+
+.admin-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: #2D2422;
+  text-transform: uppercase;
+  margin: 10px 0;
+}
+
+.header-double-line-gold {
+  width: 80px; height: 4px;
+  border-top: 1px solid #D4AF37;
+  border-bottom: 1px solid #D4AF37;
+  margin: 0 auto;
+}
+
+/* Grille des Modes */
+.mode-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.luxury-mode-card {
+  position: relative;
+  cursor: pointer;
+  padding: 8px; /* Espace pour la bordure dorée */
+  transition: transform 0.4s ease;
+}
+
+.luxury-card-border {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  z-index: 1;
+}
+
+.luxury-mode-card.active .luxury-card-border {
+  border: 2px solid #D4AF37;
+}
+
+.luxury-card-content {
+  position: relative;
+  z-index: 2;
+  background: #2D2422; /* Fond Terracotta comme ton menu-details */
+  color: white;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.luxury-card-content h3 {
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37;
+  margin: 15px 0 5px;
+  text-transform: uppercase;
+}
+
+.luxury-card-content p {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.mode-icon {
+  color: #D4AF37;
+}
+
+.active-dot {
+  margin-top: 15px;
+  color: #D4AF37;
+  opacity: 0;
+}
+
+.luxury-mode-card.active .active-dot {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+/* Stats Bar */
+.stats-container-terracotta {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  color: #2D2422;
+  font-family: 'Playfair Display', serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-separator {
+  color: #D4AF37;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}

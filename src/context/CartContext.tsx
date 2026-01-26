@@ -1,16 +1,18 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
+// Mise à jour de l'interface pour accepter les IDs de MongoDB (string)
 interface CartItem {
-  id: number;
+  id: string; 
   name: string;
-  price: string;
+  price: string | number; // Souple pour accepter "15" ou 15
+  image?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: any) => void;
-  removeFromCart: (id: number) => void;
-  isInCart: (id: number) => boolean;
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (id: string) => void;
+  isInCart: (id: string) => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -18,9 +20,22 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (item: CartItem) => setCart((prev) => [...prev, item]);
-  const removeFromCart = (id: number) => setCart((prev) => prev.filter(i => i.id !== id));
-  const isInCart = (id: number) => cart.some(item => item.id === id);
+  // Ajoute le plat au panier
+  const addToCart = (item: CartItem) => {
+    setCart((prev) => {
+      // Sécurité pour éviter les doublons
+      if (prev.some(i => i.id === item.id)) return prev;
+      return [...prev, item];
+    });
+  };
+
+  // Retire le plat via son ID MongoDB (string)
+  const removeFromCart = (id: string) => {
+    setCart((prev) => prev.filter(i => i.id !== id));
+  };
+
+  // Vérifie la présence via son ID MongoDB (string)
+  const isInCart = (id: string) => cart.some(item => item.id === id);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, isInCart }}>
