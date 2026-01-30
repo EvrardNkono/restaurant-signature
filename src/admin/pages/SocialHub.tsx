@@ -1,6 +1,16 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Send, Loader2, Facebook, Instagram, Zap, Share2, Film, CheckCircle2 } from 'lucide-react';
+import { 
+  Send, 
+  Loader2, 
+  Facebook, 
+  Instagram, 
+  Zap, 
+  Share2, 
+  Film, 
+  CheckCircle2, 
+  Youtube 
+} from 'lucide-react';
 import './SocialHub.css';
 
 // --- CONFIGURATION SIGNATURE MEDIA ---
@@ -13,10 +23,12 @@ export default function SocialHub() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   
+  // Ajout de Youtube dans l'état initial
   const [platforms, setPlatforms] = useState({
     facebook: true,
     instagram: true,
     tiktok: false,
+    youtube: false,
     snapchat: false
   });
 
@@ -61,16 +73,15 @@ export default function SocialHub() {
         `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`,
         formData,
         {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }, // Important pour certains navigateurs
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
           onUploadProgress: (p) => {
             const percent = Math.round((p.loaded * 100) / (p.total || 100));
-            setUploadProgress(Math.round(percent * 0.80)); // 80% pour l'upload
+            setUploadProgress(Math.round(percent * 0.80)); 
           }
         }
       );
 
       const mediaUrl = cloudRes.data.secure_url;
-      console.log("🚀 Succès Cloudinary :", mediaUrl);
 
       // --- ÉTAPE 2 : MAKE.COM (Distribution) ---
       setUploadProgress(90);
@@ -84,12 +95,12 @@ export default function SocialHub() {
 
       setUploadProgress(100);
       setTimeout(() => {
-        alert("✅ Signature Media : Diffusion lancée avec succès !");
+        alert("✅ Signature Media : Diffusion lancée avec succès sur vos réseaux !");
       }, 500);
       
     } catch (err: any) {
-      console.error("Détails de l'erreur :", err.response?.data || err.message);
-      alert(`❌ Échec : ${err.response?.data?.error?.message || "Vérifie ta connexion ou le preset Cloudinary"}`);
+      console.error("Erreur :", err.response?.data || err.message);
+      alert(`❌ Échec : ${err.response?.data?.error?.message || "Erreur de connexion"}`);
       setUploadProgress(0);
     } finally {
       setTimeout(() => {
@@ -102,13 +113,14 @@ export default function SocialHub() {
   return (
     <div className="social-hub-page">
       <header className="admin-header-gold">
-        <div className="header-seal-small"><Zap size={20} /></div>
+        <div className="header-seal"><Zap size={24} /></div>
         <span className="admin-badge">Signature Media Command</span>
         <h1 className="admin-main-title">Broadcaster Pro</h1>
         <div className="header-double-line-gold"></div>
       </header>
 
       <div className="hub-container">
+        {/* Colonne de gauche : Éditeur */}
         <div className="hub-editor">
           <div className="hub-card">
             <label className="input-label-gold">Média (Image ou Vidéo 9:16)</label>
@@ -121,7 +133,7 @@ export default function SocialHub() {
                 )
               ) : (
                 <div className="upload-placeholder">
-                  <Film size={40} />
+                  <Film size={40} color="#D4AF37" />
                   <span>Glissez ou cliquez pour charger</span>
                 </div>
               )}
@@ -129,20 +141,22 @@ export default function SocialHub() {
             </div>
 
             <div className="input-group">
-              <label className="input-label-gold">Titre interne</label>
+              <label className="input-label-gold">Titre interne du contenu</label>
               <input 
-                type="text" className="admin-input-terracotta"
-                placeholder="Ex: Arrivage Langoustes"
+                type="text" 
+                className="admin-input-terracotta"
+                placeholder="Ex: Soirée Dégustation Truffe"
                 value={postData.title}
                 onChange={(e) => setPostData({...postData, title: e.target.value})}
               />
             </div>
 
             <div className="input-group">
-              <label className="input-label-gold">Légende des posts</label>
+              <label className="input-label-gold">Légende de la publication</label>
               <textarea 
-                className="admin-input-terracotta" rows={4}
-                placeholder="Le texte qui sera publié..."
+                className="admin-input-terracotta" 
+                rows={4}
+                placeholder="Décrivez votre plat ou votre événement ici..."
                 value={postData.content}
                 onChange={(e) => setPostData({...postData, content: e.target.value})}
               />
@@ -150,9 +164,10 @@ export default function SocialHub() {
           </div>
         </div>
 
+        {/* Sidebar de droite : Plateformes */}
         <div className="hub-sidebar">
           <div className="hub-card">
-            <h3 className="section-title">Canaux de diffusion</h3>
+            <h3 className="section-title" style={{color: '#D4AF37', marginBottom: '20px'}}>Canaux</h3>
             <div className="platform-selector">
               {Object.entries(platforms).map(([id, active]) => (
                 <div 
@@ -164,17 +179,19 @@ export default function SocialHub() {
                     {id === 'facebook' && <Facebook size={18} />}
                     {id === 'instagram' && <Instagram size={18} />}
                     {id === 'tiktok' && <Zap size={18} />}
+                    {id === 'youtube' && <Youtube size={18} />}
                     {id === 'snapchat' && <Share2 size={18} />}
                     <span className="capitalize">{id}</span>
                   </div>
-                  {active && <CheckCircle2 size={18} className="check-gold" />}
+                  {active && <CheckCircle2 size={18} className="check-gold" color="#D4AF37" />}
                 </div>
               ))}
             </div>
 
             <div className="broadcast-zone">
               <p className="warning-text">
-                {mediaType === 'image' && platforms.tiktok && "⚠️ TikTok sera ignoré (vidéo requise)."}
+                {mediaType === 'image' && (platforms.tiktok || platforms.youtube) && 
+                  "⚠️ TikTok & YouTube Shorts nécessitent une vidéo."}
               </p>
 
               {isPublishing && (
@@ -182,7 +199,7 @@ export default function SocialHub() {
                   <div className="progress-container">
                     <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }}></div>
                   </div>
-                  <span className="progress-status">{uploadProgress}%</span>
+                  <span className="progress-status" style={{color: '#D4AF37'}}>{uploadProgress}%</span>
                 </div>
               )}
 
@@ -192,7 +209,7 @@ export default function SocialHub() {
                 disabled={isPublishing}
               >
                 {isPublishing ? <Loader2 className="spinner" size={20} /> : <Send size={20} />}
-                <span>{isPublishing ? "TRANSMISSION..." : "PUBLIER MAINTENANT"}</span>
+                <span>{isPublishing ? "TRANSMISSION..." : "LANCER LA DIFFUSION"}</span>
               </button>
             </div>
           </div>

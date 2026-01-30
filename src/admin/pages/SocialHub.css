@@ -1,299 +1,193 @@
-/* --- SocialHub.css - Version Alignée à Gauche --- */
+/* --- SocialHub.css - Design Gastronomique de Caractère --- */
 
-/* 1. Structure de base et gestion de l'espace Sidebar */
 .social-hub-page {
-  /* Aligné sur ta sidebar gauche (280px) */
-  padding: 30px 30px 30px 20px; 
-  background-color: #0f0f0f;
+  padding: 80px 5% 40px 5%;
+  background-color: #fcf9f5; /* Fond crème luxueux pour le contraste */
   min-height: 100vh;
-  color: #fdfdfd;
+  font-family: 'Playfair Display', serif;
   box-sizing: border-box;
-  overflow-x: hidden;
-  /* On s'assure que le contenu s'aligne au début du flux */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
 }
 
-/* 2. Header Style - Aligné à gauche */
+/* --- HEADER AVEC CARACTÈRE --- */
 .admin-header-gold {
-  text-align: left; /* Aligné à gauche */
-  margin-bottom: 40px;
-  width: 100%;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+}
+
+.header-seal {
+  width: 50px; height: 50px;
+  border: 1px solid #D4AF37;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+  color: #D4AF37; font-weight: 700; font-size: 1.2rem;
 }
 
 .admin-badge {
-  background: #e2725b; /* Terracotta */
-  color: white;
-  padding: 4px 14px;
-  border-radius: 30px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  color: #D4AF37;
   text-transform: uppercase;
+  letter-spacing: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .admin-main-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  color: #d4af37; /* Gold */
+  font-size: clamp(1.8rem, 5vw, 3.2rem);
+  color: #2D2422;
   margin: 10px 0;
+  text-transform: uppercase;
 }
 
 .header-double-line-gold {
-  width: 80px;
-  height: 4px;
-  border-top: 1px solid #d4af37;
-  border-bottom: 1px solid #d4af37;
-  margin: 0; /* Aligné à gauche */
+  width: 60px; height: 4px;
+  border-top: 1px solid #D4AF37;
+  border-bottom: 1px solid #D4AF37;
+  margin: 15px auto;
 }
 
-/* 3. Layout Grid - Collé à gauche */
+/* --- LAYOUT RESPONSIVE --- */
 .hub-container {
   display: grid;
-  grid-template-columns: 1fr 350px; 
-  gap: 30px;
-  max-width: 1250px; 
-  margin: 0; /* Plus de centrage automatique */
+  grid-template-columns: 1fr 380px; 
+  gap: 40px;
   width: 100%;
-  box-sizing: border-box;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* --- CARTES AVEC TEXTURE --- */
 .hub-card {
-  background: #1a1a1a;
-  border: 1px solid #333;
-  padding: 25px;
-  border-radius: 16px;
-  height: fit-content;
+  background: #2D2422; /* Ton sombre Signature pour le caractère */
+  padding: 40px;
+  position: relative;
+  border-radius: 0;
+  box-shadow: 20px 20px 0px rgba(212, 175, 55, 0.1);
 }
 
-/* 4. Zone Média - Alignée à gauche dans sa colonne */
-.hub-media-dropzone {
-  width: 100%;
-  max-width: 450px; 
-  aspect-ratio: 1 / 1; 
-  background: #0a0a0a;
-  border: 2px dashed #444;
-  border-radius: 12px;
-  margin: 0 0 25px 0; /* Aligné à gauche */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s ease;
+/* Bordure interne dorée type "Menu de luxe" */
+.hub-card::before {
+  content: "";
+  position: absolute;
+  top: 10px; left: 10px; right: 10px; bottom: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  pointer-events: none;
 }
 
-.hub-media-dropzone:hover {
-  border-color: #e2725b;
-  background: rgba(226, 114, 91, 0.05);
-}
-
-.media-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; 
-  background: #000;
-}
-
-.upload-placeholder {
-  text-align: center;
-  color: #666;
-}
-
-.upload-placeholder span {
-  display: block;
-  margin-top: 15px;
-  font-size: 0.85rem;
-}
-
-/* 5. Formulaire */
+/* --- INPUTS HAUTE LISIBILITÉ --- */
 .input-label-gold {
   display: block;
-  color: #d4af37;
-  font-size: 0.85rem;
+  color: #D4AF37;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  margin-bottom: 10px;
-  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .admin-input-terracotta {
   width: 100%;
-  background: #0a0a0a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 14px;
-  color: #fff;
-  margin-bottom: 20px;
-  font-size: 1rem;
+  background: #FFFFFF !important; /* Fond blanc pur pour voir l'écriture */
+  border: none;
+  border-bottom: 2px solid #D4AF37;
+  padding: 18px;
+  color: #2D2422 !important; /* Texte très sombre */
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  font-family: 'Poppins', sans-serif; /* Plus moderne pour la saisie */
   box-sizing: border-box;
 }
 
 .admin-input-terracotta:focus {
   outline: none;
-  border-color: #e2725b;
+  background: #fff;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* 6. Sélecteur de Plateformes */
-.section-title {
-  color: #d4af37;
-  font-family: 'Playfair Display', serif;
-  margin-bottom: 20px;
-  font-size: 1.4rem;
-}
-
-.platform-selector {
+/* --- ZONE MÉDIA --- */
+.hub-media-dropzone {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #1a1514;
+  border: 1px solid #D4AF37;
+  margin-bottom: 30px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
+.media-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- PLATEFORMES --- */
 .platform-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background: #0a0a0a;
-  border: 1px solid #333;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  margin-bottom: 15px;
+  color: #fcf9f5;
+  transition: 0.3s;
 }
 
 .platform-item.active {
-  background: rgba(226, 114, 91, 0.1);
-  border-color: #e2725b;
+  background: rgba(212, 175, 55, 0.1);
+  border-color: #D4AF37;
+  transform: translateX(5px);
 }
 
-.platform-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #888;
-}
-
-.platform-item.active .platform-info {
-  color: #fff;
-}
-
-.check-gold {
-  color: #d4af37;
-}
-
-/* 7. Bouton de Diffusion */
-.broadcast-zone {
-  margin-top: 30px;
-}
-
-.warning-text {
-  color: #ffcc00;
-  font-size: 0.75rem;
-  margin-bottom: 15px;
-  text-align: center;
-  background: rgba(255, 204, 0, 0.05);
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 204, 0, 0.1);
-}
-
+/* --- BOUTON BROADCAST --- */
 .broadcast-btn {
   width: 100%;
-  background: linear-gradient(135deg, #e2725b 0%, #b35947 100%);
-  color: white;
+  background: #D4AF37;
+  color: #2D2422;
   border: none;
-  padding: 18px;
-  border-radius: 12px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: transform 0.2s;
+  padding: 22px;
+  font-weight: 900;
+  letter-spacing: 4px;
   text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  margin-top: 20px;
 }
 
-.broadcast-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
+.broadcast-btn:hover {
+  background: #2D2422;
+  color: #D4AF37;
+  box-shadow: inset 0 0 0 2px #D4AF37;
 }
 
-/* 8. Mobile et Tablette - Réorganisation complète */
-@media (max-width: 1200px) {
-  .social-hub-page {
-    padding: 20px;
-    align-items: center; /* On recentre pour le mobile uniquement */
-  }
-
-  .admin-header-gold {
-    text-align: center;
-  }
-
-  .header-double-line-gold {
-    margin: 0 auto;
-  }
-
+/* --- RESPONSIVE MOBILE (INDISPENSABLE) --- */
+@media (max-width: 1024px) {
   .hub-container {
     grid-template-columns: 1fr;
-    max-width: 600px;
-    margin: 0 auto;
+    gap: 30px;
+  }
+  
+  .social-hub-page {
+    padding: 40px 20px;
   }
 
+  .hub-card {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main-title {
+    font-size: 1.8rem;
+  }
+  
   .hub-media-dropzone {
-    margin: 0 auto 25px auto;
+    aspect-ratio: 16 / 9; /* Plus adapté aux mobiles */
   }
-
-  .hub-sidebar {
-    order: 2;
-  }
-}
-
-.capitalize { text-transform: capitalize; }
-
-.spinner {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Barre de progression style Signature */
-.progress-wrapper {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.progress-container {
-  width: 100%;
-  height: 6px;
-  background: #0a0a0a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #d4af37 0%, #e2725b 100%);
-  transition: width 0.2s ease-out;
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
-}
-
-.progress-status {
-  font-size: 0.7rem;
-  color: #d4af37;
-  text-align: right;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-/* Effet sur le bouton pendant le chargement */
-.broadcast-btn.loading {
-  filter: grayscale(0.5);
-  opacity: 0.8;
-  cursor: wait;
 }
