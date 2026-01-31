@@ -32,7 +32,6 @@ export default function MenuSoir() {
     const fetchMenuSoir = async () => {
       try {
         const response = await axios.get(API_URL);
-        // On filtre uniquement les plats destinés au SOIR
         const menuNocturne = response.data.data.filter((p: Plat) => p.showInMenuSoir === true);
         setPlats(menuNocturne);
       } catch (error) {
@@ -62,10 +61,12 @@ export default function MenuSoir() {
       <div className="menu-header-soir">
         <div className="header-overlay-dark"></div>
         <div className="header-content-wrapper">
-          <div className="header-seal-gold">S</div>
-          <span className="menu-badge-gold">L'Expérience Nocturne</span>
-          <h2 className="menu-main-title-soir">Menu Du Soir</h2>
-          <div className="header-ornament-line"></div>
+          <div className="header-text-shield-soir">
+            <div className="header-seal-gold">S</div>
+            <span className="menu-badge-gold">L'Expérience Nocturne</span>
+            <h2 className="menu-main-title-soir">Menu Du Soir</h2>
+            <div className="header-ornament-line"></div>
+          </div>
         </div>
       </div>
 
@@ -89,7 +90,6 @@ export default function MenuSoir() {
             return (
               <div key={plat._id} className="menu-card-outer soir-variant">
                 <div className="menu-card-inner dark-theme">
-                  
                   {plat.category === "Formule" && (
                     <div className="formula-badge-soir">Menu Signature</div>
                   )}
@@ -116,9 +116,7 @@ export default function MenuSoir() {
                       <h3>{plat.name}</h3>
                       <div className="gold-separator"></div>
                     </div>
-                    
                     <p className="description-soir">{plat.description}</p>
-                    
                     <div className="card-actions">
                       <button 
                         className={`btn-add-soir ${alreadyInCart ? "in-cart" : ""}`} 
@@ -149,8 +147,21 @@ export default function MenuSoir() {
             );
           })
         ) : (
-          <div className="empty-state-soir">
-            <p>La carte du soir sera disponible prochainement.</p>
+          /* --- MESSAGE PRESTIGIEUX POUR CARTE VIDE --- */
+          <div className="empty-menu-container">
+            <div className="empty-menu-content">
+              <div className="empty-icon">✧</div>
+              <h3>Une Expérience en Préparation</h3>
+              <div className="empty-separator"></div>
+              <p>
+                Notre Chef peaufine actuellement la sélection de ce soir pour vous offrir 
+                un moment d'exception.
+              </p>
+              <p className="empty-footer">La carte sera dévoilée très prochainement.</p>
+              <button onClick={() => window.location.reload()} className="refresh-btn">
+                Actualiser la carte
+              </button>
+            </div>
           </div>
         )}
       </div>

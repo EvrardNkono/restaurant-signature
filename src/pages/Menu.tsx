@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; 
-import { Loader2 } from "lucide-react"; // Optionnel, pour le chargement
+import { Loader2 } from "lucide-react";
 import "./menu.css";
 
-// Configuration de l'URL API (comme dans ton MenuManager)
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/menu" 
   : "https://signature.abbadevelop.net/api/menu";
 
-// Type local pour correspondre à ton nouveau modèle MongoDB
 interface Plat {
-  _id: string; // MongoDB utilise _id
+  _id: string;
   name: string;
   price: number;
   category: "Entrée" | "Plat" | "Dessert" | "Boisson" | "Formule";
@@ -23,19 +21,16 @@ interface Plat {
 
 export default function Menu() {
   const { addToCart, removeFromCart, isInCart } = useCart();
-  
   const [plats, setPlats] = useState<Plat[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Plat["category"] | "Tous">("Tous");
   
   const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert", "Boisson"];
 
-  // 1. Chargement des données depuis MongoDB
   useEffect(() => {
     const fetchMenuDuJour = async () => {
       try {
         const response = await axios.get(API_URL);
-        // On filtre directement pour ne garder que le menu du jour
         const menuMidi = response.data.data.filter((p: Plat) => p.showInMenuJour === true);
         setPlats(menuMidi);
       } catch (error) {
@@ -47,7 +42,6 @@ export default function Menu() {
     fetchMenuDuJour();
   }, []);
 
-  // 2. Filtrage par catégorie (sur les plats déjà filtrés "Midi")
   const platsFiltres = filter === "Tous" 
     ? plats 
     : plats.filter(p => p.category === filter);
@@ -55,7 +49,7 @@ export default function Menu() {
   if (loading) {
     return (
       <div className="menu-loading">
-        <Loader2 className="animate-spin" size={40} />
+        <Loader2 className="animate-spin" size={40} color="#D4AF37" />
         <p>Préparation de la carte du jour...</p>
       </div>
     );
@@ -66,10 +60,12 @@ export default function Menu() {
       <div className="menu-header">
         <div className="header-overlay"></div>
         <div className="header-content-wrapper">
-          <div className="header-seal">J</div>
-          <span className="menu-badge">L'Instant Gourmand</span>
-          <h2 className="menu-main-title">Menu du Jour</h2>
-          <div className="header-double-line"></div>
+          <div className="header-text-shield">
+            <div className="header-seal">J</div>
+            <span className="menu-badge">L'Instant Gourmand</span>
+            <h2 className="menu-main-title">Menu du Jour</h2>
+            <div className="header-double-line"></div>
+          </div>
         </div>
       </div>
 
@@ -88,12 +84,11 @@ export default function Menu() {
       <div className="menu-grid">
         {platsFiltres.length > 0 ? (
           platsFiltres.map(plat => {
-            const alreadyInCart = isInCart(plat._id); // Utilisation de _id
+            const alreadyInCart = isInCart(plat._id);
 
             return (
               <div key={plat._id} className="menu-card-outer">
                 <div className="gold-thick-border"></div>
-                
                 <div className="menu-card-inner">
                   {plat.category === "Formule" && (
                     <div className="formula-tag">Menu Complet</div>
@@ -115,13 +110,10 @@ export default function Menu() {
                       <h3>{plat.name}</h3>
                       <div className="title-underline-gold"></div>
                     </div>
-                    
                     <p className="description-text-light">{plat.description}</p>
-                    
                     <div className="card-actions">
                       <button 
                         className={`add-to-cart-btn ${alreadyInCart ? "in-cart" : ""}`} 
-                        // Note: Adapte ton Context si addToCart attend 'id' au lieu de '_id'
                         onClick={() => addToCart({ ...plat, id: plat._id })} 
                         disabled={alreadyInCart}
                       >
@@ -140,7 +132,6 @@ export default function Menu() {
                         </button>
                       )}
                     </div>
-
                     <div className="card-footer-ornament-gold">✦ ✦ ✦</div>
                   </div>
                 </div>
@@ -148,8 +139,21 @@ export default function Menu() {
             );
           })
         ) : (
-          <div className="empty-menu-msg">
-            <p>Le Chef prépare actuellement la carte. Revenez dans un instant !</p>
+          /* --- MESSAGE CARTE VIDE JOURNÉE --- */
+          <div className="empty-menu-container">
+            <div className="empty-menu-content">
+              <div className="empty-icon">✧</div>
+              <h3>Mise en place en cours</h3>
+              <div className="empty-separator"></div>
+              <p>
+                Le Chef sélectionne actuellement les meilleurs produits du marché 
+                pour composer votre menu de ce midi.
+              </p>
+              <p className="empty-footer">La carte sera disponible d'ici quelques instants.</p>
+              <button onClick={() => window.location.reload()} className="refresh-btn">
+                Actualiser la page
+              </button>
+            </div>
           </div>
         )}
       </div>

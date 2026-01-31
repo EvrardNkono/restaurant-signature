@@ -6,7 +6,7 @@ import {
   Facebook, 
   Instagram, 
   Zap, 
-  Share2, 
+  //Share2, 
   Film, 
   CheckCircle2, 
   Youtube 
@@ -29,7 +29,7 @@ export default function SocialHub() {
     instagram: true,
     tiktok: false,
     youtube: false,
-    snapchat: false
+   // snapchat: false
   });
 
   const [postData, setPostData] = useState({
@@ -180,7 +180,7 @@ export default function SocialHub() {
                     {id === 'instagram' && <Instagram size={18} />}
                     {id === 'tiktok' && <Zap size={18} />}
                     {id === 'youtube' && <Youtube size={18} />}
-                    {id === 'snapchat' && <Share2 size={18} />}
+                
                     <span className="capitalize">{id}</span>
                   </div>
                   {active && <CheckCircle2 size={18} className="check-gold" color="#D4AF37" />}

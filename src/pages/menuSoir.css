@@ -9,29 +9,49 @@
   overflow-x: hidden;
 }
 
-/* --- HEADER NOCTURNE LUXUEUX --- */
-.menu-header-soir {
-  text-align: center;
-  position: relative;
+/* --- SECTION PRINCIPALE --- */
+.menu-soir-section {
   width: 100%;
-  height: 400px;
+  padding-bottom: 100px;
+  background-color: #fdfaf7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* --- HEADER NOCTURNE LUXUEUX (IMAGE) --- */
+.menu-header-soir {
+  width: 100%;
+  height: 60vh;
+  min-height: 450px;
+  position: relative;
   display: flex;
   align-items: center;
-  margin-top: 60px;
   justify-content: center;
+  background: url('/images/menu-soir.jpg') no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed;
   margin-bottom: 60px;
-  background-color: #2D2422;
 }
 
 .header-overlay-dark {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0.3) 100%);
+  background: rgba(0, 0, 0, 0.5); /* Voile protecteur sombre */
+  z-index: 1;
 }
 
-.header-content-wrapper {
+/* LE SHIELD SOIR (Effet de verre sombre) */
+.header-text-shield-soir {
   position: relative;
   z-index: 2;
+  background: rgba(26, 21, 20, 0.7); /* Fond plus sombre pour le soir */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 50px 60px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .header-seal-gold {
@@ -40,8 +60,8 @@
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 15px;
-  font-family: 'Playfair Display', serif;
-  color: #D4AF37; font-weight: 700; font-size: 1.6rem;
+  color: #D4AF37; 
+  font-weight: 700; font-size: 1.6rem;
 }
 
 .menu-badge-gold {
@@ -49,56 +69,59 @@
   text-transform: uppercase;
   letter-spacing: 5px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
+  display: block;
 }
 
 .menu-main-title-soir {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  color: #FCF9F5;
-  margin: 10px 0;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  color: #FCF9F5 !important;
+  margin: 15px 0;
   text-transform: uppercase;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 .header-ornament-line {
-  width: 120px; height: 2px;
+  width: 100px; height: 2px;
   background: #D4AF37;
-  margin: 0 auto;
+  margin: 20px auto 0;
 }
 
-/* --- FILTRES (Mise à jour pour alignement parfait) --- */
+/* --- FILTRES (Correction visuelle) --- */
 .menu-filtres-soir {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 50px;
-  width: 100%;
-  padding: 0 5%;
-  box-sizing: border-box;
+  gap: 15px;
+  margin-bottom: 60px;
+  width: 90%;
 }
 
 .filter-btn-soir {
-  min-width: 120px;
-  padding: 12px 20px;
-  border: 1px solid #D4AF37;
-  background: white;
+  background: #ffffff; /* Fond blanc pour se détacher du crème */
+  border: 1px solid #D4AF37; /* Bordure Or visible */
   color: #2D2422;
+  padding: 12px 25px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
+  letter-spacing: 2px;
+  font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: 0.3s;
-  flex-grow: 1;
-  max-width: 180px;
-  text-align: center;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.filter-btn-soir.active, .filter-btn-soir:hover {
-  background: #2D2422;
+.filter-btn-soir:hover, .filter-btn-soir.active {
+  background: #2D2422; /* Devient noir au clic/survol */
   color: #D4AF37;
+  border-color: #2D2422;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
+
+/* ... (Le reste de tes styles de cartes garde la structure dorée que tu avais) */
 
 /* --- GRILLE --- */
 .menu-grid {
@@ -268,4 +291,117 @@
   .menu-header-soir {
     height: 300px;
   }
+}
+/* --- CONTENEUR D'ÉTAT VIDE (Remonté et Harmonisé) --- */
+.empty-menu-container {
+  grid-column: 1 / -1; /* Occupe toute la largeur de la grille */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Aligne vers le haut */
+  padding-top: 20px; /* Réduit l'espace avec les filtres */
+  min-height: 500px;
+}
+
+.empty-menu-content {
+  background: #ffffff;
+  width: 100%;
+  max-width: 650px;
+  padding: 80px 40px;
+  text-align: center;
+  position: relative;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+  animation: fadeUpReveal 0.8s ease-out;
+}
+
+/* Double bordure décorative */
+.empty-menu-content::before {
+  content: "";
+  position: absolute;
+  top: 15px; left: 15px; right: 15px; bottom: 15px;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  pointer-events: none;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #D4AF37;
+  margin-bottom: 25px;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  animation: starFloat 3s infinite ease-in-out;
+}
+
+.empty-menu-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: #2D2422;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.empty-separator {
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+  margin: 0 auto 30px;
+}
+
+.empty-menu-content p {
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  max-width: 450px;
+  margin: 0 auto 20px;
+}
+
+.empty-footer {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem !important;
+  color: #D4AF37 !important;
+  margin-top: 30px !important;
+  letter-spacing: 1px;
+}
+
+.refresh-btn {
+  margin-top: 40px;
+  background: #2D2422;
+  color: #D4AF37;
+  border: 1px solid #D4AF37;
+  padding: 16px 45px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 5;
+}
+
+.refresh-btn:hover {
+  background: #D4AF37;
+  color: #2D2422;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes starFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+  50% { transform: translateY(-10px) rotate(10deg); opacity: 1; }
+}
+
+@keyframes fadeUpReveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajustement de la grille quand elle est vide */
+.menu-grid:has(.empty-menu-container) {
+  display: block; /* Annule le grid pour centrer le message proprement */
+  max-width: 800px;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Loader2, Share2 } from "lucide-react"; // Import de Share2
+import { Loader2, Share2 } from "lucide-react"; 
 import "./carte.css";
 
 const isLocal = window.location.hostname === "localhost";
@@ -41,7 +41,6 @@ export default function CarteRestaurant() {
     fetchCarte();
   }, []);
 
-  // Fonction de partage par plat
   const handleSharePlat = (plat: Plat) => {
     const shareUrl = `${window.location.origin}/carte?plat=${plat._id}`;
     if (navigator.share) {
@@ -63,7 +62,7 @@ export default function CarteRestaurant() {
   if (loading) {
     return (
       <div className="carte-loading">
-        <Loader2 className="animate-spin" size={40} />
+        <Loader2 className="animate-spin" size={40} color="#D4AF37" />
         <p>Ouverture de la carte gastronomique...</p>
       </div>
     );
@@ -71,12 +70,16 @@ export default function CarteRestaurant() {
 
   return (
     <section className="carte-restaurant">
+      {/* --- BANNIÈRE AVEC IMAGE DE FOND --- */}
       <div className="carte-banner-box">
-        <div className="carte-header">
-          <div className="header-seal">S</div>
-          <span className="carte-badge">La Sélection du Chef</span>
-          <h2 className="carte-main-title">Carte Gastronomique</h2>
-          <div className="header-double-line"></div>
+        <div className="header-overlay-carte"></div>
+        <div className="header-content-wrapper-carte">
+          <div className="header-text-shield-carte">
+            <div className="header-seal">S</div>
+            <span className="carte-badge">La Sélection du Chef</span>
+            <h2 className="carte-main-title">Carte Gastronomique</h2>
+            <div className="header-double-line"></div>
+          </div>
         </div>
       </div>
 
@@ -99,7 +102,6 @@ export default function CarteRestaurant() {
               <div className="gold-thick-border"></div>
               <div className="plat-card-inner">
                 <div className="plat-image-container">
-                  {/* AJOUT DU BOUTON DE PARTAGE ICI */}
                   <button 
                     className="share-plat-icon"
                     onClick={() => handleSharePlat(plat)}
@@ -129,8 +131,20 @@ export default function CarteRestaurant() {
             </div>
           ))
         ) : (
-          <div className="empty-state">
-            <p>Notre carte est en cours de renouvellement. Merci de votre patience.</p>
+          <div className="empty-menu-container">
+            <div className="empty-menu-content">
+              <div className="empty-icon">✧</div>
+              <h3>Une Nouvelle Saison se prépare</h3>
+              <div className="empty-separator"></div>
+              <p>
+                Notre Chef renouvelle actuellement sa sélection pour vous proposer des créations 
+                inspirées par les meilleurs produits du moment.
+              </p>
+              <p className="empty-footer">La carte sera dévoilée très prochainement.</p>
+              <button onClick={() => window.location.reload()} className="refresh-btn">
+                Consulter à nouveau
+              </button>
+            </div>
           </div>
         )}
       </div>
