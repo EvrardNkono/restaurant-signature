@@ -1,4 +1,14 @@
-import { LayoutDashboard, Utensils, Image as ImageIcon, ShoppingBag, LogOut, Zap } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Utensils, 
+  Image as ImageIcon, 
+  ShoppingBag, 
+  LogOut, 
+  Zap, 
+  Tags, 
+  ListPlus,
+  Smartphone // Ajout de l'icône pour les Tables
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
@@ -7,9 +17,11 @@ export default function Sidebar() {
 
   const menuItems = [
     { path: "/admin", icon: <LayoutDashboard />, label: "Dashboard" },
+    { path: "/admin/categories", icon: <Tags />, label: "Catégories" },
+    { path: "/admin/accompaniments", icon: <ListPlus />, label: "Accompagnements" },
     { path: "/admin/menu", icon: <Utensils />, label: "Ma Carte" },
+    { path: "/admin/tables", icon: <Smartphone />, label: "Gestion Tables" }, // Nouvelle entrée
     { path: "/admin/appearance", icon: <ImageIcon />, label: "Apparence & Pub" }, 
-    // Nouveau module de diffusion réseaux sociaux
     { path: "/admin/social", icon: <Zap size={22} />, label: "Social Broadcaster" }, 
     { path: "/admin/orders", icon: <ShoppingBag />, label: "Commandes" },
   ];
@@ -17,7 +29,7 @@ export default function Sidebar() {
   return (
     <aside className="admin-sidebar">
       <div className="sidebar-brand">
-        <div className="brand-seal">S</div> {/* Changé J par S pour Signature */}
+        <div className="brand-seal">S</div>
         <span>ADMIN SIGNATURE</span>
       </div>
       

@@ -1,0 +1,132 @@
+.table-manager {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Réutilisation du style Gold Header */
+.admin-header-gold { margin-bottom: 40px; }
+.admin-badge {
+  background: rgba(212, 175, 55, 0.1);
+  color: #D4AF37;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.table-form.card {
+  background: #1A1514;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.input-with-button input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 12px 15px;
+  color: white;
+  border-radius: 4px;
+}
+
+/* Grille des tables */
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.table-item-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: 0.3s;
+}
+
+.table-item-card:hover {
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.table-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.table-icon-wrapper {
+  width: 45px;
+  height: 45px;
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #D4AF37;
+}
+
+.table-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.table-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.table-number {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #FCF9F5;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-indicator {
+  font-size: 0.75rem;
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.delete-btn-icon {
+  background: none;
+  border: none;
+  color: rgba(255, 77, 77, 0.6);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.delete-btn-icon:hover { color: #ff4d4d; }
+
+.admin-loader-container {
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  color: #D4AF37;
+}

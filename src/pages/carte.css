@@ -8,15 +8,15 @@
   box-sizing: border-box;
 }
 
-/* --- BANNIERE AVEC IMAGE DE FOND (Mise à jour) --- */
+/* --- BANNIERE AVEC IMAGE DE FOND --- */
 .carte-banner-box {
   width: 100%;
-  height: 65vh; /* Hauteur immersive */
+  height: 65vh;
   min-height: 500px;
-  background-image: url('/images/carte.jpg'); /* Ton image */
+  background-image: url('/images/carte.jpg');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Effet parallaxe de luxe */
+  background-attachment: fixed;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,6 @@
   box-sizing: border-box;
 }
 
-/* Overlay pour garantir la lisibilité du texte et des filtres */
 .header-overlay-carte {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -43,7 +42,6 @@
   align-items: center;
 }
 
-/* Bouclier de texte (Glassmorphism léger) */
 .header-text-shield-carte {
   background: rgba(45, 36, 34, 0.7);
   padding: 40px 60px;
@@ -51,11 +49,6 @@
   backdrop-filter: blur(8px);
   text-align: center;
   margin-bottom: 30px;
-}
-
-/* --- HEADER --- */
-.carte-header {
-  text-align: center;
 }
 
 .header-seal {
@@ -92,34 +85,129 @@
   margin: 0 auto;
 }
 
-/* --- FILTRES (Positionnés sur la bannière) --- */
-.carte-filtres {
+/* --- SÉLECTEUR D'UNIVERS --- */
+.univers-selector-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0 10px 0;
+  padding: 0 20px;
+}
+
+.univers-selector {
+  display: flex;
+  background: rgba(19, 9, 1, 0.8);
+  padding: 5px;
+  border-radius: 50px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.univers-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 25px;
+  border: none;
+  background: transparent;
+  color: #FCF9F5;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 40px;
+  transition: all 0.4s ease;
+}
+
+.univers-btn.active {
+  background: #D4AF37;
+  color: #1a1a1a;
+}
+
+/* --- CONTENEUR DES FILTRES (SCROLL MANUEL) --- */
+.carte-filtres-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 40px;
   position: relative;
-  z-index: 3;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
-  margin-top: 20px;
+  overflow: hidden;
+  /* Masque de dégradé sur les bords */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.carte-filtres-track {
+  display: flex;
+  overflow-x: auto; /* Active le scroll manuel */
+  padding: 10px 20px;
+  scrollbar-width: none; /* Cache la barre sur Firefox */
+  -ms-overflow-style: none; /* Cache la barre sur IE */
+  -webkit-overflow-scrolling: touch; /* Scroll fluide iOS */
+}
+
+.carte-filtres-track::-webkit-scrollbar {
+  display: none; /* Cache la barre sur Chrome/Safari */
+}
+
+.carte-filtres-list {
+  display: flex;
+  gap: 12px;
+  min-width: max-content; /* INDISPENSABLE : empêche les boutons de se tasser */
+  margin: 0 auto;
 }
 
 .filter-btn {
-  padding: 12px 25px; /* Ajusté pour être plus élégant */
-  border: 1px solid rgba(212, 175, 55, 0.5);
-  background: rgba(45, 36, 34, 0.5);
+  padding: 10px 22px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(255, 255, 255, 0.05);
   color: #FCF9F5;
   font-family: 'Poppins', sans-serif;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.8rem;
+  letter-spacing: 1.2px;
+  font-size: 0.75rem;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
+  border-radius: 4px;
 }
 
-.filter-btn.active, .filter-btn:hover {
+.filter-btn.active {
   background: #D4AF37;
-  color: #2D2422;
+  color: #1a1a1a;
   border-color: #D4AF37;
+  font-weight: 600;
 }
 
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .carte-filtres-container {
+    width: 95%;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  }
+  
+  .carte-filtres-list {
+    justify-content: flex-start; /* Aligné à gauche pour commencer le scroll */
+  }
+
+  .scroll-hint-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #D4AF37;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+}
+
+.arrow-pulse {
+  animation: pulseX 1.5s infinite;
+}
+
+@keyframes pulseX {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
 /* --- GRILLE --- */
 .plats-grid {
   width: 100%;
@@ -130,7 +218,7 @@
   padding: 40px 5% 100px;
 }
 
-/* --- CARTES (Tes styles conservés) --- */
+/* --- CARTES --- */
 .plat-card-outer {
   position: relative;
   padding: 20px;
@@ -157,37 +245,81 @@
 .plat-img { width: 100%; height: 100%; object-fit: cover; transition: 1s ease; }
 
 .price-badge-luxury {
-  position: absolute; top: 0; right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  color: #2D2422;
-  padding: 8px 15px;
+  position: absolute;
+  top: 15px; right: 15px;
+  background: #D4AF37;
+  color: #000000;
+  width: 65px; height: 65px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
   font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  border-left: 2px solid #D4AF37;
-  border-bottom: 2px solid #D4AF37;
+  font-weight: 700; font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 4;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* --- MODIFICATIONS APPLIQUÉES ICI --- */
 .plat-details-terracotta {
   background-color: #2D2422;
-  padding: 30px 20px;
   text-align: center;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* On aligne en haut pour supprimer le vide forcé au-dessus du titre */
+  justify-content: flex-start; 
+  margin-top: 15px; /* Un peu d'espace en haut */
+  margin-bottom: 5px; /* Un peu d'espace avant le trait doré */
 }
 
-.plat-details-terracotta h3 { color: #D4AF37; font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 5px; }
-.title-underline-gold { width: 30px; height: 1px; background: #D4AF37; margin: 10px auto; }
-.special-label-white { color: #FFFFFF; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 3px; display: block; margin-bottom: 12px; }
-.description-text-light { color: #FFFFFF; font-size: 0.9rem; line-height: 1.6; font-weight: 300; opacity: 0.8; margin-bottom: 20px; }
-.card-footer-ornament-gold { color: #D4AF37; font-size: 0.7rem; letter-spacing: 6px; }
+.plat-details-terracotta h3 { 
+  color: #D4AF37; 
+  font-family: 'Playfair Display', serif; 
+  font-size: 1.2rem; 
+  margin: 0px; /* SUPPRIME la marge navigateur qui créait du vide */
+}
+
+.title-underline-gold { 
+  width: 30px; 
+  height: 1px; 
+  background: #D4AF37; 
+  margin: 10px auto; 
+}
+
+.special-label-white { 
+  color: #FFFFFF; 
+  font-size: 0.65rem; 
+  text-transform: uppercase; 
+  letter-spacing: 3px; 
+  display: block; 
+  margin-bottom: 20px; 
+  margin-top: -10px; /* Remis en positif pour ne pas chevaucher le titre */
+}
+
+.description-text-light { 
+  color: #FFFFFF; 
+  font-size: 0.9rem; 
+  line-height: 1.6; 
+  font-weight: 300; 
+  opacity: 0.8; 
+  margin-bottom: -10px !important;
+  
+}
+
+
+.card-footer-ornament-gold { 
+  color: #D4AF37; 
+  font-size: 0.7rem; 
+  letter-spacing: 6px; 
+  margin-bottom: -20px;
+  padding-bottom: 0px;
+}
+/* ------------------------------------- */
 
 .plat-card-outer:hover { transform: translateY(-10px); }
 .plat-card-outer:hover .plat-img { transform: scale(1.1); }
 
-/* --- MESSAGE CARTE VIDE (Positionnement corrigé) --- */
+/* --- MESSAGE CARTE VIDE --- */
 .empty-menu-container {
   grid-column: 1 / -1;
   width: 100%;
@@ -230,4 +362,211 @@
   .carte-banner-box { height: 50vh; background-attachment: scroll; }
   .header-text-shield-carte { padding: 25px 20px; }
   .plats-grid { grid-template-columns: 1fr; padding: 20px 20px 60px; gap: 40px; }
+}
+/* --- TRONQUER LA DESCRIPTION (Recto) --- */
+.description-text-truncate {
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 300;
+  opacity: 0.8;
+  margin-bottom: 0px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 3em; 
+}
+
+.view-more-btn {
+  background: none;
+  border: none;
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 5px 0;
+  margin-bottom: -30px;
+  text-decoration: underline;
+}
+
+/* --- LOGIQUE DE ROTATION (Flip) --- */
+.plat-card-outer {
+  perspective: 1500px;
+  height: 550px; /* Augmenté légèrement pour éviter que le contenu dépasse */
+  position: relative;
+  padding: 0; /* On gère l'espacement via le gap de la grille */
+}
+
+.plat-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.plat-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+
+
+.card-front {
+  z-index: 2;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+}
+
+/* --- DESIGN DU VERSO (MODAL ENTIÈREMENT MIS À JOUR) --- */
+.card-back .modal-content {
+  background: #2D2422 !important;
+  border: 1px solid #D4AF37;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  overflow: hidden; /* Empêche les débordements */
+}
+
+/* Nouveau Header Horizontal au verso */
+.modal-header-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 35px 20px 15px 20px;
+  text-align: left;
+}
+
+.modal-circle-image {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #D4AF37;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.modal-circle-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.modal-header-info {
+  flex-grow: 1;
+}
+
+.modal-header-info h3 {
+  color: #FCF9F5 !important;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem !important;
+  margin: 5px 0 !important;
+  line-height: 1.2;
+}
+
+.modal-header-info .modal-price-tag {
+  color: #D4AF37;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.modal-badge {
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  display: block;
+}
+
+/* Trait de séparation élégant */
+.title-underline-gold.full-width {
+  width: 85%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #D4AF37, transparent);
+  margin: 0 auto;
+  opacity: 0.6;
+}
+
+/* Bouton Fermer */
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #D4AF37;
+  color: #2D2422 !important;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Zone de texte scrollable */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #2D2422;
+}
+
+.modal-body::-webkit-scrollbar { width: 5px; }
+.modal-body::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+
+.modal-details-box {
+  padding: 20px 25px;
+  text-align: left; /* Meilleure lisibilité pour le texte */
+}
+
+.modal-description-full {
+  color: #FFFFFF !important;
+  opacity: 0.9;
+  line-height: 1.7;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.card-footer-ornament-gold { 
+  color: #D4AF37; 
+  font-size: 0.7rem; 
+  letter-spacing: 6px; 
+  margin-top: auto;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+  .plat-card-outer { 
+    height: 480px; 
+  }
+  .modal-header-horizontal {
+    gap: 15px;
+    padding: 30px 15px 10px 15px;
+  }
+  .modal-circle-image {
+    width: 75px;
+    height: 75px;
+  }
+  .modal-header-info h3 { font-size: 1.1rem !important; }
+  .modal-description-full { font-size: 0.9rem; }
 }

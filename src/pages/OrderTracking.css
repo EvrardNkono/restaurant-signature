@@ -1,0 +1,271 @@
+/* --- CONTENEUR PRINCIPAL --- */
+.order-tracking-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fdfbf7; /* Fond crème très léger */
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* --- HEADER & NAVIGATION --- */
+.tracking-header {
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 20px;
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: #D4AF37;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.back-link:hover {
+  transform: translateX(-5px);
+}
+
+.gold-title {
+  color: #1a1514;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  text-align: center;
+  margin: 20px 0 5px 0;
+}
+
+.refresh-mini-loader {
+  font-size: 0.75rem;
+  color: #D4AF37;
+  text-align: center;
+  font-style: italic;
+  animation: fadePulse 1.5s infinite;
+}
+
+/* --- CARTES DE COMMANDES --- */
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-status-card {
+  background: white;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  transition: all 0.3s ease;
+}
+
+.order-status-card.completed {
+  border-color: #4CAF50;
+  background-color: #f6fff6;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.order-id {
+  font-weight: 800;
+  color: #1a1514;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.status-tag {
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-tag.pending { background: #fff4e5; color: #ff9800; }
+.status-tag.cooking { background: #e3f2fd; color: #2196f3; }
+.status-tag.done { background: #e8f5e9; color: #4caf50; }
+
+.steps-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 40px 0;
+  position: relative;
+  width: 100%;
+}
+
+/* La ligne grise de fond qui traverse tout */
+.steps-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 22px; /* Milieu du cercle de 45px */
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #eee;
+  z-index: 1;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+  position: relative;
+  background: #fdfbf7; /* Doit être la même couleur que le fond de page pour masquer la ligne grise */
+  padding: 0 10px;
+}
+
+.icon-circle {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: #ccc;
+  transition: all 0.4s ease;
+}
+
+/* Les connecteurs dorés qui indiquent la progression */
+.connector {
+  position: absolute;
+  top: 22px;
+  height: 3px; /* Légèrement plus épais pour bien voir l'or */
+  background: #D4AF37;
+  z-index: 1;
+  transition: width 0.8s ease-in-out;
+  display: block !important; /* Force l'affichage */
+}
+
+/* Connecteur entre Validée et Cuisine */
+.connector.to-cooking {
+  left: 15%;
+  width: 0;
+}
+.connector.to-cooking.active {
+  width: 35%;
+}
+
+/* Connecteur entre Cuisine et Prête */
+.connector.to-done {
+  left: 50%;
+  width: 0;
+}
+.connector.to-done.active {
+  width: 35%;
+}
+
+/* Positionnement des connecteurs entre les étapes */
+.connector:nth-child(2) { left: 15%; width: 20%; }
+.connector:nth-child(4) { left: 65%; width: 20%; }
+
+.connector.active {
+  background: #D4AF37;
+}
+
+/* --- RÉCAPITULATIF MINI --- */
+.order-summary-mini {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px dashed #eee;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.gold-text { color: #D4AF37; font-weight: 700; }
+
+.pick-up-msg {
+  color: #4CAF50;
+  font-weight: 600;
+  margin-top: 5px;
+  animation: bounce 2s infinite;
+}
+
+/* --- ÉTAT VIDE & LOADER --- */
+.tracking-loader, .track-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.spin-icon {
+  color: #D4AF37;
+  animation: rotate 2s linear infinite;
+  margin-bottom: 20px;
+}
+
+.btn-return-gold {
+  margin-top: 20px;
+  padding: 12px 30px;
+  background: #1a1514;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* --- FOOTER --- */
+.tracking-footer {
+  margin-top: 40px;
+  text-align: center;
+  padding-bottom: 40px;
+}
+
+.tracking-footer p {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.btn-clear-session {
+  margin-top: 20px;
+  background: transparent;
+  border: 1px dashed #ccc;
+  color: #999;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s;
+}
+
+.btn-clear-session:hover {
+  border-color: #ff4444;
+  color: #ff4444;
+  background: #fff5f5;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadePulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-5px);}
+  60% {transform: translateY(-3px);}
+}

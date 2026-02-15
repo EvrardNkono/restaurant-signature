@@ -88,41 +88,161 @@
   margin: 20px auto 0;
 }
 
-/* --- FILTRES (Correction visuelle) --- */
-.menu-filtres-soir {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 60px;
-  width: 90%;
+/* --- FILTRES SOIR (Logique identique au JOUR) --- */
+.menu-filtres-soir-container {
+  width: 100%;
+  background: #fcf9f5; /* On reprend le fond clair du jour */
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+  padding: 20px 0 40px;
 }
 
+/* Effet de fondu sur les côtés pour annoncer le scroll */
+.menu-filtres-soir-container::before,
+.menu-filtres-soir-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.menu-filtres-soir-container::before {
+  left: 0;
+  background: linear-gradient(to right, #fcf9f5, transparent);
+}
+.menu-filtres-soir-container::after {
+  right: 0;
+  background: linear-gradient(to left, #fcf9f5, transparent);
+}
+
+.menu-filtres-track-soir {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
+}
+
+.menu-filtres-track-soir::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.menu-filtres-list-soir {
+  display: flex;
+  gap: 15px;
+  margin: 0 auto;
+  padding: 0 40px;
+  min-width: max-content;
+}
+
+/* --- VOS BOUTONS DE FILTRE DESIGN (Identique Jour) --- */
 .filter-btn-soir {
-  background: #ffffff; /* Fond blanc pour se détacher du crème */
-  border: 1px solid #D4AF37; /* Bordure Or visible */
-  color: #2D2422;
-  padding: 12px 25px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-weight: 700;
-  font-size: 0.8rem;
+  background: #ffffff;
+  border: 1px solid #D4AF37;
+  padding: 14px 32px; /* Augmenté légèrement */
+  font-family: 'Playfair Display', serif;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 140px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border-radius: 0px;
+  text-transform: uppercase;
+  
+  /* Correction de la taille ici */
+  font-size: 1rem;      /* Passage de 0.85rem à 1rem */
+  font-weight: 700;    /* Plus gras pour la lisibilité */
+  color: #2D2422;
+  letter-spacing: 1.5px; /* Plus d'espace pour un look premium */
+  
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.filter-btn-soir:hover, .filter-btn-soir.active {
-  background: #2D2422; /* Devient noir au clic/survol */
+.filter-btn-soir:hover {
+  background: #2D2422;
   color: #D4AF37;
   border-color: #2D2422;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
-/* ... (Le reste de tes styles de cartes garde la structure dorée que tu avais) */
+.filter-btn-soir.active {
+  background: #2D2422;
+  color: #D4AF37;
+  border-color: #2D2422;
+  box-shadow: 0 4px 12px rgba(45, 36, 34, 0.2);
+}
 
+/* --- INDICATEUR MOBILE --- */
+.scroll-hint-mobile-soir {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: #D4AF37;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+}
+
+.arrow-pulse-soir {
+  animation: pulseGoldSoir 2s infinite;
+}
+
+@keyframes pulseGoldSoir {
+  0% { transform: translateX(0); opacity: 0.5; }
+  50% { transform: translateX(5px); opacity: 1; }
+  100% { transform: translateX(0); opacity: 0.5; }
+}
+
+/* --- SÉLECTEUR D'UNIVERS (Version Table/Cave) --- */
+.univers-selector-container-soir {
+  background: #fcf9f5;
+  padding-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.univers-selector-soir {
+  display: flex;
+  background: #fff;
+  padding: 5px;
+  border: 1px solid #D4AF37;
+}
+
+.univers-btn-soir {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #2D2422;
+  cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.univers-btn-soir.active {
+  background: #2D2422;
+  color: #D4AF37;
+}
+
+@media (max-width: 768px) {
+  .scroll-hint-mobile-soir {
+    display: flex;
+  }
+  
+  .menu-filtres-list-soir {
+    justify-content: flex-start;
+  }
+}
 /* --- GRILLE --- */
 .menu-grid {
   display: grid;
@@ -180,6 +300,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 0; 
+  overflow: hidden; /* L'image reste coupée proprement ici */
 }
 
 .placeholder-soir {
@@ -404,4 +526,381 @@
 .menu-grid:has(.empty-menu-container) {
   display: block; /* Annule le grid pour centrer le message proprement */
   max-width: 800px;
+}
+
+/* --- LOGIQUE DE RETOURNEMENT --- */
+.menu-card-outer.soir-variant {
+  perspective: 1500px;
+  height: 580px; /* Ajusté pour le contenu soir */
+  background: transparent !important; /* On retire le fond dégradé ici car il est géré par la face */
+  padding: 0;
+}
+
+.menu-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.menu-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face-soir {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  flex-direction: column;
+  /* overflow: hidden; */ /* <--- SUPPRIME OU COMMENTE CETTE LIGNE */
+  overflow: visible !important;
+ 
+}
+
+/* RECTO : On garde l'aspect blanc/sombre actuel */
+.card-front-soir {
+  background: #FFFFFF;
+}
+
+/* VERSO : CHARTE BLANCHE & OR */
+.card-back-soir {
+  background: #FFFFFF;
+  transform: rotateY(180deg);
+  padding: 30px 20px;
+  box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15); /* Ombre dorée */
+}
+
+/* BOUTON DÉTAILS (Celui qui manquait) */
+.view-details-btn-soir {
+  background: transparent;
+  border: none;
+  color: #2D2422;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.view-details-btn-soir:hover {
+  color: #D4AF37;
+}
+
+/* CONTENU DU VERSO */
+.back-content-soir {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-header-soir {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back-circle-img-soir {
+  width: 65px; height: 65px;
+  border-radius: 50%;
+  border: 2px solid #D4AF37;
+  overflow: hidden;
+}
+
+.back-circle-img-soir img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.back-title-group h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: #2D2422;
+  margin: 0;
+}
+
+.back-price-soir {
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+.gold-separator-small {
+  width: 40px; height: 1px;
+  background: #D4AF37;
+  margin: 20px 0;
+}
+
+.back-body-soir {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.back-label-soir {
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.back-body-soir p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.close-back-btn-soir {
+  position: absolute;
+  top: 15px; right: 15px;
+  background: none; border: none;
+  color: #D4AF37; cursor: pointer;
+}
+
+/* BOUTON RETRAIT VERSO */
+.btn-remove-soir-verso {
+  width: 100%;
+  padding: 14px;
+  background: #FFF5F5;
+  color: #C53030;
+  border: 1px solid #FEB2B2;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-remove-soir-verso:hover {
+  background: #C53030;
+  color: white;
+}
+
+/* Rappel de votre CSS pour que ça marche avec le JSX ci-dessus */
+.menu-card-outer.soir-variant {
+  position: relative;
+  padding: 8px; /* C'est ce padding qui crée l'épaisseur du contour doré */
+  background: linear-gradient(135deg, #D4AF37 0%, #FBF5B7 50%, #B8860B 100%);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  perspective: 1500px;
+  height: 580px;
+}
+
+/* On s'assure que le contenu intérieur ne déborde pas sur l'or */
+.menu-card-inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Aperçu de la description au Recto */
+.description-preview-soir {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+  margin: 10px 0 5px;
+  
+  /* Compatibilité Standard (Browsers modernes) */
+  line-clamp: 2;
+  
+  /* Compatibilité Legacy (Webkit/Blink - Chrome, Safari, Edge) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.8rem; /* Assure la stabilité visuelle */
+}
+
+/* Style du bouton "Voir plus..." */
+.view-details-btn-soir {
+  background: transparent;
+  border: none;
+  color: #D4AF37;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 600;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: center;
+}
+
+.view-details-btn-soir:hover {
+  letter-spacing: 1px;
+  color: #2D2422;
+  text-decoration: underline;
+}
+
+
+.accompaniments-client-list {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(212, 175, 55, 0.3);
+}
+
+.acc-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d4af37;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.acc-tags-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.acc-tag-client {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: #eee;
+  padding: 3px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+}
+
+/* Optionnel : permettre le scroll si la description + accompagnements sont trop longs */
+.scrollable-back-body {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.scrollable-back-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.scrollable-back-body::-webkit-scrollbar-thumb {
+  background: #d4af37;
+  border-radius: 10px;
+}
+
+/* --- GESTION DE L'ÉTIREMENT DE LA CARTE --- */
+
+/* On ajoute une marge en bas quand la carte est étirée pour ne pas chevaucher le plat suivant */
+.menu-card-outer.is-expanded {
+  margin-bottom: 160px; /* Doit correspondre à la hauteur de ton tiroir */
+  transition: margin-bottom 0.4s ease;
+}
+
+/* Le tiroir d'accompagnements */
+.acc-selection-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1a1a1a; /* Fond sombre pour trancher avec le doré */
+  border-top: 2px solid #d4af37;
+  height: 0; /* Fermé par défaut */
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 999;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* État ouvert du tiroir */
+.acc-selection-drawer.open {
+  height: 160px; /* Hauteur de l'étirement */
+  bottom: -160px; /* Il descend sous la carte */
+  opacity: 1;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* En-tête du tiroir */
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #222;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d4af37;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.close-drawer {
+  color: #888;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-drawer:hover {
+  color: #fff;
+}
+
+/* Grille des options d'accompagnements */
+.drawer-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 colonnes */
+  gap: 10px;
+  padding: 15px;
+  overflow-y: auto; /* Au cas où il y a beaucoup d'accompagnements */
+}
+
+.acc-option-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #eee;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.acc-option-btn:hover {
+  background: #d4af37;
+  color: #000;
+  border-color: #fff;
+}
+
+.acc-option-btn svg {
+  opacity: 0.7;
+}
+
+/* --- ADAPTATION MOBILE --- */
+@media (max-width: 480px) {
+  .acc-selection-drawer.open {
+    height: 180px;
+    bottom: -180px;
+  }
+  .menu-card-outer.is-expanded {
+    margin-bottom: 180px;
+  }
 }

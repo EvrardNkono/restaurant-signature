@@ -1,0 +1,69 @@
+/* src/admin/pages/AccompanimentManager.css */
+
+.category-manager {
+    padding: 30px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.admin-header-gold {
+    border-left: 4px solid #D4AF37; /* Une petite barre latérale pour changer */
+    padding-left: 20px;
+    margin-bottom: 40px;
+}
+
+.admin-title {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 2.2rem;
+    letter-spacing: 1px;
+}
+
+/* Le formulaire spécifique aux accompagnements */
+.category-form.card {
+    background: #1e1e1e;
+    border-radius: 15px;
+    padding: 30px;
+    border: 1px dashed rgba(212, 175, 55, 0.3); /* Bordure en pointillés pour le différencier */
+}
+
+.input-label-gold {
+    color: #D4AF37;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Style de la table des accompagnements */
+.category-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Espace entre les lignes */
+}
+
+.category-table tr {
+    background: rgba(255, 255, 255, 0.03);
+    transition: 0.3s;
+}
+
+.category-table tr:hover {
+    background: rgba(212, 175, 55, 0.05);
+}
+
+.category-table td {
+    padding: 20px;
+}
+
+/* Badge spécifique pour les options d'accompagnements */
+.text-gold {
+    color: #D4AF37;
+}
+
+.row-inactive {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

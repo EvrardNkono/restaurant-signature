@@ -1,0 +1,214 @@
+/* --- CONTENEUR PRINCIPAL --- */
+.category-manager {
+  padding: 20px;
+  color: #FCF9F5;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* --- HEADER STYLE SIGNATURE --- */
+.admin-header-gold {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.admin-badge {
+  display: inline-block;
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.admin-title {
+  font-family: 'Playfair Display', serif;
+  color: #FCF9F5;
+  font-size: 2.2rem;
+  margin: 10px 0;
+}
+
+.header-double-line-gold {
+  height: 3px;
+  border-top: 1px solid #D4AF37;
+  border-bottom: 1px solid #D4AF37;
+  width: 80px;
+  margin: 15px auto;
+}
+
+/* --- CARTES ET STRUCTURE --- */
+.card {
+  background: #1A1514;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* --- FORMULAIRE RESPONSIVE --- */
+.category-form {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: flex-end; /* Aligne le bouton avec les inputs */
+}
+
+.input-group {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-form input, 
+.category-form select {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: white;
+  padding: 12px 15px;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.3s;
+  font-size: 0.95rem;
+}
+
+.category-form option {
+  background: #1A1514;
+  color: white;
+}
+
+.category-form input:focus, 
+.category-form select:focus {
+  border-color: #D4AF37;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.add-btn {
+  background: #D4AF37;
+  color: #1A1514;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.3s;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  height: 46px; /* Match height des inputs */
+}
+
+.add-btn:hover {
+  background: #f1c40f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* --- TABLEAU --- */
+.category-list-wrapper {
+  overflow-x: auto;
+}
+
+.category-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.category-table th {
+  text-align: left;
+  padding: 15px;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+.category-table td {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cat-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+/* --- BADGES AVEC ICÔNES --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.cuisine {
+  background: rgba(212, 175, 55, 0.1);
+  color: #D4AF37;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.badge.boissons {
+  background: rgba(55, 134, 212, 0.1);
+  color: #3786d4;
+  border: 1px solid rgba(55, 134, 212, 0.4);
+}
+
+/* --- ACTIONS --- */
+.text-right { text-align: right; }
+
+.delete-btn-icon {
+  color: rgba(255, 77, 77, 0.6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.delete-btn-icon:hover {
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  transform: scale(1.1);
+}
+
+.loading-text, .empty-msg {
+  text-align: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+/* --- MEDIA QUERIES --- */
+@media (max-width: 768px) {
+  .category-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .input-group {
+    width: 100%;
+  }
+
+  .add-btn {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .admin-title {
+    font-size: 1.6rem;
+  }
+}

@@ -274,3 +274,94 @@
 .luxury-select:focus {
   border-color: #D4AF37;
 }
+
+
+/* --- PARTENAIRES DE LIVRAISON --- */
+.delivery-partners-box {
+  background: rgba(212, 175, 55, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 25px;
+}
+
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.partner-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background: #fff;
+  border: 1px solid #eee;
+  text-decoration: none;
+  color: #2D2422;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.partner-card:hover {
+  border-color: #D4AF37;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.partner-card.hubert { border-left: 4px solid #E94E1B; } /* Couleur Hubert */
+.partner-card.uber { border-left: 4px solid #06C167; }   /* Couleur Uber */
+.partner-card.deliveroo { border-left: 4px solid #00CCBC; } /* Couleur Deliveroo */
+
+.delivery-separator {
+  text-align: center;
+  position: relative;
+  margin: 25px 0;
+}
+
+.delivery-separator::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 0; width: 100%; height: 1px;
+  background: #eee;
+  z-index: 1;
+}
+
+.delivery-separator span {
+  position: relative;
+  z-index: 2;
+  background: #fdfaf7; /* Même couleur que le fond du formulaire */
+  padding: 0 15px;
+  color: #D4AF37;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.min-time-notice {
+  display: block;
+  margin-top: 5px;
+  color: #D4AF37;
+  font-style: italic;
+}
+
+.gold-text {
+  color: #D4AF37;
+  font-weight: 600;
+}
+
+.signature-delivery-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.signature-delivery-header .form-instruction {
+  margin-bottom: 0; /* Aligné avec l'icône */
+}

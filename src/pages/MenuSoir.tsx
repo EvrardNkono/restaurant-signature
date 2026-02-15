@@ -1,51 +1,106 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; 
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Trash2, Utensils, GlassWater, ArrowRight, Check, ListChecks } from "lucide-react"; 
 import "./menuSoir.css";
 
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
-  ? "http://localhost:5000/api/menu" 
-  : "https://signature.abbadevelop.net/api/menu";
+  ? "http://localhost:5000/api/menu?public=true" 
+  : "https://signature.abbadevelop.net/api/menu?public=true";
+
+interface Category {
+  _id: string;
+  name: string;
+  univers: "Cuisine" | "Boissons";
+  active: boolean;
+}
+
+interface Accompaniment {
+  _id: string;
+  name: string;
+  active: boolean;
+}
 
 interface Plat {
   _id: string;
   name: string;
   price: number;
-  category: "Entrée" | "Plat" | "Dessert" | "Boisson" | "Formule";
+  category: Category;
   description: string;
   image: string;
   showInMenuSoir: boolean;
+  hasAccompaniment: boolean;
+  accompaniments: Accompaniment[]; 
 }
 
 export default function MenuSoir() {
   const { addToCart, removeFromCart, isInCart } = useCart();
-  
   const [plats, setPlats] = useState<Plat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Plat["category"] | "Tous">("Tous");
   
-  const categories: (Plat["category"] | "Tous")[] = ["Tous", "Formule", "Entrée", "Plat", "Dessert", "Boisson"];
-  
+  const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
+  const [filter, setFilter] = useState<string>("Tous");
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+
+  // État pour gérer l'étirement de la carte (choix accompagnement)
+  const [selectingAccId, setSelectingAccId] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchMenuSoir = async () => {
-      try {
-        const response = await axios.get(API_URL);
-        const menuNocturne = response.data.data.filter((p: Plat) => p.showInMenuSoir === true);
-        setPlats(menuNocturne);
-      } catch (error) {
-        console.error("Erreur chargement menu soir:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      const response = await axios.get(API_URL);
+      // REGARDE BIEN CE LOG DANS LA CONSOLE F12
+      console.log("STRUCTURE DU PREMIER PLAT :", response.data.data[0]);
+      
+      const menuNocturne = response.data.data.filter((p: Plat) => p.showInMenuSoir === true);
+      setPlats(menuNocturne);
+    } catch (error) {
+      console.error("Erreur chargement menu soir:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
     fetchMenuSoir();
   }, []);
 
-  const platsFiltres = filter === "Tous" 
-    ? plats 
-    : plats.filter(p => p.category === filter);
+  // --- GESTION DE L'AJOUT ---
+const handleAddClick = (plat: Plat) => {
+  // On filtre les accompagnements actifs pour être sûr
+  const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+  
+  // Si on a des accompagnements OU que le flag est à true
+  if (activeAccs.length > 0) {
+    console.log("Ouverture du tiroir pour:", plat.name);
+    setSelectingAccId(plat._id);
+  } else {
+    console.log("Ajout direct au panier:", plat.name);
+    addToCart({ ...plat, id: plat._id });
+  }
+};
+
+  const handleSelectAccompaniment = (plat: Plat, accName: string) => {
+    addToCart({ ...plat, id: plat._id, chosenAccompaniment: accName });
+    setSelectingAccId(null); // On referme le tiroir
+    setFlippedId(null);      // On remet la carte face avant
+  };
+
+  const currentCategories = [
+    "Tous",
+    ...new Set(
+      plats
+        .filter(p => p.category?.univers === univers)
+        .map(p => p.category?.name)
+        .filter(Boolean)
+    )
+  ];
+
+  const platsFiltres = plats.filter(p => {
+    const matchUnivers = p.category?.univers === univers;
+    if (!matchUnivers) return false;
+    if (filter === "Tous") return true;
+    return p.category?.name === filter;
+  });
 
   if (loading) {
     return (
@@ -70,98 +125,147 @@ export default function MenuSoir() {
         </div>
       </div>
 
-      <div className="menu-filtres-soir">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            className={`filter-btn-soir ${filter === cat ? "active" : ""}`}
-            onClick={() => setFilter(cat)}
-          >
-            {cat === "Tous" ? "Tout voir" : `${cat}s`}
+      <div className="univers-selector-container-soir">
+        <div className="univers-selector-soir">
+          <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} onClick={() => { setUnivers("Cuisine"); setFilter("Tous"); }}>
+            <Utensils size={18} /> La Table
           </button>
-        ))}
+          <button className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} onClick={() => { setUnivers("Boissons"); setFilter("Tous"); }}>
+            <GlassWater size={18} /> La Cave
+          </button>
+        </div>
+      </div>
+
+      <div className="menu-filtres-soir-container">
+        <div className="scroll-hint-mobile-soir">
+          <span>Découvrez nos suggestions</span>
+          <ArrowRight size={14} className="arrow-pulse-soir" />
+        </div>
+
+        <div className="menu-filtres-track-soir">
+          <div className="menu-filtres-list-soir">
+            {currentCategories.map((cat, idx) => (
+              <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat)}>
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="menu-grid">
         {platsFiltres.length > 0 ? (
           platsFiltres.map(plat => {
             const alreadyInCart = isInCart(plat._id);
+            const isFlipped = flippedId === plat._id;
+            const isExpanding = selectingAccId === plat._id;
+            const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
 
             return (
-              <div key={plat._id} className="menu-card-outer soir-variant">
-                <div className="menu-card-inner dark-theme">
-                  {plat.category === "Formule" && (
-                    <div className="formula-badge-soir">Menu Signature</div>
-                  )}
+              <div key={plat._id} className={`menu-card-outer soir-variant ${isExpanding ? "is-expanded" : ""}`}>
+                <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
                   
-                  {plat.category === "Boisson" && (
-                    <div className="formula-badge-soir drink-badge">Cave & Rafraîchissements</div>
-                  )}
-
-                  <div className="menu-image-container">
-                    {plat.image ? (
-                      <img src={plat.image} alt={plat.name} className="menu-img" />
-                    ) : (
-                      <div className="placeholder-soir">
-                        {plat.category === "Boisson" ? "Sommelier" : "Signature"}
-                      </div>
-                    )}
-                    <div className="price-tag-evening">
-                      <span>{plat.price}€</span>
+                  {/* RECTO */}
+                  <div className="card-face-soir card-front-soir">
+                    {plat.category?.name === "Formule" && <div className="formula-badge-soir">Menu Signature</div>}
+                    <div className="menu-image-container">
+                      {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-soir">Signature</div>}
+                      <div className="price-tag-evening"><span>{plat.price}€</span></div>
                     </div>
-                  </div>
 
-                  <div className="details-container-soir">
-                    <div className="title-area">
+                    <div className="details-container-soir">
                       <h3>{plat.name}</h3>
                       <div className="gold-separator"></div>
-                    </div>
-                    <p className="description-soir">{plat.description}</p>
-                    <div className="card-actions">
-                      <button 
-                        className={`btn-add-soir ${alreadyInCart ? "in-cart" : ""}`} 
-                        onClick={() => addToCart({
-                          id: plat._id,
-                          name: plat.name,
-                          price: plat.price,
-                          image: plat.image
-                        })}
-                        disabled={alreadyInCart}
-                      >
-                        {alreadyInCart ? "Dans votre sélection" : "Ajouter à la dégustation"}
+                      <p className="description-preview-soir">{plat.description}</p>
+
+                      <button className="view-details-btn-soir" onClick={() => setFlippedId(plat._id)}>
+                        Voir plus...
                       </button>
 
-                      {alreadyInCart && (
+                      <div className="card-actions">
                         <button 
-                          className="btn-remove-soir" 
-                          onClick={() => removeFromCart(plat._id)}
+                          className={`btn-add-soir ${alreadyInCart ? "in-cart" : ""}`} 
+                          onClick={() => handleAddClick(plat)} 
+                          disabled={alreadyInCart && !isExpanding}
                         >
-                          Retirer
+                          {alreadyInCart ? "✓ Sélectionné" : "Ajouter à la dégustation"}
                         </button>
-                      )}
+                      </div>
+                      <div className="card-footer-star">★ ★ ★</div>
                     </div>
-                    <div className="card-footer-star">★ ★ ★</div>
+
+                    {/* TIROIR D'ACCOMPAGNEMENTS */}
+                    <div className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
+                       <div className="drawer-header">
+                         <div className="drawer-title">
+                            <ListChecks size={14} /> <span>Accompagnement au choix</span>
+                         </div>
+                         <X size={18} className="close-drawer" onClick={(e) => { e.stopPropagation(); setSelectingAccId(null); }} />
+                       </div>
+                       <div className="drawer-options">
+                          {/* Option par défaut */}
+                          <button 
+                            className="acc-option-btn default-option"
+                            onClick={() => handleSelectAccompaniment(plat, "Standard / Sans")}
+                          >
+                            Sans accompagnement
+                          </button>
+
+                          {activeAccs.map(acc => (
+                            <button 
+                              key={acc._id} 
+                              className="acc-option-btn"
+                              onClick={() => handleSelectAccompaniment(plat, acc.name)}
+                            >
+                              <Check size={14} /> {acc.name}
+                            </button>
+                          ))}
+                       </div>
+                    </div>
                   </div>
+
+                  {/* VERSO */}
+                  <div className="card-face-soir card-back-soir">
+                    <button className="close-back-btn-soir" onClick={() => setFlippedId(null)}>
+                      <X size={20} />
+                    </button>
+                    <div className="back-content-soir">
+                      <div className="back-header-soir">
+                        <div className="back-circle-img-soir">
+                           {plat.image ? <img src={plat.image} alt={plat.name} /> : <div className="circle-placeholder-soir">S</div>}
+                        </div>
+                        <div className="back-title-group">
+                          <h4>{plat.name}</h4>
+                          <span className="back-price-soir">{plat.price}€</span>
+                        </div>
+                      </div>
+                      <div className="gold-separator-small"></div>
+                      <div className="back-body-soir">
+                        <span className="back-label-soir">{plat.category?.name}</span>
+                        <p className="full-description-soir">{plat.description}</p>
+                      </div>
+                      <div className="back-footer-soir">
+                        {alreadyInCart ? (
+                          <button className="btn-remove-soir-verso" onClick={() => { removeFromCart(plat._id); setFlippedId(null); }}>
+                            <Trash2 size={16} /> Retirer
+                          </button>
+                        ) : (
+                          <button className="btn-add-soir" onClick={() => handleAddClick(plat)}>
+                            Sélectionner
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             );
           })
         ) : (
-          /* --- MESSAGE PRESTIGIEUX POUR CARTE VIDE --- */
           <div className="empty-menu-container">
-            <div className="empty-menu-content">
-              <div className="empty-icon">✧</div>
-              <h3>Une Expérience en Préparation</h3>
-              <div className="empty-separator"></div>
-              <p>
-                Notre Chef peaufine actuellement la sélection de ce soir pour vous offrir 
-                un moment d'exception.
-              </p>
-              <p className="empty-footer">La carte sera dévoilée très prochainement.</p>
-              <button onClick={() => window.location.reload()} className="refresh-btn">
-                Actualiser la carte
-              </button>
-            </div>
+            <p>Aucun délice disponible dans cette catégorie ce soir.</p>
+            <button className="refresh-btn-soir" onClick={() => {setFilter("Tous"); setUnivers("Cuisine")}}>Retour à la Table</button>
           </div>
         )}
       </div>

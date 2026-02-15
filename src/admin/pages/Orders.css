@@ -8,10 +8,124 @@
   margin-top: 30px;
 }
 
-/* Stats Row */
+/* --- PANNEAU REVENUS & FILTRES --- */
+.revenue-export-panel {
+  background: #1a1514;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #d4af37;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.revenue-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rev-icon {
+  background: rgba(212, 175, 55, 0.1);
+  padding: 12px;
+  border-radius: 10px;
+  color: #d4af37;
+}
+
+.rev-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.rev-label {
+  color: #888;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rev-amount {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-family: 'Playfair Display', serif;
+}
+
+/* --- CONTRÔLES DE FILTRAGE --- */
+.export-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+}
+
+.filter-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group {
+  background: #2d2422;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  padding: 10px 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.3s;
+}
+
+.filter-group:focus-within {
+  border-color: #d4af37;
+}
+
+.filter-group select {
+  background: transparent;
+  color: #ffffff !important;
+  border: none;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.filter-group select option {
+  background: #2d2422;
+  color: white;
+}
+
+.custom-date-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.custom-date-picker input {
+  background: #2d2422;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.custom-date-picker input:focus {
+  border-color: #d4af37;
+}
+
+.to-text { color: #d4af37; font-weight: bold; font-size: 0.8rem; }
+
+/* --- STATS ROW --- */
 .orders-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 40px;
 }
@@ -21,26 +135,55 @@
   padding: 20px;
   display: flex;
   align-items: center;
-  gap: 20px;
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  gap: 15px;
+  border: 1px solid rgba(212, 175, 55, 0.15);
   box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  transition: transform 0.3s;
+}
+
+.order-stat-card.highlight {
+  border: 2px solid #d4af37;
+  background: #fffdf7;
 }
 
 .stat-icon-circle {
-  width: 45px; height: 45px;
-  border-radius: 50%;
+  width: 48px; height: 48px;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
 
-.stat-icon-circle.pending { background: #FFF9E6; color: #D4AF37; }
-.stat-icon-circle.cooking { background: #E6F3FF; color: #3498DB; }
-.stat-icon-circle.done { background: #E9FBE9; color: #27AE60; }
+.stat-icon-circle.period { background: #fdf6e3; color: #d4af37; }
+.stat-icon-circle.pending { background: #fff4e5; color: #f39c12; }
+.stat-icon-circle.cooking { background: #e3f2fd; color: #3498db; }
+.stat-icon-circle.done { background: #e8f5e9; color: #27ae60; }
 
 .stat-info { display: flex; flex-direction: column; }
-.stat-value { font-size: 1.6rem; font-weight: 700; color: #2D2422; line-height: 1; }
-.stat-label { font-size: 0.7rem; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-top: 4px; }
+.stat-value { font-size: 1.8rem; font-weight: 800; color: #2d2422; line-height: 1; }
+.stat-label { font-size: 0.65rem; text-transform: uppercase; color: #888; font-weight: 600; margin-top: 4px; }
 
-/* Grille des commandes */
+/* --- BOUTON DOWNLOAD --- */
+.btn-download {
+  background: #d4af37;
+  color: #1a1514;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
+}
+
+.btn-download:hover {
+  background: #f1c40f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* --- GRILLE & CARTES (RAPPEL) --- */
 .orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -50,108 +193,85 @@
 .order-card {
   background: white;
   padding: 25px;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border-radius: 0; /* Garder l'aspect Signature sans arrondis */
+  border: 1px solid #F0F0F0;
+  transition: all 0.3s ease;
 }
 
 .order-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(45, 36, 34, 0.08);
+  border-color: #d4af37;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
 }
 
-.order-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #F8F5F2;
-  padding-bottom: 12px;
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.order-id-tag {
-  display: flex; align-items: center; gap: 6px;
-  color: #D4AF37; font-weight: 700; font-size: 0.85rem;
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.order-time { font-size: 0.75rem; color: #999; font-style: italic; }
-
-.table-number {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  color: #2D2422;
-  margin: 0 0 12px 0;
+@media (max-width: 992px) {
+  .revenue-export-panel { flex-direction: column; align-items: stretch; }
+  .export-controls { justify-content: space-between; }
 }
 
-.items-list {
-  background: #FAFAFA;
-  padding: 12px;
-  border-radius: 4px;
-  min-height: 60px;
-  margin-bottom: 15px;
-}
-
-.items-list p {
-  color: #555;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.order-total-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #F8F5F2;
-  padding-top: 15px;
-}
-
-.order-total-price .label { font-size: 0.8rem; text-transform: uppercase; color: #888; }
-.order-total-price .value { font-size: 1.3rem; font-weight: 800; color: #2D2422; }
-
-.order-card-footer {
-  margin-top: 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Status Pills */
-.status-pill {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
-
-.status-pending { background: #FFF9E6; color: #D4AF37; }
-.status-pending .dot { background: #D4AF37; }
-
-.status-cooking { background: #E6F3FF; color: #3498DB; }
-.status-cooking .dot { background: #3498DB; }
-
-.status-done { background: #E9FBE9; color: #27AE60; }
-.status-done .dot { background: #27AE60; }
-
-/* Actions */
-.order-actions { display: flex; gap: 8px; }
-
-.order-action-btn {
-  background: white;
-  border: 1px solid #EEE;
-  width: 38px; height: 38px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: #666; transition: 0.2s;
-}
-
-.order-action-btn:hover { border-color: #D4AF37; color: #D4AF37; background: #FDFBF7; }
-
-/* Responsive */
 @media (max-width: 768px) {
-  .orders-grid { grid-template-columns: 1fr; }
-  .orders-stats-row { grid-template-columns: 1fr; }
+  .orders-stats-row { grid-template-columns: 1fr 1fr; }
+  .export-controls { flex-direction: column; align-items: stretch; }
+}
+
+/* Boutons d'action spécifiques */
+.order-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.cooking-btn {
+  background: #E6F3FF;
+  color: #3498DB;
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.cooking-btn:hover {
+  background: #3498DB;
+  color: white;
+}
+
+.done-btn {
+  background: #E9FBE9;
+  color: #27AE60;
+  border-color: rgba(39, 174, 96, 0.2);
+}
+
+.done-btn:hover {
+  background: #27AE60;
+  color: white;
+}
+
+.order-action-btn span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.status-pending .dot {
+  background-color: #ff9800;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
 }

@@ -19,8 +19,16 @@ import Dashboard from "./admin/pages/Dashboard";
 import MenuManager from "./admin/pages/MenuManager";
 import Orders from "./admin/pages/Orders";
 import Appearance from "./admin/pages/Appearance";
-// 1. IMPORT DU NOUVEAU COMPOSANT
 import SocialHub from "./admin/pages/SocialHub"; 
+import CategoryManager from "./admin/pages/CategoryManager"; 
+import AccompanimentManager from "./admin/pages/AccompanimentManager"; 
+// --- AJOUT DU COMPOSANT GESTION DES TABLES ---
+import TableManager from "./admin/pages/TableManager"; 
+
+// Redirection HTTPS automatique (hors localhost)
+if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
+    window.location.href = window.location.href.replace('http:', 'https:');
+}
 
 export default function AppRouter() {
   return (
@@ -56,10 +64,20 @@ export default function AppRouter() {
           {/* --- PARTIE ADMIN (AVEC SIDEBAR DÉDIÉE) --- */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
+            
+            {/* Gestion des catégories */}
+            <Route path="categories" element={<CategoryManager />} /> 
+            
+            {/* Gestion des accompagnements */}
+            <Route path="accompaniments" element={<AccompanimentManager />} /> 
+            
             <Route path="menu" element={<MenuManager />} />
+
+            {/* --- NOUVELLE ROUTE POUR LA GESTION DES TABLES --- */}
+            <Route path="tables" element={<TableManager />} /> 
+            
             <Route path="orders" element={<Orders />} />
             <Route path="appearance" element={<Appearance />} />
-            {/* 2. DÉCLARATION DE LA ROUTE SOCIALE */}
             <Route path="social" element={<SocialHub />} />
           </Route>
         </Routes>

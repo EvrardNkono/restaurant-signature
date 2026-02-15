@@ -91,35 +91,114 @@
   margin: 25px auto 0;
 }
 
-/* --- FILTRES (Visibilité Optimisée) --- */
-.menu-filtres {
+/* --- SÉLECTEUR D'UNIVERS (La Table / La Cave) --- */
+.univers-selector-container {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  padding: 50px 20px;
-  background: #fcf9f5; /* Même fond que la page */
-  position: relative;
-  z-index: 10;
+  margin: 30px 0 10px 0;
+  padding: 0 20px;
+  background: #fcf9f5;
 }
 
+.univers-selector {
+  display: flex;
+  background: rgba(45, 36, 34, 0.9); /* Terracotta très sombre */
+  padding: 6px;
+  border-radius: 50px;
+  border: 1px solid #D4AF37;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.univers-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 22px;
+  border: none;
+  background: transparent;
+  color: #fcf9f5;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 40px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.univers-btn.active {
+  background: #D4AF37;
+  color: #2D2422;
+  font-weight: 600;
+}
+
+/* --- FILTRES (Visibilité Optimisée & Scroll) --- */
+.menu-filtres-container {
+  width: 100%;
+  background: #fcf9f5;
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+  padding: 20px 0 40px;
+}
+
+/* Effet de fondu sur les côtés pour annoncer le scroll */
+.menu-filtres-container::before,
+.menu-filtres-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.menu-filtres-container::before {
+  left: 0;
+  background: linear-gradient(to right, #fcf9f5, transparent);
+}
+.menu-filtres-container::after {
+  right: 0;
+  background: linear-gradient(to left, #fcf9f5, transparent);
+}
+
+.menu-filtres-track {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
+}
+
+.menu-filtres-track::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.menu-filtres-list {
+  display: flex;
+  gap: 15px;
+  margin: 0 auto;
+  padding: 0 40px;
+  min-width: max-content; /* Empêche l'écrasement des boutons */
+}
+
+/* --- VOS BOUTONS DE FILTRE DESIGN --- */
 .filter-btn {
-  background: #ffffff; /* Fond blanc pur pour décoller du crème */
-  border: 1px solid #D4AF37; /* Bordure dorée fine toujours visible */
+  background: #ffffff;
+  border: 1px solid #D4AF37;
   padding: 12px 28px;
   font-family: 'Playfair Display', serif;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 0px; /* Garde le look tranchant/luxe */
+  border-radius: 0px; /* Look tranchant luxe */
   text-transform: uppercase;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #2D2422; /* Texte terracotta sombre très lisible */
+  color: #2D2422;
   letter-spacing: 1px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Légère ombre pour le relief */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  white-space: nowrap; /* Garde le texte sur une ligne */
 }
 
-/* État au survol */
 .filter-btn:hover {
   background: #2D2422;
   color: #D4AF37;
@@ -127,7 +206,6 @@
   transform: translateY(-2px);
 }
 
-/* État Actif (Bouton sélectionné) */
 .filter-btn.active {
   background: #2D2422;
   color: #D4AF37;
@@ -135,14 +213,43 @@
   box-shadow: 0 4px 12px rgba(45, 36, 34, 0.2);
 }
 
-/* Optionnel : petite barre dorée sous les filtres pour séparer de la grille */
-.menu-filtres::after {
+/* Barre dorée décorative sous le bloc de filtres */
+.menu-filtres-decoration {
+  display: flex;
+  justify-content: center;
+  margin-top: -20px;
+  margin-bottom: 30px;
+}
+
+.menu-filtres-decoration::after {
   content: "";
-  position: absolute;
-  bottom: 0;
   width: 50px;
   height: 2px;
   background: #D4AF37;
+}
+
+/* --- INDICATEUR MOBILE --- */
+.scroll-hint-mobile {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: #D4AF37;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+  .scroll-hint-mobile {
+    display: flex;
+  }
+  
+  .menu-filtres-list {
+    justify-content: flex-start;
+  }
 }
 
 /* --- GRID ET CARTES --- */
@@ -391,4 +498,191 @@
 .menu-grid:has(.empty-menu-container) {
   display: block;
   text-align: center;
+}
+
+
+/* --- LOGIQUE DE RETOURNEMENT --- */
+.menu-card-outer {
+  perspective: 1500px;
+  height: 550px;
+  position: relative;
+}
+
+.menu-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.menu-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #ffffff; /* Fond blanc identique avant/arrière */
+  border: 1px solid rgba(212, 175, 55, 0.3); /* Bordure dorée subtile */
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); /* Ombre aux reflets dorés */
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- BOUTON DÉTAILS (RECTO) --- */
+.view-details-btn {
+  background: transparent;
+  border: none;
+  color: #2D2422;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.view-details-btn:hover {
+  color: #D4AF37;
+}
+
+/* --- DESIGN DU VERSO (CHARTE HARMONISÉE) --- */
+.card-back {
+  transform: rotateY(180deg);
+  padding: 30px 20px;
+}
+
+.back-header-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-align: left;
+}
+
+.back-circle-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #D4AF37;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.back-circle-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.back-header-text h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: #2D2422;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.back-price-tag {
+  display: block;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #D4AF37;
+  margin-top: 4px;
+}
+
+.small-separator-gold {
+  width: 40px;
+  height: 1px;
+  background: #D4AF37;
+  margin: 20px 0;
+}
+
+.back-body {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.back-category-label {
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.description-full {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4a4a4a; /* Texte plus sombre pour lecture sur blanc */
+  font-style: italic;
+}
+
+.close-back-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #D4AF37;
+  cursor: pointer;
+}
+
+.back-footer {
+  margin-top: 20px;
+}
+
+/* BOUTON RETRAIT AU VERSO */
+.remove-btn-verso {
+  width: 100%;
+  padding: 12px;
+  background: #fdf2f2;
+  color: #c81e1e;
+  border: 1px solid #f8b4b4;
+  border-radius: 4px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-btn-verso:hover {
+  background: #c81e1e;
+  color: white;
+}
+
+/* ORNEMENT DE FIN DE CARTE AU VERSO */
+.card-back .card-footer-ornament-gold {
+  margin-top: 15px;
+  opacity: 0.6;
+}
+
+/* AJUSTEMENT DU SCROLLBAR AU VERSO */
+.back-body {
+  flex-grow: 1;
+  text-align: left;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.back-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.back-body::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 10px;
 }
