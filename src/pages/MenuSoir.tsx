@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; 
 import { Loader2, X, Trash2, Utensils, GlassWater, ArrowRight, Check, ListChecks } from "lucide-react"; 
@@ -9,6 +10,7 @@ const API_URL = isLocal
   ? "http://localhost:5000/api/menu?public=true" 
   : "https://signature.abbadevelop.net/api/menu?public=true";
 
+// --- INTERFACES ---
 interface Category {
   _id: string;
   name: string;
@@ -34,75 +36,64 @@ interface Plat {
   accompaniments: Accompaniment[]; 
 }
 
+// Fonction de fetch synchronisée avec Home, Carte et Menu
+const fetchFullCatalog = async () => {
+  const response = await axios.get(API_URL);
+  return response.data.data;
+};
+
 export default function MenuSoir() {
   const { addToCart, removeFromCart, isInCart } = useCart();
-  const [plats, setPlats] = useState<Plat[]>([]);
-  const [loading, setLoading] = useState(true);
-  
+
+  // --- RÉCUPÉRATION DU CACHE ---
+  const { data: allPlats, isLoading } = useQuery<Plat[]>({
+    queryKey: ['full-catalog'],
+    queryFn: fetchFullCatalog,
+    staleTime: 1000 * 60 * 30, // 30 minutes de cache
+  });
+
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
-
-  // État pour gérer l'étirement de la carte (choix accompagnement)
   const [selectingAccId, setSelectingAccId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMenuSoir = async () => {
-    try {
-      const response = await axios.get(API_URL);
-      // REGARDE BIEN CE LOG DANS LA CONSOLE F12
-      console.log("STRUCTURE DU PREMIER PLAT :", response.data.data[0]);
-      
-      const menuNocturne = response.data.data.filter((p: Plat) => p.showInMenuSoir === true);
-      setPlats(menuNocturne);
-    } catch (error) {
-      console.error("Erreur chargement menu soir:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-    fetchMenuSoir();
-  }, []);
-
-  // --- GESTION DE L'AJOUT ---
-const handleAddClick = (plat: Plat) => {
-  // On filtre les accompagnements actifs pour être sûr
-  const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-  
-  // Si on a des accompagnements OU que le flag est à true
-  if (activeAccs.length > 0) {
-    console.log("Ouverture du tiroir pour:", plat.name);
-    setSelectingAccId(plat._id);
-  } else {
-    console.log("Ajout direct au panier:", plat.name);
-    addToCart({ ...plat, id: plat._id });
-  }
-};
-
-  const handleSelectAccompaniment = (plat: Plat, accName: string) => {
-    addToCart({ ...plat, id: plat._id, chosenAccompaniment: accName });
-    setSelectingAccId(null); // On referme le tiroir
-    setFlippedId(null);      // On remet la carte face avant
-  };
+  // --- FILTRAGE CÔTÉ CLIENT ---
+  const platsDuSoir = allPlats?.filter((p) => p.showInMenuSoir === true) || [];
 
   const currentCategories = [
     "Tous",
     ...new Set(
-      plats
+      platsDuSoir
         .filter(p => p.category?.univers === univers)
         .map(p => p.category?.name)
         .filter(Boolean)
     )
   ];
 
-  const platsFiltres = plats.filter(p => {
+  const platsFiltres = platsDuSoir.filter(p => {
     const matchUnivers = p.category?.univers === univers;
     if (!matchUnivers) return false;
     if (filter === "Tous") return true;
     return p.category?.name === filter;
   });
 
-  if (loading) {
+  // --- GESTION DE L'AJOUT ---
+  const handleAddClick = (plat: Plat) => {
+    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+    if (activeAccs.length > 0) {
+      setSelectingAccId(plat._id);
+    } else {
+      addToCart({ ...plat, id: plat._id });
+    }
+  };
+
+  const handleSelectAccompaniment = (plat: Plat, accName: string) => {
+    addToCart({ ...plat, id: plat._id, chosenAccompaniment: accName });
+    setSelectingAccId(null);
+    setFlippedId(null);
+  };
+
+  if (isLoading) {
     return (
       <div className="menu-soir-loading">
         <Loader2 className="animate-spin" size={40} color="#d4af37" />
@@ -203,7 +194,6 @@ const handleAddClick = (plat: Plat) => {
                          <X size={18} className="close-drawer" onClick={(e) => { e.stopPropagation(); setSelectingAccId(null); }} />
                        </div>
                        <div className="drawer-options">
-                          {/* Option par défaut */}
                           <button 
                             className="acc-option-btn default-option"
                             onClick={() => handleSelectAccompaniment(plat, "Standard / Sans")}

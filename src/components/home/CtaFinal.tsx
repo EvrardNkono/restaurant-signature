@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "./CtaFinal.css";
 
 interface CtaFinalProps {
@@ -9,7 +10,7 @@ export default function CtaFinal({ text, title = "Prêt pour l'expérience ?" }:
   return (
     <section className="cta-final-section">
       <div className="cta-container">
-        {/* Artifice : Bordures décoratives internes */}
+        {/* Décorations dorées */}
         <div className="cta-border-decoration top"></div>
         
         <div className="cta-content">
@@ -17,10 +18,10 @@ export default function CtaFinal({ text, title = "Prêt pour l'expérience ?" }:
           <div className="cta-ornament">
             <span className="dot gold"></span>
           </div>
-          <button className="cta-button">
+          
+          <Link to="/carte" className="cta-button">
             <span className="button-text">{text}</span>
-            <span className="button-border"></span>
-          </button>
+          </Link>
         </div>
 
         <div className="cta-border-decoration bottom"></div>

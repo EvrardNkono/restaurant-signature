@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2, Share2, X, Utensils, GlassWater, ArrowRight } from "lucide-react"; 
 import "./carte.css";
 
 const isLocal = window.location.hostname === "localhost";
-// On ajoute ?public=true pour utiliser le filtre qu'on a créé dans le controller
 const API_URL = isLocal 
   ? "http://localhost:5000/api/menu?public=true" 
   : "https://signature.abbadevelop.net/api/menu?public=true";
 
+// --- INTERFACES ---
 interface Category {
   _id: string;
   name: string;
@@ -20,54 +21,50 @@ interface Plat {
   _id: string;
   name: string;
   price: number;
-  category: Category; // Maintenant c'est l'objet complet grâce au .populate()
+  category: Category;
   description: string;
   image: string;
   showInCarte: boolean;
   label?: string;
 }
 
+// Fonction de fetch identique à celle de Home.tsx pour que react-query reconnaisse le cache
+const fetchFullCatalog = async () => {
+  const response = await axios.get(API_URL);
+  return response.data.data;
+};
+
 export default function CarteRestaurant() {
-  const [plats, setPlats] = useState<Plat[]>([]);
-  const [loading, setLoading] = useState(true);
+  // --- UTILISATION DU CACHE ---
+  // On utilise la même clé 'full-catalog' que dans Home.tsx
+  const { data: allPlats, isLoading } = useQuery<Plat[]>({
+    queryKey: ['full-catalog'],
+    queryFn: fetchFullCatalog,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [selectedPlat, setSelectedPlat] = useState<Plat | null>(null);
 
-  useEffect(() => {
-    const fetchCarte = async () => {
-      try {
-        const response = await axios.get(API_URL);
-        // On garde les plats qui ont l'option "showInCarte" à true
-        const platsDeLaCarte = response.data.data.filter((p: Plat) => p.showInCarte === true);
-        setPlats(platsDeLaCarte);
-      } catch (error) {
-        console.error("Erreur chargement de la carte:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCarte();
-  }, []);
+  // --- FILTRAGE DES DONNÉES ---
+  // On ne garde que les plats prévus pour la "Carte"
+  const platsDeLaCarte = allPlats?.filter((p) => p.showInCarte === true) || [];
 
-  // --- LOGIQUE DYNAMIQUE DES FILTRES ---
-  // On génère la liste des catégories uniquement à partir des plats présents et de l'univers choisi
+  // Logique des filtres basée sur les données filtrées
   const currentCategories = [
     "Tous",
     ...new Set(
-      plats
+      platsDeLaCarte
         .filter(p => p.category?.univers === univers)
         .map(p => p.category?.name)
-        .filter(Boolean) // Sécurité si une catégorie est mal renseignée
+        .filter(Boolean)
     )
   ];
 
-  const platsFiltres = plats.filter(p => {
-    // 1. Vérifier si le plat appartient à l'univers (Cuisine ou Boissons)
+  const platsFiltres = platsDeLaCarte.filter(p => {
     const matchUnivers = p.category?.univers === univers;
     if (!matchUnivers) return false;
-
-    // 2. Vérifier le filtre de catégorie spécifique
     if (filter === "Tous") return true;
     return p.category?.name === filter;
   });
@@ -86,7 +83,8 @@ export default function CarteRestaurant() {
     }
   };
 
-  if (loading) {
+  // Loader uniquement si les données ne sont pas encore dans le cache
+  if (isLoading) {
     return (
       <div className="carte-loading">
         <Loader2 className="animate-spin" size={40} color="#D4AF37" />

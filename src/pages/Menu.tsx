@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; 
 import { Loader2, X, Trash2, ArrowRight, Utensils, GlassWater } from "lucide-react"; 
 import "./menu.css";
 
 const isLocal = window.location.hostname === "localhost";
-// On utilise le filtre ?public=true pour ne récupérer que les catégories actives
 const API_URL = isLocal 
   ? "http://localhost:5000/api/menu?public=true" 
   : "https://signature.abbadevelop.net/api/menu?public=true";
 
+// --- INTERFACES ---
 interface Category {
   _id: string;
   name: string;
@@ -21,57 +22,55 @@ interface Plat {
   _id: string;
   name: string;
   price: number;
-  category: Category; // Objet complet via populate
+  category: Category;
   description: string;
   image: string;
   showInMenuJour: boolean;
 }
 
+// Fonction de fetch synchronisée avec Home.tsx et CarteRestaurant.tsx
+const fetchFullCatalog = async () => {
+  const response = await axios.get(API_URL);
+  return response.data.data;
+};
+
 export default function Menu() {
   const { addToCart, removeFromCart, isInCart } = useCart();
-  const [plats, setPlats] = useState<Plat[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // --- RÉCUPÉRATION DU CACHE ---
+  const { data: allPlats, isLoading } = useQuery<Plat[]>({
+    queryKey: ['full-catalog'],
+    queryFn: fetchFullCatalog,
+    staleTime: 1000 * 60 * 30, // 30 minutes de cache
+  });
+
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchMenuDuJour = async () => {
-      try {
-        const response = await axios.get(API_URL);
-        // Filtrage spécifique pour le menu du midi / du jour
-        const menuMidi = response.data.data.filter((p: Plat) => p.showInMenuJour === true);
-        setPlats(menuMidi);
-      } catch (error) {
-        console.error("Erreur de récupération du menu:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMenuDuJour();
-  }, []);
+  // --- FILTRAGE CÔTÉ CLIENT (INSTANTANÉ) ---
+  // On ne garde que les plats marqués pour le "Menu du Jour"
+  const platsDuJour = allPlats?.filter((p) => p.showInMenuJour === true) || [];
 
-  // --- LOGIQUE DYNAMIQUE DES FILTRES (SYNCHRONISÉE AVEC LA CARTE) ---
+  // Génération dynamique des catégories à partir du cache filtré
   const currentCategories = [
     "Tous",
     ...new Set(
-      plats
+      platsDuJour
         .filter(p => p.category?.univers === univers)
         .map(p => p.category?.name)
         .filter(Boolean)
     )
   ];
 
-  // --- LOGIQUE DE FILTRAGE DES PLATS ---
-  const platsFiltres = plats.filter(p => {
+  const platsFiltres = platsDuJour.filter(p => {
     const matchUnivers = p.category?.univers === univers;
     if (!matchUnivers) return false;
-
     if (filter === "Tous") return true;
     return p.category?.name === filter;
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="menu-loading">
         <Loader2 className="animate-spin" size={40} color="#D4AF37" />

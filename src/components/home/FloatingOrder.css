@@ -1,0 +1,125 @@
+.floating-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none; /* Laisse passer les clics sur le reste du site */
+  z-index: 9999;
+}
+
+.draggable-wrapper {
+  pointer-events: auto; /* Récupère les clics pour le bouton uniquement */
+  position: absolute;
+  bottom: 100px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centre les bulles au-dessus du bouton */
+  z-index: 10000;
+  /* Assure que le contenu n'est pas coupé si collé à gauche */
+  min-width: 160px; 
+}
+
+/* Bulles d'options */
+.order-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  animation: slideUp 0.3s ease-out;
+  align-items: center; 
+}
+
+.option-link {
+  background: #FCF9F5;
+  color: #3D2B27;
+  padding: 12px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid #D4AF37;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  cursor: pointer !important;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  position: relative;
+  z-index: 10005;
+}
+
+.option-link:hover {
+  transform: scale(1.05);
+  background-color: #f3ece4;
+}
+
+.option-link .icon {
+  font-size: 1.2rem;
+}
+
+/* Le bouton principal */
+.fab-button {
+  width: 90px;
+  height: 90px;
+  background-color: #3D2B27;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  cursor: grab;
+  position: relative;
+  transition: all 0.3s ease;
+  user-select: none;
+  touch-action: none;
+}
+
+.fab-button:active {
+  cursor: grabbing;
+}
+
+.fab-button.active {
+  transform: rotate(15deg);
+  border-color: #FCF9F5;
+}
+
+.fab-text {
+  color: #D4AF37;
+  font-weight: bold;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+.fab-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid #D4AF37;
+  animation: pulse-gold 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-gold {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .fab-button { width: 80px; height: 80px; }
+  .draggable-wrapper { right: 20px; bottom: 80px; }
+  .option-link { padding: 10px 20px; font-size: 0.85rem; }
+}

@@ -1,0 +1,55 @@
+.testimonials-section {
+  padding: 80px 20px;
+  background-color: #fcfaf8; /* Un fond très clair pour faire ressortir les cartes */
+  text-align: center;
+}
+
+.section-title {
+  color: #2D2422; /* Ton Terracotta foncé */
+  font-family: 'Playfair Display', serif; /* Ou ta police actuelle */
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+}
+
+.testimonials-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  width: 300px;
+  border-top: 4px solid #D4AF37; /* Ligne Or en haut pour le luxe */
+  transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-10px);
+}
+
+.stars {
+  color: #D4AF37; /* Or */
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.review-text {
+  color: #555;
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.client-name {
+  color: #2D2422;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
