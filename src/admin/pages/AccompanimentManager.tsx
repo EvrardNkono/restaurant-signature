@@ -6,7 +6,7 @@ import "./AccompanimentManager.css"; // Réutilisation de ton CSS existant
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/accompaniments" 
-  : "https://signature.abbadevelop.net/api/accompaniments";
+  : "https://signature-backend-alpha.vercel.app//accompaniments";
 
 interface Accompaniment {
   _id: string;

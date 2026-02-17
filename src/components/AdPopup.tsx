@@ -5,7 +5,7 @@ import "./adPopup.css";
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/ads" 
-  : "https://signature.abbadevelop.net/api/ads";
+  : "https://signature-backend-alpha.vercel.app//ads";
 
 interface AdPopupProps {
   word?: string; // Gardé pour la compatibilité, mais sera remplacé par le titre de l'API

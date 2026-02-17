@@ -7,7 +7,7 @@ import "./Appearance.css";
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/banner" 
-  : "https://signature.abbadevelop.net/api/banner";
+  : "https://signature-backend-alpha.vercel.app//banner";
 
 export default function Appearance() {
   const [images, setImages] = useState<string[]>([]);

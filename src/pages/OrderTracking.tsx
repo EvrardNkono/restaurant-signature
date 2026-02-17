@@ -5,7 +5,7 @@ import { Clock, Utensils, CheckCircle, ArrowLeft, RefreshCw, Package } from "luc
 import "./OrderTracking.css";
 
 const isLocal = window.location.hostname === "localhost";
-const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature.abbadevelop.net/api";
+const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/";
 
 export default function OrderTracking() {
   const [orders, setOrders] = useState<any[]>([]);

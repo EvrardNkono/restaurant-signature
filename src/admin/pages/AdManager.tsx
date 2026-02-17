@@ -6,7 +6,7 @@ import './AdManager.css';
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/ads" 
-  : "https://signature.abbadevelop.net/api/ads";
+  : "https://signature-backend-alpha.vercel.app//ads";
 
 const AdManager = () => {
   const [isSaving, setIsSaving] = useState(false);

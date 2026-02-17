@@ -1,20 +1,26 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit3, Trash2, Search, Filter, X, Save, Camera, Check, Loader2, Upload, ListPlus } from "lucide-react";
+import { 
+  Plus, Edit3, Trash2, Search, Filter, X, Save, 
+  Camera, Check, Loader2, Upload, ListPlus, Sparkles 
+} from "lucide-react";
 import axios from "axios";
 import "./MenuManager.css";
 
+// --- CONFIGURATION ---
 const CLOUD_NAME = "dbs4ghp91"; 
 const UPLOAD_PRESET = "signature_menu"; 
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_URL = isLocal 
   ? "http://localhost:5000/api" 
-  : "https://signature.abbadevelop.net/api";
+  : "https://signature-backend-alpha.vercel.app/";
 
 const API_URL = `${BASE_URL}/menu`;
 const CAT_API_URL = `${BASE_URL}/categories`;
-const ACC_API_URL = `${BASE_URL}/accompaniments`; // <-- Nouvelle URL
+const ACC_API_URL = `${BASE_URL}/accompaniments`;
+const SUPP_API_URL = `${BASE_URL}/supplements`;
 
+// --- INTERFACES ---
 interface Category {
   _id: string;
   name: string;
@@ -24,6 +30,12 @@ interface Category {
 interface Accompaniment {
   _id: string;
   name: string;
+}
+
+interface Supplement {
+  _id: string;
+  name: string;
+  price: number;
 }
 
 interface ManagedPlat {
@@ -36,15 +48,18 @@ interface ManagedPlat {
   showInCarte: boolean;
   showInMenuJour: boolean;
   showInMenuSoir: boolean;
-  // --- NOUVEAUX CHAMPS ---
   hasAccompaniment: boolean;
-  accompaniments: string[]; // Liste d'IDs
+  accompaniments: string[]; 
+  allowSupplements: boolean; // Synchro avec le Backend
+  supplements: string[];      // Pour la sélection spécifique
 }
 
 export default function MenuManager() {
+  // --- ÉTATS ---
   const [plats, setPlats] = useState<ManagedPlat[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [allAccompaniments, setAllAccompaniments] = useState<Accompaniment[]>([]); // Liste globale
+  const [allAccompaniments, setAllAccompaniments] = useState<Accompaniment[]>([]);
+  const [allSupplements, setAllSupplements] = useState<Supplement[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,27 +68,40 @@ export default function MenuManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const emptyForm: ManagedPlat = {
-    name: "", price: "", category: "", description: "", image: "",
-    showInCarte: true, showInMenuJour: false, showInMenuSoir: false,
-    hasAccompaniment: false, accompaniments: []
+    name: "", 
+    price: "", 
+    category: "", 
+    description: "", 
+    image: "", 
+    showInCarte: true, 
+    showInMenuJour: false, 
+    showInMenuSoir: false,
+    hasAccompaniment: false, 
+    accompaniments: [],
+    allowSupplements: false, // Initialisé à false
+    supplements: []
   };
 
   const [formData, setFormData] = useState(emptyForm);
 
+  // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const [platsRes, catsRes, accsRes] = await Promise.all([
+      setLoading(true);
+      const [platsRes, catsRes, accsRes, suppsRes] = await Promise.all([
         axios.get(API_URL),
         axios.get(CAT_API_URL),
-        axios.get(ACC_API_URL) // Charger les accompagnements
+        axios.get(ACC_API_URL),
+        axios.get(SUPP_API_URL)
       ]);
       setPlats(platsRes.data.data);
       setCategories(catsRes.data.data);
       setAllAccompaniments(accsRes.data.data);
+      setAllSupplements(suppsRes.data.data);
     } catch (error) {
       console.error("Erreur de chargement:", error);
     } finally {
@@ -81,16 +109,16 @@ export default function MenuManager() {
     }
   };
 
-  // Gérer la sélection/désélection d'un accompagnement
-  const handleToggleAccompaniment = (id: string) => {
-    const current = [...formData.accompaniments];
+  // --- LOGIQUE DE SÉLECTION ---
+  const handleToggleId = (field: 'accompaniments' | 'supplements', id: string) => {
+    const current = [...(formData[field] || [])];
     const index = current.indexOf(id);
     if (index > -1) {
-      current.splice(index, 1); // On retire
+      current.splice(index, 1);
     } else {
-      current.push(id); // On ajoute
+      current.push(id);
     }
-    setFormData({ ...formData, accompaniments: current });
+    setFormData({ ...formData, [field]: current });
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,14 +139,16 @@ export default function MenuManager() {
     }
   };
 
+  // --- ACTIONS CRUD ---
   const handleOpenModal = (plat?: ManagedPlat) => {
     if (plat) {
       setEditingId(plat._id || null);
       setFormData({ 
         ...plat,
         category: plat.category?._id || plat.category,
-        // On s'assure que accompaniments est une liste d'IDs (pas d'objets) pour le formulaire
-        accompaniments: plat.accompaniments?.map((a: any) => a._id || a) || []
+        accompaniments: plat.accompaniments?.map((a: any) => a._id || a) || [],
+        supplements: plat.supplements?.map((s: any) => s._id || s) || [],
+        allowSupplements: plat.allowSupplements || false
       });
     } else {
       setEditingId(null);
@@ -156,6 +186,7 @@ export default function MenuManager() {
     }
   };
 
+  // --- FILTRES ---
   const filteredPlats = plats.filter(plat => {
     const matchesSearch = plat.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === "Tous" || plat.category?._id === activeCategory;
@@ -237,7 +268,7 @@ export default function MenuManager() {
                     {plat.showInCarte && <span className="v-tag active">Carte</span>}
                     {plat.showInMenuJour && <span className="v-tag active">Midi</span>}
                     {plat.showInMenuSoir && <span className="v-tag active">Soir</span>}
-                    {plat.hasAccompaniment && <span className="v-tag special">Options</span>}
+                    {(plat.hasAccompaniment || plat.allowSupplements) && <span className="v-tag special">Options</span>}
                   </div>
                 </td>
                 <td className="td-price"><span className="price-tag">{plat.price}€</span></td>
@@ -255,7 +286,7 @@ export default function MenuManager() {
 
       {isModalOpen && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal-container">
+          <div className="admin-modal-container" style={{ width: '95vw', maxWidth: '1400px', padding: '40px', maxHeight: '95vh', display: 'flex', flexDirection: 'column' }}>
             <div className="gold-thin-border"></div>
             <div className="modal-header">
               <h2>{editingId ? "Modifier le Menu" : "Nouveau Chef-d'œuvre"}</h2>
@@ -282,17 +313,17 @@ export default function MenuManager() {
                       <label className="check-item">
                         <input type="checkbox" checked={formData.showInCarte} onChange={e => setFormData({...formData, showInCarte: e.target.checked})} />
                         <div className="custom-check">{formData.showInCarte && <Check size={14} />}</div>
-                        <span className="label-text">Carte (Menu Complet)</span>
+                        <span className="label-text">Carte</span>
                       </label>
                       <label className="check-item">
                         <input type="checkbox" checked={formData.showInMenuJour} onChange={e => setFormData({...formData, showInMenuJour: e.target.checked})} />
                         <div className="custom-check">{formData.showInMenuJour && <Check size={14} />}</div>
-                        <span className="label-text">Menu Midi</span>
+                        <span className="label-text">Midi</span>
                       </label>
                       <label className="check-item">
                         <input type="checkbox" checked={formData.showInMenuSoir} onChange={e => setFormData({...formData, showInMenuSoir: e.target.checked})} />
                         <div className="custom-check">{formData.showInMenuSoir && <Check size={14} />}</div>
-                        <span className="label-text">Menu Soir</span>
+                        <span className="label-text">Soir</span>
                       </label>
                     </div>
                   </div>
@@ -323,22 +354,19 @@ export default function MenuManager() {
                       </select>
                     </div>
                   </div>
+
                   <div className="input-group">
                     <label className="input-label-gold">Description / Ingrédients</label>
-                    <textarea rows={4} className="admin-input-terracotta" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
+                    <textarea rows={3} className="admin-input-terracotta" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
                   </div>
 
-                  {/* --- SECTION ACCOMPAGNEMENTS --- */}
+                  {/* --- ACCOMPAGNEMENTS (GRATUITS) --- */}
                   <div className="input-group accompaniment-section">
                     <label className="input-label-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-  <input 
-    type="checkbox" 
-    checked={formData.hasAccompaniment} 
-    onChange={e => setFormData({...formData, hasAccompaniment: e.target.checked})} 
-  />
-  <ListPlus size={18} className="text-gold" /> {/* <--- L'icône est utilisée ici */}
-  <span>Proposer des accompagnements ?</span>
-</label>
+                      <input type="checkbox" checked={formData.hasAccompaniment} onChange={e => setFormData({...formData, hasAccompaniment: e.target.checked})} />
+                      <ListPlus size={18} className="text-gold" />
+                      <span>Accompagnements (Gratuits)</span>
+                    </label>
 
                     {formData.hasAccompaniment && (
                       <div className="acc-selection-grid">
@@ -347,16 +375,42 @@ export default function MenuManager() {
                             key={acc._id}
                             type="button"
                             className={`acc-choice-chip ${formData.accompaniments.includes(acc._id) ? 'selected' : ''}`}
-                            onClick={() => handleToggleAccompaniment(acc._id)}
+                            onClick={() => handleToggleId('accompaniments', acc._id)}
                           >
                             {formData.accompaniments.includes(acc._id) ? <Check size={14} /> : <Plus size={14} />}
                             {acc.name}
                           </button>
                         ))}
-                        {allAccompaniments.length === 0 && (
-                          <p className="small-info">Aucun accompagnement créé dans la section dédiée.</p>
-                        )}
                       </div>
+                    )}
+                  </div>
+
+                  {/* --- SUPPLÉMENTS (PAYANTS) --- */}
+                  <div className="input-group accompaniment-section">
+                    <label className="input-label-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d4af37' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={formData.allowSupplements} 
+                        onChange={e => setFormData({...formData, allowSupplements: e.target.checked})} 
+                      />
+                      <Sparkles size={18} />
+                      <span>Autoriser les Suppléments sur ce plat</span>
+                    </label>
+                    
+                    {formData.allowSupplements && (
+                       <div className="acc-selection-grid">
+                       {allSupplements.map(supp => (
+                         <button
+                           key={supp._id}
+                           type="button"
+                           className={`acc-choice-chip ${formData.supplements.includes(supp._id) ? 'selected' : ''}`}
+                           onClick={() => handleToggleId('supplements', supp._id)}
+                         >
+                           {formData.supplements.includes(supp._id) ? <Check size={14} /> : <Plus size={14} />}
+                           {supp.name} (+{supp.price}€)
+                         </button>
+                       ))}
+                     </div>
                     )}
                   </div>
                   

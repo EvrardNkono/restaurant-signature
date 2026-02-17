@@ -275,3 +275,85 @@
   50% { opacity: 0.3; }
   100% { opacity: 1; }
 }
+
+/* --- ANIMATIONS DES COMMANDES (À coller dans Orders.css) --- */
+
+/* Le point qui clignote en gris/gris-bleu pour attirer l'oeil sur les nouvelles commandes */
+.status-pending .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  background-color: #7f8c8d;
+  box-shadow: 0 0 0 rgba(127, 140, 141, 0.4);
+  animation: pulse-gray 2s infinite;
+}
+
+/* État Cuisine : Bordure orange et fond léger */
+.order-card.status-cooking {
+  border-left: 5px solid #f39c12;
+  background: rgba(243, 156, 18, 0.05);
+  transition: all 0.3s ease;
+}
+
+/* Le bouton Cuisine */
+.cooking-btn {
+  background: #f39c12 !important;
+  color: white !important;
+  border: none;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.cooking-btn:hover {
+  background: #e67e22 !important;
+  transform: translateY(-2px);
+}
+
+.cooking-btn:active {
+  transform: scale(0.95);
+}
+
+/* État Terminé : Bordure verte et petite animation d'apparition */
+.order-card.status-done {
+  border-left: 5px solid #2ecc71;
+  background: rgba(46, 204, 113, 0.05);
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Les Keyframes pour les animations */
+@keyframes pulse-gray {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(127, 140, 141, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(127, 140, 141, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(127, 140, 141, 0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.archive-btn {
+  background: #34495e !important; /* Gris foncé pro */
+  color: white !important;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.archive-btn:hover {
+  background: #2c3e50 !important;
+  transform: translateY(-2px);
+}
+
+/* Optionnel : cacher la carte de la grille admin quand elle est archivée 
+   si tu veux vider ton écran de gestion */
+.order-card.status-archived {
+  opacity: 0.5;
+  display: none; /* Décommente cette ligne pour que l'admin ne voit plus les archivées */
+}

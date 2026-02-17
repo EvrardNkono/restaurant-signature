@@ -25,6 +25,7 @@ import Appearance from "./admin/pages/Appearance";
 import SocialHub from "./admin/pages/SocialHub"; 
 import CategoryManager from "./admin/pages/CategoryManager"; 
 import AccompanimentManager from "./admin/pages/AccompanimentManager"; 
+import SupplementManager from "./admin/pages/SupplementAdmin"; // Ajout ici
 import TableManager from "./admin/pages/TableManager"; 
 
 // 2. Création du client de cache
@@ -80,8 +81,9 @@ export default function AppRouter() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="categories" element={<CategoryManager />} /> 
-              <Route path="accompaniments" element={<AccompanimentManager />} /> 
               <Route path="menu" element={<MenuManager />} />
+              <Route path="supplements" element={<SupplementManager />} /> {/* Ajout ici */}
+              <Route path="accompaniments" element={<AccompanimentManager />} /> 
               <Route path="tables" element={<TableManager />} /> 
               <Route path="orders" element={<Orders />} />
               <Route path="appearance" element={<Appearance />} />

@@ -140,6 +140,15 @@
   padding: 20px 0 40px;
 }
 
+@media (min-width: 1024px) {
+  .menu-filtres-list {
+    justify-content: center; /* Centre les boutons quand il y a de la place */
+    flex-wrap: wrap;        /* Permet de passer à la ligne si trop de catégories */
+    overflow-x: visible;    /* Plus besoin de scroll */
+  }
+}
+
+
 /* Effet de fondu sur les côtés pour annoncer le scroll */
 .menu-filtres-container::before,
 .menu-filtres-container::after {
@@ -163,10 +172,12 @@
 .menu-filtres-track {
   display: flex;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  -webkit-overflow-scrolling: touch;
+  white-space: nowrap; /* Empêche le passage à la ligne */
+  scrollbar-width: none; /* Cache la scrollbar sur Firefox */
+  -ms-overflow-style: none; /* Cache sur IE/Edge */
+  -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
   padding: 10px 0;
+  width: 100%;
 }
 
 .menu-filtres-track::-webkit-scrollbar {
@@ -504,7 +515,7 @@
 /* --- LOGIQUE DE RETOURNEMENT --- */
 .menu-card-outer {
   perspective: 1500px;
-  height: 550px;
+  height: 460px;
   position: relative;
 }
 
@@ -685,4 +696,360 @@
 .back-body::-webkit-scrollbar-thumb {
   background: #D4AF37;
   border-radius: 10px;
+}
+
+
+/* --- BOUTON RETIRER (Sous le plat) --- */
+.btn-remove-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #D4AF37; /* Rouge vif pour le bouton retirer */
+  border: none;
+  color: #FFFFFF; /* Texte blanc pour contraste maximal */
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex: 1;
+  justify-content: center;
+  transition: transform 0.1s active;
+}
+
+.btn-remove-line:active {
+  transform: scale(0.95);
+}
+
+/* --- BOUTONS + ET - (Dans le tiroir) --- */
+.supp-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.supp-mini-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Bouton Plus (+) */
+.supp-mini-btn.add {
+  background: #D4AF37; /* Or Signature */
+  color: #FFFFFF;
+}
+
+/* Bouton Moins (-) */
+.supp-mini-btn.remove {
+  background: #E5E7EB; /* Gris clair neutre */
+  color: #374151; /* Texte sombre */
+}
+
+.supp-mini-btn:active {
+  transform: scale(0.9);
+}
+
+/* Badge du compteur */
+.supp-count-badge {
+  background: #4a2c2a;
+  color: #ffffff;
+  font-weight: 800;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* --- TEXTE DES SUPPLÉMENTS (Blanc sur Fond Noir/Foncé) --- */
+.supp-card-mini {
+  background: #1A1A1A; /* Fond noir/anthracite pour les cartes suppléments */
+  border: 1px solid #333;
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.supp-name {
+  color: #FFFFFF; /* Texte blanc comme demandé */
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: block;
+}
+
+.supp-price {
+  color: #D4AF37; /* Prix en Or pour le style */
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 2px;
+  display: block;
+}
+
+
+/* Conteneur pour espacer le bouton du contenu précédent */
+.drawer-footer-action {
+  padding: 20px 10px;
+  margin-top: -50px;
+  border-top: 1px baseline rgba(212, 175, 55, 0.2);
+  display: flex;
+  justify-content: center;
+}
+
+/* Style du bouton luxueux */
+.btn-confirm-drawer {
+  width: 100%;
+  max-width: 300px;
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: white;
+  border: none;
+  padding: 5px 20px;
+  border-radius: 50px; /* Bord arrondi pour un aspect moderne */
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.btn-confirm-drawer:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(184, 134, 11, 0.5);
+  background: linear-gradient(135deg, #e5c05b 0%, #d4af37 100%);
+}
+
+.btn-confirm-drawer:active {
+  transform: translateY(-1px);
+}
+
+/* Petit effet de brillance discret */
+.btn-confirm-drawer svg {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+
+/* --- BOUTON ANNULER (DANS LE TIROIR) --- */
+.btn-cancel-config {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(211, 47, 47, 0.1); /* Rouge très léger */
+  border: 1px solid rgba(211, 47, 47, 0.3);
+  color: #d32f2f; /* Rouge alert */
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel-config:hover {
+  background: #d32f2f;
+  color: white;
+  border-color: #d32f2f;
+}
+
+.btn-cancel-config span {
+  font-family: 'Inter', sans-serif;
+}
+
+
+
+
+
+/* État désactivé pour les boutons d'univers et de filtres */
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none; /* Empêche le clic au niveau du navigateur */
+}
+
+/* Bouton "Ajouter" quand il devient gris car un autre est ouvert */
+.btn-disabled {
+  background-color: #e0e0e0 !important;
+  color: #9e9e9e !important;
+  border-color: #bdbdbd !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* Animation pour le bouton "Configuration en cours..." */
+.btn-configuring {
+  background-color: #d4af37 !important; /* Or */
+  color: white !important;
+  animation: pulse-gold 2s infinite;
+}
+
+@keyframes pulse-gold {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); opacity: 0.8; }
+  100% { transform: scale(1); }
+}
+
+/* Animation d'ajout de supplément */
+.added-anim {
+  animation: bounce 0.4s ease;
+  color: #4caf50; /* Vert succès temporaire */
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
+/* --- STYLE DU BOUTON RETIRER --- */
+.btn-remove-one {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espace entre l'icône Minus et le texte */
+  
+  background-color: #ffffff;
+  color: #cebb15; /* Rouge élégant pour l'action de retrait */
+  border: 1.5px solid #cebb15;
+  
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  
+  /* Pour s'aligner parfaitement en hauteur avec le bouton Ajouter */
+  height: 45px; 
+  min-width: 120px;
+}
+
+.btn-remove-one:hover {
+  background-color: #fff5f5; /* Léger fond rouge au survol */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(230, 57, 70, 0.1);
+}
+
+.btn-remove-one:active {
+  transform: translateY(0);
+}
+
+/* --- ADAPTATION DANS LE CONTENEUR D'ACTIONS --- */
+.card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px; /* Espace entre les deux boutons */
+  width: 100%;
+  padding: 0 10px;
+}
+
+/* --- RESPONSIVE (MOBILE) --- */
+@media (max-width: 480px) {
+  .card-actions {
+    flex-direction: column; /* Empile les boutons sur petit écran */
+    gap: 8px;
+  }
+
+  .btn-remove-one, 
+  .add-to-cart-btn {
+    width: 100%; /* Prend toute la largeur sur mobile */
+    height: 42px;
+  }
+}
+
+
+/* --- EFFET D'ILLUMINATION DORÉE (SÉLECTIONNÉ) --- */
+.acc-mini-choice.selected {
+  background-color: #fffdf2; /* Un fond très légèrement crème */
+  border-color: #D4AF37;     /* Bordure Or */
+  color: #D4AF37;            /* Texte Or */
+  
+  /* L'effet d'illumination (Glow) */
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+  
+  /* Un petit boost de graisse pour confirmer le choix */
+  font-weight: 600;
+  transform: scale(1.02);
+}
+
+/* Optionnel : petit effet au survol pour les boutons non-sélectionnés */
+.acc-mini-choice:hover:not(.selected) {
+  border-color: #D4AF37;
+  background-color: #f9f9f9;
+}
+
+/* --- BADGES DE TRACKING (L'EXPÉRIENCE SIGNATURE) --- */
+
+.order-status-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideInBadge 0.4s ease-out;
+  text-transform: uppercase;
+}
+
+@keyframes slideInBadge {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* État : En cuisine (Terracotta / Orange Signature) */
+.status-cooking {
+  background: rgba(184, 107, 74, 0.9); /* Ta couleur Terracotta */
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* État : Prêt (Or / Gold Signature) */
+.status-ready {
+  background: rgba(212, 175, 55, 0.95); /* Ton Or */
+  color: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+/* État : Livré ou Reçu (Sombre / Élégant) */
+.status-delivered, .status-pending {
+  background: rgba(28, 28, 28, 0.85);
+  color: #d4af37;
+  border: 1px solid #d4af37;
+}
+
+/* Animation de l'icône (le petit battement) */
+.animate-pulse-slow {
+  animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- AJUSTEMENT POUR L'IMAGE --- */
+.menu-image-container {
+  position: relative; /* Pour que le badge reste bien positionné par dessus l'image */
+  overflow: hidden;
 }

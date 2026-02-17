@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { Smartphone, CheckCircle, ExternalLink, Bike } from "lucide-react"; 
+import { Smartphone, CheckCircle, ExternalLink, Bike, Trash2 } from "lucide-react"; 
 import axios from "axios";
 import "./cart.css";
 
 // Configuration de l'URL API
 const isLocal = window.location.hostname === "localhost";
-const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature.abbadevelop.net/api";
+const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart } = useCart();
@@ -33,12 +33,11 @@ export default function Cart() {
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
 
-  // ÉTATS UBER DIRECT (Livraison Interne)
+  // ÉTATS UBER DIRECT
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string} | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
-  // LIENS PARTENAIRES EXTERNES
   const PARTNER_LINKS = {
     uberEats: "https://www.ubereats.com/store/votre-restaurant",
     deliveroo: "https://deliveroo.fr/menu/paris/votre-restaurant",
@@ -59,7 +58,7 @@ export default function Cart() {
     fetchTables();
   }, []);
 
-  // Logique de temps minimum (Livraison)
+  // Logique temps minimum livraison
   useEffect(() => {
     const updateMinTime = () => {
       const now = new Date();
@@ -75,7 +74,7 @@ export default function Cart() {
     return () => clearInterval(interval);
   }, [deliveryTime]);
 
-  // Réinitialisation si changement de mode
+  // Réinitialisation modes
   useEffect(() => {
     if (orderMode !== "delivery") {
       setDeliveryQuote(null);
@@ -86,7 +85,7 @@ export default function Cart() {
     }
   }, [orderMode, consumeMode]);
 
-  // LOGIQUE UBER DIRECT (Estimation de prix)
+  // LOGIQUE UBER DIRECT
   const fetchDeliveryQuote = async (targetAddress: string) => {
     if (targetAddress.trim().length < 10) return;
     setIsEstimating(true);
@@ -102,10 +101,17 @@ export default function Cart() {
     }
   };
 
+  // CALCUL DU TOTAL
   const calculateTotal = () => {
     return cart.reduce((acc, item) => {
-      const price = parseFloat(item.price.toString().replace(/[^\d.]/g, ""));
-      return acc + price;
+      const basePriceStr = String(item.price || "0");
+      const basePrice = parseFloat(basePriceStr.replace(/[^\d.]/g, "")) || 0;
+      const supplementsPrice = (item.supplements || []).reduce((sAcc: number, s: any) => {
+        const sPriceStr = String(s.price || "0");
+        const sPrice = parseFloat(sPriceStr.replace(/[^\d.]/g, "")) || 0;
+        return sAcc + sPrice;
+      }, 0);
+      return acc + basePrice + supplementsPrice;
     }, 0);
   };
 
@@ -120,46 +126,71 @@ export default function Cart() {
     return base + shipping;
   };
 
+  /**
+   * ACTION FINALE : ENVOI À L'ADMINISTRATION
+   */
   const handleFinalOrder = async () => {
-    setIsSubmitting(true);
+  setIsSubmitting(true);
+  
+  // 1. Récupération du ClientID (pour le suivi sur la carte)
+  let clientId = localStorage.getItem('signature_client_id');
+  if (!clientId) {
+    clientId = crypto.randomUUID();
+    localStorage.setItem('signature_client_id', clientId);
+  }
 
-    // 1. On récupère ou on crée l'identifiant unique du navigateur
-    let clientId = localStorage.getItem('signature_client_id');
-    if (!clientId) {
-      clientId = crypto.randomUUID();
-      localStorage.setItem('signature_client_id', clientId);
-    }
+  // 2. Préparation des items avec productId pour le voyant de la carte
+  // On utilise 'any' pour éviter l'erreur sur _id
+  const itemsForAdmin = cart.map((item: any) => ({
+    productId: item.id || item._id, // Identifiant unique du plat
+    name: item.name,
+    price: item.price,
+    chosenAccompaniment: item.chosenAccompaniment || "Aucun",
+    supplements: item.supplements || [],
+    type: item.type || 'Signature'
+  }));
 
-    const orderData = {
-      clientId: clientId, // <--- AJOUTER CETTE LIGNE
-      customer: {
-        name: customerName || "Client Signature",
-        address: orderMode === "delivery" ? address : "Sur place",
-      },
-      items: cart,
-      total: totalPrice,
-      amountPaid: getAmountToPay(),
-      mode: orderMode,
-      details: {
-        consumeMode: orderMode === "on_site" ? consumeMode : null,
-        tableNumber: selectedTable || null,
-        guestCount: orderMode === "booking" ? guestCount : null,
-        bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
-        deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-        paymentStatus: payNow ? "paid" : "pending_at_counter"
-      }
-    };
-
-    try {
-      await axios.post(`${BASE_API}/orders`, orderData);
-      setOrderSuccess(true);
-      clearCart();
-    } catch (error) {
-      alert("Erreur lors de la confirmation. Veuillez réessayer.");
-    } finally {
-      setIsSubmitting(false);
+  // 3. Construction de l'objet selon ton OrderRoutes.js
+  const orderData = {
+    clientId: clientId,
+    customer: {
+      name: customerName || "Client Signature",
+      address: orderMode === "delivery" ? address : "Sur place",
+    },
+    items: itemsForAdmin, 
+    total: totalPrice,
+    amountPaid: getAmountToPay(),
+    mode: orderMode,
+    // On utilise 'pending' car c'est ce que ton Enum backend autorise
+    status: "pending", 
+    details: {
+      consumeMode: orderMode === "on_site" ? consumeMode : null,
+      tableNumber: selectedTable || null,
+      guestCount: orderMode === "booking" ? guestCount : null,
+      bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
+      deliveryTime: orderMode === "delivery" ? deliveryTime : null,
+      paymentStatus: payNow ? "paid" : "pending_at_counter"
     }
   };
+
+  try {
+    // 4. Envoi au backend
+    const response = await axios.post(`${BASE_API}/orders`, orderData);
+    
+    if (response.data.success) {
+      setOrderSuccess(true);
+      // 5. Vidage du panier
+      // Le produit disparaît du panier mais le voyant "En attente" 
+      // apparaîtra sur la carte car le clientId est en DB avec status: 'pending'
+      clearCart();
+    }
+  } catch (error: any) {
+    console.error("Détails de l'erreur:", error.response?.data);
+    alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier les informations"}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const isOrderDisabled = () => {
     if (!isAgreed || isSubmitting) return true;
@@ -208,23 +239,47 @@ export default function Cart() {
               </div>
               
               <div className="cart-items-list">
-                {cart.map((item, index) => (
-                  <div key={`${item.id}-${index}`} className="cart-item">
-                    <div className="item-info">
-                      <div className="item-details">
-                        <h4>{item.name}</h4>
-                        <span className="item-category">Signature</span>
+                {cart.map((item, index) => {
+                  const itemBase = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+                  const itemSupps = item.supplements?.reduce((a:any, b:any) => a + parseFloat(b.price), 0) || 0;
+                  const itemTotal = itemBase + itemSupps;
+
+                  return (
+                    <div key={item.cartItemId || `${item.id}-${index}`} className="cart-item">
+                      <div className="item-info">
+                        <div className="item-details">
+                          <div className="item-main-row">
+                            <h4>{item.name}</h4>
+                            <span className="badge-type">{item.type || 'Signature'}</span>
+                          </div>
+                          
+                          {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
+                            <p className="item-meta">Accompagnement : <strong>{item.chosenAccompaniment}</strong></p>
+                          )}
+
+                          {item.supplements && item.supplements.length > 0 && (
+                            <div className="item-supps-list">
+                              {item.supplements.map((s: any, i: number) => (
+                                <span key={i} className="cart-supp-tag">+{s.name}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
+                      <span className="item-price">{itemTotal.toFixed(2)}€</span>
+                      <button 
+                        className="cart-remove-btn" 
+                        onClick={() => removeFromCart(item.cartItemId || item.id)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                    <span className="item-price">{item.price}€</span>
-                    <button className="cart-remove-btn" onClick={() => removeFromCart(item.id)}>Supprimer</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="order-options-box">
                 <h3 className="options-title">Comment souhaitez-vous commander ?</h3>
-                
                 <div className="selection-grid">
                   <button className={`select-btn ${orderMode === "on_site" ? "active" : ""}`} onClick={() => setOrderMode("on_site")}>📍 En salle</button>
                   <button className={`select-btn ${orderMode === "booking" ? "active" : ""}`} onClick={() => setOrderMode("booking")}>📅 Réserver</button>
@@ -232,7 +287,6 @@ export default function Cart() {
                 </div>
 
                 <div className="dynamic-form-container">
-                  {/* FORMULAIRE EN SALLE */}
                   {orderMode === "on_site" && (
                     <div className="form-fade-in">
                       <p className="form-instruction">Type de consommation :</p>
@@ -262,20 +316,13 @@ export default function Cart() {
                     </div>
                   )}
 
-                  {/* FORMULAIRE LIVRAISON AVEC PARTENAIRES EXTERNES */}
                   {orderMode === "delivery" && (
                     <div className="form-fade-in">
                       <p className="form-instruction">Commander via nos partenaires :</p>
                       <div className="selection-grid partners-grid" style={{marginBottom: '25px', gridTemplateColumns: 'repeat(3, 1fr)'}}>
-                        <a href={PARTNER_LINKS.uberEats} target="_blank" rel="noreferrer" className="select-btn partner-btn">
-                          Uber <ExternalLink size={12} />
-                        </a>
-                        <a href={PARTNER_LINKS.deliveroo} target="_blank" rel="noreferrer" className="select-btn partner-btn">
-                          Deliveroo <ExternalLink size={12} />
-                        </a>
-                        <a href={PARTNER_LINKS.justEat} target="_blank" rel="noreferrer" className="select-btn partner-btn">
-                          Just Eat <ExternalLink size={12} />
-                        </a>
+                        <a href={PARTNER_LINKS.uberEats} target="_blank" rel="noreferrer" className="select-btn partner-btn">Uber <ExternalLink size={12} /></a>
+                        <a href={PARTNER_LINKS.deliveroo} target="_blank" rel="noreferrer" className="select-btn partner-btn">Deliveroo <ExternalLink size={12} /></a>
+                        <a href={PARTNER_LINKS.justEat} target="_blank" rel="noreferrer" className="select-btn partner-btn">Just Eat <ExternalLink size={12} /></a>
                       </div>
 
                       <div className="delivery-separator" style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px'}}>
@@ -293,7 +340,7 @@ export default function Cart() {
                         <input type="text" placeholder="Rue, code postal, ville..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
                         {isEstimating && <small className="gold-text">Estimation en cours...</small>}
                         {deliveryError && <small className="error-text">{deliveryError}</small>}
-                        {deliveryQuote && <small className="success-text">✓ Zone desservie par nos coursiers</small>}
+                        {deliveryQuote && <small className="success-text">✓ Zone desservie</small>}
                       </div>
                       <div className="input-group full">
                         <label>Heure souhaitée</label>
@@ -302,7 +349,6 @@ export default function Cart() {
                     </div>
                   )}
 
-                  {/* FORMULAIRE RÉSERVATION */}
                   {orderMode === "booking" && (
                     <div className="form-fade-in">
                       <div className="input-group full">
@@ -345,7 +391,7 @@ export default function Cart() {
               </div>
 
               <div className="summary-line">
-                <span>Total Plats</span>
+                <span>Total Plats + Options</span>
                 <span>{totalPrice.toFixed(2)}€</span>
               </div>
 

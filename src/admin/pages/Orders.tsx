@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
-  Printer, MapPin, Utensils, Package, Download, Calendar, Wallet, ListOrdered 
+  Printer, MapPin, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
 
 const isLocal = window.location.hostname === "localhost";
-const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature.abbadevelop.net/api";
+const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/";
 
 export default function Orders() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -19,26 +19,8 @@ export default function Orders() {
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
 
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get(`${BASE_API}/orders`);
-      const data = res.data.data.reverse();
-      setOrders(data);
-      applyFilter(data, activeFilter, customRange);
-    } catch (err) {
-      console.error("Erreur chargement:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
-    return () => clearInterval(interval);
-  }, [activeFilter, customRange]);
-
-  const applyFilter = (allOrders: any[], period: string, range: {start: string, end: string}) => {
+  // --- LOGIQUE DE FILTRAGE ---
+  const applyFilter = useCallback((allOrders: any[], period: string, range: {start: string, end: string}) => {
     let filtered = [...allOrders];
     const now = new Date();
 
@@ -60,25 +42,60 @@ export default function Orders() {
       filtered = allOrders.filter(o => new Date(o.createdAt) >= startDate);
     }
 
+    // Calcul du revenu basé sur les commandes terminées ou archivées
     const revenue = filtered
-      .filter(o => o.status === "done")
-      .reduce((acc, curr) => acc + parseFloat(curr.total), 0);
+      .filter(o => o.status === "done" || o.status === "archived")
+      .reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
 
     setFilteredOrders(filtered);
     setTotalRevenue(revenue);
-  };
+  }, []);
 
-  // NOUVELLE FONCTION : Mise à jour du statut
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  // --- RÉCUPÉRATION DES DONNÉES ---
+  const fetchOrders = async () => {
     try {
-      await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus });
-      fetchOrders(); // Rafraîchissement automatique
+      const res = await axios.get(`${BASE_API}/orders`);
+      const data = res.data.data.reverse(); 
+      setOrders(data);
+      applyFilter(data, activeFilter, customRange);
     } catch (err) {
-      console.error("Erreur update statut:", err);
-      alert("Impossible de mettre à jour la commande.");
+      console.error("Erreur chargement:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchOrders();
+    // Rafraîchissement toutes les 15 secondes pour la synchro client
+    const interval = setInterval(fetchOrders, 15000);
+    return () => clearInterval(interval);
+  }, [activeFilter, customRange, applyFilter]);
+
+  // --- ACTIONS : MISE À JOUR DU STATUT ---
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const now = new Date().toISOString();
+    try {
+      // 1. Mise à jour "Optimiste" immédiate
+      setFilteredOrders(prev => 
+        prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
+      );
+
+      // 2. Appel API : On envoie le statut et le timestamp de mise à jour
+      await axios.put(`${BASE_API}/orders/${orderId}`, { 
+        status: newStatus,
+        updatedAt: now 
+      });
+      
+      fetchOrders(); 
+    } catch (err) {
+      console.error("Erreur update statut:", err);
+      alert("Impossible de mettre à jour la commande.");
+      fetchOrders(); 
+    }
+  };
+
+  // --- EXPORT CSV ---
   const downloadHistory = () => {
     const headers = ["ID", "Date", "Heure", "Mode", "Table/Client", "Articles", "Total", "Statut"];
     const rows = filteredOrders.map(o => [
@@ -106,6 +123,7 @@ export default function Orders() {
       case "pending": return "status-pending";
       case "cooking": return "status-cooking";
       case "done": return "status-done";
+      case "archived": return "status-archived";
       default: return "status-pending";
     }
   };
@@ -165,7 +183,7 @@ export default function Orders() {
             <div className="stat-icon-circle period"><ListOrdered size={20} /></div>
             <div className="stat-info">
               <span className="stat-value">{filteredOrders.length}</span>
-              <span className="stat-label">Commandes sur la période</span>
+              <span className="stat-label">Commandes</span>
             </div>
           </div>
           <div className="order-stat-card">
@@ -186,7 +204,7 @@ export default function Orders() {
             <div className="stat-icon-circle done"><CheckCircle size={20} /></div>
             <div className="stat-info">
               <span className="stat-value">{filteredOrders.filter(o => o.status === "done").length}</span>
-              <span className="stat-label">Terminées</span>
+              <span className="stat-label">À Archiver</span>
             </div>
           </div>
         </div>
@@ -195,7 +213,9 @@ export default function Orders() {
           <div className="loading-gold">Mise à jour des données...</div>
         ) : (
           <div className="orders-grid">
-            {filteredOrders.map((order) => (
+            {filteredOrders.length === 0 ? (
+              <div className="no-orders">Aucune commande.</div>
+            ) : filteredOrders.map((order) => (
               <div key={order._id} className={`order-card ${getStatusClass(order.status)}`}>
                 <div className="gold-thin-border"></div>
                 <div className="order-card-header">
@@ -204,14 +224,14 @@ export default function Orders() {
                     <span>#{order._id.slice(-4).toUpperCase()}</span>
                   </div>
                   <span className="order-time">
-                    {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
 
                 <div className="order-card-body">
                   <div className="order-origin">
                     {order.mode === "on_site" ? (
-                      <h3 className="table-number">{order.details?.tableNumber ? `Table ${order.details.tableNumber}` : "À emporter"}</h3>
+                      <h3 className="table-number">{order.details?.tableNumber ? `Table ${order.details.tableNumber}` : "Sur place"}</h3>
                     ) : (
                       <h3 className="customer-name">{order.customer?.name || "Client Livraison"}</h3>
                     )}
@@ -220,8 +240,13 @@ export default function Orders() {
                   <div className="items-list">
                     {order.items.map((item: any, idx: number) => (
                       <div key={idx} className="order-item-row">
-                        <span className="item-qty">1x</span>
-                        <span className="item-name">{item.name}</span>
+                        <span className="item-qty">{item.quantity || 1}x</span>
+                        <div className="item-details-box">
+                           <span className="item-name">{item.name}</span>
+                           {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
+                             <small className="item-sub">Acc: {item.chosenAccompaniment}</small>
+                           )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -235,11 +260,12 @@ export default function Orders() {
                 <div className="order-card-footer">
                   <div className={`status-pill ${getStatusClass(order.status)}`}>
                     <span className="dot"></span>
-                    {order.status === "pending" ? "En attente" : order.status === "cooking" ? "Cuisine" : "Terminé"}
+                    {order.status === "pending" ? "En attente" : 
+                     order.status === "cooking" ? "En cuisine" : 
+                     order.status === "done" ? "Prêt / Servi" : "Archivée"}
                   </div>
                   
                   <div className="order-actions">
-                    {/* BOUTONS DYNAMIQUES DE STATUT */}
                     {order.status === "pending" && (
                       <button className="order-action-btn cooking-btn" onClick={() => updateOrderStatus(order._id, "cooking")}>
                         <Clock size={16} /> <span>Cuisine</span>
@@ -250,9 +276,14 @@ export default function Orders() {
                         <CheckCircle size={16} /> <span>Terminer</span>
                       </button>
                     )}
+                    {order.status === "done" && (
+                      <button className="order-action-btn archive-btn" onClick={() => updateOrderStatus(order._id, "archived")} title="Retirer le voyant chez le client">
+                        <Archive size={16} /> <span>Archiver</span>
+                      </button>
+                    )}
                     
-                    <button className="order-action-btn view"><Eye size={18} /></button>
-                    <button className="order-action-btn print"><Printer size={18} /></button>
+                    <button className="order-action-btn view" title="Détails"><Eye size={18} /></button>
+                    <button className="order-action-btn print" title="Ticket"><Printer size={18} /></button>
                   </div>
                 </div>
               </div>

@@ -7,7 +7,8 @@ import {
   Zap, 
   Tags, 
   ListPlus,
-  Smartphone // Ajout de l'icône pour les Tables
+  PlusSquare, // Icône pour les Suppléments
+  Smartphone 
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
@@ -18,9 +19,18 @@ export default function Sidebar() {
   const menuItems = [
     { path: "/admin", icon: <LayoutDashboard />, label: "Dashboard" },
     { path: "/admin/categories", icon: <Tags />, label: "Catégories" },
-    { path: "/admin/accompaniments", icon: <ListPlus />, label: "Accompagnements" },
     { path: "/admin/menu", icon: <Utensils />, label: "Ma Carte" },
-    { path: "/admin/tables", icon: <Smartphone />, label: "Gestion Tables" }, // Nouvelle entrée
+    { 
+      path: "/admin/supplements", 
+      icon: <PlusSquare />, 
+      label: "Suppléments" 
+    }, // Nouveau : Gestion des extras payants
+    { 
+      path: "/admin/accompaniments", 
+      icon: <ListPlus />, 
+      label: "Accompagnements" 
+    },
+    { path: "/admin/tables", icon: <Smartphone />, label: "Gestion Tables" },
     { path: "/admin/appearance", icon: <ImageIcon />, label: "Apparence & Pub" }, 
     { path: "/admin/social", icon: <Zap size={22} />, label: "Social Broadcaster" }, 
     { path: "/admin/orders", icon: <ShoppingBag />, label: "Commandes" },
