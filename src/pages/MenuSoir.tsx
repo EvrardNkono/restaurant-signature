@@ -13,7 +13,7 @@ import "./menuSoir.css";
 const isLocal = window.location.hostname === "localhost";
 const BASE_URL = isLocal 
   ? "http://localhost:5000/api" 
-  : "https://signature-backend-alpha.vercel.app/";
+  : "https://signature-backend-alpha.vercel.app/api";
 
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;

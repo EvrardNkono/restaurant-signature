@@ -6,7 +6,7 @@ import "./CategoryManager.css";
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/categories" 
-  : "https://signature-backend-alpha.vercel.app//categories";
+  : "https://signature-backend-alpha.vercel.app/api/categories";
 
 interface Category {
   _id: string;

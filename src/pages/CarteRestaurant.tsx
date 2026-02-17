@@ -7,7 +7,7 @@ import "./carte.css";
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/menu?public=true" 
-  : "https://signature-backend-alpha.vercel.app//menu?public=true";
+  : "https://signature-backend-alpha.vercel.app/api/menu?public=true";
 
 // --- INTERFACES ---
 interface Category {

@@ -7,7 +7,7 @@ import "./TableManager.css";
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/tables" 
-  : "https://signature-backend-alpha.vercel.app//tables";
+  : "https://signature-backend-alpha.vercel.app/api/tables";
 
 interface Table {
   _id: string;

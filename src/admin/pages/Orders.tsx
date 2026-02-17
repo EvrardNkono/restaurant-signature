@@ -7,7 +7,7 @@ import axios from "axios";
 import "./Orders.css";
 
 const isLocal = window.location.hostname === "localhost";
-const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/";
+const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
 export default function Orders() {
   const [orders, setOrders] = useState<any[]>([]);

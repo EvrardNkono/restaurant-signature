@@ -12,7 +12,7 @@ const defaultImages = [
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
   ? "http://localhost:5000/api/banner" 
-  : "https://signature-backend-alpha.vercel.app//banner";
+  : "https://signature-backend-alpha.vercel.app/api/banner";
 
 interface HeroProps {
   title: string;
