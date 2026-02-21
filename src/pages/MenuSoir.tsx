@@ -18,6 +18,7 @@ const BASE_URL = isLocal
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
 
+
 // --- INTERFACES ---
 interface Category {
   _id: string;
@@ -258,7 +259,25 @@ export default function MenuSoir() {
     setUnivers(newUnivers);
     setFilter("Tous");
   };
-
+  // --- MON NOUVEL EFFET DE REBOND DE SCROLL ICI ---
+useEffect(() => {
+  if (tempItem) {
+    const scrollContainer = document.querySelector('.drawer-body-scroll');
+    if (scrollContainer) {
+      // On ajoute la classe après un petit délai (ouverture du tiroir)
+      const timer = setTimeout(() => {
+        scrollContainer.classList.add('hint-active');
+        
+        // On la retire après l'animation pour que l'utilisateur puisse scroller normalement
+        setTimeout(() => {
+          scrollContainer.classList.remove('hint-active');
+        }, 2000); 
+      }, 600);
+      
+      return () => clearTimeout(timer);
+    }
+  }
+}, [tempItem]);
   if (isLoadingMenu) {
     return (
       <div className="menu-soir-loading">

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart } from "../context/CartContext"; 
@@ -141,6 +141,24 @@ export default function Menu() {
 
   const isAnyDrawerOpen = selectingAccId !== null;
 
+  // --- LOGIQUE DE REBOND (HINT) ---
+  const triggerBounceHint = useCallback(() => {
+    const scrollContainer = document.querySelector('.drawer-body-scroll');
+    if (scrollContainer) {
+      scrollContainer.classList.remove('hint-active');
+      void (scrollContainer as HTMLElement).offsetWidth; 
+      scrollContainer.classList.add('hint-active');
+    }
+  }, []);
+
+  // Déclenchement à l'ouverture du tiroir
+  useEffect(() => {
+    if (selectingAccId) {
+      const timer = setTimeout(() => triggerBounceHint(), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [selectingAccId, triggerBounceHint]);
+
   // --- DATA FETCHERS ---
   const { data: allPlats, isLoading: isLoadingMenu } = useQuery<Plat[]>({
     queryKey: ['full-catalog'],
@@ -160,7 +178,6 @@ export default function Menu() {
     staleTime: 1000 * 60 * 30,
   });
 
-  // RÉCUPÉRATION DES COMMANDES RÉELLES (Tracking)
   const { data: activeOrders = [], refetch: refetchOrders } = useQuery({
     queryKey: ["active-orders", clientId],
     queryFn: async () => {
@@ -172,7 +189,6 @@ export default function Menu() {
     enabled: !!clientId
   });
 
-  // Sync tracking au montage et changement du panier
   useEffect(() => {
     if (clientId) refetchOrders();
   }, [clientId, cart.length, refetchOrders]);
@@ -289,22 +305,21 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* Remplacez la section des filtres par ceci */}
-<div className="menu-filtres-container">
-  <div className="menu-filtres-track"> {/* Ajout de la track ici */}
-    <div className="menu-filtres-list">
-      {currentCategories.map((cat, idx) => (
-        <button 
-          key={idx} 
-          className={`filter-btn ${filter === cat ? "active" : ""}`} 
-          onClick={() => !isAnyDrawerOpen && setFilter(cat)}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
+      <div className="menu-filtres-container">
+        <div className="menu-filtres-track">
+          <div className="menu-filtres-list">
+            {currentCategories.map((cat, idx) => (
+              <button 
+                key={idx} 
+                className={`filter-btn ${filter === cat ? "active" : ""}`} 
+                onClick={() => !isAnyDrawerOpen && setFilter(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <div className="menu-grid">
         {platsFiltres.map(plat => {
@@ -314,7 +329,7 @@ export default function Menu() {
           const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
           const lastItemAdded = itemsInCart[itemsInCart.length - 1];
 
-          // 1. LOGIQUE DE TRACKING
+          // 1. LOGIQUE DE TRACKING (ORIGINALE)
           const orderMatch = activeOrders.find((order: any) => 
             order.items.some((item: any) => item.productId === plat._id)
           );
@@ -327,7 +342,7 @@ export default function Menu() {
             
             if (status === "archived") {
               currentStatus = null;
-            } else if (status === "done" && (now - lastUpdate > 600000)) { // 10 min
+            } else if (status === "done" && (now - lastUpdate > 600000)) { 
               currentStatus = null;
             } else {
               currentStatus = status;
@@ -344,9 +359,7 @@ export default function Menu() {
                 
                 <div className="card-face card-front">
                   <div className="menu-image-container">
-                    {/* Badge de statut dynamique */}
                     {currentStatus && <OrderStatusBadge status={currentStatus} />}
-
                     {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-img">S</div>}
                     <div className="price-badge-luxury"><span>{plat.price}€</span></div>
                   </div>
@@ -408,7 +421,10 @@ export default function Menu() {
                               <button 
                                 key={accName}
                                 className={`acc-mini-choice ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`} 
-                                onClick={() => updateLineAccompaniment(lastItemAdded.cartItemId, accName)}
+                                onClick={() => {
+                                  updateLineAccompaniment(lastItemAdded.cartItemId, accName);
+                                  triggerBounceHint(); // EFFET REBOND AU CLIC
+                                }}
                               >
                                 {accName}
                               </button>
@@ -436,7 +452,10 @@ export default function Menu() {
                                     </div>
                                     <div className="supp-actions-wrapper">
                                       {count > 0 && (
-                                        <button className="supp-mini-btn" onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
+                                        <button className="supp-mini-btn" onClick={() => {
+                                          removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
+                                          triggerBounceHint(); // EFFET REBOND AU CLIC
+                                        }}>
                                           <MinusCircle size={20}/>
                                         </button>
                                       )}
@@ -446,6 +465,7 @@ export default function Menu() {
                                         onClick={() => {
                                           addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
                                           setAddedSuppId(supp._id);
+                                          triggerBounceHint(); // EFFET REBOND AU CLIC
                                           setTimeout(() => setAddedSuppId(null), 600);
                                         }}
                                       >

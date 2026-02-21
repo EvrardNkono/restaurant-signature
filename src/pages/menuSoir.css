@@ -1278,3 +1278,18 @@
   50% { transform: scale(1.05); filter: brightness(1.2); }
   100% { transform: scale(1); filter: brightness(1); }
 }
+
+/* On cible le wrapper qui contient les sections à l'intérieur du scroll */
+.drawer-body-scroll.hint-active > div {
+  animation: organicBounce 2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+@keyframes organicBounce {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-90px); } /* Monte avec douceur */
+  50%  { transform: translateY(10px); }   /* Redescend et dépasse un tout petit peu */
+  70%  { transform: translateY(-15px); } /* Petit rebond final */
+  100% { transform: translateY(0); }
+}
+
+
