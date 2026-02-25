@@ -570,3 +570,58 @@
     font-style: italic;
 }
 
+
+
+/* --- STYLES OFFRE LOT --- */
+
+.offer-box {
+  margin-top: 10px;
+  border: 1px double #d4af37 !important; /* Double bordure pour marquer l'aspect spécial */
+  background: rgba(212, 175, 55, 0.05) !important; /* Fond très léger or */
+  padding: 20px !important;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.offer-box:hover {
+  background: rgba(212, 175, 55, 0.08) !important;
+  box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.05);
+}
+
+/* Style spécifique pour les inputs dans le bloc offre */
+.offer-box .input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Petit texte d'info sous les inputs de l'offre */
+.offer-box .input-label-gold {
+  margin-bottom: 5px;
+  color: #bfa04a; /* Un or un peu plus sombre pour la lisibilité */
+}
+
+/* Badge spécifique pour la colonne "Affectations" du tableau */
+.v-tag.special {
+  background: #2D2422 !important;
+  color: #D4AF37 !important;
+  border: 1px solid #D4AF37 !important;
+  font-weight: 800;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Animation pour l'apparition des champs numériques */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive pour le bloc offre */
+@media (max-width: 768px) {
+  .offer-box .input-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}

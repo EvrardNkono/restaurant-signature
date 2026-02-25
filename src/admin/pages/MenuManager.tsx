@@ -38,6 +38,12 @@ interface Supplement {
   price: number;
 }
 
+interface Offer {
+  enabled: boolean;
+  requiredQuantity: number;
+  offerPrice: number;
+}
+
 interface ManagedPlat {
   _id?: string;
   name: string;
@@ -50,8 +56,9 @@ interface ManagedPlat {
   showInMenuSoir: boolean;
   hasAccompaniment: boolean;
   accompaniments: string[]; 
-  allowSupplements: boolean; // Synchro avec le Backend
-  supplements: string[];      // Pour la sélection spécifique
+  allowSupplements: boolean; 
+  supplements: string[];
+  offer: Offer; // AJOUTÉ
 }
 
 export default function MenuManager() {
@@ -78,11 +85,16 @@ export default function MenuManager() {
     showInMenuSoir: false,
     hasAccompaniment: false, 
     accompaniments: [],
-    allowSupplements: false, // Initialisé à false
-    supplements: []
+    allowSupplements: false,
+    supplements: [],
+    offer: { enabled: false, requiredQuantity: 0, offerPrice: 0 } // AJOUTÉ
   };
 
   const [formData, setFormData] = useState(emptyForm);
+
+  // --- LOGIQUE DE DÉTECTION UNIVERS ---
+  const selectedCategory = categories.find(c => c._id === formData.category);
+  const isDrinkUniverse = selectedCategory?.univers === "Boissons";
 
   // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
@@ -148,7 +160,8 @@ export default function MenuManager() {
         category: plat.category?._id || plat.category,
         accompaniments: plat.accompaniments?.map((a: any) => a._id || a) || [],
         supplements: plat.supplements?.map((s: any) => s._id || s) || [],
-        allowSupplements: plat.allowSupplements || false
+        allowSupplements: plat.allowSupplements || false,
+        offer: plat.offer || { enabled: false, requiredQuantity: 0, offerPrice: 0 } // SÉCURITÉ
       });
     } else {
       setEditingId(null);
@@ -268,7 +281,7 @@ export default function MenuManager() {
                     {plat.showInCarte && <span className="v-tag active">Carte</span>}
                     {plat.showInMenuJour && <span className="v-tag active">Midi</span>}
                     {plat.showInMenuSoir && <span className="v-tag active">Soir</span>}
-                    {(plat.hasAccompaniment || plat.allowSupplements) && <span className="v-tag special">Options</span>}
+                    {(plat.hasAccompaniment || plat.allowSupplements || plat.offer?.enabled) && <span className="v-tag special">Options</span>}
                   </div>
                 </td>
                 <td className="td-price"><span className="price-tag">{plat.price}€</span></td>
@@ -359,6 +372,47 @@ export default function MenuManager() {
                     <label className="input-label-gold">Description / Ingrédients</label>
                     <textarea rows={3} className="admin-input-terracotta" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}></textarea>
                   </div>
+
+                  {/* --- SECTION OFFRE LOT (BOISSONS UNIQUEMENT) --- */}
+                  {isDrinkUniverse && (
+                    <div className="input-group accompaniment-section offer-box" style={{ border: '1px double #d4af37', padding: '15px', background: 'rgba(212,175,55,0.05)' }}>
+                      <label className="input-label-gold" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={formData.offer?.enabled} 
+                          onChange={e => setFormData({...formData, offer: {...formData.offer, enabled: e.target.checked}})} 
+                        />
+                        <Sparkles size={18} className="text-gold" />
+                        <span>Activer une réduction par lot (ex: 3 pour 5€)</span>
+                      </label>
+
+                      {formData.offer?.enabled && (
+                        <div className="input-row" style={{ marginTop: '10px' }}>
+                          <div className="input-group">
+                            <label className="input-label-gold" style={{ fontSize: '0.8rem' }}>Quantité requise</label>
+                            <input 
+                              type="number" 
+                              className="admin-input-terracotta" 
+                              placeholder="Ex: 3"
+                              value={formData.offer.requiredQuantity}
+                              onChange={e => setFormData({...formData, offer: {...formData.offer, requiredQuantity: Number(e.target.value)}})}
+                            />
+                          </div>
+                          <div className="input-group">
+                            <label className="input-label-gold" style={{ fontSize: '0.8rem' }}>Prix du lot (€)</label>
+                            <input 
+                              type="number" 
+                              step="0.01" 
+                              className="admin-input-terracotta" 
+                              placeholder="Ex: 5"
+                              value={formData.offer.offerPrice}
+                              onChange={e => setFormData({...formData, offer: {...formData.offer, offerPrice: Number(e.target.value)}})}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* --- ACCOMPAGNEMENTS (GRATUITS) --- */}
                   <div className="input-group accompaniment-section">

@@ -991,65 +991,222 @@
 
 /* --- BADGES DE TRACKING (L'EXPÉRIENCE SIGNATURE) --- */
 
-.order-status-badge {
+.order-status-tag {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 15px;      /* Un peu plus d'espace depuis le haut */
+  left: 30%;      /* Centrage horizontal */
+  transform: translateX(-50%); /* Ajustement précis du centre */
+  margin-right: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 5px 18px;
+  
+  /* Look Pilule de Luxe : Très arrondi, très fin */
+  border-radius: 50px; 
+  font-size: 9px;     /* Plus petit pour la discrétion */
+  font-weight: 700;
+  letter-spacing: 2px; /* Aération maximale des lettres */
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 30;
+
+  /* Effet de verre poli (Frosted Glass) */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  
+  color: #FFFFFF;
+  animation: slideDownFade 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow: hidden;
+}
+
+/* Effet de brillance furtive amélioré */
+.order-status-tag::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 30%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine-status 5s infinite ease-in-out;
+}
+
+/* Nouvelle animation d'entrée plus fluide */
+@keyframes slideDownFade {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, 0); 
+  }
+}
+
+/* Pulsation très subtile sur le contour uniquement */
+.pulse-active {
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+  animation: luxury-glow 2.5s infinite;
+}
+
+@keyframes luxury-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+@keyframes shine-status {
+  0% { left: -100%; }
+  15% { left: 150%; }
+  100% { left: 150%; }
+}
+
+.status-icon-anim {
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  animation: heartbeat 2s infinite ease-in-out;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+
+/* Badge Ruban Signature */
+.luxury-offer-ribbon {
+  position: absolute;
+  top: 40px;
+  left: -4px; /* Débordement léger pour l'effet ruban */
+  background: linear-gradient(135deg, #8e443d 0%, #6d2d28 100%); /* Base Terracotta Sombre */
+  color: #f1c40f; /* Texte Or */
+  padding: 5px 15px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 25;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  z-index: 10;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: slideInBadge 0.4s ease-out;
-  text-transform: uppercase;
+  
+  /* Bordure dorée fine */
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 0 4px 4px 0;
+  
+  /* Ombre portée pour la profondeur */
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);
 }
 
-@keyframes slideInBadge {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* État : En cuisine (Terracotta / Orange Signature) */
-.status-cooking {
-  background: rgba(184, 107, 74, 0.9); /* Ta couleur Terracotta */
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* État : Prêt (Or / Gold Signature) */
-.status-ready {
-  background: rgba(212, 175, 55, 0.95); /* Ton Or */
-  color: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-}
-
-/* État : Livré ou Reçu (Sombre / Élégant) */
-.status-delivered, .status-pending {
-  background: rgba(28, 28, 28, 0.85);
+/* L'icône étincelle en Or */
+.ribbon-icon {
   color: #d4af37;
-  border: 1px solid #d4af37;
+  filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5));
 }
 
-/* Animation de l'icône (le petit battement) */
-.animate-pulse-slow {
-  animation: pulseBadge 2s infinite;
+/* Effet de brillance balayante (optionnel, pour le luxe) */
+.luxury-offer-ribbon::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: 0.5s;
+  animation: shine-ribbon 3s infinite;
 }
 
-@keyframes pulseBadge {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes shine-ribbon {
+  to { left: 200%; }
 }
 
-/* --- AJUSTEMENT POUR L'IMAGE --- */
-.menu-image-container {
-  position: relative; /* Pour que le badge reste bien positionné par dessus l'image */
-  overflow: hidden;
+
+/* Zone d'offre dans le tiroir */
+
+.offer-activation-zone {
+
+  background: linear-gradient(135deg, rgba(142, 68, 61, 0.1) 0%, rgba(212, 175, 55, 0.1) 100%);
+
+  border: 1px dashed #d4af37;
+
+  border-radius: 12px;
+
+  padding: 20px 15px;
+
+  text-align: center;
+
+  margin-bottom: 20px;
+
+  animation: slideInDown 0.4s ease-out;
+
+}
+
+
+
+.offer-congrats {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  color: #d4af37; /* Or */
+
+  font-weight: 800;
+
+  font-size: 1.1rem;
+
+  text-transform: uppercase;
+
+  margin-bottom: 8px;
+
+}
+
+
+
+.offer-details {
+
+  color: #8e443d; /* Terracotta */
+
+  font-size: 0.95rem;
+
+  margin-bottom: 12px;
+
+}
+
+
+
+.savings-badge {
+
+  display: inline-block;
+
+  background: #d4af37;
+
+  color: #ffffff;
+
+  padding: 6px 16px;
+
+  border-radius: 50px;
+
+  font-weight: bold;
+
+  font-size: 0.85rem;
+
+  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+
+}
+
+
+
+@keyframes slideInDown {
+
+  from { opacity: 0; transform: translateY(-15px); }
+
+  to { opacity: 1; transform: translateY(0); }
+
 }

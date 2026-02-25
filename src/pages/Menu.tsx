@@ -23,25 +23,25 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
   const statusConfig: Record<string, { label: string, color: string, icon: any, pulse?: boolean }> = {
     in_cart: { 
       label: "À régler", 
-      color: "#e74c3c", 
+      color: "rgba(231, 76, 60, 0.9)", // Rouge élégant
       icon: <CreditCard size={12} />,
       pulse: true 
     },
     pending: { 
       label: "En attente", 
-      color: "#7f8c8d", 
+      color: "rgba(45, 36, 34, 0.9)", // Anthracite Signature
       icon: <Clock size={12} />,
       pulse: true
     },
     cooking: { 
       label: "En cuisine", 
-      color: "#f39c12", 
+      color: "rgba(184, 107, 74, 0.95)", // Terracotta Signature
       icon: <Utensils size={12} />, 
       pulse: true 
     },
     done: { 
       label: "Prêt", 
-      color: "#2ecc71", 
+      color: "rgba(212, 175, 55, 0.95)", // Or Signature
       icon: <Sparkles size={12} /> 
     },
   };
@@ -49,24 +49,13 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
   const config = statusConfig[status] || { label: "Reçu", color: "#34495e", icon: <Check size={12} /> };
 
   return (
-    <div className={`order-status-tag ${config.pulse ? "pulse-active" : ""}`} 
-         style={{ 
-           backgroundColor: config.color,
-           position: 'absolute',
-           top: '10px',
-           left: '10px',
-           zIndex: 10,
-           display: 'flex',
-           alignItems: 'center',
-           gap: '5px',
-           padding: '4px 8px',
-           borderRadius: '4px',
-           color: 'white',
-           fontSize: '10px',
-           fontWeight: 'bold',
-           textTransform: 'uppercase'
-         }}>
-      {config.icon}
+    <div 
+      className={`order-status-tag ${config.pulse ? "pulse-active" : ""}`} 
+      style={{ backgroundColor: config.color }}
+    >
+      <div className={config.pulse ? "status-icon-anim" : ""}>
+        {config.icon}
+      </div>
       <span>{config.label}</span>
     </div>
   );
@@ -109,7 +98,13 @@ interface Plat {
   showInMenuSoir: boolean;
   hasAccompaniment: boolean;
   accompaniments: Accompaniment[]; 
-  allowSupplements: boolean; 
+  allowSupplements: boolean;
+  // AJOUTE CECI :
+  offer?: {
+    enabled: boolean;
+    requiredQuantity: number;
+    offerPrice: number;
+  };
 }
 
 interface Supplement {
@@ -227,36 +222,42 @@ export default function Menu() {
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat) => {
-    if (isAnyDrawerOpen) {
-      alert("Veuillez d'abord terminer votre personnalisation en cours.");
-      return;
-    }
+  if (isAnyDrawerOpen) {
+    alert("Veuillez d'abord terminer votre personnalisation en cours.");
+    return;
+  }
 
-    const result = addToCart(
-      { 
-        id: plat._id, 
-        name: plat.name, 
-        price: plat.price, 
-        image: plat.image,
-        type: periode, 
-        supplements: [] 
-      }, 
-      periode
-    );
+  const result = addToCart(
+    { 
+      id: plat._id, 
+      name: plat.name, 
+      price: plat.price, 
+      image: plat.image,
+      type: periode, 
+      supplements: [] 
+    }, 
+    periode
+  );
 
-    if (result === "LOCK_ERROR") {
-      alert(`Votre panier contient déjà des produits d'un autre service. Veuillez le vider pour continuer.`);
-      return;
-    }
+  if (result === "LOCK_ERROR") {
+    alert(`Votre panier contient déjà des produits d'un autre service.`);
+    return;
+  }
 
-    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-    const canShowSupps = plat.allowSupplements === true;
+  // --- NOUVELLE LOGIQUE D'OUVERTURE ---
+  const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+  const canShowSupps = plat.allowSupplements === true;
+  
+  // On récupère le nombre d'articles de ce type APRES l'ajout
+  const countInCart = cart.filter(i => i.id === plat._id).length + 1;
+  const isOfferReached = plat.offer?.enabled && countInCart >= plat.offer.requiredQuantity;
 
-    if (activeAccs.length > 0 || canShowSupps) {
-      setSelectingAccId(plat._id);
-      scrollToDrawer(plat._id);
-    }
-  };
+  // Le tiroir s'ouvre si : Accompagnements OU Suppléments OU Offre activée
+  if (activeAccs.length > 0 || canShowSupps || isOfferReached) {
+    setSelectingAccId(plat._id);
+    scrollToDrawer(plat._id);
+  }
+};
 
   const handleRemoveOne = (itemsInCart: any[]) => {
     if (itemsInCart.length > 0) {
@@ -359,10 +360,29 @@ export default function Menu() {
                 
                 <div className="card-face card-front">
                   <div className="menu-image-container">
-                    {currentStatus && <OrderStatusBadge status={currentStatus} />}
-                    {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-img">S</div>}
-                    <div className="price-badge-luxury"><span>{plat.price}€</span></div>
-                  </div>
+  {/* Statut de commande (Cuisine, etc.) */}
+  {currentStatus && <OrderStatusBadge status={currentStatus} />}
+
+  {/* LE BADGE LUXE - ANGLE HAUT GAUCHE */}
+  {plat.offer?.enabled && (
+    <div className="luxury-offer-ribbon">
+      <Sparkles size={10} className="ribbon-icon" />
+      <span>Offre dès {plat.offer.requiredQuantity}</span>
+    </div>
+  )}
+
+  {/* Image ou Placeholder */}
+  {plat.image ? (
+    <img src={plat.image} alt={plat.name} className="menu-img" />
+  ) : (
+    <div className="placeholder-img">S</div>
+  )}
+
+  {/* Prix unitaire */}
+  <div className="price-badge-luxury">
+    <span>{plat.price}€</span>
+  </div>
+</div>
 
                   <div className="menu-details-terracotta">
                     <h3>{plat.name}</h3>
@@ -412,80 +432,99 @@ export default function Menu() {
                       </button>
                     </div>
 
-                    <div className="drawer-body-scroll">
-                      {activeAccs.length > 0 && lastItemAdded && (
-                        <div className="drawer-section">
-                          <p className="drawer-label">Accompagnement :</p>
-                          <div className="acc-options-grid">
-                            {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
-                              <button 
-                                key={accName}
-                                className={`acc-mini-choice ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`} 
-                                onClick={() => {
-                                  updateLineAccompaniment(lastItemAdded.cartItemId, accName);
-                                  triggerBounceHint(); // EFFET REBOND AU CLIC
-                                }}
-                              >
-                                {accName}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                   <div className="drawer-body-scroll">
+  {/* --- SECTION OFFRE SPÉCIALE (AFFICHÉE SI QUOTA ATTEINT) --- */}
+  {plat.offer?.enabled && itemsInCart.length >= plat.offer.requiredQuantity && (
+    <div className="drawer-section offer-activation-zone">
+      <div className="offer-congrats">
+        <Sparkles size={18} className="ribbon-icon" />
+        <span>Offre Signature Activée !</span>
+      </div>
+      <p className="offer-details">
+        Vos <strong>{itemsInCart.length} {plat.name}</strong> passent à un tarif exceptionnel de <strong>{plat.offer.offerPrice}€</strong>.
+      </p>
+      <div className="savings-badge">
+        Économie réalisée : {(plat.price * itemsInCart.length - plat.offer.offerPrice).toFixed(2)}€
+      </div>
+    </div>
+  )}
 
-                      {plat.allowSupplements && lastItemAdded && (
-                        <div className="drawer-section">
-                          <p className="drawer-label">Extras</p>
-                          <div className="supps-list-container">
-                            {isLoadingSupps ? (
-                              <div className="drawer-loader-container">
-                                <Loader2 className="animate-spin" size={20} color="#D4AF37" />
-                              </div>
-                            ) : (
-                              supplementsDisponibles.map(supp => {
-                                const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
-                                return (
-                                  <div key={supp._id} className="supp-card-mini">
-                                    <div className="supp-info">
-                                      <span className="supp-name">{supp.name}</span>
-                                      <span className="supp-price">+{supp.price}€</span>
-                                    </div>
-                                    <div className="supp-actions-wrapper">
-                                      {count > 0 && (
-                                        <button className="supp-mini-btn" onClick={() => {
-                                          removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
-                                          triggerBounceHint(); // EFFET REBOND AU CLIC
-                                        }}>
-                                          <MinusCircle size={20}/>
-                                        </button>
-                                      )}
-                                      {count > 0 && <span className="supp-count-badge">{count}</span>}
-                                      <button 
-                                        className="supp-mini-btn" 
-                                        onClick={() => {
-                                          addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
-                                          setAddedSuppId(supp._id);
-                                          triggerBounceHint(); // EFFET REBOND AU CLIC
-                                          setTimeout(() => setAddedSuppId(null), 600);
-                                        }}
-                                      >
-                                        <PlusCircle size={20} className={addedSuppId === supp._id ? "added-anim" : ""}/>
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              })
-                            )}
-                          </div>
-                        </div>
-                      )}
+  {/* --- SECTION ACCOMPAGNEMENTS --- */}
+  {activeAccs.length > 0 && lastItemAdded && (
+    <div className="drawer-section">
+      <p className="drawer-label">Accompagnement :</p>
+      <div className="acc-options-grid">
+        {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
+          <button 
+            key={accName}
+            className={`acc-mini-choice ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`} 
+            onClick={() => {
+              updateLineAccompaniment(lastItemAdded.cartItemId, accName);
+              triggerBounceHint();
+            }}
+          >
+            {accName}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
 
-                      <div className="drawer-footer-action">
-                        <button className="btn-confirm-drawer" onClick={() => setSelectingAccId(null)}>
-                          <Check size={18} /> <span>Valider et continuer</span>
-                        </button>
-                      </div>
-                    </div>
+  {/* --- SECTION SUPPLEMENTS --- */}
+  {plat.allowSupplements && lastItemAdded && (
+    <div className="drawer-section">
+      <p className="drawer-label">Extras</p>
+      <div className="supps-list-container">
+        {isLoadingSupps ? (
+          <div className="drawer-loader-container">
+            <Loader2 className="animate-spin" size={20} color="#D4AF37" />
+          </div>
+        ) : (
+          supplementsDisponibles.map(supp => {
+            const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
+            return (
+              <div key={supp._id} className="supp-card-mini">
+                <div className="supp-info">
+                  <span className="supp-name">{supp.name}</span>
+                  <span className="supp-price">+{supp.price}€</span>
+                </div>
+                <div className="supp-actions-wrapper">
+                  {count > 0 && (
+                    <button className="supp-mini-btn" onClick={() => {
+                      removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
+                      triggerBounceHint();
+                    }}>
+                      <MinusCircle size={20}/>
+                    </button>
+                  )}
+                  {count > 0 && <span className="supp-count-badge">{count}</span>}
+                  <button 
+                    className="supp-mini-btn" 
+                    onClick={() => {
+                      addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
+                      setAddedSuppId(supp._id);
+                      triggerBounceHint();
+                      setTimeout(() => setAddedSuppId(null), 600);
+                    }}
+                  >
+                    <PlusCircle size={20} className={addedSuppId === supp._id ? "added-anim" : ""}/>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  )}
+
+  {/* --- FOOTER DU TIROIR --- */}
+  <div className="drawer-footer-action">
+    <button className="btn-confirm-drawer" onClick={() => setSelectingAccId(null)}>
+      <Check size={18} /> <span>Valider et continuer</span>
+    </button>
+  </div>
+</div>
                   </div>
                 </div>
 
