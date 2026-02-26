@@ -1,6 +1,6 @@
 .cta-final-section {
   width: 100%;
-  padding: 60px 10%;
+  padding: 100px 10%;
   background-color: #FCF9F5;
   display: flex;
   justify-content: center;
@@ -17,7 +17,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  overflow: hidden;
+  /* overflow: hidden; */ /* SUPPRIMÉ pour laisser passer le tiroir */
   box-shadow: 0 20px 50px rgba(45, 36, 34, 0.2);
 }
 
@@ -27,12 +27,12 @@
   width: calc(100% - 40px);
   height: 1px;
   background: linear-gradient(to right, transparent, #D4AF37, transparent);
+  z-index: 1;
 }
 
 .cta-border-decoration.top { top: 20px; }
 .cta-border-decoration.bottom { bottom: 20px; }
 
-/* --- CONTENU --- */
 .cta-title {
   font-family: 'Playfair Display', serif;
   font-size: clamp(1.8rem, 4vw, 2.8rem);
@@ -49,13 +49,108 @@
 }
 
 .cta-ornament .dot.gold {
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   background-color: #D4AF37;
   transform: rotate(45deg);
 }
 
-/* --- LE BOUTON MODERNE (LIEN) --- */
+/* --- LOGIQUE DU TIROIR --- */
+.cta-button-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.menu-choice-drawer {
+  position: absolute;
+  bottom: calc(100% + 25px); /* Juste au-dessus du bouton */
+  left: 50%;
+  transform: translateX(-50%) translateY(15px);
+  width: 320px;
+  background: #1a1514;
+  border: 1px solid #D4AF37;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.menu-choice-drawer.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.drawer-header-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #D4AF37;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.close-mini-drawer {
+  background: none; border: none; color: #666; cursor: pointer;
+}
+
+.drawer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.choice-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: #D4AF37;
+  transform: translateX(5px);
+}
+
+.choice-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.main-choice {
+  font-family: 'Playfair Display', serif;
+  color: #fcf9f5;
+  font-size: 1rem;
+}
+
+.sub-choice {
+  font-size: 0.65rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.drawer-arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #D4AF37;
+}
+
+/* --- LE BOUTON PRINCIPAL --- */
 .cta-button {
   background: transparent;
   border: 1px solid #D4AF37;
@@ -64,10 +159,7 @@
   position: relative;
   transition: all 0.4s ease;
   overflow: hidden;
-  /* Correction pour le Link */
   display: inline-block;
-  text-decoration: none;
-  z-index: 1;
 }
 
 .button-text {
@@ -78,55 +170,102 @@
   font-size: 0.9rem;
   font-weight: 600;
   position: relative;
-  z-index: 3; /* Doit être au-dessus du fond qui glisse */
+  z-index: 3;
   transition: color 0.4s ease;
 }
 
-/* L'EFFET DE REMPLISSAGE OR */
 .cta-button::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
   background-color: #D4AF37;
   transition: all 0.4s ease-in-out;
   z-index: 2;
 }
 
-.cta-button:hover::before {
-  left: 0; /* Remplit vers la droite */
+.cta-button:hover::before, .cta-button.is-active::before {
+  left: 0;
 }
 
-.cta-button:hover .button-text {
-  color: #3D2B27; /* Devient sombre sur l'Or */
+.cta-button:hover .button-text, .cta-button.is-active .button-text {
+  color: #3D2B27;
 }
 
 /* --- RESPONSIVE --- */
-
 @media (max-width: 768px) {
-  .cta-final-section {
-    padding: 80px 40px;
+  .menu-choice-drawer {
+    width: 280px;
   }
-
-  .cta-container {
-    padding: 60px 20px;
-  }
-
-  .cta-title {
-    font-size: 1.6rem;
-  }
-
+  
   .cta-button {
     width: 100%;
-    padding: 15px 20px;
-    box-sizing: border-box;
+    min-width: 260px;
   }
 }
 
-@media (max-width: 480px) {
-  .cta-final-section {
-    padding: 60px 25px;
-  }
+
+/* --- BOUTONS DE CHOIX STYLISÉS --- */
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  border-radius: 6px; /* Un peu plus arrondi pour le confort */
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- STYLE JOUR (DORÉ/SOLAIRE) --- */
+.choice-btn.btn-day {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.choice-btn.btn-day .icon-day {
+  color: #D4AF37;
+  filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
+}
+
+.choice-btn.btn-day:hover {
+  background: linear-gradient(135deg, #D4AF37, #FFD700);
+  transform: translateX(8px);
+  border-color: #FFD700;
+}
+
+/* --- STYLE SOIR (BLEU NUIT/INDIGO) --- */
+.choice-btn.btn-night {
+  background: linear-gradient(135deg, rgba(30, 39, 73, 0.4), rgba(15, 23, 42, 0.4));
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.choice-btn.btn-night .icon-night {
+  color: #94a3b8; /* Argenté/Lunaire par défaut */
+}
+
+.choice-btn.btn-night:hover {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  transform: translateX(8px);
+  border-color: #38bdf8; /* Halo bleu au survol */
+}
+
+.choice-btn.btn-night .main-choice {
+  color: #f1f5f9;
+}
+
+/* --- CHANGEMENT DE COULEUR DU TEXTE AU SURVOL --- */
+.choice-btn:hover .main-choice,
+.choice-btn:hover .sub-choice,
+.choice-btn:hover .icon-day,
+.choice-btn:hover .icon-night {
+  color: #ffffff !important;
+  filter: none;
+}
+
+/* Optionnel : Une légère lueur derrière le bouton Soir au hover */
+.choice-btn.btn-night:hover {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
 }
