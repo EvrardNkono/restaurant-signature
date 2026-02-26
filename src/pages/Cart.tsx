@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { Smartphone, CheckCircle, ExternalLink, Bike, Trash2 } from "lucide-react"; 
 import axios from "axios";
+import { ShoppingBag } from "lucide-react";
 import "./cart.css";
 
 // Configuration de l'URL API
@@ -209,10 +210,27 @@ export default function Cart() {
       <div className="cart-container">
         {cart.length === 0 ? (
           <div className="empty-cart">
-            <p>Votre panier est actuellement vide.</p>
-            <div className="title-underline-gold"></div>
-            <Link to="/carte" className="return-btn">Retour à la Carte</Link>
-          </div>
+  <div className="empty-cart-icon-wrapper">
+    <div className="icon-circle">
+      <ShoppingBag size={40} strokeWidth={1} className="gold-bag" />
+    </div>
+    <div className="floating-sparkle s1">✦</div>
+    <div className="floating-sparkle s2">✦</div>
+  </div>
+
+  <h3 className="empty-cart-title">Votre panier est vide</h3>
+  <p className="empty-cart-subtitle">
+    Laissez-vous tenter par nos créations culinaires <br /> 
+    et commencez votre expérience Signature.
+  </p>
+  
+  <div className="title-underline-gold central"></div>
+  
+  <Link to="/carte" className="return-btn-premium">
+    <span className="btn-text">Découvrir la Carte</span>
+    <div className="btn-shine"></div>
+  </Link>
+</div>
         ) : (
           <div className="cart-content">
             <div className="cart-left-side">

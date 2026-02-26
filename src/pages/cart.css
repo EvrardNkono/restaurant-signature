@@ -365,3 +365,122 @@
 .signature-delivery-header .form-instruction {
   margin-bottom: 0; /* Aligné avec l'icône */
 }
+
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* --- ICONE ANIMÉE --- */
+.empty-cart-icon-wrapper {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.icon-circle {
+  width: 100px;
+  height: 100px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+}
+
+.gold-bag {
+  color: #D4AF37;
+  opacity: 0.8;
+}
+
+.floating-sparkle {
+  position: absolute;
+  color: #D4AF37;
+  font-size: 1.2rem;
+  animation: float 3s infinite ease-in-out;
+}
+
+.s1 { top: 0; right: -10px; animation-delay: 0s; }
+.s2 { bottom: 10px; left: -15px; animation-delay: 1.5s; font-size: 0.8rem; }
+
+/* --- TYPOGRAPHIE --- */
+.empty-cart-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  color: #3D2B27;
+  margin-bottom: 10px;
+}
+
+.empty-cart-subtitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.title-underline-gold.central {
+  width: 60px;
+  height: 2px;
+  background: #D4AF37;
+  margin: 0 auto 40px;
+}
+
+/* --- BOUTON RETOUR --- */
+.return-btn-premium {
+  position: relative;
+  background: #3D2B27;
+  color: #FCF9F5;
+  padding: 16px 40px;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(61, 43, 39, 0.15);
+}
+
+.return-btn-premium:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(61, 43, 39, 0.25);
+  background: #4d3732;
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.6s;
+}
+
+.return-btn-premium:hover .btn-shine {
+  left: 100%;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); opacity: 0.5; }
+  50% { transform: translateY(-10px) rotate(20deg); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
