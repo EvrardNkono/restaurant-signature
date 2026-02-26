@@ -10,7 +10,7 @@ const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
 export default function Cart() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  
   
   // États de base
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
@@ -19,7 +19,7 @@ export default function Cart() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
-
+  const { cart, removeFromCart, clearCart, getCartTotal, getCartSavings } = useCart();
   // ÉTATS DES TABLES
   const [tables, setTables] = useState<any[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
@@ -49,7 +49,8 @@ export default function Cart() {
     const fetchTables = async () => {
       try {
         const res = await axios.get(`${BASE_API}/tables`);
-        const activeTables = res.data.data.filter((t: any) => t.active);
+        const rawData = res.data.data || res.data;
+        const activeTables = Array.isArray(rawData) ? rawData.filter((t: any) => t.active) : [];
         setTables(activeTables);
       } catch (err) {
         console.error("Erreur récupération tables:", err);
@@ -81,7 +82,7 @@ export default function Cart() {
       setDeliveryError(null);
     }
     if (consumeMode !== "dine_in") {
-        setSelectedTable("");
+      setSelectedTable("");
     }
   }, [orderMode, consumeMode]);
 
@@ -101,21 +102,16 @@ export default function Cart() {
     }
   };
 
-  // CALCUL DU TOTAL
-  const calculateTotal = () => {
-    return cart.reduce((acc, item) => {
-      const basePriceStr = String(item.price || "0");
-      const basePrice = parseFloat(basePriceStr.replace(/[^\d.]/g, "")) || 0;
-      const supplementsPrice = (item.supplements || []).reduce((sAcc: number, s: any) => {
-        const sPriceStr = String(s.price || "0");
-        const sPrice = parseFloat(sPriceStr.replace(/[^\d.]/g, "")) || 0;
-        return sAcc + sPrice;
-      }, 0);
-      return acc + basePrice + supplementsPrice;
-    }, 0);
+  // CALCUL DU TOTAL (Nettoyage des prix string)
+  const parsePrice = (val: any) => {
+    const str = String(val || "0");
+    return parseFloat(str.replace(/[^\d.]/g, "")) || 0;
   };
 
-  const totalPrice = calculateTotal();
+  
+
+  const totalPrice = getCartTotal(); // Utilise la logique avec promos
+  const savings = getCartSavings();  // Pour afficher les économies si besoin
   const depositAmount = totalPrice / 2;
 
   const getAmountToPay = () => {
@@ -126,77 +122,65 @@ export default function Cart() {
     return base + shipping;
   };
 
-  /**
-   * ACTION FINALE : ENVOI À L'ADMINISTRATION
-   */
   const handleFinalOrder = async () => {
-  setIsSubmitting(true);
-  
-  // 1. Récupération du ClientID (pour le suivi sur la carte)
-  let clientId = localStorage.getItem('signature_client_id');
-  if (!clientId) {
-    clientId = crypto.randomUUID();
-    localStorage.setItem('signature_client_id', clientId);
-  }
+    setIsSubmitting(true);
+    
+    let clientId = localStorage.getItem('signature_client_id');
+    if (!clientId) {
+      clientId = crypto.randomUUID();
+      localStorage.setItem('signature_client_id', clientId);
+    }
 
-  // 2. Préparation des items avec productId pour le voyant de la carte
-  // On utilise 'any' pour éviter l'erreur sur _id
-  const itemsForAdmin = cart.map((item: any) => ({
-    productId: item.id || item._id, // Identifiant unique du plat
-    name: item.name,
-    price: item.price,
-    chosenAccompaniment: item.chosenAccompaniment || "Aucun",
-    supplements: item.supplements || [],
-    type: item.type || 'Signature'
-  }));
+    const orderData = {
+      clientId: clientId,
+      customer: {
+        name: customerName || "Client Signature",
+        address: orderMode === "delivery" ? address : "Sur place",
+      },
+      items: cart.map((item: any) => ({
+        productId: item.id || item._id,
+        name: item.name,
+        price: parsePrice(item.price),
+        quantity: item.quantity || 1,
+        chosenAccompaniment: item.chosenAccompaniment || "Aucun",
+        supplements: item.supplements || [],
+        type: item.type || 'Signature'
+      })), 
+      total: totalPrice,
+      amountPaid: getAmountToPay(),
+      mode: orderMode,
+      status: "pending", 
+      details: {
+        consumeMode: orderMode === "on_site" ? consumeMode : null,
+        tableNumber: selectedTable || null,
+        guestCount: orderMode === "booking" ? guestCount : null,
+        bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
+        deliveryTime: orderMode === "delivery" ? deliveryTime : null,
+        paymentStatus: payNow ? "paid" : "pending_at_counter",
+        uberQuoteId: deliveryQuote?.id || null
+      }
+    };
 
-  // 3. Construction de l'objet selon ton OrderRoutes.js
-  const orderData = {
-    clientId: clientId,
-    customer: {
-      name: customerName || "Client Signature",
-      address: orderMode === "delivery" ? address : "Sur place",
-    },
-    items: itemsForAdmin, 
-    total: totalPrice,
-    amountPaid: getAmountToPay(),
-    mode: orderMode,
-    // On utilise 'pending' car c'est ce que ton Enum backend autorise
-    status: "pending", 
-    details: {
-      consumeMode: orderMode === "on_site" ? consumeMode : null,
-      tableNumber: selectedTable || null,
-      guestCount: orderMode === "booking" ? guestCount : null,
-      bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
-      deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-      paymentStatus: payNow ? "paid" : "pending_at_counter"
+    try {
+      const response = await axios.post(`${BASE_API}/orders`, orderData);
+      if (response.data.success) {
+        setOrderSuccess(true);
+        clearCart();
+      }
+    } catch (error: any) {
+      console.error("Erreur:", error.response?.data);
+      alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier les informations"}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  try {
-    // 4. Envoi au backend
-    const response = await axios.post(`${BASE_API}/orders`, orderData);
-    
-    if (response.data.success) {
-      setOrderSuccess(true);
-      // 5. Vidage du panier
-      // Le produit disparaît du panier mais le voyant "En attente" 
-      // apparaîtra sur la carte car le clientId est en DB avec status: 'pending'
-      clearCart();
-    }
-  } catch (error: any) {
-    console.error("Détails de l'erreur:", error.response?.data);
-    alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier les informations"}`);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   const isOrderDisabled = () => {
     if (!isAgreed || isSubmitting) return true;
     if (orderMode === 'delivery' && !deliveryQuote) return true;
     if (orderMode === 'on_site' && consumeMode === 'dine_in' && !selectedTable) return true;
     if ((orderMode === 'delivery' || orderMode === 'booking') && !customerName) return true;
+    if (orderMode === 'booking' && (!bookingDate || !bookingTime)) return true;
     return false;
   };
 
@@ -234,29 +218,29 @@ export default function Cart() {
             <div className="cart-left-side">
               <div className="cart-table-header">
                 <span>Produit</span>
-                <span>Prix</span>
+                <span>Prix Total</span>
                 <span className="text-center">Action</span>
               </div>
               
               <div className="cart-items-list">
                 {cart.map((item, index) => {
-                  const itemBase = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-                  const itemSupps = item.supplements?.reduce((a:any, b:any) => a + parseFloat(b.price), 0) || 0;
-                  const itemTotal = itemBase + itemSupps;
+                  const qty = item.quantity || 1;
+                  const unitPrice = parsePrice(item.price) + (item.supplements?.reduce((a:any, b:any) => a + parsePrice(b.price), 0) || 0);
+                  const itemTotal = unitPrice * qty;
 
                   return (
                     <div key={item.cartItemId || `${item.id}-${index}`} className="cart-item">
                       <div className="item-info">
                         <div className="item-details">
                           <div className="item-main-row">
-                            <h4>{item.name}</h4>
+                            <h4>
+                              {item.name} {qty > 1 && <span className="item-qty-badge">x{qty}</span>}
+                            </h4>
                             <span className="badge-type">{item.type || 'Signature'}</span>
                           </div>
-                          
                           {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
-                            <p className="item-meta">Accompagnement : <strong>{item.chosenAccompaniment}</strong></p>
+                            <p className="item-meta">Accompagnement : <span className="gold-text">{item.chosenAccompaniment}</span></p>
                           )}
-
                           {item.supplements && item.supplements.length > 0 && (
                             <div className="item-supps-list">
                               {item.supplements.map((s: any, i: number) => (
@@ -266,7 +250,10 @@ export default function Cart() {
                           )}
                         </div>
                       </div>
-                      <span className="item-price">{itemTotal.toFixed(2)}€</span>
+                      <div className="price-box" style={{textAlign: 'right'}}>
+                        <span className="item-price">{itemTotal.toFixed(2)}€</span>
+                        {qty > 1 && <div style={{fontSize: '0.7rem', opacity: 0.7}}>{unitPrice.toFixed(2)}€ / pce</div>}
+                      </div>
                       <button 
                         className="cart-remove-btn" 
                         onClick={() => removeFromCart(item.cartItemId || item.id)}
@@ -319,16 +306,16 @@ export default function Cart() {
                   {orderMode === "delivery" && (
                     <div className="form-fade-in">
                       <p className="form-instruction">Commander via nos partenaires :</p>
-                      <div className="selection-grid partners-grid" style={{marginBottom: '25px', gridTemplateColumns: 'repeat(3, 1fr)'}}>
+                      <div className="selection-grid partners-grid" style={{marginBottom: '25px', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px'}}>
                         <a href={PARTNER_LINKS.uberEats} target="_blank" rel="noreferrer" className="select-btn partner-btn">Uber <ExternalLink size={12} /></a>
                         <a href={PARTNER_LINKS.deliveroo} target="_blank" rel="noreferrer" className="select-btn partner-btn">Deliveroo <ExternalLink size={12} /></a>
                         <a href={PARTNER_LINKS.justEat} target="_blank" rel="noreferrer" className="select-btn partner-btn">Just Eat <ExternalLink size={12} /></a>
                       </div>
 
-                      <div className="delivery-separator" style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px'}}>
-                         <div style={{flex:1, height:'1px', background:'rgba(212,175,55,0.3)'}}></div>
-                         <span style={{fontSize:'0.7rem', color:'#D4AF37', letterSpacing:'1px'}}>OU LIVRAISON SIGNATURE</span>
-                         <div style={{flex:1, height:'1px', background:'rgba(212,175,55,0.3)'}}></div>
+                      <div className="delivery-separator">
+                         <div className="sep-line"></div>
+                         <span>OU LIVRAISON SIGNATURE</span>
+                         <div className="sep-line"></div>
                       </div>
 
                       <div className="input-group full">
@@ -336,7 +323,7 @@ export default function Cart() {
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
                       <div className="input-group full">
-                        <label><Bike size={14} style={{marginRight:'5px'}}/> Adresse de livraison</label>
+                        <label><Bike size={14}/> Adresse de livraison</label>
                         <input type="text" placeholder="Rue, code postal, ville..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
                         {isEstimating && <small className="gold-text">Estimation en cours...</small>}
                         {deliveryError && <small className="error-text">{deliveryError}</small>}
@@ -380,32 +367,41 @@ export default function Cart() {
             </div>
 
             <div className="cart-summary">
-              <h3 className="summary-title">Récapitulatif</h3>
-              <div className="summary-line">
-                <span>Mode choisi</span>
-                <span className="gold-text">
-                  {orderMode === "on_site" && (consumeMode === "dine_in" ? "Sur place" : "À emporter")}
-                  {orderMode === "booking" && "Réservation"}
-                  {orderMode === "delivery" && "Livraison Signature"}
-                </span>
-              </div>
+  <h3 className="summary-title">Récapitulatif</h3>
+  
+  <div className="summary-line">
+    <span>Mode</span>
+    <span className="gold-text">
+      {orderMode === "on_site" && (consumeMode === "dine_in" ? "Sur place" : "À emporter")}
+      {orderMode === "booking" && "Réservation"}
+      {orderMode === "delivery" && "Livraison"}
+    </span>
+  </div>
 
-              <div className="summary-line">
-                <span>Total Plats + Options</span>
-                <span>{totalPrice.toFixed(2)}€</span>
-              </div>
+  <div className="summary-line">
+    <span>Total Plats</span>
+    <span>{(totalPrice + savings).toFixed(2)}€</span> 
+  </div>
 
-              {orderMode === "delivery" && deliveryQuote && (
-                <div className="summary-line">
-                  <span>Frais de livraison</span>
-                  <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
-                </div>
-              )}
+  {/* AFFICHAGE DES ÉCONOMIES SI ELLES EXISTENT */}
+  {savings > 0 && (
+    <div className="summary-line savings-row" style={{ color: "#27ae60", fontWeight: "bold" }}>
+      <span>Réduction (Offres)</span>
+      <span>-{savings.toFixed(2)}€</span>
+    </div>
+  )}
 
-              <div className="summary-line total">
-                <span>À payer :</span>
-                <span>{getAmountToPay().toFixed(2)}€</span>
-              </div>
+  {orderMode === "delivery" && deliveryQuote && (
+    <div className="summary-line">
+      <span>Frais de livraison</span>
+      <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
+    </div>
+  )}
+
+  <div className="summary-line total">
+    <span>{orderMode === "booking" ? "Acompte à payer :" : "À payer :"}</span>
+    <span>{getAmountToPay().toFixed(2)}€</span>
+  </div>
 
               <div className="legal-notice">
                 <label className="checkbox-label">

@@ -10,6 +10,10 @@ export default function Navbar() {
 
   const closeMenu = () => setOpen(false);
 
+  // Correction de l'erreur "never read" : on utilise 'cart' ici
+  // On calcule la somme des quantités de tous les produits
+  const totalItems = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
+
   return (
     <header className="navbar">
       <div className="navbar-container">
@@ -41,7 +45,10 @@ export default function Navbar() {
         <div className="navbar-actions">
           <Link to="/panier" className="cart-icon-link" onClick={closeMenu}>
             <ShoppingBag size={24} strokeWidth={1.5} />
-            <span className="cart-count">{cart.length}</span>
+            {/* On affiche le badge seulement si le panier contient des articles */}
+            {totalItems > 0 && (
+              <span className="cart-count">{totalItems}</span>
+            )}
           </Link>
 
           <button

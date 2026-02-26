@@ -121,7 +121,8 @@ export default function Menu() {
     addSupplementToLine, 
     removeSupplementFromLine, 
     removeFromCart, 
-    updateLineAccompaniment 
+    updateLineAccompaniment,
+    getItemQuantity
   } = useCart();
 
   const clientId = localStorage.getItem("signature_client_id");
@@ -221,11 +222,8 @@ export default function Menu() {
   [platsDeLaPeriode, univers, filter]);
 
   // --- ACTIONS ---
-  const handleAddClick = (plat: Plat) => {
-  if (isAnyDrawerOpen) {
-    alert("Veuillez d'abord terminer votre personnalisation en cours.");
-    return;
-  }
+  const handleAddClick = (plat: Plat, currentQty: number) => {
+  if (isAnyDrawerOpen) return;
 
   const result = addToCart(
     { 
@@ -234,7 +232,8 @@ export default function Menu() {
       price: plat.price, 
       image: plat.image,
       type: periode, 
-      supplements: [] 
+      supplements: [],
+      offer: plat.offer 
     }, 
     periode
   );
@@ -244,16 +243,12 @@ export default function Menu() {
     return;
   }
 
-  // --- NOUVELLE LOGIQUE D'OUVERTURE ---
   const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-  const canShowSupps = plat.allowSupplements === true;
-  
-  // On récupère le nombre d'articles de ce type APRES l'ajout
-  const countInCart = cart.filter(i => i.id === plat._id).length + 1;
-  const isOfferReached = plat.offer?.enabled && countInCart >= plat.offer.requiredQuantity;
+  const hasSupps = plat.allowSupplements;
+  // On vérifie si l'ajout actuel (currentQty + 1) déclenche l'offre
+  const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
 
-  // Le tiroir s'ouvre si : Accompagnements OU Suppléments OU Offre activée
-  if (activeAccs.length > 0 || canShowSupps || isOfferReached) {
+  if (activeAccs.length > 0 || hasSupps || willHaveOffer) {
     setSelectingAccId(plat._id);
     scrollToDrawer(plat._id);
   }
@@ -323,224 +318,258 @@ export default function Menu() {
       </div>
 
       <div className="menu-grid">
-        {platsFiltres.map(plat => {
-          const itemsInCart = cart.filter(i => i.id === plat._id);
-          const isFlipped = flippedId === plat._id;
-          const isExpanding = selectingAccId === plat._id;
-          const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-          const lastItemAdded = itemsInCart[itemsInCart.length - 1];
+  {platsFiltres.map((plat) => {
+    // 1. RÉCUPÉRATION DES DONNÉES DU PANIER (Synchronisé avec CartContext)
+    const quantityInCart = getItemQuantity(plat._id);
+    const itemsInCart = cart.filter((i) => i.id === plat._id);
+    const lastItemAdded = itemsInCart[itemsInCart.length - 1];
 
-          // 1. LOGIQUE DE TRACKING (ORIGINALE)
-          const orderMatch = activeOrders.find((order: any) => 
-            order.items.some((item: any) => item.productId === plat._id)
-          );
+    const isFlipped = flippedId === plat._id;
+    const isExpanding = selectingAccId === plat._id;
+    const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+
+    // 2. LOGIQUE DE TRACKING DES COMMANDES
+    const orderMatch = activeOrders.find((order: any) =>
+      order.items.some((item: any) => item.productId === plat._id)
+    );
+
+    let currentStatus = null;
+    if (orderMatch) {
+      const status = orderMatch.status;
+      const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
+      const now = Date.now();
+
+      if (status === "archived") {
+        currentStatus = null;
+      } else if (status === "done" && now - lastUpdate > 600000) {
+        currentStatus = null;
+      } else {
+        currentStatus = status;
+      }
+    }
+
+    if (!currentStatus && quantityInCart > 0) {
+      currentStatus = "in_cart";
+    }
+
+    return (
+      <div key={plat._id} className={`menu-card-outer ${isExpanding ? "is-expanded" : ""}`}>
+        <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
           
-          let currentStatus = null;
-          if (orderMatch) {
-            const status = orderMatch.status;
-            const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
-            const now = Date.now();
-            
-            if (status === "archived") {
-              currentStatus = null;
-            } else if (status === "done" && (now - lastUpdate > 600000)) { 
-              currentStatus = null;
-            } else {
-              currentStatus = status;
-            }
-          } 
-          
-          if (!currentStatus && itemsInCart.length > 0) {
-            currentStatus = "in_cart"; 
-          }
+          {/* --- FACE AVANT --- */}
+          <div className="card-face card-front">
+            <div className="menu-image-container">
+              {currentStatus && <OrderStatusBadge status={currentStatus} />}
 
-          return (
-            <div key={plat._id} className={`menu-card-outer ${isExpanding ? "is-expanded" : ""}`}>
-              <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
-                
-                <div className="card-face card-front">
-                  <div className="menu-image-container">
-  {/* Statut de commande (Cuisine, etc.) */}
-  {currentStatus && <OrderStatusBadge status={currentStatus} />}
+              {plat.offer?.enabled && (
+                <div className="luxury-offer-ribbon">
+                  <Sparkles size={10} className="ribbon-icon" />
+                  <span>Offre dès {plat.offer.requiredQuantity}</span>
+                </div>
+              )}
 
-  {/* LE BADGE LUXE - ANGLE HAUT GAUCHE */}
-  {plat.offer?.enabled && (
-    <div className="luxury-offer-ribbon">
-      <Sparkles size={10} className="ribbon-icon" />
-      <span>Offre dès {plat.offer.requiredQuantity}</span>
-    </div>
-  )}
+              {plat.image ? (
+                <img src={plat.image} alt={plat.name} className="menu-img" />
+              ) : (
+                <div className="placeholder-img">S</div>
+              )}
 
-  {/* Image ou Placeholder */}
-  {plat.image ? (
-    <img src={plat.image} alt={plat.name} className="menu-img" />
-  ) : (
-    <div className="placeholder-img">S</div>
-  )}
+              <div className="price-badge-luxury">
+                <span>{plat.price}€</span>
+              </div>
+            </div>
 
-  {/* Prix unitaire */}
-  <div className="price-badge-luxury">
-    <span>{plat.price}€</span>
-  </div>
-</div>
+            <div className="menu-details-terracotta">
+              <h3>{plat.name}</h3>
+              <div className="title-underline-gold"></div>
+              <button 
+                className="view-details-btn" 
+                onClick={() => !isAnyDrawerOpen && setFlippedId(plat._id)}
+              >
+                Détails du plat
+              </button>
 
-                  <div className="menu-details-terracotta">
-                    <h3>{plat.name}</h3>
-                    <div className="title-underline-gold"></div>
-                    <button className="view-details-btn" onClick={() => !isAnyDrawerOpen && setFlippedId(plat._id)}>
-                      Détails du plat
-                    </button>
+              <div className="card-actions">
+                {quantityInCart > 0 && !isExpanding && (
+                  <button
+                    className="btn-remove-one"
+                    onClick={() => handleRemoveOne(itemsInCart)}
+                  >
+                    <MinusCircle size={20} color="#dbb022" />
+                    <span className="btn-text-action">Retirer 1</span>
+                  </button>
+                )}
 
-                    <div className="card-actions">
-                      {itemsInCart.length > 0 && !isExpanding && (
-                        <button 
-                          className="btn-remove-one" 
-                          onClick={() => handleRemoveOne(itemsInCart)}
-                        >
-                          <MinusCircle size={20} color="#dbb022" />
-                          <span className="btn-text-action">Retirer 1</span>
-                        </button>
+                <button
+                  className={`add-to-cart-btn ${isExpanding ? "btn-configuring" : ""}`}
+                  onClick={() => handleAddClick(plat, quantityInCart)}
+                >
+                  {isExpanding ? (
+                    "Configuration..."
+                  ) : (
+                    <>
+                      <PlusCircle size={18} />
+                      <span className="btn-text-action">
+                        {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* --- TIROIR DE PERSONNALISATION --- */}
+            <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
+              <div className="drawer-header">
+                <div className="drawer-title">
+                  <Sparkles size={14} color="#d4af37" /> <span>Personnaliser</span>
+                </div>
+                <button
+                  className="btn-cancel-config"
+                  onClick={() => {
+                    if (lastItemAdded) removeFromCart(lastItemAdded.cartItemId);
+                    setSelectingAccId(null);
+                  }}
+                >
+                  <Trash2 size={16} /> Annuler
+                </button>
+              </div>
+
+              <div className="drawer-body-scroll">
+                {/* SECTION OFFRE DYNAMIQUE */}
+                {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
+                  const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
+                  const reste = quantityInCart % plat.offer.requiredQuantity;
+                  const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                  const economie = (plat.price * quantityInCart) - prixPromo;
+
+                  return (
+                    <div className="drawer-section offer-activation-zone">
+                      <div className="offer-congrats">
+                        <Sparkles size={18} className="ribbon-icon" />
+                        <span>Offre Signature Activée !</span>
+                      </div>
+                      <p className="offer-details">
+                        Vos <strong>{quantityInCart} {plat.name}</strong> passent à <strong>{prixPromo.toFixed(2)}€</strong>.
+                      </p>
+                      {economie > 0 && (
+                        <div className="savings-badge">Économie réalisée : {economie.toFixed(2)}€</div>
                       )}
+                      {reste > 0 && (
+                        <p className="offer-subtext">
+                          ({nbLots} pack{nbLots > 1 ? 's' : ''} + {reste} au tarif normal)
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
 
-                      <button 
-                        className={`add-to-cart-btn ${isExpanding ? "btn-configuring" : ""}`} 
-                        onClick={() => handleAddClick(plat)}
-                      >
-                        {isExpanding ? "Configuration..." : (
-                          <>
-                            <PlusCircle size={18} />
-                            <span className="btn-text-action">
-                              {itemsInCart.length > 0 ? `Ajouter (${itemsInCart.length})` : "Ajouter au panier"}
-                            </span>
-                          </>
-                        )}
-                      </button>
+                {/* SECTION ACCOMPAGNEMENTS */}
+                {activeAccs.length > 0 && lastItemAdded && (
+                  <div className="drawer-section">
+                    <p className="drawer-label">Accompagnement :</p>
+                    <div className="acc-options-grid">
+                      {["Aucun", "Standard", ...activeAccs.map((a) => a.name)].map((accName) => (
+                        <button
+                          key={accName}
+                          className={`acc-mini-choice ${
+                            lastItemAdded.chosenAccompaniment === accName ? "selected" : ""
+                          }`}
+                          onClick={() => {
+                            updateLineAccompaniment(lastItemAdded.cartItemId, accName);
+                            triggerBounceHint();
+                          }}
+                        >
+                          {accName}
+                        </button>
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
-                    <div className="drawer-header">
-                      <div className="drawer-title"><Sparkles size={14} color="#d4af37" /> <span>Personnaliser</span></div>
-                      <button 
-                        className="btn-cancel-config" 
-                        onClick={() => {
-                          if (lastItemAdded) removeFromCart(lastItemAdded.cartItemId);
-                          setSelectingAccId(null);
-                        }}
-                      >
-                        <Trash2 size={16} /> Annuler
-                      </button>
+                {/* SECTION SUPPLÉMENTS */}
+                {plat.allowSupplements && lastItemAdded && (
+                  <div className="drawer-section">
+                    <p className="drawer-label">Extras</p>
+                    <div className="supps-list-container">
+                      {isLoadingSupps ? (
+                        <div className="drawer-loader-container">
+                          <Loader2 className="animate-spin" size={20} color="#D4AF37" />
+                        </div>
+                      ) : (
+                        supplementsDisponibles.map((supp) => {
+                          const count = lastItemAdded.supplements?.filter((s) => s.id === supp._id).length || 0;
+                          return (
+                            <div key={supp._id} className="supp-card-mini">
+                              <div className="supp-info">
+                                <span className="supp-name">{supp.name}</span>
+                                <span className="supp-price">+{supp.price}€</span>
+                              </div>
+                              <div className="supp-actions-wrapper">
+                                {count > 0 && (
+                                  <button
+                                    className="supp-mini-btn"
+                                    onClick={() => {
+                                      removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
+                                      triggerBounceHint();
+                                    }}
+                                  >
+                                    <MinusCircle size={20} />
+                                  </button>
+                                )}
+                                {count > 0 && <span className="supp-count-badge">{count}</span>}
+                                <button
+                                  className="supp-mini-btn"
+                                  onClick={() => {
+                                    addSupplementToLine(lastItemAdded.cartItemId, {
+                                      id: supp._id,
+                                      name: supp.name,
+                                      price: supp.price,
+                                    });
+                                    setAddedSuppId(supp._id);
+                                    triggerBounceHint();
+                                    setTimeout(() => setAddedSuppId(null), 600);
+                                  }}
+                                >
+                                  <PlusCircle
+                                    size={20}
+                                    className={addedSuppId === supp._id ? "added-anim" : ""}
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
+                  </div>
+                )}
 
-                   <div className="drawer-body-scroll">
-  {/* --- SECTION OFFRE SPÉCIALE (AFFICHÉE SI QUOTA ATTEINT) --- */}
-  {plat.offer?.enabled && itemsInCart.length >= plat.offer.requiredQuantity && (
-    <div className="drawer-section offer-activation-zone">
-      <div className="offer-congrats">
-        <Sparkles size={18} className="ribbon-icon" />
-        <span>Offre Signature Activée !</span>
-      </div>
-      <p className="offer-details">
-        Vos <strong>{itemsInCart.length} {plat.name}</strong> passent à un tarif exceptionnel de <strong>{plat.offer.offerPrice}€</strong>.
-      </p>
-      <div className="savings-badge">
-        Économie réalisée : {(plat.price * itemsInCart.length - plat.offer.offerPrice).toFixed(2)}€
-      </div>
-    </div>
-  )}
-
-  {/* --- SECTION ACCOMPAGNEMENTS --- */}
-  {activeAccs.length > 0 && lastItemAdded && (
-    <div className="drawer-section">
-      <p className="drawer-label">Accompagnement :</p>
-      <div className="acc-options-grid">
-        {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
-          <button 
-            key={accName}
-            className={`acc-mini-choice ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`} 
-            onClick={() => {
-              updateLineAccompaniment(lastItemAdded.cartItemId, accName);
-              triggerBounceHint();
-            }}
-          >
-            {accName}
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-
-  {/* --- SECTION SUPPLEMENTS --- */}
-  {plat.allowSupplements && lastItemAdded && (
-    <div className="drawer-section">
-      <p className="drawer-label">Extras</p>
-      <div className="supps-list-container">
-        {isLoadingSupps ? (
-          <div className="drawer-loader-container">
-            <Loader2 className="animate-spin" size={20} color="#D4AF37" />
-          </div>
-        ) : (
-          supplementsDisponibles.map(supp => {
-            const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
-            return (
-              <div key={supp._id} className="supp-card-mini">
-                <div className="supp-info">
-                  <span className="supp-name">{supp.name}</span>
-                  <span className="supp-price">+{supp.price}€</span>
-                </div>
-                <div className="supp-actions-wrapper">
-                  {count > 0 && (
-                    <button className="supp-mini-btn" onClick={() => {
-                      removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
-                      triggerBounceHint();
-                    }}>
-                      <MinusCircle size={20}/>
-                    </button>
-                  )}
-                  {count > 0 && <span className="supp-count-badge">{count}</span>}
-                  <button 
-                    className="supp-mini-btn" 
-                    onClick={() => {
-                      addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
-                      setAddedSuppId(supp._id);
-                      triggerBounceHint();
-                      setTimeout(() => setAddedSuppId(null), 600);
-                    }}
-                  >
-                    <PlusCircle size={20} className={addedSuppId === supp._id ? "added-anim" : ""}/>
+                <div className="drawer-footer-action">
+                  <button className="btn-confirm-drawer" onClick={() => setSelectingAccId(null)}>
+                    <Check size={18} /> <span>Valider et continuer</span>
                   </button>
                 </div>
               </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  )}
-
-  {/* --- FOOTER DU TIROIR --- */}
-  <div className="drawer-footer-action">
-    <button className="btn-confirm-drawer" onClick={() => setSelectingAccId(null)}>
-      <Check size={18} /> <span>Valider et continuer</span>
-    </button>
-  </div>
-</div>
-                  </div>
-                </div>
-
-                <div className="card-face card-back">
-                  <button className="close-back-btn" onClick={() => setFlippedId(null)}><X size={20} /></button>
-                  <div className="back-content">
-                    <h4>{plat.name}</h4>
-                    <div className="title-underline-gold"></div>
-                    <p className="description-text">{plat.description || "Aucune description disponible."}</p>
-                  </div>
-                </div>
-              </div>
             </div>
-          );
-        })}
+          </div>
+
+          {/* --- FACE ARRIÈRE (DÉTAILS) --- */}
+          <div className="card-face card-back">
+            <button className="close-back-btn" onClick={() => setFlippedId(null)}>
+              <X size={20} />
+            </button>
+            <div className="back-content">
+              <h4>{plat.name}</h4>
+              <div className="title-underline-gold"></div>
+              <p className="description-text">{plat.description || "Aucune description disponible."}</p>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  })}
+</div>
     </section>
   );
 }

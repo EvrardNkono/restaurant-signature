@@ -13,13 +13,13 @@ export interface CartItem {
   id: string;            
   name: string;
   price: number; 
-  category?: string; // Utile pour identifier les boissons
+  quantity: number; 
+  category?: string;
   image?: string;
   chosenAccompaniment?: string;
   supplements: CartSupplement[];
   status: "pending" | "paid" | "delivered"; 
   type: "JOUR" | "SOIR";
-  // Structure pour l'offre par lot (ex: 3 pour 5€)
   offer?: {
     enabled: boolean;
     requiredQuantity: number;
@@ -30,22 +30,22 @@ export interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   activeMenuType: "JOUR" | "SOIR" | null;
-  addToCart: (item: Omit<CartItem, "cartItemId" | "status">, menuType: "JOUR" | "SOIR") => string | "LOCK_ERROR";
+  addToCart: (item: Omit<CartItem, "cartItemId" | "status" | "quantity">, menuType: "JOUR" | "SOIR") => string | "LOCK_ERROR";
   addSupplementToLine: (cartItemId: string, supplement: { id: string, name: string, price: number }) => void;
   removeSupplementFromLine: (cartItemId: string, supplementId: string) => void;
   updateLineAccompaniment: (cartItemId: string, accompanimentName: string) => void;
   removeFromCart: (cartItemId: string) => void;
+  getItemQuantity: (productId: string) => number; // Ajouté ici pour corriger l'erreur
   isInCart: (productId: string) => boolean;
   clearCart: () => void;
   updateLineStatus: (cartItemId: string, status: CartItem["status"]) => void;
   getCartTotal: () => number;
-  getCartSavings: () => number; // Permet d'afficher l'économie totale au client
+  getCartSavings: () => number; 
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  // --- INITIALISATION PARESSEUSE ---
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem("signature_order_session");
     if (saved) {
@@ -66,7 +66,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // --- PERSISTANCE AUTOMATIQUE ---
   useEffect(() => {
     localStorage.setItem("signature_order_session", JSON.stringify(cart));
-    
     if (cart.length > 0 && activeMenuType) {
       localStorage.setItem("signature_active_menu_type", activeMenuType);
     } else if (cart.length === 0) {
@@ -76,8 +75,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // --- ACTIONS ---
 
+  // On utilise productId ici pour filtrer le panier et compter les quantités
+  const getItemQuantity = (productId: string) => {
+    return cart
+      .filter(item => item.id === productId)
+      .reduce((acc, item) => acc + (item.quantity || 1), 0);
+  };
+
   const addToCart = (
-    item: Omit<CartItem, "cartItemId" | "status">, 
+    item: Omit<CartItem, "cartItemId" | "status" | "quantity">, 
     menuType: "JOUR" | "SOIR"
   ) => {
     if (activeMenuType && activeMenuType !== menuType && cart.length > 0) {
@@ -88,25 +94,42 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setActiveMenuType(menuType);
     }
 
-    const newCartItemId = crypto.randomUUID();
-    const newItem: CartItem = {
-      ...item,
-      cartItemId: newCartItemId,
-      price: Number(item.price),
-      supplements: item.supplements || [],
-      status: "pending",
-      type: menuType
-    };
+    setCart((prev) => {
+      const existingLineIndex = prev.findIndex((line) => {
+        const sameId = line.id === item.id;
+        const sameAcc = line.chosenAccompaniment === item.chosenAccompaniment;
+        const sameSupps = JSON.stringify(line.supplements.map(s => s.id).sort()) === 
+                          JSON.stringify((item.supplements || []).map(s => s.id).sort());
+        return sameId && sameAcc && sameSupps;
+      });
 
-    setCart((prev) => [...prev, newItem]);
-    return newCartItemId; 
+      if (existingLineIndex !== -1) {
+        const newCart = [...prev];
+        newCart[existingLineIndex] = {
+          ...newCart[existingLineIndex],
+          quantity: (newCart[existingLineIndex].quantity || 1) + 1
+        };
+        return newCart;
+      }
+
+      const newItem: CartItem = {
+        ...item,
+        cartItemId: crypto.randomUUID(),
+        quantity: 1,
+        price: Number(item.price),
+        supplements: item.supplements || [],
+        status: "pending",
+        type: menuType
+      };
+      return [...prev, newItem];
+    });
+
+    return "SUCCESS"; 
   };
 
   const updateLineAccompaniment = (cartItemId: string, accompanimentName: string) => {
     setCart((prev) => prev.map((item) => 
-      item.cartItemId === cartItemId 
-        ? { ...item, chosenAccompaniment: accompanimentName } 
-        : item
+      item.cartItemId === cartItemId ? { ...item, chosenAccompaniment: accompanimentName } : item
     ));
   };
 
@@ -117,12 +140,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           ...item,
           supplements: [
             ...item.supplements,
-            { 
-              id: supplement.id, 
-              name: supplement.name, 
-              price: supplement.price,
-              status: "pending" 
-            }
+            { id: supplement.id, name: supplement.name, price: supplement.price, status: "pending" }
           ]
         };
       }
@@ -135,14 +153,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (item.cartItemId === cartItemId && item.supplements.length > 0) {
         const supps = [...item.supplements];
         let targetIndex = -1;
-        
         for (let i = supps.length - 1; i >= 0; i--) {
           if (supps[i].id === supplementId) {
             targetIndex = i;
             break;
           }
         }
-
         if (targetIndex !== -1) {
           supps.splice(targetIndex, 1);
           return { ...item, supplements: supps };
@@ -153,14 +169,32 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (cartItemId: string) => {
-    setCart((prev) => {
-      const newCart = prev.filter((i) => i.cartItemId !== cartItemId);
-      if (newCart.length === 0) {
-        setActiveMenuType(null);
-      }
-      return newCart;
-    });
-  };
+  setCart((prev) => {
+    // 1. On cherche la ligne concernée
+    const existingLine = prev.find(item => item.cartItemId === cartItemId);
+    
+    if (!existingLine) return prev;
+
+    let newCart;
+    
+    // 2. Si la quantité est supérieure à 1, on décrémente
+    if (existingLine.quantity > 1) {
+      newCart = prev.map(item => 
+        item.cartItemId === cartItemId 
+          ? { ...item, quantity: item.quantity - 1 } 
+          : item
+      );
+    } else {
+      // 3. Si la quantité est de 1, on supprime la ligne complètement
+      newCart = prev.filter(item => item.cartItemId !== cartItemId);
+    }
+
+    // Gestion du type de menu actif si le panier devient vide
+    if (newCart.length === 0) setActiveMenuType(null);
+    
+    return newCart;
+  });
+};
 
   const isInCart = (productId: string) => cart.some((item) => item.id === productId);
 
@@ -175,52 +209,42 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCart(prev => prev.map(i => i.cartItemId === cartItemId ? {...i, status} : i));
   };
 
-  // --- LOGIQUE DE CALCUL DU PANIER (PROMOS ET TOTAL) ---
-
   const calculateTotals = () => {
     let totalSansPromo = 0;
     let totalAvecPromo = 0;
 
-    // On regroupe par ID de produit pour pouvoir appliquer les règles de lot
-    // même si les articles sont sur des lignes différentes (ex: 3 boissons)
-    const groupedItems: Record<string, CartItem[]> = {};
+    const productStats: Record<string, { quantity: number; firstItem: CartItem; allSupplementsTotal: number }> = {};
+
     cart.forEach(item => {
-      if (!groupedItems[item.id]) {
-        groupedItems[item.id] = [];
+      if (!productStats[item.id]) {
+        productStats[item.id] = { quantity: 0, firstItem: item, allSupplementsTotal: 0 };
       }
-      groupedItems[item.id].push(item);
+      const qty = item.quantity || 1;
+      productStats[item.id].quantity += qty;
+      const lineSuppsTotal = (item.supplements || []).reduce((acc, s) => acc + (Number(s.price) || 0), 0);
+      productStats[item.id].allSupplementsTotal += (lineSuppsTotal * qty);
     });
 
-    Object.values(groupedItems).forEach(items => {
-      const first = items[0];
-      const quantity = items.length;
-      const unitPrice = Number(first.price) || 0;
-      
-      // Total des suppléments pour ce groupe d'items
-      const supplementsTotal = items.reduce((sum, item) => 
-        sum + item.supplements.reduce((sSum, s) => sSum + s.price, 0), 0
-      );
+Object.values(productStats).forEach(({ quantity, firstItem, allSupplementsTotal }) => {
+  // On extrait la valeur brute
+  const rawPrice = firstItem.price;
 
-      totalSansPromo += (quantity * unitPrice) + supplementsTotal;
+  const unitPrice = typeof rawPrice === 'string' 
+    ? parseFloat((rawPrice as string).replace(',', '.')) // On force l'interprétation en string ici
+    : Number(rawPrice || 0);
 
-      // Si une offre est active et que la quantité est suffisante
-      if (first.offer?.enabled && quantity >= first.offer.requiredQuantity) {
-        const nbLots = Math.floor(quantity / first.offer.requiredQuantity);
-        const reste = quantity % first.offer.requiredQuantity;
+  totalSansPromo += (quantity * unitPrice) + allSupplementsTotal;
 
-        const prixLots = nbLots * first.offer.offerPrice;
-        const prixReste = reste * unitPrice;
-
-        totalAvecPromo += prixLots + prixReste + supplementsTotal;
+      if (firstItem.offer?.enabled && quantity >= firstItem.offer.requiredQuantity) {
+        const nbLots = Math.floor(quantity / firstItem.offer.requiredQuantity);
+        const reste = quantity % firstItem.offer.requiredQuantity;
+        totalAvecPromo += (nbLots * firstItem.offer.offerPrice) + (reste * unitPrice) + allSupplementsTotal;
       } else {
-        totalAvecPromo += (quantity * unitPrice) + supplementsTotal;
+        totalAvecPromo += (quantity * unitPrice) + allSupplementsTotal;
       }
     });
 
-    return { 
-      finalTotal: totalAvecPromo, 
-      savings: totalSansPromo - totalAvecPromo 
-    };
+    return { finalTotal: totalAvecPromo, savings: totalSansPromo - totalAvecPromo };
   };
 
   const getCartTotal = () => calculateTotals().finalTotal;
@@ -235,6 +259,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       removeSupplementFromLine,
       updateLineAccompaniment, 
       removeFromCart, 
+      getItemQuantity, // Ajouté dans la value
       isInCart, 
       clearCart, 
       updateLineStatus, 

@@ -1252,21 +1252,34 @@
 
 .order-status-tag {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 4px 10px;
+  top: 12px;        /* Garde l'espacement avec le haut */
+  
+  /* --- CENTRAGE HORIZONTAL --- */
+  left: 45%;
+  transform: translateX(-40%);
+  /* --------------------------- */
+
+  padding: 3px 10px; 
+  gap: 4px;         
+  
   border-radius: 50px;
   color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
+  
+  font-size: 0.65rem; 
+  font-weight: 800;   
   text-transform: uppercase;
+  
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center; /* Assure que le contenu est bien centré dans le badge */
   z-index: 20;
+  
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   letter-spacing: 0.5px;
   border: 1px solid rgba(255,255,255,0.2);
+  
+  white-space: nowrap; 
+  width: fit-content;
 }
 
 .pulse-active {
@@ -1293,3 +1306,157 @@
 }
 
 
+/* --- RUBAN D'OFFRE LUXURY --- */
+.luxury-offer-ribbon {
+  position: absolute;
+  top: 12px;
+  left: -6px; /* Débordement pour l'effet "étiquette" */
+  background: linear-gradient(135deg, #d4af37 0%, #f1d37e 50%, #b8860b 100%);
+  color: #1a1a1a;
+  padding: 4px 12px 4px 15px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 0 4px 4px 0;
+  animation: slideInRibbon 0.5s ease-out;
+}
+
+/* Petit triangle pour l'effet de pliure sur le côté */
+.luxury-offer-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  border-left: 6px solid transparent;
+  border-top: 6px solid #856404; /* Version plus sombre du doré pour l'ombre */
+}
+
+.ribbon-icon {
+  animation: spinSlow 4s linear infinite;
+}
+
+/* --- ZONE D'ACTIVATION DANS LE DRAWER --- */
+.offer-activation-zone {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  padding: 15px !important;
+  margin-bottom: 20px;
+  text-align: center;
+  border-left: 4px solid #d4af37;
+}
+
+.offer-congrats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #d4af37;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.offer-details {
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.offer-details strong {
+  color: #fff;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes slideInRibbon {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Ajustement pour que le badge de statut ne chevauche pas le ruban */
+.order-status-tag {
+  z-index: 11; /* Toujours au dessus du ruban si les deux sont présents */
+}
+.menu-card-outer.is-expanded {
+  z-index: 100; /* Force la carte à passer au dessus des autres quand le tiroir s'ouvre */
+  position: relative;
+}
+
+/* Assure que la carte qui s'ouvre passe au dessus des autres */
+.menu-card-outer.is-expanded {
+  z-index: 100 !important;
+  position: relative;
+}
+
+/* Le tiroir doit être forcé en affichage quand il est open */
+.acc-selection-drawer.open {
+  display: flex !important;
+  flex-direction: column;
+  height: auto;
+  max-height: 400px; /* ou selon ton design */
+  opacity: 1;
+  visibility: visible;
+}
+
+.offer-activation-zone {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(184, 107, 74, 0.05) 100%);
+  border: 1px dashed #d4af37;
+  border-radius: 12px;
+  padding: 15px !important;
+  margin-bottom: 20px;
+  text-align: center;
+  animation: slideInDown 0.4s ease-out;
+}
+
+.offer-congrats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #d4af37;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.offer-details {
+  color: #f0e7e5;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.offer-details strong {
+  color: #b86b4a; /* Ta couleur Terracotta */
+  font-size: 1.3rem;
+}
+
+.offer-subtext {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: #7f8c8d;
+  margin-top: 4px;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
