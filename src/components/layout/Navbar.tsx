@@ -21,15 +21,11 @@ export default function Navbar() {
         {/* LOGOS ALIGNÉS HORIZONTALEMENT */}
         <Link to="/" className="navbar-logo-container" onClick={closeMenu}>
           <img 
-            src="/images/resto.png" 
+            src="/images/icone11.png" 
             alt="Restaurant Signature Logo" 
             className="navbar-logo-img" 
           />
-          <img 
-            src="/images/resto2.png" 
-            alt="Signature Icon" 
-            className="navbar-logo-secondary" 
-          />
+          
         </Link>
 
         <nav className={`navbar-links ${open ? "open" : ""}`}>
