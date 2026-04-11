@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Link, useLocation } from 'react-router-dom';
 import './FloatingOrder.css';
@@ -8,9 +8,36 @@ export default function FloatingOrder() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   
-  const nodeRef = useRef(null);
+  // Ref typée pour TypeScript
+  const nodeRef = useRef<HTMLDivElement>(null);
 
-  // MODIFICATION : On retire '/carte' pour qu'il soit visible sur cette page
+  useEffect(() => {
+    const handleExternalToggle = () => {
+      // On utilise une fonction de mise à jour pour garantir la valeur la plus récente
+      setIsOpen((prev) => {
+        const newState = !prev;
+        
+        // Si le nouvel état est "ouvert", on scroll vers le bouton
+        if (newState && nodeRef.current) {
+          // On attend un micro-tick pour laisser le temps au menu de s'afficher si besoin
+          setTimeout(() => {
+            nodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 10);
+        }
+        
+        return newState;
+      });
+    };
+
+    // Écoute le signal envoyé par le Footer
+    window.addEventListener('openReservation', handleExternalToggle);
+    
+    return () => {
+      window.removeEventListener('openReservation', handleExternalToggle);
+    };
+  }, []);
+
+  // Gestion des routes où le bouton est masqué
   const hiddenRoutes = ['/menu', '/menu-soir'];
   if (hiddenRoutes.includes(location.pathname)) return null;
 
@@ -23,13 +50,12 @@ export default function FloatingOrder() {
   };
 
   const handleStop = () => {
-    // Si on n'a pas bougé, c'est un clic sur le bouton principal
+    // Si on n'a pas bougé (clic simple), on change l'état
     if (!isDragging) {
       setIsOpen(!isOpen);
     }
   };
 
-  // Force la navigation et ferme le menu
   const handleLinkAction = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(false);
@@ -43,7 +69,7 @@ export default function FloatingOrder() {
         onStart={handleStart}
         onDrag={handleDrag} 
         onStop={handleStop}
-        cancel=".option-link" // TRÈS IMPORTANT : Dit au Draggable d'ignorer ces éléments
+        cancel=".option-link"
       >
         <div className="draggable-wrapper" ref={nodeRef}>
           
@@ -53,7 +79,7 @@ export default function FloatingOrder() {
                 to="/menu" 
                 className="option-link" 
                 onClick={handleLinkAction}
-                onMouseDown={(e) => e.stopPropagation()} // Sécurité PC
+                onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
               >
                 <span className="icon">☀️</span> Menu jour
               </Link>
@@ -61,7 +87,7 @@ export default function FloatingOrder() {
                 to="/menu-soir" 
                 className="option-link" 
                 onClick={handleLinkAction}
-                onMouseDown={(e) => e.stopPropagation()} // Sécurité PC
+                onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
               >
                 <span className="icon">🌙</span> Menu soir
               </Link>

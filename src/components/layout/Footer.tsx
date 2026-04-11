@@ -1,7 +1,16 @@
+import React from 'react';
 import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone } from "lucide-react";
 import "./footer.css";
 
 export default function Footer() {
+  
+  // Fonction pour ouvrir le popup flottant à distance
+  const handleReservationClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    // On émet l'événement que le composant FloatingOrder écoute
+    window.dispatchEvent(new CustomEvent('openReservation'));
+  };
+
   return (
     <footer className="footer">
       <div className="footer-top-ornament">
@@ -23,13 +32,12 @@ export default function Footer() {
 
           <div className="footer-socials">
             <a href="#" className="social-icon-link" aria-label="Instagram">
-              {/* strokeWidth très fin pour l'élégance */}
               <Instagram size={22} strokeWidth={0.75} />
             </a>
             <a href="#" className="social-icon-link" aria-label="Facebook">
               <Facebook size={22} strokeWidth={0.75} />
             </a>
-            <a href="#" className="social-icon-link" aria-label="WhatsApp">
+            <a href="https://wa.me/33662038472" className="social-icon-link" aria-label="WhatsApp">
               <MessageCircle size={22} strokeWidth={0.75} />
             </a>
           </div>
@@ -39,10 +47,22 @@ export default function Footer() {
         <div className="footer-nav">
           <h4 className="footer-label">Exploration</h4>
           <ul className="nav-list">
-            <li><a href="#">La Carte</a></li>
-            <li><a href="#">Notre Philosophie</a></li>
-            <li><a href="#">Privatisation</a></li>
-            <li><a href="#">Réservations</a></li>
+            <li><a href="#menu">La Carte</a></li>
+            <li><a href="#philosophie">Notre Philosophie</a></li>
+            <li>
+              <a href="#privatisation" className="nav-link-highlight">
+                Privatisation
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#reservations" 
+                className="nav-link-cta"
+                onClick={handleReservationClick}
+              >
+                Réservations
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -51,7 +71,7 @@ export default function Footer() {
           <h4 className="footer-label">Rendez-vous</h4>
           <div className="contact-item">
             <MapPin size={18} className="gold-text" strokeWidth={1} />
-            <p>Quartier Bastos, Yaoundé</p>
+            <p>13 Rue Saint-Barthélémy, 77000 Melun</p>
           </div>
           <div className="contact-item">
             <Clock size={18} className="gold-text" strokeWidth={1} />
@@ -59,7 +79,7 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <Phone size={18} className="gold-text" strokeWidth={1} />
-            <p>+237 6XX XXX XXX</p>
+            <a href="tel:+33662038472" className="contact-link">+33 6 62 03 84 72</a>
           </div>
         </div>
       </div>

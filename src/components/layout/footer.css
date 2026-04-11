@@ -1,141 +1,214 @@
+/* footer.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Poppins:wght@200;300;400&display=swap');
+
 .footer {
-  background-color: #2D2422; /* Terracotta sombre presque chocolat */
+  background-color: #2D2422; /* Terracotta très sombre / Chocolat */
   color: #FCF9F5;
-  padding: 80px 10% 40px; /* Tes marges G/D 10% */
+  padding: 120px 10% 60px;
   position: relative;
   overflow: hidden;
+  background-image: radial-gradient(circle at 50% -20%, #3d312e 0%, #2D2422 80%);
 }
 
-/* --- ARTIFICE : L'ORNEMENT DU HAUT --- */
+/* Texte fantôme en fond */
+.footer::before {
+  content: "SIGNATURE";
+  position: absolute;
+  bottom: -50px;
+  right: -20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 15vw;
+  font-weight: 900;
+  color: rgba(212, 175, 55, 0.03);
+  pointer-events: none;
+  letter-spacing: -5px;
+}
+
 .footer-top-ornament {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  margin-bottom: 80px;
+  gap: 30px;
+  margin-bottom: 100px;
 }
 
 .ornament-line {
   height: 1px;
   flex: 1;
-  max-width: 100px;
+  max-width: 150px;
   background: linear-gradient(to right, transparent, #D4AF37, transparent);
 }
 
 .ornament-text {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: #D4AF37;
-  letter-spacing: 2px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
 }
 
-/* --- LAYOUT --- */
 .footer-container {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr;
-  gap: 60px;
-  align-items: start;
+  grid-template-columns: 1.8fr 1fr 1fr;
+  gap: 100px;
+  position: relative;
+  z-index: 1;
 }
 
 /* --- BRANDING --- */
 .brand-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  margin-bottom: 25px;
-  letter-spacing: 1px;
+  font-size: 2.8rem;
+  margin-bottom: 30px;
+  line-height: 1.1;
 }
 
 .gold-italic {
   color: #D4AF37;
   font-style: italic;
   font-weight: 400;
+  position: relative;
+}
+
+.gold-italic::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(212, 175, 55, 0.4);
 }
 
 .brand-description {
   font-family: 'Poppins', sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.8;
-  opacity: 0.7;
-  max-width: 350px;
+  font-size: 1rem;
+  line-height: 2.1;
+  opacity: 0.6;
+  max-width: 400px;
   font-weight: 300;
-  margin-bottom: 30px;
+  margin-bottom: 45px;
 }
 
-/* --- RÉSEAUX SOCIAUX DÉLICATS --- */
 .footer-socials {
   display: flex;
   gap: 15px;
-  align-items: center;
 }
 
-.social-link {
+.social-icon-link {
   color: #FCF9F5;
-  text-decoration: none;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: color 0.3s;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.social-link:hover { color: #D4AF37; }
-.social-divider { color: #D4AF37; opacity: 0.4; }
+.social-icon-link:hover {
+  background: #D4AF37;
+  color: #2D2422;
+  transform: translateY(-8px) rotate(8deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
 
-/* --- NAVIGATION & TITRES --- */
+/* --- NAVIGATION & HIGHLIGHTS --- */
 .footer-label {
   font-family: 'Playfair Display', serif;
   color: #D4AF37;
-  font-size: 1.1rem;
-  margin-bottom: 30px;
-  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  position: relative;
 }
 
-.nav-list {
-  list-style: none;
-  padding: 0;
+.footer-label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  width: 20px;
+  height: 1px;
+  background-color: #D4AF37;
 }
 
-.nav-list li {
-  margin-bottom: 15px;
-}
+.nav-list { list-style: none; padding: 0; }
+.nav-list li { margin-bottom: 22px; }
 
 .nav-list a {
   color: #FCF9F5;
   text-decoration: none;
   font-size: 0.95rem;
-  opacity: 0.6;
-  transition: all 0.3s ease;
+  opacity: 0.5;
+  transition: all 0.4s ease;
 }
 
 .nav-list a:hover {
   opacity: 1;
-  padding-left: 8px;
   color: #D4AF37;
+  padding-left: 10px;
+}
+
+/* Mise en avant : Privatisation */
+.nav-link-highlight {
+  opacity: 0.9 !important;
+  color: var(--gold-light);
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Mise en avant : Réservations (Style Bouton) */
+.nav-link-cta {
+  opacity: 1 !important;
+  background: rgba(212, 175, 55, 0.1);
+  color: #D4AF37 !important;
+  padding: 10px 20px;
+  border: 1px solid #D4AF37;
+  display: inline-block;
+  margin-top: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+}
+
+.nav-link-cta:hover {
+  background: #D4AF37 !important;
+  color: #2D2422 !important;
+  padding-left: 20px !important; /* On annule le padding-left de l'animation globale */
 }
 
 /* --- CONTACT --- */
 .contact-item {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  align-items: flex-start;
 }
 
-.contact-icon { font-size: 1rem; }
+.gold-text { color: #D4AF37; margin-top: 4px; }
 
-.contact-item p {
-  font-size: 0.9rem;
-  opacity: 0.7;
-  font-weight: 300;
+.contact-link {
+  text-decoration: none;
+  color: inherit;
+  transition: 0.3s;
 }
 
 /* --- FOOTER BOTTOM --- */
 .footer-bottom {
-  margin-top: 80px;
-  padding-top: 30px;
-  border-top: 1px solid rgba(212, 175, 55, 0.1);
+  margin-top: 120px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(212, 175, 55, 0.08);
 }
 
 .footer-bottom-content {
@@ -143,29 +216,15 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.75rem;
-  letter-spacing: 2px;
-  opacity: 0.5;
-  text-transform: uppercase;
+  letter-spacing: 4px;
+  opacity: 0.4;
 }
 
-.designer-credit span { color: #D4AF37; }
+.designer-credit span { color: #D4AF37; font-weight: 600; }
 
-/* --- RESPONSIVE AVEC TES MARGES --- */
-@media (max-width: 900px) {
-  .footer { padding: 60px 40px; } /* Marges fixes sur mobile */
-  
-  .footer-container {
-    grid-template-columns: 1fr;
-    gap: 50px;
-    text-align: center;
-  }
-
-  .brand-description { margin: 0 auto 30px; }
-  .footer-socials { justify-content: center; }
-  .contact-item { justify-content: center; }
-  
-  .footer-bottom-content {
-    flex-direction: column;
-    gap: 15px;
-  }
+@media (max-width: 992px) {
+  .footer-container { grid-template-columns: 1fr; text-align: center; gap: 80px; }
+  .brand-description { margin: 0 auto 35px; }
+  .footer-socials, .contact-item { justify-content: center; }
+  .footer-label::after { left: 50%; transform: translateX(-50%); }
 }

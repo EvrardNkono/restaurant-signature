@@ -83,6 +83,9 @@
   font-style: italic;
   font-weight: 400;
   font-size: 0.8em;
+  background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .hero-right p {
@@ -163,4 +166,16 @@
   .reserve-btn {
     padding: 14px 30px !important; /* Bouton un peu moins massif sur mobile */
   }
+}
+
+
+.image-circle {
+  animation: float 6s ease-in-out infinite;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
 }
