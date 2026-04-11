@@ -29,27 +29,33 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
     const fetchBanner = async () => {
       try {
         const response = await axios.get(API_URL);
-        // Si on reçoit des images, on met à jour le state
         if (response.data.images && response.data.images.length > 0) {
           setHeroImages(response.data.images);
         }
       } catch (error) {
         console.error("Erreur chargement bannière:", error);
-        // En cas d'erreur, heroImages garde les defaultImages
       }
     };
     fetchBanner();
   }, []);
 
-  // 2. Logique du slider (inchangée)
+  // 2. Logique du slider automatique
   useEffect(() => {
-    if (heroImages.length <= 1) return; // Pas de défilement s'il n'y a qu'une image
+    if (heroImages.length <= 1) return;
 
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroImages.length);
-    }, 5000); // Augmenté à 5s pour laisser le temps d'apprécier l'image
+    }, 5000); 
+
     return () => clearInterval(interval);
   }, [heroImages]);
+
+  // 3. Déclencheur pour le FloatingOrder
+  const handleCtaClick = () => {
+    // On crée et diffuse l'événement que FloatingOrder écoute
+    const event = new CustomEvent("openReservation");
+    window.dispatchEvent(event);
+  };
 
   return (
     <section className="hero">
@@ -57,11 +63,11 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
         
         <div className="hero-left">
           <div className="image-circle">
-            {/* L'image s'affiche ici, qu'elle soit une URL ou du Base64 */}
             <img 
               src={heroImages[current]} 
-              alt="Plat du restaurant" 
-              key={current} // Aide React à gérer la transition d'image
+              alt="Plat signature" 
+              key={current} // Crucial pour déclencher l'animation CSS au changement
+              loading="eager"
             />
           </div>
         </div>
@@ -69,7 +75,14 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
         <div className="hero-right">
           <h1>{title}</h1>
           <p>{subtitle}</p>
-          <button className="reserve-btn">{ctaText}</button>
+          
+          {/* Le bouton déclenche maintenant l'ouverture du menu flottant */}
+          <button 
+            className="reserve-btn" 
+            onClick={handleCtaClick}
+          >
+            {ctaText}
+          </button>
         </div>
 
       </div>

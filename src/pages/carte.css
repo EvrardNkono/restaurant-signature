@@ -8,6 +8,62 @@
   box-sizing: border-box;
 }
 
+/* Conteneur principal du succès */
+.success-page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Aligne vers le haut mais avec un padding */
+  min-height: 100vh;
+  background: var(--ivory);
+  
+  /* C'est ici qu'on règle ton problème : */
+  padding-top: 150px; /* Pousse le contenu sous la navbar */
+  padding-bottom: 50px;
+}
+
+.success-view {
+  text-align: center;
+  max-width: 90%;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.success-view h2 {
+  margin-top: 25px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  color: var(--dark);
+}
+
+.success-view p {
+  margin: 15px 0 30px;
+  line-height: 1.6;
+  color: var(--dark);
+}
+
+/* --- AJUSTEMENT MOBILE --- */
+@media (max-width: 768px) {
+  .success-page-container {
+    /* Sur mobile, on augmente encore un peu pour être sûr */
+    padding-top: 180px; 
+  }
+  
+  .success-view h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* --- BANNIERE AVEC IMAGE DE FOND --- */
 .carte-banner-box {
   width: 100%;

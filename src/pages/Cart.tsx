@@ -186,15 +186,17 @@ export default function Cart() {
   };
 
   if (orderSuccess) {
-    return (
-      <div className="empty-cart success-view">
+  return (
+    <div className="cart-page success-page-container"> {/* Classe modifiée ici */}
+      <div className="success-view">
         <CheckCircle size={60} color="#D4AF37" />
         <h2>Commande Confirmée !</h2>
         <p>Merci pour votre confiance. Nous préparons votre sélection Signature.</p>
         <Link to="/" className="return-btn">Retour à l'accueil</Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <section className="cart-page">
