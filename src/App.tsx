@@ -10,6 +10,7 @@ import MenuSoir from "./pages/MenuSoir";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
+import Success from "./pages/Success"; // Import de la nouvelle page Success
 import Chatbot from "./components/Chatbot"; 
 import AdPopup from "./components/AdPopup"; 
 import ScrollToTop from "./components/ScrollToTop";
@@ -25,15 +26,15 @@ import Appearance from "./admin/pages/Appearance";
 import SocialHub from "./admin/pages/SocialHub"; 
 import CategoryManager from "./admin/pages/CategoryManager"; 
 import AccompanimentManager from "./admin/pages/AccompanimentManager"; 
-import SupplementManager from "./admin/pages/SupplementAdmin"; // Ajout ici
+import SupplementManager from "./admin/pages/SupplementAdmin";
 import TableManager from "./admin/pages/TableManager"; 
 
 // 2. Création du client de cache
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 10, // Les données sont considérées "fraîches" pendant 10 minutes
-      gcTime: 1000 * 60 * 30,    // Garde en mémoire pendant 30 minutes même si on ne les utilise pas
+      staleTime: 1000 * 60 * 10, // 10 minutes
+      gcTime: 1000 * 60 * 30,    // 30 minutes
     },
   },
 });
@@ -44,7 +45,6 @@ if (window.location.protocol === 'http:' && window.location.hostname !== 'localh
 
 export default function AppRouter() {
   return (
-    // 3. On enveloppe avec le Provider de Cache
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <Router>
@@ -69,6 +69,8 @@ export default function AppRouter() {
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
+                      {/* Ajout de la route de succès après paiement */}
+                      <Route path="/order-success" element={<Success />} />
                     </Routes>
                   </main>
                   <Chatbot />
@@ -82,7 +84,7 @@ export default function AppRouter() {
               <Route index element={<Dashboard />} />
               <Route path="categories" element={<CategoryManager />} /> 
               <Route path="menu" element={<MenuManager />} />
-              <Route path="supplements" element={<SupplementManager />} /> {/* Ajout ici */}
+              <Route path="supplements" element={<SupplementManager />} />
               <Route path="accompaniments" element={<AccompanimentManager />} /> 
               <Route path="tables" element={<TableManager />} /> 
               <Route path="orders" element={<Orders />} />

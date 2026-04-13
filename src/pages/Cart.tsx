@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { Smartphone, CheckCircle, ExternalLink, Bike, Trash2 } from "lucide-react"; 
+import { 
+  Smartphone, 
+  ExternalLink, 
+  Bike, 
+  Trash2, 
+  ShoppingBag 
+} from "lucide-react"; 
 import axios from "axios";
-import { ShoppingBag } from "lucide-react";
 import "./cart.css";
 
 // Configuration de l'URL API
@@ -11,16 +16,15 @@ const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
 export default function Cart() {
-  
-  
   // États de base
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
   const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in");
   const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
+  
   const { cart, removeFromCart, clearCart, getCartTotal, getCartSavings } = useCart();
+  
   // ÉTATS DES TABLES
   const [tables, setTables] = useState<any[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
@@ -40,9 +44,9 @@ export default function Cart() {
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
   const PARTNER_LINKS = {
-    uberEats: "https://www.ubereats.com/store/votre-restaurant",
-    deliveroo: "https://deliveroo.fr/menu/paris/votre-restaurant",
-    justEat: "https://www.just-eat.fr/restaurant/votre-restaurant"
+    uberEats: "https://www.ubereats.com/",
+    deliveroo: "https://deliveroo.fr/",
+    justEat: "https://www.just-eat.fr/"
   };
 
   // 1. CHARGEMENT DES TABLES
@@ -60,7 +64,7 @@ export default function Cart() {
     fetchTables();
   }, []);
 
-  // Logique temps minimum livraison
+  // 2. GESTION DU TEMPS MINIMUM (Livraison +90min)
   useEffect(() => {
     const updateMinTime = () => {
       const now = new Date();
@@ -76,7 +80,7 @@ export default function Cart() {
     return () => clearInterval(interval);
   }, [deliveryTime]);
 
-  // Réinitialisation modes
+  // 3. RÉINITIALISATION DES MODES
   useEffect(() => {
     if (orderMode !== "delivery") {
       setDeliveryQuote(null);
@@ -96,23 +100,21 @@ export default function Cart() {
       const response = await axios.post(`${BASE_API}/uber/estimate`, { address: targetAddress });
       setDeliveryQuote({ fee: response.data.fee, id: response.data.quoteId });
     } catch (err: any) {
-      setDeliveryError(err.response?.data?.details || "Adresse non desservie.");
+      setDeliveryError(err.response?.data?.details || "Adresse non desservie par notre service Signature.");
       setDeliveryQuote(null);
     } finally {
       setIsEstimating(false);
     }
   };
 
-  // CALCUL DU TOTAL (Nettoyage des prix string)
+  // CALCULS
   const parsePrice = (val: any) => {
     const str = String(val || "0");
     return parseFloat(str.replace(/[^\d.]/g, "")) || 0;
   };
 
-  
-
-  const totalPrice = getCartTotal(); // Utilise la logique avec promos
-  const savings = getCartSavings();  // Pour afficher les économies si besoin
+  const totalPrice = getCartTotal(); 
+  const savings = getCartSavings();  
   const depositAmount = totalPrice / 2;
 
   const getAmountToPay = () => {
@@ -123,6 +125,7 @@ export default function Cart() {
     return base + shipping;
   };
 
+  // ACTION FINALE
   const handleFinalOrder = async () => {
     setIsSubmitting(true);
     
@@ -136,7 +139,7 @@ export default function Cart() {
       clientId: clientId,
       customer: {
         name: customerName || "Client Signature",
-        address: orderMode === "delivery" ? address : "Sur place",
+        address: orderMode === "delivery" ? address : "Vente à emporter / Sur place",
       },
       items: cart.map((item: any) => ({
         productId: item.id || item._id,
@@ -157,20 +160,37 @@ export default function Cart() {
         guestCount: orderMode === "booking" ? guestCount : null,
         bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
         deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-        paymentStatus: payNow ? "paid" : "pending_at_counter",
+        paymentStatus: payNow ? "pending_stripe" : "pending_at_counter",
         uberQuoteId: deliveryQuote?.id || null
       }
     };
 
     try {
       const response = await axios.post(`${BASE_API}/orders`, orderData);
+      
       if (response.data.success) {
-        setOrderSuccess(true);
-        clearCart();
+        const orderId = response.data.data?._id || response.data.orderId;
+
+        if (payNow || orderMode === "booking") {
+          const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
+            orderId: orderId,
+            items: orderData.items,
+            deliveryFee: (orderMode === "delivery" && deliveryQuote) ? deliveryQuote.fee : 0,
+            amount: getAmountToPay(),
+            customerName: customerName
+          });
+
+          if (paymentResponse.data.url) {
+            window.location.href = paymentResponse.data.url;
+          }
+        } else {
+          // Paiement comptoir : Redirection vers notre nouvelle page success
+          window.location.href = `/order-success?orderId=${orderId}`;
+        }
       }
     } catch (error: any) {
-      console.error("Erreur:", error.response?.data);
-      alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier les informations"}`);
+      console.error("Erreur commande:", error.response?.data);
+      alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier vos informations"}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -185,24 +205,11 @@ export default function Cart() {
     return false;
   };
 
-  if (orderSuccess) {
-  return (
-    <div className="cart-page success-page-container"> {/* Classe modifiée ici */}
-      <div className="success-view">
-        <CheckCircle size={60} color="#D4AF37" />
-        <h2>Commande Confirmée !</h2>
-        <p>Merci pour votre confiance. Nous préparons votre sélection Signature.</p>
-        <Link to="/" className="return-btn">Retour à l'accueil</Link>
-      </div>
-    </div>
-  );
-}
-
   return (
     <section className="cart-page">
       <div className="cart-banner-box">
         <div className="cart-header">
-          <div className="header-seal">C</div>
+          <div className="header-seal">S</div>
           <span className="cart-badge">Votre Sélection</span>
           <h2 className="cart-main-title">Votre Panier</h2>
           <div className="header-double-line"></div>
@@ -212,27 +219,18 @@ export default function Cart() {
       <div className="cart-container">
         {cart.length === 0 ? (
           <div className="empty-cart">
-  <div className="empty-cart-icon-wrapper">
-    <div className="icon-circle">
-      <ShoppingBag size={40} strokeWidth={1} className="gold-bag" />
-    </div>
-    <div className="floating-sparkle s1">✦</div>
-    <div className="floating-sparkle s2">✦</div>
-  </div>
-
-  <h3 className="empty-cart-title">Votre panier est vide</h3>
-  <p className="empty-cart-subtitle">
-    Laissez-vous tenter par nos créations culinaires <br /> 
-    et commencez votre expérience Signature.
-  </p>
-  
-  <div className="title-underline-gold central"></div>
-  
-  <Link to="/carte" className="return-btn-premium">
-    <span className="btn-text">Découvrir la Carte</span>
-    <div className="btn-shine"></div>
-  </Link>
-</div>
+            <div className="empty-cart-icon-wrapper">
+              <div className="icon-circle">
+                <ShoppingBag size={40} strokeWidth={1} className="gold-bag" />
+              </div>
+              <div className="floating-sparkle s1">✦</div>
+              <div className="floating-sparkle s2">✦</div>
+            </div>
+            <h3 className="empty-cart-title">Votre panier est vide</h3>
+            <p className="empty-cart-subtitle">Laissez-vous tenter par nos créations culinaires.</p>
+            <div className="title-underline-gold central"></div>
+            <Link to="/carte" className="return-btn-premium">Découvrir la Carte</Link>
+          </div>
         ) : (
           <div className="cart-content">
             <div className="cart-left-side">
@@ -253,9 +251,7 @@ export default function Cart() {
                       <div className="item-info">
                         <div className="item-details">
                           <div className="item-main-row">
-                            <h4>
-                              {item.name} {qty > 1 && <span className="item-qty-badge">x{qty}</span>}
-                            </h4>
+                            <h4>{item.name} {qty > 1 && <span className="item-qty-badge">x{qty}</span>}</h4>
                             <span className="badge-type">{item.type || 'Signature'}</span>
                           </div>
                           {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
@@ -272,12 +268,8 @@ export default function Cart() {
                       </div>
                       <div className="price-box" style={{textAlign: 'right'}}>
                         <span className="item-price">{itemTotal.toFixed(2)}€</span>
-                        {qty > 1 && <div style={{fontSize: '0.7rem', opacity: 0.7}}>{unitPrice.toFixed(2)}€ / pce</div>}
                       </div>
-                      <button 
-                        className="cart-remove-btn" 
-                        onClick={() => removeFromCart(item.cartItemId || item.id)}
-                      >
+                      <button className="cart-remove-btn" onClick={() => removeFromCart(item.cartItemId)}>
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -296,8 +288,8 @@ export default function Cart() {
                 <div className="dynamic-form-container">
                   {orderMode === "on_site" && (
                     <div className="form-fade-in">
-                      <p className="form-instruction">Type de consommation :</p>
-                      <div className="selection-grid small" style={{marginBottom: '20px'}}>
+                      <p className="form-instruction">Consommation :</p>
+                      <div className="selection-grid small">
                         <button className={`select-btn ${consumeMode === "dine_in" ? "active" : ""}`} onClick={() => setConsumeMode("dine_in")}>🍽️ Sur place</button>
                         <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
                       </div>
@@ -306,16 +298,16 @@ export default function Cart() {
                         <div className="table-selector-box form-fade-in">
                           <div className="table-header-select">
                              <Smartphone size={18} color="#D4AF37" />
-                             <label>Votre numéro de table :</label>
+                             <label>Numéro de table :</label>
                           </div>
                           <select className="luxury-select" value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
-                            <option value="">-- Sélectionnez une table --</option>
+                            <option value="">-- Sélectionnez --</option>
                             {tables.map(t => <option key={t._id} value={t.number}>Table n°{t.number}</option>)}
                           </select>
                         </div>
                       )}
 
-                      <p className="form-instruction" style={{marginTop: '20px'}}>Règlement :</p>
+                      <p className="form-instruction">Règlement :</p>
                       <div className="selection-grid small">
                         <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
                         <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
@@ -325,32 +317,19 @@ export default function Cart() {
 
                   {orderMode === "delivery" && (
                     <div className="form-fade-in">
-                      <p className="form-instruction">Commander via nos partenaires :</p>
-                      <div className="selection-grid partners-grid" style={{marginBottom: '25px', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px'}}>
-                        <a href={PARTNER_LINKS.uberEats} target="_blank" rel="noreferrer" className="select-btn partner-btn">Uber <ExternalLink size={12} /></a>
-                        <a href={PARTNER_LINKS.deliveroo} target="_blank" rel="noreferrer" className="select-btn partner-btn">Deliveroo <ExternalLink size={12} /></a>
-                        <a href={PARTNER_LINKS.justEat} target="_blank" rel="noreferrer" className="select-btn partner-btn">Just Eat <ExternalLink size={12} /></a>
-                      </div>
-
-                      <div className="delivery-separator">
-                         <div className="sep-line"></div>
-                         <span>OU LIVRAISON SIGNATURE</span>
-                         <div className="sep-line"></div>
-                      </div>
-
                       <div className="input-group full">
                         <label>Nom complet</label>
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
                       <div className="input-group full">
                         <label><Bike size={14}/> Adresse de livraison</label>
-                        <input type="text" placeholder="Rue, code postal, ville..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
-                        {isEstimating && <small className="gold-text">Estimation en cours...</small>}
+                        <input type="text" placeholder="Adresse précise..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
+                        {isEstimating && <small className="gold-text">Calcul des frais...</small>}
                         {deliveryError && <small className="error-text">{deliveryError}</small>}
-                        {deliveryQuote && <small className="success-text">✓ Zone desservie</small>}
+                        {deliveryQuote && <small className="success-text">✓ Livraison possible (+{deliveryQuote.fee.toFixed(2)}€)</small>}
                       </div>
                       <div className="input-group full">
-                        <label>Heure souhaitée</label>
+                        <label>Heure souhaitée (min {minTime})</label>
                         <input type="time" min={minTime} value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} />
                       </div>
                     </div>
@@ -361,14 +340,6 @@ export default function Cart() {
                       <div className="input-group full">
                         <label>Nom de la réservation</label>
                         <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                      </div>
-                      <div className="input-group full">
-                        <label>Nombre de convives</label>
-                        <select className="luxury-select" value={guestCount} onChange={(e) => setGuestCount(e.target.value)}>
-                          {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                            <option key={num} value={num}>{num} {num > 1 ? 'Personnes' : 'Personne'}</option>
-                          ))}
-                        </select>
                       </div>
                       <div className="form-row">
                         <div className="input-group">
@@ -387,46 +358,35 @@ export default function Cart() {
             </div>
 
             <div className="cart-summary">
-  <h3 className="summary-title">Récapitulatif</h3>
-  
-  <div className="summary-line">
-    <span>Mode</span>
-    <span className="gold-text">
-      {orderMode === "on_site" && (consumeMode === "dine_in" ? "Sur place" : "À emporter")}
-      {orderMode === "booking" && "Réservation"}
-      {orderMode === "delivery" && "Livraison"}
-    </span>
-  </div>
+              <h3 className="summary-title">Récapitulatif</h3>
+              <div className="summary-line">
+                <span>Total Plats</span>
+                <span>{(totalPrice + savings).toFixed(2)}€</span> 
+              </div>
 
-  <div className="summary-line">
-    <span>Total Plats</span>
-    <span>{(totalPrice + savings).toFixed(2)}€</span> 
-  </div>
+              {savings > 0 && (
+                <div className="summary-line savings-row" style={{ color: "#27ae60", fontWeight: "bold" }}>
+                  <span>Réduction</span>
+                  <span>-{savings.toFixed(2)}€</span>
+                </div>
+              )}
 
-  {/* AFFICHAGE DES ÉCONOMIES SI ELLES EXISTENT */}
-  {savings > 0 && (
-    <div className="summary-line savings-row" style={{ color: "#27ae60", fontWeight: "bold" }}>
-      <span>Réduction (Offres)</span>
-      <span>-{savings.toFixed(2)}€</span>
-    </div>
-  )}
+              {orderMode === "delivery" && deliveryQuote && (
+                <div className="summary-line">
+                  <span>Frais de livraison</span>
+                  <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
+                </div>
+              )}
 
-  {orderMode === "delivery" && deliveryQuote && (
-    <div className="summary-line">
-      <span>Frais de livraison</span>
-      <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
-    </div>
-  )}
-
-  <div className="summary-line total">
-    <span>{orderMode === "booking" ? "Acompte à payer :" : "À payer :"}</span>
-    <span>{getAmountToPay().toFixed(2)}€</span>
-  </div>
+              <div className="summary-line total">
+                <span>{orderMode === "booking" ? "Acompte (50%) :" : "À payer :"}</span>
+                <span>{getAmountToPay().toFixed(2)}€</span>
+              </div>
 
               <div className="legal-notice">
                 <label className="checkbox-label">
                   <input type="checkbox" checked={isAgreed} onChange={(e) => setIsAgreed(e.target.checked)} />
-                  Ma commande est <strong>non-remboursable</strong>.
+                  Commande <strong>non-remboursable</strong>.
                 </label>
               </div>
 
