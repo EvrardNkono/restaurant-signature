@@ -6,8 +6,7 @@ import {
   Loader2, X, Utensils, GlassWater, 
   Check, PlusCircle, Sparkles, MinusCircle,
   Clock, CreditCard, Gift, Flame, Crown,
-  Star, Eye, Award, Search, ArrowRight,
- 
+  Star, Eye, Award, Search, ArrowRight
 } from "lucide-react"; 
 import "./menu.css";
 
@@ -603,16 +602,16 @@ export default function Menu() {
                     </div>
 
                     {/* TIROIR DE PERSONNALISATION */}
-<div id={`drawer-${plat._id}`} className={`customization-drawer ${isExpanding ? "open" : ""}`}>
-  <div className="drawer-header-premium">
-    <div className="drawer-title-premium">
-      <Sparkles size={16} color="#D4AF37" />
-      <span>Personnalisez votre expérience</span>
-    </div>
-    <button className="drawer-close-premium" onClick={() => setSelectingAccId(null)}>
-      <X size={18} />
-    </button>
-  </div>
+                    <div id={`drawer-${plat._id}`} className={`customization-drawer ${isExpanding ? "open" : ""}`}>
+                      <div className="drawer-header-premium">
+                        <div className="drawer-title-premium">
+                          <Sparkles size={16} color="#D4AF37" />
+                          <span>Personnalisez votre expérience</span>
+                        </div>
+                        <button className="drawer-close-premium" onClick={() => setSelectingAccId(null)}>
+                          <X size={18} />
+                        </button>
+                      </div>
 
                       <div className="drawer-content-premium">
                         {/* OFFRE DYNAMIQUE */}
@@ -764,8 +763,6 @@ export default function Menu() {
           </div>
         )}
       </div>
-
- 
     </section>
   );
 }
