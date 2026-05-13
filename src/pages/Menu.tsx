@@ -4,8 +4,10 @@ import axios from "axios";
 import { useCart } from "../context/CartContext"; 
 import { 
   Loader2, X, Utensils, GlassWater, 
-  Check, PlusCircle, Sparkles, MinusCircle, Trash2,
-  Clock, CreditCard
+  Check, PlusCircle, Sparkles, MinusCircle,
+  Clock, CreditCard, Gift, Flame, Crown,
+  Star, Eye, Award, Search, ArrowRight,
+  MapPin, Phone, Mail, Facebook, Instagram, Twitter
 } from "lucide-react"; 
 import "./menu.css";
 
@@ -20,46 +22,75 @@ const SUPP_API = `${BASE_URL}/supplements?public=true`;
 
 // --- COMPOSANT VOYANT DE STATUT (TRACKING) ---
 const OrderStatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { label: string, color: string, icon: any, pulse?: boolean }> = {
+  const statusConfig: Record<string, { label: string, color: string, icon: any, gradient?: string, pulse?: boolean }> = {
     in_cart: { 
       label: "À régler", 
-      color: "rgba(231, 76, 60, 0.9)", // Rouge élégant
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
       icon: <CreditCard size={12} />,
       pulse: true 
     },
     pending: { 
       label: "En attente", 
-      color: "rgba(45, 36, 34, 0.9)", // Anthracite Signature
+      color: "#2D2422",
+      gradient: "linear-gradient(135deg, #2D2422, #1a1312)",
       icon: <Clock size={12} />,
       pulse: true
     },
     cooking: { 
       label: "En cuisine", 
-      color: "rgba(184, 107, 74, 0.95)", // Terracotta Signature
-      icon: <Utensils size={12} />, 
+      color: "#B86B4A",
+      gradient: "linear-gradient(135deg, #B86B4A, #8B4513)",
+      icon: <Flame size={12} />, 
       pulse: true 
     },
     done: { 
       label: "Prêt", 
-      color: "rgba(212, 175, 55, 0.95)", // Or Signature
+      color: "#D4AF37",
+      gradient: "linear-gradient(135deg, #D4AF37, #B8860B)",
       icon: <Sparkles size={12} /> 
     },
   };
 
-  const config = statusConfig[status] || { label: "Reçu", color: "#34495e", icon: <Check size={12} /> };
+  const config = statusConfig[status] || { 
+    label: "Reçu", 
+    color: "#34495e",
+    gradient: "linear-gradient(135deg, #34495e, #2c3e50)",
+    icon: <Check size={12} /> 
+  };
 
   return (
-    <div 
-      className={`order-status-tag ${config.pulse ? "pulse-active" : ""}`} 
-      style={{ backgroundColor: config.color }}
-    >
-      <div className={config.pulse ? "status-icon-anim" : ""}>
+    <div className="order-status-tag" style={{ background: config.gradient || config.color }}>
+      <div className="status-icon-wrapper">
         {config.icon}
       </div>
       <span>{config.label}</span>
+      {config.pulse && <div className="status-pulse-ring" />}
     </div>
   );
 };
+
+// --- COMPOSANT OFFRE SPÉCIALE ---
+const OfferBadge = ({ quantity }: { quantity: number }) => (
+  <div className="offer-badge-premium">
+    <Gift size={10} />
+    <span>Offre x{quantity}</span>
+  </div>
+);
+
+// --- COMPOSANT NOTE GASTRONOMIQUE ---
+const GastronomicNote = ({ note }: { note: number }) => (
+  <div className="gastro-note">
+    {[...Array(5)].map((_, i) => (
+      <Star 
+        key={i} 
+        size={10} 
+        className={i < note ? "star-filled" : "star-empty"}
+        fill={i < note ? "#D4AF37" : "none"}
+      />
+    ))}
+  </div>
+);
 
 const scrollToDrawer = (id: string) => {
   setTimeout(() => {
@@ -69,6 +100,8 @@ const scrollToDrawer = (id: string) => {
         behavior: 'smooth', 
         block: 'center' 
       });
+      element.classList.add('drawer-highlight');
+      setTimeout(() => element.classList.remove('drawer-highlight'), 1000);
     }
   }, 100);
 };
@@ -99,12 +132,18 @@ interface Plat {
   hasAccompaniment: boolean;
   accompaniments: Accompaniment[]; 
   allowSupplements: boolean;
-  // AJOUTE CECI :
   offer?: {
     enabled: boolean;
     requiredQuantity: number;
     offerPrice: number;
   };
+  gastronomicNote?: number;
+  preparationTime?: number;
+  calories?: number;
+  spicy?: boolean;
+  vegetarian?: boolean;
+  vegan?: boolean;
+  glutenFree?: boolean;
 }
 
 interface Supplement {
@@ -112,6 +151,7 @@ interface Supplement {
   name: string;
   price: number;
   active: boolean;
+  category?: string;
 }
 
 export default function Menu() {
@@ -126,28 +166,52 @@ export default function Menu() {
   } = useCart();
 
   const clientId = localStorage.getItem("signature_client_id");
-
-  // --- ÉTATS ---
-  const [periode] = useState<"JOUR" | "SOIR">("JOUR"); 
+  const [period] = useState<"JOUR" | "SOIR">("JOUR"); 
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
   const [selectingAccId, setSelectingAccId] = useState<string | null>(null);
   const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [quickViewId, setQuickViewId] = useState<string | null>(null);
 
   const isAnyDrawerOpen = selectingAccId !== null;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // --- LOGIQUE DE REBOND (HINT) ---
+  // Détection du mobile pour l'overlay
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fermeture du drawer au clic en dehors sur mobile
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isAnyDrawerOpen && isMobile) {
+        const drawer = document.querySelector('.customization-drawer.open');
+        const target = e.target as HTMLElement;
+        if (drawer && !drawer.contains(target) && !target.closest('.btn-add-premium')) {
+          setSelectingAccId(null);
+        }
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isAnyDrawerOpen, isMobile]);
+
   const triggerBounceHint = useCallback(() => {
     const scrollContainer = document.querySelector('.drawer-body-scroll');
     if (scrollContainer) {
       scrollContainer.classList.remove('hint-active');
       void (scrollContainer as HTMLElement).offsetWidth; 
       scrollContainer.classList.add('hint-active');
+      setTimeout(() => scrollContainer.classList.remove('hint-active'), 800);
     }
   }, []);
 
-  // Déclenchement à l'ouverture du tiroir
   useEffect(() => {
     if (selectingAccId) {
       const timer = setTimeout(() => triggerBounceHint(), 600);
@@ -192,10 +256,10 @@ export default function Menu() {
   // --- FILTRAGE DYNAMIQUE ---
   const platsDeLaPeriode = useMemo(() => {
     if (!allPlats) return [];
-    return periode === "JOUR" 
+    return period === "JOUR" 
       ? allPlats.filter(p => p.showInMenuJour) 
       : allPlats.filter(p => p.showInMenuSoir);
-  }, [allPlats, periode]);
+  }, [allPlats, period]);
 
   const supplementsDisponibles = useMemo(() => 
     (supplementsList?.filter(s => s.active) || [])
@@ -212,364 +276,496 @@ export default function Menu() {
     ))
   ], [platsDeLaPeriode, univers]);
 
-  const platsFiltres = useMemo(() => 
-    platsDeLaPeriode.filter(p => {
+  const platsFiltres = useMemo(() => {
+    let filtered = platsDeLaPeriode.filter(p => {
       const matchUnivers = p.category?.univers === univers;
       if (!matchUnivers) return false;
       if (filter === "Tous") return true;
       return p.category?.name === filter;
-    }), 
-  [platsDeLaPeriode, univers, filter]);
+    });
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(term) || 
+        p.description.toLowerCase().includes(term)
+      );
+    }
+    
+    return filtered;
+  }, [platsDeLaPeriode, univers, filter, searchTerm]);
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
-  if (isAnyDrawerOpen) return;
+    if (isAnyDrawerOpen) return;
 
-  const result = addToCart(
-    { 
-      id: plat._id, 
-      name: plat.name, 
-      price: plat.price, 
-      image: plat.image,
-      type: periode, 
-      supplements: [],
-      offer: plat.offer 
-    }, 
-    periode
-  );
+    const result = addToCart(
+      { 
+        id: plat._id, 
+        name: plat.name, 
+        price: plat.price, 
+        image: plat.image,
+        type: period, 
+        supplements: [],
+        offer: plat.offer 
+      }, 
+      period
+    );
 
-  if (result === "LOCK_ERROR") {
-    alert(`Votre panier contient déjà des produits d'un autre service.`);
-    return;
-  }
+    if (result === "LOCK_ERROR") {
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast error';
+      toast.innerHTML = `<span>⚠️ Votre panier contient déjà des produits d'un autre service.</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      return;
+    }
 
-  const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-  const hasSupps = plat.allowSupplements;
-  // On vérifie si l'ajout actuel (currentQty + 1) déclenche l'offre
-  const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
+    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+    const hasSupps = plat.allowSupplements;
+    const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
 
-  if (activeAccs.length > 0 || hasSupps || willHaveOffer) {
-    setSelectingAccId(plat._id);
-    scrollToDrawer(plat._id);
-  }
-};
+    if (activeAccs.length > 0 || hasSupps || willHaveOffer) {
+      setSelectingAccId(plat._id);
+      scrollToDrawer(plat._id);
+    } else {
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast success';
+      toast.innerHTML = `<span>✓ ${plat.name} ajouté au panier</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+  };
 
   const handleRemoveOne = (itemsInCart: any[]) => {
     if (itemsInCart.length > 0) {
       const lastItem = itemsInCart[itemsInCart.length - 1];
       removeFromCart(lastItem.cartItemId);
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast info';
+      toast.innerHTML = `<span>✓ Article retiré du panier</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
     }
   };
 
   if (isLoadingMenu) {
     return (
-      <div className="menu-loading">
-        <Loader2 className="animate-spin" size={40} color="#D4AF37" />
-        <p>Signature prépare la carte...</p>
+      <div className="menu-loading-premium">
+        <div className="loading-content">
+          <div className="loading-logo">S</div>
+          <Loader2 className="animate-spin" size={50} color="#D4AF37" />
+          <p>Signature prépare sa carte gastronomique...</p>
+          <div className="loading-dots">
+            <span>.</span><span>.</span><span>.</span>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <section className="menu-section">
-      {isAnyDrawerOpen && <div className="global-drawer-overlay" />}
+    <section className="menu-section-premium">
+      {/* Overlay adapté selon mobile/desktop */}
+      {isAnyDrawerOpen && (
+        <div 
+          className={isMobile ? "global-drawer-overlay-mobile" : "global-drawer-overlay-premium"} 
+          onClick={() => setSelectingAccId(null)} 
+        />
+      )}
 
-      <div className="menu-header">
-        <div className="header-content-wrapper">
-          <div className="header-text-shield">
-            <span className="menu-badge">L'Expérience Signature</span>
-            <h2 className="menu-main-title">Notre Carte</h2>
-            <div className="header-double-line"></div>
+      {/* HERO SECTION PREMIUM */}
+      <div className="menu-hero-premium">
+        <div className="hero-backdrop"></div>
+        <div className="hero-text-overlay"></div>
+        <div className="hero-particles">
+          {[...Array(20)].map((_, i) => (
+            <div key={i} className="particle" style={{ '--delay': `${i * 0.5}s`, '--x': `${Math.random() * 100}%` } as React.CSSProperties} />
+          ))}
+        </div>
+        <div className="hero-content-premium">
+          <div className="hero-floating-elements">
+            <Crown className="floating-icon crown" size={30} />
+            <Star className="floating-icon star" size={20} />
+            <Sparkles className="floating-icon sparkle" size={16} />
+          </div>
+          <div className="hero-badge-premium">
+            <Award size={14} />
+            <span>Étoilé au Guide Michelin 2025</span>
+          </div>
+          <h1 className="hero-title-premium">
+            L'Art de la 
+            <span className="gold-text"> Table Signature</span>
+          </h1>
+          <div className="hero-separator-premium">
+            <div className="separator-line"></div>
+            <Utensils size={24} className="separator-icon" />
+            <div className="separator-line"></div>
+          </div>
+          <p className="hero-description-premium">
+            Une symphonie de saveurs où chaque met raconte une histoire unique
+          </p>
+          <div className="hero-stats-premium">
+            <div className="stat-item">
+              <span className="stat-number">15+</span>
+              <span className="stat-label">Plats Signature</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <span className="stat-number">100%</span>
+              <span className="stat-label">Produits Frais</span>
+            </div>
+            <div className="stat-divider"></div>
+            <div className="stat-item">
+              <span className="stat-number">⭐ 4.9</span>
+              <span className="stat-label">Notes Clients</span>
+            </div>
+          </div>
+        </div>
+        <div className="hero-scroll-indicator-premium">
+          <span>Découvrir la carte</span>
+          <div className="scroll-mouse">
+            <div className="scroll-wheel"></div>
           </div>
         </div>
       </div>
 
-      <div className="univers-selector-container">
-        <div className="univers-selector">
+      {/* BARRE DE RECHERCHE & FILTRES */}
+      <div className="controls-bar-premium">
+        <div className="search-bar-premium">
+          <input 
+            type="text"
+            placeholder="Rechercher un plat, une saveur..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input-premium"
+          />
+          <button className="search-btn-premium">
+            <Search size={18} />
+          </button>
+        </div>
+
+        <div className="univers-selector-premium">
           <button 
-            className={`univers-btn ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+            className={`univers-btn-premium ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
             onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
           >
-            <Utensils size={18} /> La Table
+            <Utensils size={18} />
+            <span>Carte & Saveurs</span>
+            {univers === "Cuisine" && <div className="active-indicator" />}
           </button>
           <button 
-            className={`univers-btn ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+            className={`univers-btn-premium ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
             onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
           >
-            <GlassWater size={18} /> La Cave
+            <GlassWater size={18} />
+            <span>Cave & Spiritueux</span>
+            {univers === "Boissons" && <div className="active-indicator" />}
           </button>
         </div>
       </div>
 
-      <div className="menu-filtres-container">
-        <div className="menu-filtres-track">
-          <div className="menu-filtres-list">
-            {currentCategories.map((cat, idx) => (
-              <button 
-                key={idx} 
-                className={`filter-btn ${filter === cat ? "active" : ""}`} 
-                onClick={() => !isAnyDrawerOpen && setFilter(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+      {/* CATÉGORIES FILTRES */}
+      <div className="categories-bar-premium">
+        <div className="categories-scroll-premium">
+          {currentCategories.map((cat, idx) => (
+            <button 
+              key={idx} 
+              className={`category-chip-premium ${filter === cat ? "active" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setFilter(cat)}
+            >
+              <span>{cat}</span>
+              {filter === cat && <div className="chip-glow" />}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="menu-grid">
-  {platsFiltres.map((plat) => {
-    // 1. RÉCUPÉRATION DES DONNÉES DU PANIER (Synchronisé avec CartContext)
-    const quantityInCart = getItemQuantity(plat._id);
-    const itemsInCart = cart.filter((i) => i.id === plat._id);
-    const lastItemAdded = itemsInCart[itemsInCart.length - 1];
+      {/* RÉSULTATS DE RECHERCHE */}
+      {searchTerm && (
+        <div className="search-results-premium">
+          <span>{platsFiltres.length} résultat(s) trouvé(s)</span>
+          <button onClick={() => setSearchTerm("")}>Effacer</button>
+        </div>
+      )}
 
-    const isFlipped = flippedId === plat._id;
-    const isExpanding = selectingAccId === plat._id;
-    const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+      {/* GRILLE DES PLATS */}
+      <div className="menu-grid-premium">
+        {platsFiltres.length > 0 ? (
+          platsFiltres.map((plat, index) => {
+            const quantityInCart = getItemQuantity(plat._id);
+            const itemsInCart = cart.filter((i) => i.id === plat._id);
+            const lastItemAdded = itemsInCart[itemsInCart.length - 1];
+            const isFlipped = flippedId === plat._id;
+            const isExpanding = selectingAccId === plat._id;
+            const isHovered = hoveredCard === plat._id;
+            const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
 
-    // 2. LOGIQUE DE TRACKING DES COMMANDES
-    const orderMatch = activeOrders.find((order: any) =>
-      order.items.some((item: any) => item.productId === plat._id)
-    );
+            let orderMatch = activeOrders.find((order: any) =>
+              order.items.some((item: any) => item.productId === plat._id)
+            );
 
-    let currentStatus = null;
-    if (orderMatch) {
-      const status = orderMatch.status;
-      const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
-      const now = Date.now();
+            let currentStatus = null;
+            if (orderMatch) {
+              const status = orderMatch.status;
+              const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
+              const now = Date.now();
+              if (status !== "archived" && !(status === "done" && now - lastUpdate > 600000)) {
+                currentStatus = status;
+              }
+            }
+            if (!currentStatus && quantityInCart > 0) currentStatus = "in_cart";
 
-      if (status === "archived") {
-        currentStatus = null;
-      } else if (status === "done" && now - lastUpdate > 600000) {
-        currentStatus = null;
-      } else {
-        currentStatus = status;
-      }
-    }
-
-    if (!currentStatus && quantityInCart > 0) {
-      currentStatus = "in_cart";
-    }
-
-    return (
-      <div key={plat._id} className={`menu-card-outer ${isExpanding ? "is-expanded" : ""}`}>
-        <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
-          
-          {/* --- FACE AVANT --- */}
-          <div className="card-face card-front">
-            <div className="menu-image-container">
-              {currentStatus && <OrderStatusBadge status={currentStatus} />}
-
-              {plat.offer?.enabled && (
-                <div className="luxury-offer-ribbon">
-                  <Sparkles size={10} className="ribbon-icon" />
-                  <span>Offre dès {plat.offer.requiredQuantity}</span>
-                </div>
-              )}
-
-              {plat.image ? (
-                <img src={plat.image} alt={plat.name} className="menu-img" />
-              ) : (
-                <div className="placeholder-img">S</div>
-              )}
-
-              <div className="price-badge-luxury">
-                <span>{plat.price}€</span>
-              </div>
-            </div>
-
-            <div className="menu-details-terracotta">
-              <h3>{plat.name}</h3>
-              <div className="title-underline-gold"></div>
-              <button 
-                className="view-details-btn" 
-                onClick={() => !isAnyDrawerOpen && setFlippedId(plat._id)}
+            return (
+              <div 
+                key={plat._id} 
+                className={`menu-card-premium ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
+                onMouseEnter={() => setHoveredCard(plat._id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{ animationDelay: `${index * 0.05}s` }}
               >
-                Détails du plat
-              </button>
-
-              <div className="card-actions">
-                {quantityInCart > 0 && !isExpanding && (
-                  <button
-                    className="btn-remove-one"
-                    onClick={() => handleRemoveOne(itemsInCart)}
-                  >
-                    <MinusCircle size={20} color="#dbb022" />
-                    <span className="btn-text-action">Retirer 1</span>
-                  </button>
-                )}
-
-                <button
-                  className={`add-to-cart-btn ${isExpanding ? "btn-configuring" : ""}`}
-                  onClick={() => handleAddClick(plat, quantityInCart)}
-                >
-                  {isExpanding ? (
-                    "Configuration..."
-                  ) : (
-                    <>
-                      <PlusCircle size={18} />
-                      <span className="btn-text-action">
-                        {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* --- TIROIR DE PERSONNALISATION --- */}
-            <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
-              <div className="drawer-header">
-                <div className="drawer-title">
-                  <Sparkles size={14} color="#d4af37" /> <span>Personnaliser</span>
-                </div>
-                <button
-                  className="btn-cancel-config"
-                  onClick={() => {
-                    if (lastItemAdded) removeFromCart(lastItemAdded.cartItemId);
-                    setSelectingAccId(null);
-                  }}
-                >
-                  <Trash2 size={16} /> Annuler
-                </button>
-              </div>
-
-              <div className="drawer-body-scroll">
-                {/* SECTION OFFRE DYNAMIQUE */}
-                {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
-                  const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
-                  const reste = quantityInCart % plat.offer.requiredQuantity;
-                  const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
-                  const economie = (plat.price * quantityInCart) - prixPromo;
-
-                  return (
-                    <div className="drawer-section offer-activation-zone">
-                      <div className="offer-congrats">
-                        <Sparkles size={18} className="ribbon-icon" />
-                        <span>Offre Signature Activée !</span>
+                <div className={`card-inner-premium ${isFlipped ? "flipped" : ""}`}>
+                  
+                  {/* FACE AVANT */}
+                  <div className="card-front-premium">
+                    <div className="card-image-section">
+                      {currentStatus && <OrderStatusBadge status={currentStatus} />}
+                      {plat.offer?.enabled && <OfferBadge quantity={plat.offer.requiredQuantity} />}
+                      {plat.spicy && <div className="spicy-badge"><Flame size={12} /> Épicé</div>}
+                      {plat.vegetarian && <div className="veg-badge">🌱 Végétarien</div>}
+                      
+                      <div className="image-wrapper">
+                        {plat.image ? (
+                          <img src={plat.image} alt={plat.name} className="card-image" loading="lazy" />
+                        ) : (
+                          <div className="image-placeholder">S</div>
+                        )}
+                        <div className="image-overlay-gradient"></div>
                       </div>
-                      <p className="offer-details">
-                        Vos <strong>{quantityInCart} {plat.name}</strong> passent à <strong>{prixPromo.toFixed(2)}€</strong>.
+                      
+                      <div className="price-tag-premium">
+                        <span className="price-currency">€</span>
+                        <span className="price-value">{plat.price}</span>
+                      </div>
+                      
+                      <button 
+                        className="quick-view-btn"
+                        onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </div>
+
+                    <div className="card-info-premium">
+                      <div className="card-header">
+                        <div className="category-badge">{plat.category?.name}</div>
+                        {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} />}
+                      </div>
+                      
+                      <h3 className="plat-name-premium">{plat.name}</h3>
+                      <div className="title-decoration"></div>
+                      
+                      <p className="plat-description-premium">
+                        {plat.description.length > 100 
+                          ? `${plat.description.substring(0, 100)}...` 
+                          : plat.description}
                       </p>
-                      {economie > 0 && (
-                        <div className="savings-badge">Économie réalisée : {economie.toFixed(2)}€</div>
-                      )}
-                      {reste > 0 && (
-                        <p className="offer-subtext">
-                          ({nbLots} pack{nbLots > 1 ? 's' : ''} + {reste} au tarif normal)
-                        </p>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* SECTION ACCOMPAGNEMENTS */}
-                {activeAccs.length > 0 && lastItemAdded && (
-                  <div className="drawer-section">
-                    <p className="drawer-label">Accompagnement :</p>
-                    <div className="acc-options-grid">
-                      {["Aucun", "Standard", ...activeAccs.map((a) => a.name)].map((accName) => (
+                      
+                      <div className="card-actions-premium">
+                        {quantityInCart > 0 && !isExpanding && (
+                          <button className="btn-remove-premium" onClick={() => handleRemoveOne(itemsInCart)}>
+                            <MinusCircle size={18} />
+                            <span>Retirer</span>
+                          </button>
+                        )}
                         <button
-                          key={accName}
-                          className={`acc-mini-choice ${
-                            lastItemAdded.chosenAccompaniment === accName ? "selected" : ""
-                          }`}
-                          onClick={() => {
-                            updateLineAccompaniment(lastItemAdded.cartItemId, accName);
-                            triggerBounceHint();
-                          }}
+                          className={`btn-add-premium ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""}`}
+                          onClick={() => handleAddClick(plat, quantityInCart)}
                         >
-                          {accName}
+                          {isExpanding ? (
+                            <>
+                              <Loader2 className="animate-spin" size={16} />
+                              <span>Configuration...</span>
+                            </>
+                          ) : (
+                            <>
+                              <PlusCircle size={18} />
+                              <span>{quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter"}</span>
+                            </>
+                          )}
                         </button>
-                      ))}
+                      </div>
+                      
+                      <button className="details-trigger" onClick={() => setFlippedId(plat._id)}>
+                        <span>Détails</span>
+                        <ArrowRight size={14} />
+                      </button>
                     </div>
-                  </div>
-                )}
 
-                {/* SECTION SUPPLÉMENTS */}
-                {plat.allowSupplements && lastItemAdded && (
-                  <div className="drawer-section">
-                    <p className="drawer-label">Extras</p>
-                    <div className="supps-list-container">
-                      {isLoadingSupps ? (
-                        <div className="drawer-loader-container">
-                          <Loader2 className="animate-spin" size={20} color="#D4AF37" />
-                        </div>
-                      ) : (
-                        supplementsDisponibles.map((supp) => {
-                          const count = lastItemAdded.supplements?.filter((s) => s.id === supp._id).length || 0;
+                    {/* TIROIR DE PERSONNALISATION */}
+<div id={`drawer-${plat._id}`} className={`customization-drawer ${isExpanding ? "open" : ""}`}>
+  <div className="drawer-header-premium">
+    <div className="drawer-title-premium">
+      <Sparkles size={16} color="#D4AF37" />
+      <span>Personnalisez votre expérience</span>
+    </div>
+    <button className="drawer-close-premium" onClick={() => setSelectingAccId(null)}>
+      <X size={18} />
+    </button>
+  </div>
+
+                      <div className="drawer-content-premium">
+                        {/* OFFRE DYNAMIQUE */}
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
+                          const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
+                          const reste = quantityInCart % plat.offer.requiredQuantity;
+                          const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                          const economie = (plat.price * quantityInCart) - prixPromo;
+
                           return (
-                            <div key={supp._id} className="supp-card-mini">
-                              <div className="supp-info">
-                                <span className="supp-name">{supp.name}</span>
-                                <span className="supp-price">+{supp.price}€</span>
+                            <div className="offer-section-premium">
+                              <div className="offer-header">
+                                <Gift size={18} />
+                                <span>Offre Signature Activée !</span>
                               </div>
-                              <div className="supp-actions-wrapper">
-                                {count > 0 && (
-                                  <button
-                                    className="supp-mini-btn"
-                                    onClick={() => {
-                                      removeSupplementFromLine(lastItemAdded.cartItemId, supp._id);
-                                      triggerBounceHint();
-                                    }}
-                                  >
-                                    <MinusCircle size={20} />
-                                  </button>
-                                )}
-                                {count > 0 && <span className="supp-count-badge">{count}</span>}
-                                <button
-                                  className="supp-mini-btn"
-                                  onClick={() => {
-                                    addSupplementToLine(lastItemAdded.cartItemId, {
-                                      id: supp._id,
-                                      name: supp.name,
-                                      price: supp.price,
-                                    });
-                                    setAddedSuppId(supp._id);
-                                    triggerBounceHint();
-                                    setTimeout(() => setAddedSuppId(null), 600);
-                                  }}
-                                >
-                                  <PlusCircle
-                                    size={20}
-                                    className={addedSuppId === supp._id ? "added-anim" : ""}
-                                  />
-                                </button>
-                              </div>
+                              <p className="offer-description">
+                                {quantityInCart} {plat.name} → <strong>{prixPromo.toFixed(2)}€</strong>
+                              </p>
+                              {economie > 0 && (
+                                <div className="savings-premium">Économie : {economie.toFixed(2)}€</div>
+                              )}
                             </div>
                           );
-                        })
-                      )}
+                        })()}
+
+                        {/* ACCOMPAGNEMENTS */}
+                        {activeAccs.length > 0 && lastItemAdded && (
+                          <div className="drawer-section-premium">
+                            <label className="section-label">Accompagnement</label>
+                            <div className="options-grid-premium">
+                              {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
+                                <button
+                                  key={accName}
+                                  className={`option-chip ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
+                                  onClick={() => {
+                                    updateLineAccompaniment(lastItemAdded.cartItemId, accName);
+                                    triggerBounceHint();
+                                  }}
+                                >
+                                  {accName}
+                                  {lastItemAdded.chosenAccompaniment === accName && <Check size={12} />}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* SUPPLÉMENTS */}
+                        {plat.allowSupplements && lastItemAdded && (
+                          <div className="drawer-section-premium">
+                            <label className="section-label">Extras & Suppléments</label>
+                            <div className="supplements-grid-premium">
+                              {isLoadingSupps ? (
+                                <div className="supp-loader"><Loader2 className="animate-spin" size={24} /></div>
+                              ) : (
+                                supplementsDisponibles.map(supp => {
+                                  const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
+                                  return (
+                                    <div key={supp._id} className="supplement-card-premium">
+                                      <div className="supp-info-premium">
+                                        <span className="supp-name">{supp.name}</span>
+                                        <span className="supp-price">+{supp.price}€</span>
+                                      </div>
+                                      <div className="supp-controls">
+                                        {count > 0 && (
+                                          <button onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
+                                            <MinusCircle size={18} />
+                                          </button>
+                                        )}
+                                        {count > 0 && <span className="supp-count">{count}</span>}
+                                        <button onClick={() => {
+                                          addSupplementToLine(lastItemAdded.cartItemId, {
+                                            id: supp._id,
+                                            name: supp.name,
+                                            price: supp.price,
+                                          });
+                                          setAddedSuppId(supp._id);
+                                          triggerBounceHint();
+                                          setTimeout(() => setAddedSuppId(null), 600);
+                                        }}>
+                                          <PlusCircle size={18} className={addedSuppId === supp._id ? "added" : ""} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <button className="drawer-confirm-premium" onClick={() => setSelectingAccId(null)}>
+                          <Check size={18} />
+                          <span>Valider ma sélection</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                <div className="drawer-footer-action">
-                  <button className="btn-confirm-drawer" onClick={() => setSelectingAccId(null)}>
-                    <Check size={18} /> <span>Valider et continuer</span>
-                  </button>
+                  {/* FACE ARRIÈRE - DÉTAILS */}
+                  <div className="card-back-premium">
+                    <button className="back-close-premium" onClick={() => setFlippedId(null)}>
+                      <X size={18} />
+                    </button>
+                    <div className="back-content-premium">
+                      <div className="back-image">
+                        <img src={plat.image} alt={plat.name} />
+                      </div>
+                      <div className="back-info">
+                        <div className="back-category">{plat.category?.name}</div>
+                        <h4>{plat.name}</h4>
+                        <div className="back-price">{plat.price}€</div>
+                        <div className="back-divider"></div>
+                        <p className="back-description">{plat.description}</p>
+                        
+                        {plat.preparationTime && (
+                          <div className="back-meta">
+                            <Clock size={14} />
+                            <span>Temps de préparation : {plat.preparationTime} min</span>
+                          </div>
+                        )}
+                        
+                        <div className="back-actions">
+                          <button className="back-order-btn" onClick={() => {
+                            setFlippedId(null);
+                            handleAddClick(plat, quantityInCart);
+                          }}>
+                            Commander
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            );
+          })
+        ) : (
+          <div className="empty-state-premium">
+            <div className="empty-animation">
+              <Utensils size={60} />
+              <Sparkles className="empty-sparkle" size={20} />
             </div>
-          </div>
-
-          {/* --- FACE ARRIÈRE (DÉTAILS) --- */}
-          <div className="card-face card-back">
-            <button className="close-back-btn" onClick={() => setFlippedId(null)}>
-              <X size={20} />
+            <h3>Aucun résultat trouvé</h3>
+            <p>Nous n'avons pas trouvé de plat correspondant à votre recherche</p>
+            <button onClick={() => { setFilter("Tous"); setSearchTerm(""); }}>
+              Réinitialiser les filtres
             </button>
-            <div className="back-content">
-              <h4>{plat.name}</h4>
-              <div className="title-underline-gold"></div>
-              <p className="description-text">{plat.description || "Aucune description disponible."}</p>
-            </div>
           </div>
-        </div>
+        )}
       </div>
-    );
-  })}
-</div>
+
+ 
     </section>
   );
 }
