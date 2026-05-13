@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { 
   Smartphone, 
-  ExternalLink, 
   Bike, 
   Trash2, 
   ShoppingBag 
@@ -23,7 +22,7 @@ export default function Cart() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { cart, removeFromCart, clearCart, getCartTotal, getCartSavings } = useCart();
+  const { cart, removeFromCart, getCartTotal, getCartSavings } = useCart();
   
   // ÉTATS DES TABLES
   const [tables, setTables] = useState<any[]>([]);
@@ -32,7 +31,7 @@ export default function Cart() {
   // États Formulaire
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState(""); 
-  const [guestCount, setGuestCount] = useState("2");
+  const [guestCount] = useState("2"); // setGuestCount n'est pas utilisé
   const [deliveryTime, setDeliveryTime] = useState("");
   const [minTime, setMinTime] = useState("");
   const [bookingDate, setBookingDate] = useState("");
@@ -42,12 +41,6 @@ export default function Cart() {
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string} | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
-
-  const PARTNER_LINKS = {
-    uberEats: "https://www.ubereats.com/",
-    deliveroo: "https://deliveroo.fr/",
-    justEat: "https://www.just-eat.fr/"
-  };
 
   // 1. CHARGEMENT DES TABLES
   useEffect(() => {
