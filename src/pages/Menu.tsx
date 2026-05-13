@@ -7,7 +7,7 @@ import {
   Check, PlusCircle, Sparkles, MinusCircle,
   Clock, CreditCard, Gift, Flame, Crown,
   Star, Eye, Award, Search, ArrowRight,
-  MapPin, Phone, Mail, Facebook, Instagram, Twitter
+ 
 } from "lucide-react"; 
 import "./menu.css";
 
