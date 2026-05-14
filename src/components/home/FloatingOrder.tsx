@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Link, useLocation } from 'react-router-dom';
-import { Utensils, Moon, Sparkles, X, ChefHat, Star } from 'lucide-react';
+import { Utensils, Moon, Sparkles, X, ChefHat} from 'lucide-react';
 import './FloatingOrder.css';
 
 export default function FloatingOrder() {
