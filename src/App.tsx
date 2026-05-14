@@ -56,7 +56,7 @@ export default function AppRouter() {
               path="/*"
               element={
                 <>
-                  <AdPopup word="SIGNATURE" />
+                  <AdPopup />
                   <Navbar />
                   <FloatingOrder /> 
 

@@ -90,7 +90,7 @@ const AdPopup: React.FC = () => {
   }
 
   const currentPopup = popups[currentIndex];
-  const progressDuration = currentPopup.duration;
+  
 
   // Styles dynamiques basés sur la configuration
   const bannerStyle = {
