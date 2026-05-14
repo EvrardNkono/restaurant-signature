@@ -5,10 +5,10 @@ import { useCart } from "../context/CartContext";
 import { 
   Loader2, X, Utensils, GlassWater, 
   Check, PlusCircle, Sparkles, MinusCircle,
-  Clock, CreditCard, Gift, Flame, Crown,
+  Clock, CreditCard, Gift, Flame,
   Star, Eye, Award, Search, ArrowRight,
-  Heart, Zap, Shield, ChefHat, Coffee,
-  Wine, Beer, Tv, MapPin, Instagram, Facebook
+  Heart, Zap, ChefHat,
+   Tv,  
 } from "lucide-react";
 import "./menu.css";
 
@@ -932,51 +932,7 @@ export default function Menu() {
         )}
       </div>
 
-      {/* FOOTER GASTRONOMIQUE */}
-      <footer className="menu-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div className="footer-logo">Signature</div>
-            <p>Cuisine d'exception depuis 1985</p>
-            <div className="social-links">
-              <Instagram size={20} />
-              <Facebook size={20} />
-              <MapPin size={20} />
-            </div>
-          </div>
-          <div className="footer-links">
-            <div className="link-group">
-              <h4>Menu</h4>
-              <a href="#">Entrées</a>
-              <a href="#">Plats</a>
-              <a href="#">Desserts</a>
-              <a href="#">Boissons</a>
-            </div>
-            <div className="link-group">
-              <h4>Informations</h4>
-              <a href="#">Réservations</a>
-              <a href="#">Événements</a>
-              <a href="#">Contact</a>
-              <a href="#">CGV</a>
-            </div>
-          </div>
-          <div className="footer-newsletter">
-            <h4>Newsletter</h4>
-            <p>Soyez informé des nouveautés</p>
-            <div className="newsletter-input">
-              <input type="email" placeholder="Votre email" />
-              <button>→</button>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span>© 2025 Signature Restaurant - Tous droits réservés</span>
-          <div className="michelin-badge">
-            <span>⭐⭐⭐</span>
-            <span>Guide Michelin</span>
-          </div>
-        </div>
-      </footer>
+      
     </section>
   );
 }

@@ -31,7 +31,7 @@ export default function Cart() {
   // États Formulaire
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState(""); 
-  const [guestCount] = useState("2"); // setGuestCount n'est pas utilisé
+  const [guestCount] = useState("2"); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [deliveryTime, setDeliveryTime] = useState("");
   const [minTime, setMinTime] = useState("");
   const [bookingDate, setBookingDate] = useState("");
