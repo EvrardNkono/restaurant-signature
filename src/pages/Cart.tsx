@@ -5,7 +5,8 @@ import {
   Smartphone, 
   Bike, 
   Trash2, 
-  ShoppingBag 
+  ShoppingBag,
+  Sparkles
 } from "lucide-react"; 
 import axios from "axios";
 
@@ -14,6 +15,9 @@ import "./cart.css";
 // Configuration de l'URL API
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
+
+// Types pour les services de livraison
+type DeliveryService = "uber" | "deliveroo" | "justeat" | "signature" | null;
 
 export default function Cart() {
   // États de base
@@ -40,10 +44,19 @@ export default function Cart() {
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
 
-  // ÉTATS UBER DIRECT
-  const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string} | null>(null);
+  // ÉTATS LIVRAISON MULTI-SERVICES
+  const [selectedDeliveryService, setSelectedDeliveryService] = useState<DeliveryService>(null);
+  const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string, service: string} | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
+
+  // Configuration des frais de livraison par service
+  const deliveryFees = {
+    uber: { fee: 0, label: "Uber Eats", icon: "🚲", needsEstimate: true },
+    deliveroo: { fee: 0, label: "Deliveroo", icon: "🛵", needsEstimate: true },
+    justeat: { fee: 0, label: "Just Eat", icon: "🍔", needsEstimate: true },
+    signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
+  };
 
   // CHARGEMENT DES TABLES
   useEffect(() => {
@@ -81,25 +94,69 @@ export default function Cart() {
     if (orderMode !== "delivery") {
       setDeliveryQuote(null);
       setDeliveryError(null);
+      setSelectedDeliveryService(null);
     }
     if (consumeMode !== "dine_in") {
       setSelectedTable("");
     }
   }, [orderMode, consumeMode]);
 
-  // LOGIQUE UBER DIRECT
-  const fetchDeliveryQuote = async (targetAddress: string) => {
+  // Fonction pour obtenir le devis selon le service sélectionné
+  const fetchDeliveryQuoteForService = async (service: DeliveryService, targetAddress: string) => {
+    if (!service) return;
+    
+    // Livraison Signature : frais fixes
+    if (service === "signature") {
+      setDeliveryQuote({ 
+        fee: deliveryFees.signature.fee, 
+        id: "signature_delivery", 
+        service: "signature" 
+      });
+      setDeliveryError(null);
+      return;
+    }
+
     if (targetAddress.trim().length < 10) return;
+    
     setIsEstimating(true);
     setDeliveryError(null);
+    
     try {
-      const response = await axios.post(`${BASE_API}/uber/estimate`, { address: targetAddress });
-      setDeliveryQuote({ fee: response.data.fee, id: response.data.quoteId });
+      const response = await axios.post(`${BASE_API}/delivery/estimate`, { 
+        address: targetAddress,
+        service: service 
+      });
+      
+      setDeliveryQuote({ 
+        fee: response.data.fee, 
+        id: response.data.quoteId,
+        service: service 
+      });
     } catch (err: any) {
-      setDeliveryError(err.response?.data?.details || "Adresse non desservie par notre service Signature.");
+      setDeliveryError(`Service ${deliveryFees[service]?.label} non disponible à cette adresse.`);
       setDeliveryQuote(null);
     } finally {
       setIsEstimating(false);
+    }
+  };
+
+  // Quand l'utilisateur change de service de livraison
+  const handleDeliveryServiceChange = (service: DeliveryService) => {
+    setSelectedDeliveryService(service);
+    if (service === "signature") {
+      setDeliveryQuote({ fee: 5, id: "signature_delivery", service: "signature" });
+      setDeliveryError(null);
+    } else if (address.trim().length >= 10) {
+      fetchDeliveryQuoteForService(service, address);
+    } else {
+      setDeliveryQuote(null);
+    }
+  };
+
+  // Quand l'adresse change, on re-calcule le devis pour le service sélectionné
+  const handleAddressBlur = () => {
+    if (selectedDeliveryService && selectedDeliveryService !== "signature" && address.trim().length >= 10) {
+      fetchDeliveryQuoteForService(selectedDeliveryService, address);
     }
   };
 
@@ -121,7 +178,6 @@ export default function Cart() {
     return base + shipping;
   };
 
-  // Variables calculées avant le return pour éviter les erreurs TypeScript
   const amountToPay = getAmountToPay();
   const shouldShowEmailFields = (payNow === true || orderMode === "booking") && amountToPay > 0;
 
@@ -172,14 +228,15 @@ export default function Cart() {
         bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
         deliveryTime: orderMode === "delivery" ? deliveryTime : null,
         paymentStatus: needsPayment ? "pending_stripe" : "pending_at_counter",
-        uberQuoteId: deliveryQuote?.id || null,
+        deliveryService: deliveryQuote?.service || null,
+        deliveryQuoteId: deliveryQuote?.id || null,
+        deliveryFee: deliveryQuote?.fee || 0,
         customerEmail: customerEmail,
         customerPhone: customerPhone
       }
     };
 
     try {
-      // 1. Créer la commande
       console.log("Création de la commande...");
       const response = await axios.post(`${BASE_API}/orders`, orderData);
       console.log("Réponse commande:", response.data);
@@ -188,10 +245,8 @@ export default function Cart() {
         const orderId = response.data.data?._id || response.data.orderId;
         console.log("OrderId:", orderId);
 
-        // 2. Si paiement nécessaire, utiliser Stripe
         if (needsPayment) {
           console.log("Paiement nécessaire, préparation des items Stripe...");
-          // Format simplifié pour votre backend
           const stripeItems = cart.map((item: any) => {
             const unitPrice = parsePrice(item.price);
             const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
@@ -209,7 +264,6 @@ export default function Cart() {
           
           console.log("Stripe items:", stripeItems);
           
-          // Appel direct à votre backend
           const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
             items: stripeItems,
             orderId: orderId
@@ -235,18 +289,12 @@ export default function Cart() {
     }
   };
 
-  // Validation du formulaire avec LOGS
+  // Validation du formulaire
   const isOrderDisabled = () => {
     console.log("=== isOrderDisabled CALLED ===");
     console.log("orderMode:", orderMode);
-    console.log("consumeMode:", consumeMode);
-    console.log("payNow:", payNow);
-    console.log("isAgreed:", isAgreed);
-    console.log("isSubmitting:", isSubmitting);
-    console.log("selectedTable:", selectedTable);
-    console.log("customerEmail:", customerEmail);
-    console.log("shouldShowEmailFields:", shouldShowEmailFields);
-    console.log("amountToPay:", amountToPay);
+    console.log("selectedDeliveryService:", selectedDeliveryService);
+    console.log("deliveryQuote:", deliveryQuote);
     
     if (!isAgreed) {
       console.log("❌ BLOQUÉ: Conditions non acceptées");
@@ -258,12 +306,20 @@ export default function Cart() {
     }
     
     if (orderMode === 'delivery') {
+      if (!selectedDeliveryService) {
+        console.log("❌ BLOQUÉ (delivery): Aucun service de livraison sélectionné");
+        return true;
+      }
       if (!deliveryQuote) {
-        console.log("❌ BLOQUÉ (delivery): Pas de devis livraison");
+        console.log("❌ BLOQUÉ (delivery): Pas de devis livraison validé");
         return true;
       }
       if (!customerName) {
         console.log("❌ BLOQUÉ (delivery): Nom manquant");
+        return true;
+      }
+      if (!address || address.trim().length < 10) {
+        console.log("❌ BLOQUÉ (delivery): Adresse invalide");
         return true;
       }
     }
@@ -279,7 +335,6 @@ export default function Cart() {
       }
     }
     
-    // POUR LE MODE "EN SALLE" AVEC PAIEMENT EN LIGNE
     if (orderMode === 'on_site') {
       console.log("--- Mode en salle ---");
       if (consumeMode === 'dine_in' && !selectedTable) {
@@ -293,7 +348,6 @@ export default function Cart() {
       }
     }
     
-    // Validation email pour paiement en ligne (autres modes)
     if (shouldShowEmailFields && (!customerEmail || !customerEmail.includes('@'))) {
       console.log("❌ BLOQUÉ: Email invalide ou manquant");
       return true;
@@ -411,7 +465,6 @@ export default function Cart() {
                         <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
                       </div>
                       
-                      {/* Champ email pour paiement en ligne en salle */}
                       {payNow === true && amountToPay > 0 && (
                         <div className="input-group full">
                           <label>Email * (pour le reçu)</label>
@@ -442,12 +495,83 @@ export default function Cart() {
                       )}
                       
                       <div className="input-group full">
-                        <label><Bike size={14}/> Adresse de livraison</label>
-                        <input type="text" placeholder="Adresse précise..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
-                        {isEstimating && <small className="gold-text">Calcul des frais...</small>}
-                        {deliveryError && <small className="error-text">{deliveryError}</small>}
-                        {deliveryQuote && <small className="success-text">✓ Livraison possible (+{deliveryQuote.fee.toFixed(2)}€)</small>}
+                        <label><Bike size={14}/> Adresse de livraison *</label>
+                        <input 
+                          type="text" 
+                          placeholder="Adresse précise..." 
+                          value={address} 
+                          onChange={(e) => setAddress(e.target.value)} 
+                          onBlur={handleAddressBlur}
+                        />
                       </div>
+
+                      {/* SECTION CHOIX DU SERVICE DE LIVRAISON */}
+                      <div className="delivery-services-section">
+                        <label className="section-label">Choisissez votre service de livraison :</label>
+                        <div className="delivery-services-grid">
+                          <button
+                            type="button"
+                            className={`delivery-service-btn ${selectedDeliveryService === "uber" ? "active" : ""}`}
+                            onClick={() => handleDeliveryServiceChange("uber")}
+                          >
+                            <span className="service-icon">🚲</span>
+                            <span className="service-name">Uber Eats</span>
+                            <span className="service-price">Prix selon course</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`delivery-service-btn ${selectedDeliveryService === "deliveroo" ? "active" : ""}`}
+                            onClick={() => handleDeliveryServiceChange("deliveroo")}
+                          >
+                            <span className="service-icon">🛵</span>
+                            <span className="service-name">Deliveroo</span>
+                            <span className="service-price">Prix selon course</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`delivery-service-btn ${selectedDeliveryService === "justeat" ? "active" : ""}`}
+                            onClick={() => handleDeliveryServiceChange("justeat")}
+                          >
+                            <span className="service-icon">🍔</span>
+                            <span className="service-name">Just Eat</span>
+                            <span className="service-price">Prix selon course</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`delivery-service-btn signature ${selectedDeliveryService === "signature" ? "active" : ""}`}
+                            onClick={() => handleDeliveryServiceChange("signature")}
+                          >
+                            <span className="service-icon">✨</span>
+                            <span className="service-name">Livraison Signature</span>
+                            <span className="service-price">5.00€</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Statut du devis */}
+                      {isEstimating && (
+                        <small className="gold-text">Calcul des frais de livraison...</small>
+                      )}
+                      
+                      {deliveryError && (
+                        <small className="error-text">{deliveryError}</small>
+                      )}
+                      
+                      {deliveryQuote && !deliveryError && (
+                        <div className="delivery-quote-success">
+                          <Sparkles size={16} />
+                          <span>
+                            {deliveryQuote.service === "signature" 
+                              ? "✨ Livraison Signature : 5.00€ ajoutés à votre commande"
+                              : `✓ Livraison via ${deliveryFees[deliveryQuote.service as keyof typeof deliveryFees]?.label} : +${deliveryQuote.fee.toFixed(2)}€`
+                            }
+                          </span>
+                        </div>
+                      )}
+
                       <div className="input-group full">
                         <label>Heure souhaitée (min {minTime})</label>
                         <input type="time" min={minTime} value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} />
@@ -503,7 +627,7 @@ export default function Cart() {
 
               {orderMode === "delivery" && deliveryQuote && (
                 <div className="summary-line">
-                  <span>Frais de livraison</span>
+                  <span>Frais de livraison ({deliveryFees[deliveryQuote.service as keyof typeof deliveryFees]?.label || "Livraison"})</span>
                   <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
                 </div>
               )}
