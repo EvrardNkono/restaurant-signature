@@ -2,9 +2,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  Save, Power, PowerOff, Image as ImageIcon, Loader2, UploadCloud,
-  Plus, Edit3, Trash2, Eye, EyeOff, Clock, GripVertical, X,
-  Sparkles, Palette, Link as LinkIcon, AlertCircle, MoveUp, MoveDown
+  Save, Image as ImageIcon, Loader2, UploadCloud,
+  Plus, Edit3, Trash2, Eye, EyeOff, Clock, X, Link as LinkIcon,  MoveUp, MoveDown
 } from 'lucide-react';
 import './AdManager.css';
 
