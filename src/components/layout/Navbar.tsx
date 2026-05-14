@@ -1,63 +1,106 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { ShoppingBag } from "lucide-react"; 
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { ShoppingBag, Menu, X, Phone } from "lucide-react"; 
 import { useCart } from "../../context/CartContext"; 
 import "../../styles/navbar.css";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { cart } = useCart(); 
+  const [scrolled, setScrolled] = useState(false);
+  const { cart } = useCart();
+  const location = useLocation();
 
   const closeMenu = () => setOpen(false);
 
-  // Correction de l'erreur "never read" : on utilise 'cart' ici
-  // On calcule la somme des quantités de tous les produits
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    closeMenu();
+  }, [location]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [open]);
+
   const totalItems = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  return (
-    <header className="navbar">
-      <div className="navbar-container">
+  const navLinks = [
+    { to: "/", label: "Accueil" },
+    { to: "/carte", label: "Notre Carte" },
+    { to: "/menu", label: "Menu Jour" },
+    { to: "/menu-soir", label: "Menu Soir" },
+    { to: "/a-propos", label: "À propos" },
+    { to: "/contact", label: "Contact" },
+  ];
 
-        {/* LOGOS ALIGNÉS HORIZONTALEMENT */}
-        <Link to="/" className="navbar-logo-container" onClick={closeMenu}>
-          <img 
-            src="/images/icone11.png" 
-            alt="Restaurant Signature Logo" 
-            className="navbar-logo-img" 
-          />
-          
+  return (
+    <header className={`navbar ${scrolled ? "scrolled" : ""}`}>
+      <div className="navbar-container">
+        
+        {/* LOGO */}
+        <Link to="/" className="logo" onClick={closeMenu}>
+          <img src="/images/icone11.png" alt="Signature" />
+          <div className="logo-text">
+            <span>Signature</span>
+            <small>Restaurant</small>
+          </div>
         </Link>
 
-        <nav className={`navbar-links ${open ? "open" : ""}`}>
-          <Link to="/" onClick={closeMenu}>Accueil</Link>
-          <Link to="/carte" onClick={closeMenu}>Notre Carte</Link>
-          <Link to="/menu" onClick={closeMenu}>Menu jour</Link>
-          <Link to="/menu-soir" onClick={closeMenu}>Menu soir</Link>
-          <Link to="/a-propos" onClick={closeMenu}>À propos</Link>
-          <Link to="/contact" onClick={closeMenu}>Contact</Link>
+        {/* NAVIGATION DESKTOP */}
+        <nav className="nav-links">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.to} 
+              to={link.to} 
+              className={location.pathname === link.to ? "active" : ""}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* ZONE PANIER ET BURGER */}
-        <div className="navbar-actions">
-          <Link to="/panier" className="cart-icon-link" onClick={closeMenu}>
-            <ShoppingBag size={24} strokeWidth={1.5} />
-            {/* On affiche le badge seulement si le panier contient des articles */}
-            {totalItems > 0 && (
-              <span className="cart-count">{totalItems}</span>
-            )}
+        {/* TÉLÉPHONE */}
+        <div className="nav-phone">
+          <Phone size={14} />
+          <span>+33 6 62 03 84 72</span>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="nav-actions">
+          <Link to="/panier" className="cart-link">
+            <ShoppingBag size={22} />
+            {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
           </Link>
 
-          <button
-            className={`burger ${open ? "open" : ""}`}
-            onClick={() => setOpen(!open)}
-            aria-label="Menu"
-          >
-            <span />
-            <span />
-            <span />
+          <button className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)}>
+            <Menu size={22} />
           </button>
         </div>
 
+        {/* MENU MOBILE */}
+        <div className={`mobile-menu ${open ? "open" : ""}`}>
+          {/* Bouton de fermeture à l'intérieur du menu mobile */}
+          <button className="mobile-close" onClick={closeMenu}>
+            <X size={24} />
+          </button>
+          
+          <div className="mobile-menu-inner">
+            {navLinks.map((link) => (
+              <Link key={link.to} to={link.to} onClick={closeMenu}>
+                {link.label}
+              </Link>
+            ))}
+            <div className="mobile-phone">
+              <Phone size={14} />
+              <span>+33 6 62 03 84 72</span>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
   );

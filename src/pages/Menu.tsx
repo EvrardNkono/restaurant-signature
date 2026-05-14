@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useCart } from "../context/CartContext"; 
+import { useCart } from "../context/CartContext";
 import { 
   Loader2, X, Utensils, GlassWater, 
   Check, PlusCircle, Sparkles, MinusCircle,
   Clock, CreditCard, Gift, Flame, Crown,
-  Star, Eye, Award, Search, ArrowRight
-} from "lucide-react"; 
+  Star, Eye, Award, Search, ArrowRight,
+  Heart, Zap, Shield, ChefHat, Coffee,
+  Wine, Beer, Tv, MapPin, Instagram, Facebook
+} from "lucide-react";
 import "./menu.css";
 
 // --- CONFIGURATION ---
@@ -19,90 +21,110 @@ const BASE_URL = isLocal
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
 
-// --- COMPOSANT VOYANT DE STATUT (TRACKING) ---
+// --- COMPOSANT VOYANT DE STATUT AVEC PROGRESSION ---
 const OrderStatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { label: string, color: string, icon: any, gradient?: string, pulse?: boolean }> = {
+  const statusConfig: Record<string, { label: string, color: string, icon: any, gradient: string, progress?: number }> = {
     in_cart: { 
       label: "À régler", 
       color: "#E74C3C",
       gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
       icon: <CreditCard size={12} />,
-      pulse: true 
+      progress: 0
     },
     pending: { 
       label: "En attente", 
-      color: "#2D2422",
-      gradient: "linear-gradient(135deg, #2D2422, #1a1312)",
+      color: "#F39C12",
+      gradient: "linear-gradient(135deg, #F39C12, #E67E22)",
       icon: <Clock size={12} />,
-      pulse: true
+      progress: 25
     },
     cooking: { 
       label: "En cuisine", 
-      color: "#B86B4A",
-      gradient: "linear-gradient(135deg, #B86B4A, #8B4513)",
-      icon: <Flame size={12} />, 
-      pulse: true 
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
+      icon: <Flame size={12} />,
+      progress: 50
     },
     done: { 
       label: "Prêt", 
-      color: "#D4AF37",
-      gradient: "linear-gradient(135deg, #D4AF37, #B8860B)",
-      icon: <Sparkles size={12} /> 
+      color: "#27AE60",
+      gradient: "linear-gradient(135deg, #27AE60, #1E8449)",
+      icon: <Sparkles size={12} />,
+      progress: 100
     },
   };
 
-  const config = statusConfig[status] || { 
-    label: "Reçu", 
-    color: "#34495e",
-    gradient: "linear-gradient(135deg, #34495e, #2c3e50)",
-    icon: <Check size={12} /> 
-  };
+  const config = statusConfig[status] || statusConfig.pending;
 
   return (
-    <div className="order-status-tag" style={{ background: config.gradient || config.color }}>
-      <div className="status-icon-wrapper">
-        {config.icon}
-      </div>
+    <div className="order-status-badge-premium" style={{ background: config.gradient }}>
+      <div className="status-icon">{config.icon}</div>
       <span>{config.label}</span>
-      {config.pulse && <div className="status-pulse-ring" />}
+      {config.progress !== undefined && config.progress < 100 && (
+        <div className="status-progress">
+          <div className="status-progress-bar" style={{ width: `${config.progress}%` }} />
+        </div>
+      )}
     </div>
   );
 };
 
-// --- COMPOSANT OFFRE SPÉCIALE ---
-const OfferBadge = ({ quantity }: { quantity: number }) => (
-  <div className="offer-badge-premium">
+// --- COMPOSANT OFFRE SPÉCIALE AMÉLIORÉ ---
+const OfferBadge = ({ quantity, requiredQuantity }: { quantity: number; requiredQuantity: number }) => (
+  <div className="offer-badge-enhanced">
     <Gift size={10} />
-    <span>Offre x{quantity}</span>
+    <span>+{Math.floor(quantity / requiredQuantity)} offerte(s)</span>
   </div>
 );
 
-// --- COMPOSANT NOTE GASTRONOMIQUE ---
-const GastronomicNote = ({ note }: { note: number }) => (
-  <div className="gastro-note">
+// --- COMPOSANT NOTE GASTRONOMIQUE AVEC ANIMATION ---
+const GastronomicNote = ({ note, size = 10 }: { note: number; size?: number }) => (
+  <div className="gastro-note-enhanced">
     {[...Array(5)].map((_, i) => (
       <Star 
         key={i} 
-        size={10} 
-        className={i < note ? "star-filled" : "star-empty"}
+        size={size} 
+        className={`gastro-star ${i < note ? "filled" : "empty"}`}
         fill={i < note ? "#D4AF37" : "none"}
       />
     ))}
+    <span className="gastro-note-value">{note}.0</span>
   </div>
 );
 
+// --- COMPOSANT TIMER DE PRÉPARATION ---
+const PreparationTimer = ({ minutes }: { minutes: number }) => (
+  <div className="prep-timer-premium">
+    <Clock size={12} />
+    <span>{minutes} min</span>
+  </div>
+);
+
+// --- FONCTION SCROLL AMÉLIORÉE ---
 const scrollToDrawer = (id: string) => {
   setTimeout(() => {
     const element = document.getElementById(`drawer-${id}`);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-      });
+      const card = element.closest('.menu-card-enhanced');
+      if (card) {
+        const cardRect = card.getBoundingClientRect();
+        const scrollTarget = window.scrollY + cardRect.top - 100;
+        
+        window.scrollTo({
+          top: scrollTarget + 120,
+          behavior: 'smooth'
+        });
+      } else {
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start'
+        });
+      }
+      
       element.classList.add('drawer-highlight');
       setTimeout(() => element.classList.remove('drawer-highlight'), 1000);
     }
-  }, 100);
+  }, 150);
 };
 
 // --- INTERFACES ---
@@ -174,9 +196,27 @@ export default function Menu() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
   const isAnyDrawerOpen = selectingAccId !== null;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
+  const lastScrollY = useRef(0);
+
+  // Détection du scroll pour masquer/afficher la barre de contrôle
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setScrollDirection("down");
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection("up");
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Détection du mobile pour l'overlay
   useEffect(() => {
@@ -189,9 +229,9 @@ export default function Menu() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (isAnyDrawerOpen && isMobile) {
-        const drawer = document.querySelector('.customization-drawer.open');
+        const drawer = document.querySelector('.customization-drawer-enhanced.open');
         const target = e.target as HTMLElement;
-        if (drawer && !drawer.contains(target) && !target.closest('.btn-add-premium')) {
+        if (drawer && !drawer.contains(target) && !target.closest('.add-btn')) {
           setSelectingAccId(null);
         }
       }
@@ -202,12 +242,12 @@ export default function Menu() {
   }, [isAnyDrawerOpen, isMobile]);
 
   const triggerBounceHint = useCallback(() => {
-    const scrollContainer = document.querySelector('.drawer-body-scroll');
-    if (scrollContainer) {
-      scrollContainer.classList.remove('hint-active');
-      void (scrollContainer as HTMLElement).offsetWidth; 
-      scrollContainer.classList.add('hint-active');
-      setTimeout(() => scrollContainer.classList.remove('hint-active'), 800);
+    const drawerContent = document.querySelector('.customization-drawer-enhanced.open .drawer-content-enhanced');
+    if (drawerContent) {
+      drawerContent.classList.remove('hint-active');
+      void (drawerContent as HTMLElement).offsetWidth; 
+      drawerContent.classList.add('hint-active');
+      setTimeout(() => drawerContent.classList.remove('hint-active'), 800);
     }
   }, []);
 
@@ -296,7 +336,12 @@ export default function Menu() {
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    if (isAnyDrawerOpen) return;
+    // Si un autre drawer est ouvert, on le ferme d'abord
+    if (isAnyDrawerOpen && selectingAccId !== plat._id) {
+      setSelectingAccId(null);
+      setTimeout(() => handleAddClick(plat, currentQty), 300);
+      return;
+    }
 
     const result = addToCart(
       { 
@@ -312,11 +357,7 @@ export default function Menu() {
     );
 
     if (result === "LOCK_ERROR") {
-      const toast = document.createElement('div');
-      toast.className = 'custom-toast error';
-      toast.innerHTML = `<span>⚠️ Votre panier contient déjà des produits d'un autre service.</span>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      showToast("Votre panier contient déjà des produits d'un autre service", "error");
       return;
     }
 
@@ -328,153 +369,202 @@ export default function Menu() {
       setSelectingAccId(plat._id);
       scrollToDrawer(plat._id);
     } else {
-      const toast = document.createElement('div');
-      toast.className = 'custom-toast success';
-      toast.innerHTML = `<span>✓ ${plat.name} ajouté au panier</span>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
+      showToast(`✓ ${plat.name} ajouté au panier`, "success");
     }
   };
 
-  const handleRemoveOne = (itemsInCart: any[]) => {
+  const handleRemoveOne = (itemsInCart: any[], platName: string) => {
     if (itemsInCart.length > 0) {
       const lastItem = itemsInCart[itemsInCart.length - 1];
       removeFromCart(lastItem.cartItemId);
-      const toast = document.createElement('div');
-      toast.className = 'custom-toast info';
-      toast.innerHTML = `<span>✓ Article retiré du panier</span>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
+      showToast(`✓ ${platName} retiré du panier`, "info");
     }
+  };
+
+  const showToast = (message: string, type: "success" | "error" | "info") => {
+    const toast = document.createElement('div');
+    toast.className = `custom-toast-enhanced ${type}`;
+    toast.innerHTML = `
+      <div class="toast-content">
+        <span class="toast-message">${message}</span>
+        <button class="toast-close">×</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn?.addEventListener('click', () => toast.remove());
+    
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  };
+
+  const toggleLike = (platId: string) => {
+    setLikedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platId)) {
+        newSet.delete(platId);
+        showToast("Retiré de vos favoris", "info");
+      } else {
+        newSet.add(platId);
+        showToast("Ajouté à vos favoris", "success");
+      }
+      return newSet;
+    });
   };
 
   if (isLoadingMenu) {
     return (
-      <div className="menu-loading-premium">
-        <div className="loading-content">
-          <div className="loading-logo">S</div>
-          <Loader2 className="animate-spin" size={50} color="#D4AF37" />
-          <p>Signature prépare sa carte gastronomique...</p>
-          <div className="loading-dots">
-            <span>.</span><span>.</span><span>.</span>
-          </div>
+      <div className="menu-loading-enhanced">
+        <div className="loading-spiral">
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-logo">S</div>
+        </div>
+        <p className="loading-text">Signature prépare sa carte gastronomique...</p>
+        <div className="loading-progress-bar">
+          <div className="loading-progress-fill"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <section className="menu-section-premium">
+    <section className="menu-section-enhanced">
       {/* Overlay adapté selon mobile/desktop */}
       {isAnyDrawerOpen && (
         <div 
-          className={isMobile ? "global-drawer-overlay-mobile" : "global-drawer-overlay-premium"} 
+          className={isMobile ? "drawer-overlay-mobile" : "drawer-overlay-premium"} 
           onClick={() => setSelectingAccId(null)} 
         />
       )}
 
-      {/* HERO SECTION PREMIUM */}
-      <div className="menu-hero-premium">
-        <div className="hero-backdrop"></div>
-        <div className="hero-text-overlay"></div>
-        <div className="hero-particles">
-          {[...Array(20)].map((_, i) => (
-            <div key={i} className="particle" style={{ '--delay': `${i * 0.5}s`, '--x': `${Math.random() * 100}%` } as React.CSSProperties} />
-          ))}
+      {/* HERO SECTION CINÉMATIQUE */}
+      <div className="menu-hero-cinematic">
+        <div className="hero-video-backdrop">
+          <div className="hero-gradient-overlay"></div>
+          <div className="hero-particles-container">
+            {[...Array(30)].map((_, i) => (
+              <div key={i} className="hero-particle" style={{ 
+                '--delay': `${i * 0.3}s`, 
+                '--x': `${Math.random() * 100}%`,
+                '--duration': `${5 + Math.random() * 10}s`
+              } as React.CSSProperties} />
+            ))}
+          </div>
         </div>
-        <div className="hero-content-premium">
-          <div className="hero-floating-elements">
-            <Crown className="floating-icon crown" size={30} />
-            <Star className="floating-icon star" size={20} />
-            <Sparkles className="floating-icon sparkle" size={16} />
+        
+        <div className="hero-content-cinematic">
+          <div className="hero-badge-cinematic">
+            <Award size={16} />
+            <span>Étoilé Michelin ⭐⭐⭐</span>
           </div>
-          <div className="hero-badge-premium">
-            <Award size={14} />
-            <span>Étoilé au Guide Michelin 2025</span>
-          </div>
-          <h1 className="hero-title-premium">
-            L'Art de la 
-            <span className="gold-text"> Table Signature</span>
+          
+          <h1 className="hero-title-cinematic">
+            L'Art de la
+            <span className="gold-gradient"> Table Signature</span>
           </h1>
-          <div className="hero-separator-premium">
-            <div className="separator-line"></div>
-            <Utensils size={24} className="separator-icon" />
-            <div className="separator-line"></div>
+          
+          <div className="hero-separator-cinematic">
+            <div className="separator-line gold"></div>
+            <ChefHat size={28} className="separator-icon" />
+            <div className="separator-line gold"></div>
           </div>
-          <p className="hero-description-premium">
-            Une symphonie de saveurs où chaque met raconte une histoire unique
+          
+          <p className="hero-description-cinematic">
+            Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+            Découvrez l'excellence gastronomique réinventée
           </p>
-          <div className="hero-stats-premium">
-            <div className="stat-item">
+          
+          <div className="hero-stats-cinematic">
+            <div className="hero-stat">
               <span className="stat-number">15+</span>
               <span className="stat-label">Plats Signature</span>
             </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
+            <div className="hero-stat">
               <span className="stat-number">100%</span>
               <span className="stat-label">Produits Frais</span>
             </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
+            <div className="hero-stat">
               <span className="stat-number">⭐ 4.9</span>
               <span className="stat-label">Notes Clients</span>
             </div>
           </div>
+          
+          <div className="hero-cta-cinematic">
+            <button className="cta-primary" onClick={() => {
+              document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              <span>Découvrir la carte</span>
+              <ArrowRight size={18} />
+            </button>
+            <button className="cta-secondary">
+              <span>Réservation</span>
+              <Tv size={16} />
+            </button>
+          </div>
         </div>
-        <div className="hero-scroll-indicator-premium">
-          <span>Découvrir la carte</span>
+        
+        <div className="hero-scroll-indicator">
           <div className="scroll-mouse">
             <div className="scroll-wheel"></div>
+          </div>
+          <span>Scroll</span>
+        </div>
+      </div>
+
+      {/* BARRE DE CONTRÔLE STICKY AVEC ANIMATION */}
+      <div className={`controls-bar-enhanced ${scrollDirection === "up" ? "visible" : "hidden"}`}>
+        <div className="controls-container">
+          <div className="search-wrapper">
+            <Search className="search-icon" size={18} />
+            <input 
+              type="text"
+              placeholder="Rechercher un plat, une saveur..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input-enhanced"
+            />
+            {searchTerm && (
+              <button className="search-clear" onClick={() => setSearchTerm("")}>
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          <div className="univers-tabs">
+            <button 
+              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
+            >
+              <Utensils size={18} />
+              <span>Cuisine</span>
+            </button>
+            <button 
+              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
+            >
+              <GlassWater size={18} />
+              <span>Boissons</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* BARRE DE RECHERCHE & FILTRES */}
-      <div className="controls-bar-premium">
-        <div className="search-bar-premium">
-          <input 
-            type="text"
-            placeholder="Rechercher un plat, une saveur..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input-premium"
-          />
-          <button className="search-btn-premium">
-            <Search size={18} />
-          </button>
-        </div>
-
-        <div className="univers-selector-premium">
-          <button 
-            className={`univers-btn-premium ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
-            onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
-          >
-            <Utensils size={18} />
-            <span>Carte & Saveurs</span>
-            {univers === "Cuisine" && <div className="active-indicator" />}
-          </button>
-          <button 
-            className={`univers-btn-premium ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
-            onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
-          >
-            <GlassWater size={18} />
-            <span>Cave & Spiritueux</span>
-            {univers === "Boissons" && <div className="active-indicator" />}
-          </button>
-        </div>
-      </div>
-
-      {/* CATÉGORIES FILTRES */}
-      <div className="categories-bar-premium">
-        <div className="categories-scroll-premium">
+      {/* CATÉGORIES FILTRES AVEC SCROLL HORIZONTAL */}
+      <div className="categories-bar-enhanced">
+        <div className="categories-scroll">
           {currentCategories.map((cat, idx) => (
             <button 
               key={idx} 
-              className={`category-chip-premium ${filter === cat ? "active" : ""}`} 
+              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
               onClick={() => !isAnyDrawerOpen && setFilter(cat)}
             >
-              <span>{cat}</span>
-              {filter === cat && <div className="chip-glow" />}
+              <span className="chip-text">{cat}</span>
+              {filter === cat && <div className="chip-active-indicator" />}
             </button>
           ))}
         </div>
@@ -482,14 +572,20 @@ export default function Menu() {
 
       {/* RÉSULTATS DE RECHERCHE */}
       {searchTerm && (
-        <div className="search-results-premium">
-          <span>{platsFiltres.length} résultat(s) trouvé(s)</span>
-          <button onClick={() => setSearchTerm("")}>Effacer</button>
+        <div className="search-results-enhanced">
+          <div className="results-info">
+            <Sparkles size={14} />
+            <span>{platsFiltres.length} résultat(s) trouvé(s)</span>
+          </div>
+          <button className="clear-search" onClick={() => setSearchTerm("")}>
+            <X size={14} />
+            Effacer
+          </button>
         </div>
       )}
 
       {/* GRILLE DES PLATS */}
-      <div className="menu-grid-premium">
+      <div className="menu-grid-enhanced">
         {platsFiltres.length > 0 ? (
           platsFiltres.map((plat, index) => {
             const quantityInCart = getItemQuantity(plat._id);
@@ -499,6 +595,7 @@ export default function Menu() {
             const isExpanding = selectingAccId === plat._id;
             const isHovered = hoveredCard === plat._id;
             const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+            const isLiked = likedItems.has(plat._id);
 
             let orderMatch = activeOrders.find((order: any) =>
               order.items.some((item: any) => item.productId === plat._id)
@@ -518,102 +615,135 @@ export default function Menu() {
             return (
               <div 
                 key={plat._id} 
-                className={`menu-card-premium ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
+                className={`menu-card-enhanced ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
                 onMouseEnter={() => setHoveredCard(plat._id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                style={{ animationDelay: `${index * 0.05}s` }}
+                style={{ animationDelay: `${index * 0.03}s` }}
               >
-                <div className={`card-inner-premium ${isFlipped ? "flipped" : ""}`}>
+                <div className={`card-perspective ${isFlipped ? "flipped" : ""}`}>
                   
                   {/* FACE AVANT */}
-                  <div className="card-front-premium">
-                    <div className="card-image-section">
+                  <div className="card-front-enhanced">
+                    <div className="card-media">
                       {currentStatus && <OrderStatusBadge status={currentStatus} />}
-                      {plat.offer?.enabled && <OfferBadge quantity={plat.offer.requiredQuantity} />}
-                      {plat.spicy && <div className="spicy-badge"><Flame size={12} /> Épicé</div>}
-                      {plat.vegetarian && <div className="veg-badge">🌱 Végétarien</div>}
                       
-                      <div className="image-wrapper">
-                        {plat.image ? (
-                          <img src={plat.image} alt={plat.name} className="card-image" loading="lazy" />
-                        ) : (
-                          <div className="image-placeholder">S</div>
+                      <div className="card-badges">
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (
+                          <OfferBadge quantity={quantityInCart} requiredQuantity={plat.offer.requiredQuantity} />
                         )}
-                        <div className="image-overlay-gradient"></div>
+                        {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                        {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                        {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
                       </div>
                       
-                      <div className="price-tag-premium">
-                        <span className="price-currency">€</span>
-                        <span className="price-value">{plat.price}</span>
+                      <div className="media-wrapper">
+                        {plat.image ? (
+                          <img 
+                            src={plat.image} 
+                            alt={plat.name} 
+                            className="card-image-enhanced"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="image-placeholder-enhanced">
+                            <Utensils size={32} />
+                          </div>
+                        )}
+                        <div className="media-overlay"></div>
                       </div>
                       
-                      <button 
-                        className="quick-view-btn"
-                        onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
-                      >
-                        <Eye size={16} />
-                      </button>
+                      <div className="price-chip">
+                        <span className="price-symbol">€</span>
+                        <span className="price-amount">{plat.price}</span>
+                      </div>
+                      
+                      <div className="card-actions-floating">
+                        <button 
+                          className={`action-btn like-btn ${isLiked ? "active" : ""}`}
+                          onClick={() => toggleLike(plat._id)}
+                        >
+                          <Heart size={16} fill={isLiked ? "#E74C3C" : "none"} />
+                        </button>
+                        <button 
+                          className="action-btn view-btn"
+                          onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="card-info-premium">
+                    <div className="card-content">
                       <div className="card-header">
-                        <div className="category-badge">{plat.category?.name}</div>
-                        {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} />}
+                        <div className="category-tag">{plat.category?.name}</div>
+                        {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
                       </div>
                       
-                      <h3 className="plat-name-premium">{plat.name}</h3>
-                      <div className="title-decoration"></div>
+                      <h3 className="plat-title">{plat.name}</h3>
+                      <div className="title-underline"></div>
                       
-                      <p className="plat-description-premium">
-                        {plat.description.length > 100 
-                          ? `${plat.description.substring(0, 100)}...` 
+                      <p className="plat-description">
+                        {plat.description.length > 90 
+                          ? `${plat.description.substring(0, 90)}...` 
                           : plat.description}
                       </p>
                       
-                      <div className="card-actions-premium">
-                        {quantityInCart > 0 && !isExpanding && (
-                          <button className="btn-remove-premium" onClick={() => handleRemoveOne(itemsInCart)}>
-                            <MinusCircle size={18} />
-                            <span>Retirer</span>
-                          </button>
-                        )}
-                        <button
-                          className={`btn-add-premium ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""}`}
-                          onClick={() => handleAddClick(plat, quantityInCart)}
-                        >
-                          {isExpanding ? (
-                            <>
-                              <Loader2 className="animate-spin" size={16} />
-                              <span>Configuration...</span>
-                            </>
-                          ) : (
-                            <>
-                              <PlusCircle size={18} />
-                              <span>{quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter"}</span>
-                            </>
+                      {plat.preparationTime && (
+                        <PreparationTimer minutes={plat.preparationTime} />
+                      )}
+                      
+                      <div className="card-footer">
+                        <div className="quantity-controls">
+                          {quantityInCart > 0 && !isExpanding && (
+                            <button 
+                              className="qty-btn remove"
+                              onClick={() => handleRemoveOne(itemsInCart, plat.name)}
+                            >
+                              <MinusCircle size={18} />
+                            </button>
                           )}
+                          {quantityInCart > 0 && (
+                            <span className="qty-badge">{quantityInCart}</span>
+                          )}
+                          <button
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""}`}
+                            onClick={() => handleAddClick(plat, quantityInCart)}
+                          >
+                            {isExpanding ? (
+                              <>
+                                <Loader2 className="spin" size={16} />
+                                <span>Configuration...</span>
+                              </>
+                            ) : (
+                              <>
+                                <PlusCircle size={18} />
+                                <span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        
+                        <button className="details-link" onClick={() => setFlippedId(plat._id)}>
+                          <span>Détails</span>
+                          <ArrowRight size={14} />
                         </button>
                       </div>
-                      
-                      <button className="details-trigger" onClick={() => setFlippedId(plat._id)}>
-                        <span>Détails</span>
-                        <ArrowRight size={14} />
-                      </button>
                     </div>
 
                     {/* TIROIR DE PERSONNALISATION */}
-                    <div id={`drawer-${plat._id}`} className={`customization-drawer ${isExpanding ? "open" : ""}`}>
-                      <div className="drawer-header-premium">
-                        <div className="drawer-title-premium">
+                    <div id={`drawer-${plat._id}`} className={`customization-drawer-enhanced ${isExpanding ? "open" : ""}`}>
+                      <div className="drawer-handle-bar"></div>
+                      <div className="drawer-header-enhanced">
+                        <div className="drawer-title">
                           <Sparkles size={16} color="#D4AF37" />
                           <span>Personnalisez votre expérience</span>
                         </div>
-                        <button className="drawer-close-premium" onClick={() => setSelectingAccId(null)}>
+                        <button className="drawer-close" onClick={() => setSelectingAccId(null)}>
                           <X size={18} />
                         </button>
                       </div>
 
-                      <div className="drawer-content-premium">
+                      <div className="drawer-content-enhanced">
                         {/* OFFRE DYNAMIQUE */}
                         {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
                           const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
@@ -622,30 +752,33 @@ export default function Menu() {
                           const economie = (plat.price * quantityInCart) - prixPromo;
 
                           return (
-                            <div className="offer-section-premium">
-                              <div className="offer-header">
-                                <Gift size={18} />
-                                <span>Offre Signature Activée !</span>
+                            <div className="offer-card">
+                              <div className="offer-icon">
+                                <Gift size={20} />
                               </div>
-                              <p className="offer-description">
-                                {quantityInCart} {plat.name} → <strong>{prixPromo.toFixed(2)}€</strong>
-                              </p>
-                              {economie > 0 && (
-                                <div className="savings-premium">Économie : {economie.toFixed(2)}€</div>
-                              )}
+                              <div className="offer-info">
+                                <div className="offer-title">Offre Signature Activée !</div>
+                                <div className="offer-price">
+                                  {quantityInCart} × {plat.name}
+                                  <span className="offer-savings">Économie : {economie.toFixed(2)}€</span>
+                                </div>
+                              </div>
                             </div>
                           );
                         })()}
 
                         {/* ACCOMPAGNEMENTS */}
                         {activeAccs.length > 0 && lastItemAdded && (
-                          <div className="drawer-section-premium">
-                            <label className="section-label">Accompagnement</label>
-                            <div className="options-grid-premium">
+                          <div className="drawer-section">
+                            <label className="section-title">
+                              <Utensils size={14} />
+                              Accompagnement
+                            </label>
+                            <div className="options-grid">
                               {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
                                 <button
                                   key={accName}
-                                  className={`option-chip ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
+                                  className={`option ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
                                   onClick={() => {
                                     updateLineAccompaniment(lastItemAdded.cartItemId, accName);
                                     triggerBounceHint();
@@ -661,38 +794,47 @@ export default function Menu() {
 
                         {/* SUPPLÉMENTS */}
                         {plat.allowSupplements && lastItemAdded && (
-                          <div className="drawer-section-premium">
-                            <label className="section-label">Extras & Suppléments</label>
-                            <div className="supplements-grid-premium">
+                          <div className="drawer-section">
+                            <label className="section-title">
+                              <PlusCircle size={14} />
+                              Extras & Suppléments
+                            </label>
+                            <div className="supplements-list">
                               {isLoadingSupps ? (
-                                <div className="supp-loader"><Loader2 className="animate-spin" size={24} /></div>
+                                <div className="supp-loader"><Loader2 className="spin" size={24} /></div>
                               ) : (
                                 supplementsDisponibles.map(supp => {
                                   const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
                                   return (
-                                    <div key={supp._id} className="supplement-card-premium">
-                                      <div className="supp-info-premium">
+                                    <div key={supp._id} className="supplement-item">
+                                      <div className="supp-info">
                                         <span className="supp-name">{supp.name}</span>
                                         <span className="supp-price">+{supp.price}€</span>
                                       </div>
-                                      <div className="supp-controls">
+                                      <div className="supp-quantity">
                                         {count > 0 && (
-                                          <button onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
-                                            <MinusCircle size={18} />
+                                          <button 
+                                            className="supp-qty-btn"
+                                            onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}
+                                          >
+                                            <MinusCircle size={16} />
                                           </button>
                                         )}
                                         {count > 0 && <span className="supp-count">{count}</span>}
-                                        <button onClick={() => {
-                                          addSupplementToLine(lastItemAdded.cartItemId, {
-                                            id: supp._id,
-                                            name: supp.name,
-                                            price: supp.price,
-                                          });
-                                          setAddedSuppId(supp._id);
-                                          triggerBounceHint();
-                                          setTimeout(() => setAddedSuppId(null), 600);
-                                        }}>
-                                          <PlusCircle size={18} className={addedSuppId === supp._id ? "added" : ""} />
+                                        <button 
+                                          className="supp-qty-btn add"
+                                          onClick={() => {
+                                            addSupplementToLine(lastItemAdded.cartItemId, {
+                                              id: supp._id,
+                                              name: supp.name,
+                                              price: supp.price,
+                                            });
+                                            setAddedSuppId(supp._id);
+                                            triggerBounceHint();
+                                            setTimeout(() => setAddedSuppId(null), 600);
+                                          }}
+                                        >
+                                          <PlusCircle size={16} className={addedSuppId === supp._id ? "added-animation" : ""} />
                                         </button>
                                       </div>
                                     </div>
@@ -703,7 +845,7 @@ export default function Menu() {
                           </div>
                         )}
 
-                        <button className="drawer-confirm-premium" onClick={() => setSelectingAccId(null)}>
+                        <button className="drawer-confirm" onClick={() => setSelectingAccId(null)}>
                           <Check size={18} />
                           <span>Valider ma sélection</span>
                         </button>
@@ -711,35 +853,58 @@ export default function Menu() {
                     </div>
                   </div>
 
-                  {/* FACE ARRIÈRE - DÉTAILS */}
-                  <div className="card-back-premium">
-                    <button className="back-close-premium" onClick={() => setFlippedId(null)}>
+                  {/* FACE ARRIÈRE - DÉTAILS COMPLETS */}
+                  <div className="card-back-enhanced">
+                    <button className="back-close" onClick={() => setFlippedId(null)}>
                       <X size={18} />
                     </button>
-                    <div className="back-content-premium">
+                    <div className="back-scroll">
                       <div className="back-image">
                         <img src={plat.image} alt={plat.name} />
                       </div>
-                      <div className="back-info">
+                      <div className="back-details">
                         <div className="back-category">{plat.category?.name}</div>
-                        <h4>{plat.name}</h4>
-                        <div className="back-price">{plat.price}€</div>
-                        <div className="back-divider"></div>
-                        <p className="back-description">{plat.description}</p>
+                        <h2 className="back-title">{plat.name}</h2>
+                        <div className="back-price-large">{plat.price}€</div>
                         
-                        {plat.preparationTime && (
-                          <div className="back-meta">
-                            <Clock size={14} />
-                            <span>Temps de préparation : {plat.preparationTime} min</span>
-                          </div>
-                        )}
+                        <div className="back-info-grid">
+                          {plat.gastronomicNote && (
+                            <div className="info-item">
+                              <Star size={14} />
+                              <span>Note gastronomique: {plat.gastronomicNote}/5</span>
+                            </div>
+                          )}
+                          {plat.preparationTime && (
+                            <div className="info-item">
+                              <Clock size={14} />
+                              <span>Préparation: {plat.preparationTime} min</span>
+                            </div>
+                          )}
+                          {plat.calories && (
+                            <div className="info-item">
+                              <Zap size={14} />
+                              <span>Calories: {plat.calories} kcal</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="back-divider"></div>
+                        
+                        <p className="back-description-full">{plat.description}</p>
+                        
+                        <div className="back-tags">
+                          {plat.spicy && <span className="tag spicy">🌶️ Épicé</span>}
+                          {plat.vegetarian && <span className="tag veg">🌱 Végétarien</span>}
+                          {plat.vegan && <span className="tag vegan">🌿 Vegan</span>}
+                          {plat.glutenFree && <span className="tag gluten">🚫 Sans gluten</span>}
+                        </div>
                         
                         <div className="back-actions">
-                          <button className="back-order-btn" onClick={() => {
+                          <button className="order-now-btn" onClick={() => {
                             setFlippedId(null);
                             handleAddClick(plat, quantityInCart);
                           }}>
-                            Commander
+                            Commander maintenant
                           </button>
                         </div>
                       </div>
@@ -750,19 +915,68 @@ export default function Menu() {
             );
           })
         ) : (
-          <div className="empty-state-premium">
+          <div className="empty-state-enhanced">
             <div className="empty-animation">
-              <Utensils size={60} />
-              <Sparkles className="empty-sparkle" size={20} />
+              <Utensils size={64} strokeWidth={1} />
+              <div className="empty-sparkles">
+                <Sparkles className="sparkle-1" size={24} />
+                <Sparkles className="sparkle-2" size={16} />
+              </div>
             </div>
             <h3>Aucun résultat trouvé</h3>
             <p>Nous n'avons pas trouvé de plat correspondant à votre recherche</p>
-            <button onClick={() => { setFilter("Tous"); setSearchTerm(""); }}>
+            <button className="reset-filters" onClick={() => { setFilter("Tous"); setSearchTerm(""); }}>
               Réinitialiser les filtres
             </button>
           </div>
         )}
       </div>
+
+      {/* FOOTER GASTRONOMIQUE */}
+      <footer className="menu-footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="footer-logo">Signature</div>
+            <p>Cuisine d'exception depuis 1985</p>
+            <div className="social-links">
+              <Instagram size={20} />
+              <Facebook size={20} />
+              <MapPin size={20} />
+            </div>
+          </div>
+          <div className="footer-links">
+            <div className="link-group">
+              <h4>Menu</h4>
+              <a href="#">Entrées</a>
+              <a href="#">Plats</a>
+              <a href="#">Desserts</a>
+              <a href="#">Boissons</a>
+            </div>
+            <div className="link-group">
+              <h4>Informations</h4>
+              <a href="#">Réservations</a>
+              <a href="#">Événements</a>
+              <a href="#">Contact</a>
+              <a href="#">CGV</a>
+            </div>
+          </div>
+          <div className="footer-newsletter">
+            <h4>Newsletter</h4>
+            <p>Soyez informé des nouveautés</p>
+            <div className="newsletter-input">
+              <input type="email" placeholder="Votre email" />
+              <button>→</button>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© 2025 Signature Restaurant - Tous droits réservés</span>
+          <div className="michelin-badge">
+            <span>⭐⭐⭐</span>
+            <span>Guide Michelin</span>
+          </div>
+        </div>
+      </footer>
     </section>
   );
 }

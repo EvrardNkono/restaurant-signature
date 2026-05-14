@@ -1,16 +1,45 @@
 .hero {
   position: relative;
-  min-height: 80vh; /* Plus grand pour un aspect majestueux */
+  min-height: 80vh;
   width: 100%;
   margin-top: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 100px 5%;
-  /* Image de fond avec un dégradé sombre pour faire ressortir l'Or et le Terracotta */
   background: linear-gradient(rgba(45, 36, 34, 0.7), rgba(45, 36, 34, 0.7)), 
               url('/images/hero.jpg') center/cover no-repeat;
   overflow: hidden;
+}
+
+/* Éléments décoratifs */
+.hero-ornament {
+  position: absolute;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-ornament-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  right: -100px;
+}
+
+.hero-ornament-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 50px;
+  left: -80px;
+}
+
+.hero-ornament-3 {
+  width: 150px;
+  height: 150px;
+  top: 30%;
+  left: 20%;
+  opacity: 0.4;
 }
 
 .hero-container {
@@ -23,25 +52,45 @@
   z-index: 2;
 }
 
-/* --- PARTIE GAUCHE : L'IMAGE --- */
+/* ==================== PARTIE GAUCHE ==================== */
 .hero-left {
   flex: 1;
   display: flex;
-  justify-content: center;
-  perspective: 1000px; /* Effet de profondeur */
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.image-badge {
+  position: absolute;
+  top: -20px;
+  left: 40px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #D4AF37, #B8960F);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2D2422;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .image-circle {
   width: 380px;
   height: 380px;
-  border: 1px solid var(--gold); /* Plus fin pour l'élégance */
-  padding: 15px; /* Espace entre le cercle or et l'image */
+  border: 1px solid var(--gold);
+  padding: 15px;
   border-radius: 50%;
   position: relative;
-  transition: var(--transition);
+  transition: all 0.5s ease;
+  animation: float 6s ease-in-out infinite;
 }
 
-/* Petit cercle décoratif en arrière-plan */
 .image-circle::before {
   content: '';
   position: absolute;
@@ -61,31 +110,93 @@
   object-fit: cover;
   filter: saturate(1.1);
   box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  transition: transform 0.6s ease;
 }
 
-/* --- PARTIE DROITE : LE TEXTE --- */
+.image-circle:hover img {
+  transform: scale(1.02);
+}
+
+.image-indicators {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.indicator.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--gold);
+}
+
+.indicator:hover {
+  background: var(--gold);
+}
+
+/* ==================== PARTIE DROITE ==================== */
 .hero-right {
   flex: 1;
   text-align: left;
 }
 
+.hero-sup-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 175, 55, 0.15);
+  backdrop-filter: blur(4px);
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
 .hero-right h1 {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(2.5rem, 5vw, 4rem); /* Taille fluide selon l'écran */
+  font-size: clamp(2.5rem, 5vw, 4rem);
   color: var(--ivory);
   line-height: 1.1;
   margin-bottom: 1.5rem;
 }
 
-.hero-right h1 span {
-  display: block;
-  color: var(--gold);
+.gold-word {
+  background: linear-gradient(135deg, #D4AF37, #F5E6A3, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   font-style: italic;
-  font-weight: 400;
-  font-size: 0.8em;
-  background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
+}
+
+.hero-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.hero-divider span {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.hero-divider svg {
+  color: var(--gold);
 }
 
 .hero-right p {
@@ -97,10 +208,14 @@
   margin-bottom: 2.5rem;
   opacity: 0.9;
   letter-spacing: 0.5px;
+  line-height: 1.6;
 }
 
-/* --- BOUTON SIGNATURE --- */
+/* BOUTON */
 .reserve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   padding: 18px 40px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -113,6 +228,22 @@
   transition: all 0.4s ease;
   position: relative;
   overflow: hidden;
+  border-radius: 0;
+}
+
+.reserve-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.reserve-btn:hover::before {
+  left: 100%;
 }
 
 .reserve-btn:hover {
@@ -120,62 +251,101 @@
   border-color: var(--gold);
   color: var(--gold);
   transform: translateY(-3px);
+  gap: 15px;
 }
 
-/* --- RESPONSIVE MOBILE --- */
-@media (max-width: 992px) {
-  .hero {
-    height: auto !important;
-    min-height: auto !important; /* Retire l'obligation de prendre tout l'écran */
-    padding: 80px 20px 40px 20px !important; /* Réduit le padding du haut et du bas */
-  }
-
-  .hero-container {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 20px !important; /* Réduit l'espace entre le cercle et le texte (était à 50px) */
-    padding: 0 !important;
-  }
-
-  .hero-left, .hero-right {
-    flex: none !important;
-    width: 100% !important;
-  }
-
-  .image-circle {
-
-    width: 220px !important; /* Taille légèrement plus petite pour gagner de la place */
-    height: 220px !important;
-    margin-bottom: 0px !important;
-     margin-top: 30px !important;
-  }
-
-  .hero-right h1 {
-    font-size: 1.8rem !important; /* Titre un peu plus compact */
-    margin-bottom: 0.8rem !important;
-    margin-top: 10px !important;
-  }
-
-  .hero-right p {
-    font-size: 1rem !important;
-    margin-bottom: 1.5rem !important; /* Rapproche le bouton du texte */
-    line-height: 1.4 !important;
-  }
-
-  .reserve-btn {
-    padding: 14px 30px !important; /* Bouton un peu moins massif sur mobile */
-  }
-}
-
-
-.image-circle {
-  animation: float 6s ease-in-out infinite;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-}
-
+/* ==================== ANIMATIONS ==================== */
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
   100% { transform: translateY(0px); }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 992px) {
+  .hero {
+    height: auto;
+    min-height: auto;
+    padding: 80px 20px 40px;
+  }
+
+  .hero-container {
+    flex-direction: column;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .hero-left {
+    order: 2;
+  }
+
+  .hero-right {
+    order: 1;
+    text-align: center;
+  }
+
+  .image-circle {
+    width: 260px;
+    height: 260px;
+  }
+
+  .image-badge {
+    left: 50%;
+    transform: translateX(-50%);
+    top: -15px;
+  }
+
+  .hero-right p {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-divider {
+    justify-content: center;
+  }
+
+  .reserve-btn {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 70px 15px 40px;
+  }
+  
+  .image-circle {
+    width: 220px;
+    height: 220px;
+    padding: 10px;
+  }
+  
+  .hero-right h1 {
+    font-size: 1.8rem;
+  }
+  
+  .hero-right p {
+    font-size: 0.95rem;
+  }
+  
+  .reserve-btn {
+    padding: 14px 30px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-circle {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .hero-right h1 {
+    font-size: 1.5rem;
+  }
+  
+  .hero-divider span {
+    width: 30px;
+  }
 }

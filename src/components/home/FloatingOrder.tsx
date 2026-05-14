@@ -1,43 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Link, useLocation } from 'react-router-dom';
+import { Utensils, Moon, Sparkles, X, ChefHat, Star } from 'lucide-react';
 import './FloatingOrder.css';
 
 export default function FloatingOrder() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   
-  // Ref typée pour TypeScript
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleExternalToggle = () => {
-      // On utilise une fonction de mise à jour pour garantir la valeur la plus récente
       setIsOpen((prev) => {
         const newState = !prev;
-        
-        // Si le nouvel état est "ouvert", on scroll vers le bouton
         if (newState && nodeRef.current) {
-          // On attend un micro-tick pour laisser le temps au menu de s'afficher si besoin
           setTimeout(() => {
             nodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 10);
         }
-        
         return newState;
       });
     };
 
-    // Écoute le signal envoyé par le Footer
     window.addEventListener('openReservation', handleExternalToggle);
-    
     return () => {
       window.removeEventListener('openReservation', handleExternalToggle);
     };
   }, []);
 
-  // Gestion des routes où le bouton est masqué
   const hiddenRoutes = ['/menu', '/menu-soir'];
   if (hiddenRoutes.includes(location.pathname)) return null;
 
@@ -50,7 +43,6 @@ export default function FloatingOrder() {
   };
 
   const handleStop = () => {
-    // Si on n'a pas bougé (clic simple), on change l'état
     if (!isDragging) {
       setIsOpen(!isOpen);
     }
@@ -75,30 +67,65 @@ export default function FloatingOrder() {
           
           {isOpen && (
             <div className="order-options">
+              <div className="options-header">
+                <Sparkles size={12} />
+                <span>Notre sélection</span>
+              </div>
               <Link 
                 to="/menu" 
                 className="option-link" 
                 onClick={handleLinkAction}
-                onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               >
-                <span className="icon">☀️</span> Menu jour
+                <div className="option-icon">
+                  <Utensils size={16} />
+                </div>
+                <div className="option-content">
+                  <span className="option-title">Menu Jour</span>
+                  <span className="option-desc">Découvrez notre carte du jour</span>
+                </div>
+                <div className="option-arrow">→</div>
               </Link>
               <Link 
                 to="/menu-soir" 
                 className="option-link" 
                 onClick={handleLinkAction}
-                onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               >
-                <span className="icon">🌙</span> Menu soir
+                <div className="option-icon">
+                  <Moon size={16} />
+                </div>
+                <div className="option-content">
+                  <span className="option-title">Menu Soir</span>
+                  <span className="option-desc">L'élégance après le coucher du soleil</span>
+                </div>
+                <div className="option-arrow">→</div>
               </Link>
             </div>
           )}
 
-          <div className={`fab-button ${isOpen ? 'active' : ''}`}>
+          <div 
+            className={`fab-button ${isOpen ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div className="fab-particles">
+              <span className="particle"></span>
+              <span className="particle"></span>
+              <span className="particle"></span>
+            </div>
             <div className="fab-content">
-              <span className="fab-text">Commander</span>
+              {isOpen ? (
+                <X size={28} strokeWidth={1.5} />
+              ) : (
+                <>
+                  <ChefHat size={22} />
+                  <span className="fab-text">Commander</span>
+                </>
+              )}
             </div>
             <div className="fab-ring"></div>
+            <div className="fab-ring-delayed"></div>
           </div>
         </div>
       </Draggable>

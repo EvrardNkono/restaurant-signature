@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { ChefHat, Sparkles, ArrowRight, Star } from "lucide-react";
 import "./Hero.css";
 
-// Fallback : images par défaut si la base de données est vide
 const defaultImages = [
   "/images/plat1.jpg",
   "/images/plat2.jpg",
@@ -24,7 +24,6 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
   const [heroImages, setHeroImages] = useState<string[]>(defaultImages);
   const [current, setCurrent] = useState(0);
 
-  // 1. Récupération des images depuis MongoDB
   useEffect(() => {
     const fetchBanner = async () => {
       try {
@@ -39,20 +38,15 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
     fetchBanner();
   }, []);
 
-  // 2. Logique du slider automatique
   useEffect(() => {
     if (heroImages.length <= 1) return;
-
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroImages.length);
-    }, 5000); 
-
+    }, 5000);
     return () => clearInterval(interval);
   }, [heroImages]);
 
-  // 3. Déclencheur pour le FloatingOrder
   const handleCtaClick = () => {
-    // On crée et diffuse l'événement que FloatingOrder écoute
     const event = new CustomEvent("openReservation");
     window.dispatchEvent(event);
   };
@@ -60,31 +54,61 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
   return (
     <section className="hero">
       <div className="hero-container">
-        
+        {/* PARTIE GAUCHE - IMAGE */}
         <div className="hero-left">
+          <div className="image-badge">
+            <ChefHat size={16} />
+            <span>Plat Signature</span>
+          </div>
           <div className="image-circle">
             <img 
               src={heroImages[current]} 
               alt="Plat signature" 
-              key={current} // Crucial pour déclencher l'animation CSS au changement
+              key={current}
               loading="eager"
             />
           </div>
+          <div className="image-indicators">
+            {heroImages.map((_, idx) => (
+              <button 
+                key={idx} 
+                className={`indicator ${current === idx ? "active" : ""}`}
+                onClick={() => setCurrent(idx)}
+              />
+            ))}
+          </div>
         </div>
 
+        {/* PARTIE DROITE - TEXTE */}
         <div className="hero-right">
-          <h1>{title}</h1>
+          <div className="hero-sup-title">
+            <Sparkles size={12} />
+            <span>L'Excellence à table</span>
+          </div>
+          
+          <h1>
+            {title.split(" ").map((word, i) => 
+              word.toLowerCase() === "signature" ? (
+                <span key={i} className="gold-word">{word} </span>
+              ) : (
+                <span key={i}>{word} </span>
+              )
+            )}
+          </h1>
+          
+          <div className="hero-divider">
+            <span></span>
+            <Star size={14} fill="#D4AF37" color="#D4AF37" />
+            <span></span>
+          </div>
+          
           <p>{subtitle}</p>
           
-          {/* Le bouton déclenche maintenant l'ouverture du menu flottant */}
-          <button 
-            className="reserve-btn" 
-            onClick={handleCtaClick}
-          >
-            {ctaText}
+          <button className="reserve-btn" onClick={handleCtaClick}>
+            <span>{ctaText}</span>
+            <ArrowRight size={16} />
           </button>
         </div>
-
       </div>
     </section>
   );
