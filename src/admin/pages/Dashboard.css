@@ -460,10 +460,6 @@
   background: transparent; /* ← Hérite du fond parent */
 }
 
-/* Ajustez le header pour qu'il colle bien */
-.modern-header {
-  margin-bottom: 32px;
-}
 
 /* Gardez le padding seulement sur le conteneur parent */
 

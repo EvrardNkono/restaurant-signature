@@ -1,18 +1,21 @@
-/* --- BANNIÈRE FLOTTANTE (Positionnée à gauche) --- */
+/* adPopup.css - Version avec succession de popups */
+
+/* --- BANNIÈRE FLOTTANTE --- */
 .ad-floating-banner {
   position: fixed;
-  bottom: 30px; 
-  left: 30px; /* Changé de right à left pour libérer le chatbot */
+  bottom: 30px;
+  left: 30px;
   width: 380px;
   background: #2D2422;
   border: 1px solid #D4AF37;
+  border-radius: 16px;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
-  z-index: 9998; /* Un cran en dessous du chatbot si nécessaire */
+  z-index: 9998;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
 }
-
-/* ... (le reste du code flex, image-box et content-box reste identique) ... */
 
 .ad-flex-container {
   display: flex;
@@ -41,9 +44,94 @@
   position: relative;
 }
 
-/* ... (boutons et barres de progression identiques) ... */
+.ad-mini-tag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 5px;
+}
 
-/* --- ANIMATIONS AJUSTÉES POUR LA GAUCHE --- */
+.ad-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.ad-text {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* --- BOUTON FERMER --- */
+.close-ad-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.close-ad-btn:hover {
+  opacity: 1;
+}
+
+/* --- BARRE DE PROGRESSION --- */
+.ad-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #D4AF37;
+  width: 100%;
+  animation: adProgress var(--duration, 5s) linear forwards;
+}
+
+/* Animation personnalisée pour chaque popup */
+.ad-progress-bar {
+  animation-duration: var(--duration, 5s);
+}
+
+@keyframes adProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* --- PAGINATION (dots) --- */
+.ad-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.ad-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.ad-dot.active {
+  width: 20px;
+  border-radius: 10px;
+}
+
+.ad-dot.passed {
+  opacity: 0.5;
+}
+
+/* --- ANIMATIONS D'ENTRÉE/SORTIE --- */
 .slide-in {
   animation: adSlideInLeft 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -54,22 +142,22 @@
 
 @keyframes adSlideInLeft {
   from { 
-    transform: translateX(-100%); /* Arrive de la gauche */
+    transform: translateX(-100%);
     opacity: 0; 
   }
   to { 
-    transform: translateX(0); 
+    transform: translateX(0);
     opacity: 1; 
   }
 }
 
 @keyframes adSlideOutLeft {
   from { 
-    transform: translateX(0); 
+    transform: translateX(0);
     opacity: 1; 
   }
   to { 
-    transform: translateX(-50px); /* Repart vers la gauche */
+    transform: translateX(-50px);
     opacity: 0; 
   }
 }
@@ -78,73 +166,20 @@
 @media (max-width: 480px) {
   .ad-floating-banner {
     width: calc(100% - 40px);
-    left: 20px; /* Ajusté pour mobile */
+    left: 20px;
     bottom: 20px;
   }
-}
-
-.close-ad-btn {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: #D4AF37;
-  font-size: 1.5rem;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.ad-progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: #D4AF37;
-  width: 100%;
-  animation: adProgress 15s linear forwards;
-}
-
-@keyframes adProgress {
-  from { width: 100%; }
-  to { width: 0%; }
-}
-
-/* --- ANIMATIONS CORRIGÉES --- */
-.slide-in {
-  animation: adSlideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.slide-out {
-  animation: adSlideOut 0.5s ease-in forwards;
-}
-
-@keyframes adSlideIn {
-  from { 
-    transform: translateX(100%); 
-    opacity: 0; 
+  
+  .ad-image-box {
+    width: 90px;
+    height: 90px;
   }
-  to { 
-    transform: translateX(0); 
-    opacity: 1; 
+  
+  .ad-title {
+    font-size: 0.95rem;
   }
-}
-
-@keyframes adSlideOut {
-  from { 
-    transform: translateX(0); 
-    opacity: 1; 
-  }
-  to { 
-    transform: translateX(50px); 
-    opacity: 0; 
-  }
-}
-
-@media (max-width: 480px) {
-  .ad-floating-banner {
-    width: calc(100% - 40px);
-    right: 20px;
-    bottom: 20px;
+  
+  .ad-text {
+    font-size: 0.7rem;
   }
 }
