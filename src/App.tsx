@@ -10,7 +10,7 @@ import MenuSoir from "./pages/MenuSoir";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
-import Success from "./pages/Success"; // Import de la nouvelle page Success
+import OrderSuccess from "./pages/OrderSuccess";// Import de la nouvelle page Success
 import Chatbot from "./components/Chatbot"; 
 import AdPopup from "./components/AdPopup"; 
 import ScrollToTop from "./components/ScrollToTop";
@@ -70,7 +70,7 @@ export default function AppRouter() {
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
                       {/* Ajout de la route de succès après paiement */}
-                      <Route path="/order-success" element={<Success />} />
+                     <Route path="/order-success" element={<OrderSuccess />} />
                     </Routes>
                   </main>
                   <Chatbot />

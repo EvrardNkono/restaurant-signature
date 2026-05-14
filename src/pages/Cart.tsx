@@ -8,6 +8,7 @@ import {
   ShoppingBag 
 } from "lucide-react"; 
 import axios from "axios";
+import { handleCheckout, formatCartItemsForStripe } from "../services/stripeService";
 import "./cart.css";
 
 // Configuration de l'URL API
@@ -30,8 +31,10 @@ export default function Cart() {
   
   // États Formulaire
   const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [address, setAddress] = useState(""); 
-  const [guestCount] = useState("2"); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [guestCount] = useState("2");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [minTime, setMinTime] = useState("");
   const [bookingDate, setBookingDate] = useState("");
@@ -42,7 +45,7 @@ export default function Cart() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
-  // 1. CHARGEMENT DES TABLES
+  // CHARGEMENT DES TABLES
   useEffect(() => {
     const fetchTables = async () => {
       try {
@@ -57,7 +60,7 @@ export default function Cart() {
     fetchTables();
   }, []);
 
-  // 2. GESTION DU TEMPS MINIMUM (Livraison +90min)
+  // GESTION DU TEMPS MINIMUM (Livraison +90min)
   useEffect(() => {
     const updateMinTime = () => {
       const now = new Date();
@@ -73,7 +76,7 @@ export default function Cart() {
     return () => clearInterval(interval);
   }, [deliveryTime]);
 
-  // 3. RÉINITIALISATION DES MODES
+  // RÉINITIALISATION DES MODES
   useEffect(() => {
     if (orderMode !== "delivery") {
       setDeliveryQuote(null);
@@ -118,8 +121,13 @@ export default function Cart() {
     return base + shipping;
   };
 
-  // ACTION FINALE
+  // Variables calculées avant le return pour éviter les erreurs TypeScript
+  const amountToPay = getAmountToPay();
+  const shouldShowEmailFields = (payNow === true || orderMode === "booking") && amountToPay > 0;
+
+  // ACTION FINALE AVEC STRIPE SERVICE
   const handleFinalOrder = async () => {
+    console.log("=== handleFinalOrder appelé ===");
     setIsSubmitting(true);
     
     let clientId = localStorage.getItem('signature_client_id');
@@ -128,10 +136,20 @@ export default function Cart() {
       localStorage.setItem('signature_client_id', clientId);
     }
 
+    const currentAmountToPay = getAmountToPay();
+    const needsPayment = currentAmountToPay > 0 && (payNow === true || orderMode === "booking");
+    
+    console.log("currentAmountToPay:", currentAmountToPay);
+    console.log("needsPayment:", needsPayment);
+    console.log("payNow:", payNow);
+    console.log("orderMode:", orderMode);
+    
     const orderData = {
       clientId: clientId,
       customer: {
         name: customerName || "Client Signature",
+        email: customerEmail,
+        phone: customerPhone,
         address: orderMode === "delivery" ? address : "Vente à emporter / Sur place",
       },
       items: cart.map((item: any) => ({
@@ -144,57 +162,144 @@ export default function Cart() {
         type: item.type || 'Signature'
       })), 
       total: totalPrice,
-      amountPaid: getAmountToPay(),
+      amountPaid: currentAmountToPay,
       mode: orderMode,
-      status: "pending", 
+      status: "pending",
       details: {
         consumeMode: orderMode === "on_site" ? consumeMode : null,
         tableNumber: selectedTable || null,
         guestCount: orderMode === "booking" ? guestCount : null,
         bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
         deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-        paymentStatus: payNow ? "pending_stripe" : "pending_at_counter",
-        uberQuoteId: deliveryQuote?.id || null
+        paymentStatus: needsPayment ? "pending_stripe" : "pending_at_counter",
+        uberQuoteId: deliveryQuote?.id || null,
+        customerEmail: customerEmail,
+        customerPhone: customerPhone
       }
     };
 
     try {
+      // 1. Créer la commande
+      console.log("Création de la commande...");
       const response = await axios.post(`${BASE_API}/orders`, orderData);
+      console.log("Réponse commande:", response.data);
       
       if (response.data.success) {
         const orderId = response.data.data?._id || response.data.orderId;
+        console.log("OrderId:", orderId);
 
-        if (payNow || orderMode === "booking") {
-          const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
-            orderId: orderId,
-            items: orderData.items,
-            deliveryFee: (orderMode === "delivery" && deliveryQuote) ? deliveryQuote.fee : 0,
-            amount: getAmountToPay(),
-            customerName: customerName
+        // 2. Si paiement nécessaire, utiliser Stripe
+        if (needsPayment) {
+          console.log("Paiement nécessaire, préparation des items Stripe...");
+          // Format simplifié pour votre backend
+          const stripeItems = cart.map((item: any) => {
+            const unitPrice = parsePrice(item.price);
+            const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
+              return sum + parsePrice(supp.price);
+            }, 0) || 0;
+            const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
+            
+            return {
+              name: item.name,
+              price: totalPrice,
+              quantity: 1,
+              chosenAccompaniment: item.chosenAccompaniment || "Aucun"
+            };
           });
+          
+          console.log("Stripe items:", stripeItems);
+          
+          // Appel direct à votre backend
+          const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
+            items: stripeItems,
+            orderId: orderId
+          });
+          
+          console.log("Réponse paiement:", paymentResponse.data);
 
           if (paymentResponse.data.url) {
+            console.log("Redirection vers Stripe:", paymentResponse.data.url);
             window.location.href = paymentResponse.data.url;
+          } else {
+            console.error("Pas d'URL dans la réponse Stripe");
           }
         } else {
-          // Paiement comptoir : Redirection vers notre nouvelle page success
+          console.log("Pas de paiement nécessaire, redirection vers success");
           window.location.href = `/order-success?orderId=${orderId}`;
         }
       }
     } catch (error: any) {
-      console.error("Erreur commande:", error.response?.data);
-      alert(`Erreur : ${error.response?.data?.message || "Veuillez vérifier vos informations"}`);
-    } finally {
+      console.error("Erreur commande:", error.response?.data || error);
+      alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
       setIsSubmitting(false);
     }
   };
 
+  // Validation du formulaire avec LOGS
   const isOrderDisabled = () => {
-    if (!isAgreed || isSubmitting) return true;
-    if (orderMode === 'delivery' && !deliveryQuote) return true;
-    if (orderMode === 'on_site' && consumeMode === 'dine_in' && !selectedTable) return true;
-    if ((orderMode === 'delivery' || orderMode === 'booking') && !customerName) return true;
-    if (orderMode === 'booking' && (!bookingDate || !bookingTime)) return true;
+    console.log("=== isOrderDisabled CALLED ===");
+    console.log("orderMode:", orderMode);
+    console.log("consumeMode:", consumeMode);
+    console.log("payNow:", payNow);
+    console.log("isAgreed:", isAgreed);
+    console.log("isSubmitting:", isSubmitting);
+    console.log("selectedTable:", selectedTable);
+    console.log("customerEmail:", customerEmail);
+    console.log("shouldShowEmailFields:", shouldShowEmailFields);
+    console.log("amountToPay:", amountToPay);
+    
+    if (!isAgreed) {
+      console.log("❌ BLOQUÉ: Conditions non acceptées");
+      return true;
+    }
+    if (isSubmitting) {
+      console.log("❌ BLOQUÉ: Soumission en cours");
+      return true;
+    }
+    
+    if (orderMode === 'delivery') {
+      if (!deliveryQuote) {
+        console.log("❌ BLOQUÉ (delivery): Pas de devis livraison");
+        return true;
+      }
+      if (!customerName) {
+        console.log("❌ BLOQUÉ (delivery): Nom manquant");
+        return true;
+      }
+    }
+    
+    if (orderMode === 'booking') {
+      if (!customerName) {
+        console.log("❌ BLOQUÉ (booking): Nom manquant");
+        return true;
+      }
+      if (!bookingDate || !bookingTime) {
+        console.log("❌ BLOQUÉ (booking): Date/heure manquante");
+        return true;
+      }
+    }
+    
+    // POUR LE MODE "EN SALLE" AVEC PAIEMENT EN LIGNE
+    if (orderMode === 'on_site') {
+      console.log("--- Mode en salle ---");
+      if (consumeMode === 'dine_in' && !selectedTable) {
+        console.log("❌ BLOQUÉ (en salle): Table non sélectionnée pour manger sur place");
+        return true;
+      }
+      if (payNow === true && (!customerEmail || !customerEmail.includes('@'))) {
+        console.log("❌ BLOQUÉ (en salle): Email requis pour paiement en ligne");
+        console.log("Email actuel:", customerEmail);
+        return true;
+      }
+    }
+    
+    // Validation email pour paiement en ligne (autres modes)
+    if (shouldShowEmailFields && (!customerEmail || !customerEmail.includes('@'))) {
+      console.log("❌ BLOQUÉ: Email invalide ou manquant");
+      return true;
+    }
+    
+    console.log("✅ BOUTON ACTIF - Toutes les conditions sont remplies");
     return false;
   };
 
@@ -305,15 +410,37 @@ export default function Cart() {
                         <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
                         <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
                       </div>
+                      
+                      {/* Champ email pour paiement en ligne en salle */}
+                      {payNow === true && amountToPay > 0 && (
+                        <div className="input-group full">
+                          <label>Email * (pour le reçu)</label>
+                          <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {orderMode === "delivery" && (
                     <div className="form-fade-in">
                       <div className="input-group full">
-                        <label>Nom complet</label>
+                        <label>Nom complet *</label>
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
+                      
+                      {shouldShowEmailFields && (
+                        <>
+                          <div className="input-group full">
+                            <label>Email *</label>
+                            <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                          </div>
+                          <div className="input-group full">
+                            <label>Téléphone</label>
+                            <input type="tel" placeholder="Votre numéro" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+                          </div>
+                        </>
+                      )}
+                      
                       <div className="input-group full">
                         <label><Bike size={14}/> Adresse de livraison</label>
                         <input type="text" placeholder="Adresse précise..." value={address} onChange={(e) => setAddress(e.target.value)} onBlur={() => fetchDeliveryQuote(address)} />
@@ -331,9 +458,19 @@ export default function Cart() {
                   {orderMode === "booking" && (
                     <div className="form-fade-in">
                       <div className="input-group full">
-                        <label>Nom de la réservation</label>
+                        <label>Nom de la réservation *</label>
                         <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
+                      
+                      <div className="input-group full">
+                        <label>Email *</label>
+                        <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                      </div>
+                      <div className="input-group full">
+                        <label>Téléphone</label>
+                        <input type="tel" placeholder="Votre numéro" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+                      </div>
+                      
                       <div className="form-row">
                         <div className="input-group">
                             <label>Date</label>
@@ -373,7 +510,7 @@ export default function Cart() {
 
               <div className="summary-line total">
                 <span>{orderMode === "booking" ? "Acompte (50%) :" : "À payer :"}</span>
-                <span>{getAmountToPay().toFixed(2)}€</span>
+                <span>{amountToPay.toFixed(2)}€</span>
               </div>
 
               <div className="legal-notice">
