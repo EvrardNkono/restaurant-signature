@@ -8,7 +8,7 @@ import {
   ShoppingBag 
 } from "lucide-react"; 
 import axios from "axios";
-import { handleCheckout, formatCartItemsForStripe } from "../services/stripeService";
+
 import "./cart.css";
 
 // Configuration de l'URL API
