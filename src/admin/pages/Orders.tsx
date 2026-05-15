@@ -2,11 +2,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
-  Printer, MapPin, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
+  Printer, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
   Truck, Sparkles
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
+ import * as XLSX from 'xlsx';
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -85,27 +86,57 @@ export default function Orders() {
     }
   };
 
-  const downloadHistory = () => {
-    const headers = ["ID", "Date", "Heure", "Mode", "Table/Client", "Articles", "Total", "Statut"];
-    const rows = filteredOrders.map(o => [
-      o._id.slice(-6).toUpperCase(),
-      new Date(o.createdAt).toLocaleDateString(),
-      new Date(o.createdAt).toLocaleTimeString(),
-      o.mode === "delivery" ? "Livraison" : o.mode === "booking" ? "Réservation" : "Sur Place",
-      o.details?.tableNumber ? `Table ${o.details.tableNumber}` : (o.customer?.name || "N/A"),
-      o.items.map((i: any) => i.name).join(" | "),
-      `${o.total}€`,
-      o.status === "pending" ? "En attente" : o.status === "cooking" ? "En cuisine" : o.status === "done" ? "Prêt" : "Archivé"
-    ]);
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers, ...rows].map(e => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `export_signature_${new Date().toLocaleDateString()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+ 
+
+const downloadExcel = () => {
+  const data = filteredOrders.map(o => {
+    // 1. Calcul du prix unitaire (approximation ou premier item) et formatage articles
+    const articlesDetails = o.items.map((i: any) => {
+      const acc = i.chosenAccompaniment && i.chosenAccompaniment !== "Aucun" 
+        ? ` (Acc: ${i.chosenAccompaniment})` 
+        : "";
+      return `${i.name}${acc} x${i.quantity || 1}`;
+    }).join(", ");
+
+    // 2. Gestion propre de la provenance (Table ou Client)
+    let tableOrClient = "-";
+    if (o.mode === "delivery") tableOrClient = o.customer?.name || "Livraison";
+    else if (o.details?.tableNumber) tableOrClient = `Table ${o.details.tableNumber}`;
+    else if (o.details?.consumeMode === "take_away") tableOrClient = `À emporter (${o.customer?.name || "Client"})`;
+    else tableOrClient = o.customer?.name || "Sur place";
+
+    const dateObj = new Date(o.createdAt);
+
+    return {
+      "ID Commande": o._id.slice(-8).toUpperCase(),
+      "Date": dateObj.toLocaleDateString('fr-FR'),
+      "Heure": dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+      "Jour": dateObj.toLocaleDateString('fr-FR', { weekday: 'long' }),
+      "Mode": o.mode === "delivery" ? "Livraison" : o.mode === "booking" ? "Réservation" : "Sur place",
+      "Table / Client": tableOrClient,
+      "Téléphone": o.customer?.phone || "-",
+      "Email": o.customer?.email || "-",
+      "Articles": articlesDetails,
+      "Quantité": o.items.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0),
+      "Total TTC": `${parseFloat(o.total).toFixed(2)} €`,
+      "Statut": getStatusLabel(o.status),
+      "Service livraison": o.details?.deliveryService || "-",
+    };
+  });
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  
+  // Optionnel : Définir des largeurs de colonnes pour que ce soit propre à l'ouverture
+  ws['!cols'] = [
+    { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, 
+    { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
+    { wch: 12 }, { wch: 15 }, { wch: 15 }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Commandes");
+  XLSX.writeFile(wb, `signature_commandes_${new Date().toISOString().split('T')[0]}.xlsx`);
+};
 
   const getStatusClass = (status: string) => {
     switch(status) {
@@ -231,7 +262,7 @@ export default function Orders() {
             </div>
           )}
 
-          <button className="btn-download-gold" onClick={downloadHistory}>
+          <button className="btn-download-gold" onClick={downloadExcel}>
             <Download size={18} />
             <span>Exporter CSV</span>
           </button>
