@@ -460,7 +460,7 @@ export default function Menu() {
         <div className="hero-content-cinematic">
           <div className="hero-badge-cinematic">
             <Award size={16} />
-            <span>Étoilé Michelin ⭐⭐⭐</span>
+            <span> ⭐⭐⭐</span>
           </div>
           
           <h1 className="hero-title-cinematic">
