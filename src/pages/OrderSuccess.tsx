@@ -1,6 +1,8 @@
+// src/pages/OrderSuccess.tsx
 import { useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Sparkles, ArrowRight, Home, ShoppingBag } from 'lucide-react';
+import './OrderSuccess.css';
 
 export default function OrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -8,7 +10,6 @@ export default function OrderSuccess() {
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    // Optionnel: Appeler votre backend pour confirmer le paiement
     if (sessionId && orderId) {
       const isLocal = window.location.hostname === "localhost";
       const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -22,28 +23,69 @@ export default function OrderSuccess() {
 
   return (
     <div className="order-success-page">
+      {/* Fond décoratif */}
+      <div className="success-bg-pattern"></div>
+      
       <div className="success-container">
-        <div className="success-icon">
-          <CheckCircle size={80} color="#D4AF37" strokeWidth={1.5} />
+        {/* Sceau décoratif */}
+        <div className="success-seal">
+          <span>S</span>
         </div>
-        
-        <h1 className="success-title">Commande confirmée !</h1>
+
+        {/* Icône de succès */}
+        <div className="success-icon-wrapper">
+          <div className="success-icon-circle">
+            <CheckCircle size={60} strokeWidth={1.5} />
+          </div>
+          <div className="sparkle-decoration">
+            <Sparkles size={20} />
+          </div>
+        </div>
+
+        <h1 className="success-title">Commande Confirmée !</h1>
         
         <p className="success-message">
-          Merci pour votre commande. Vous recevrez un email de confirmation.
+          Votre commande a été reçue avec succès. <br />
+          Un email de confirmation vous a été envoyé.
         </p>
-        
-        <div className="order-details">
-          <p className="order-id-label">N° commande :</p>
-          <p className="order-id-value">{orderId || 'Généré'}</p>
+
+        {/* Badge de numéro de commande */}
+        <div className="order-card">
+          <span className="order-label">NUMÉRO DE COMMANDE</span>
+          <div className="order-id-wrapper">
+            <span className="order-id-value">{orderId || 'SIG-' + Math.random().toString(36).substr(2, 8).toUpperCase()}</span>
+          </div>
         </div>
-        
+
+        {/* Prochaines étapes */}
+        <div className="next-steps">
+          <h3 className="steps-title">✨ Prochaines étapes</h3>
+          <div className="steps-list">
+            <div className="step-item">
+              <div className="step-number">1</div>
+              <div className="step-text">Notre équipe prépare votre commande</div>
+            </div>
+            <div className="step-item">
+              <div className="step-number">2</div>
+              <div className="step-text">Vous serez notifié dès que ce sera prêt</div>
+            </div>
+            <div className="step-item">
+              <div className="step-number">3</div>
+              <div className="step-text">Venez récupérer ou recevez votre livraison</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Boutons d'action */}
         <div className="success-actions">
           <Link to="/" className="btn-home">
-            Retour à l'accueil
+            <Home size={18} />
+            <span>Accueil</span>
           </Link>
           <Link to="/carte" className="btn-continue">
-            Commander à nouveau
+            <ShoppingBag size={18} />
+            <span>Commander à nouveau</span>
+            <ArrowRight size={16} />
           </Link>
         </div>
       </div>

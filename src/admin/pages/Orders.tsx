@@ -1,7 +1,9 @@
+// src/admin/pages/Orders.tsx
 import { useState, useEffect, useCallback } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
-  Printer, MapPin, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive
+  Printer, MapPin, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
+  Truck, Sparkles
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
@@ -19,7 +21,6 @@ export default function Orders() {
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
 
-  // --- LOGIQUE DE FILTRAGE ---
   const applyFilter = useCallback((allOrders: any[], period: string, range: {start: string, end: string}) => {
     let filtered = [...allOrders];
     const now = new Date();
@@ -42,7 +43,6 @@ export default function Orders() {
       filtered = allOrders.filter(o => new Date(o.createdAt) >= startDate);
     }
 
-    // Calcul du revenu basé sur les commandes terminées ou archivées
     const revenue = filtered
       .filter(o => o.status === "done" || o.status === "archived")
       .reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
@@ -51,7 +51,6 @@ export default function Orders() {
     setTotalRevenue(revenue);
   }, []);
 
-  // --- RÉCUPÉRATION DES DONNÉES ---
   const fetchOrders = async () => {
     try {
       const res = await axios.get(`${BASE_API}/orders`);
@@ -67,26 +66,17 @@ export default function Orders() {
 
   useEffect(() => {
     fetchOrders();
-    // Rafraîchissement toutes les 15 secondes pour la synchro client
     const interval = setInterval(fetchOrders, 15000);
     return () => clearInterval(interval);
   }, [activeFilter, customRange, applyFilter]);
 
-  // --- ACTIONS : MISE À JOUR DU STATUT ---
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const now = new Date().toISOString();
     try {
-      // 1. Mise à jour "Optimiste" immédiate
       setFilteredOrders(prev => 
         prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
       );
-
-      // 2. Appel API : On envoie le statut et le timestamp de mise à jour
-      await axios.put(`${BASE_API}/orders/${orderId}`, { 
-        status: newStatus,
-        updatedAt: now 
-      });
-      
+      await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus, updatedAt: now });
       fetchOrders(); 
     } catch (err) {
       console.error("Erreur update statut:", err);
@@ -95,18 +85,17 @@ export default function Orders() {
     }
   };
 
-  // --- EXPORT CSV ---
   const downloadHistory = () => {
     const headers = ["ID", "Date", "Heure", "Mode", "Table/Client", "Articles", "Total", "Statut"];
     const rows = filteredOrders.map(o => [
       o._id.slice(-6).toUpperCase(),
       new Date(o.createdAt).toLocaleDateString(),
       new Date(o.createdAt).toLocaleTimeString(),
-      o.mode === "delivery" ? "Livraison" : "Sur Place",
+      o.mode === "delivery" ? "Livraison" : o.mode === "booking" ? "Réservation" : "Sur Place",
       o.details?.tableNumber ? `Table ${o.details.tableNumber}` : (o.customer?.name || "N/A"),
       o.items.map((i: any) => i.name).join(" | "),
       `${o.total}€`,
-      o.status
+      o.status === "pending" ? "En attente" : o.status === "cooking" ? "En cuisine" : o.status === "done" ? "Prêt" : "Archivé"
     ]);
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers, ...rows].map(e => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -128,169 +117,266 @@ export default function Orders() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    switch(status) {
+      case "pending": return "En attente";
+      case "cooking": return "En cuisine";
+      case "done": return "Prêt / Servi";
+      case "archived": return "Archivée";
+      default: return "En attente";
+    }
+  };
+
   const getModeIcon = (mode: string, details?: any) => {
-    if (mode === "delivery") return <MapPin size={16} className="mode-icon delivery" />;
+    if (mode === "delivery") return <Truck size={16} className="mode-icon delivery" />;
+    if (mode === "booking") return <Calendar size={16} className="mode-icon booking" />;
     if (details?.consumeMode === "take_away") return <Package size={16} className="mode-icon takeaway" />;
     return <Utensils size={16} className="mode-icon on-site" />;
   };
 
+  // Fonction pour obtenir le nom de la table ou du client
+  const getOrderOrigin = (order: any) => {
+    if (order.mode === "delivery") {
+      return (
+        <div className="origin-delivery">
+          <Truck size={14} />
+          <span>{order.customer?.name || "Client Livraison"}</span>
+          {order.details?.deliveryService && (
+            <span className="delivery-service-badge">{order.details.deliveryService}</span>
+          )}
+        </div>
+      );
+    }
+    if (order.mode === "booking") {
+      return (
+        <div className="origin-booking">
+          <Calendar size={14} />
+          <span>{order.customer?.name || "Réservation"}</span>
+          {order.details?.bookingSlot && (
+            <span className="booking-slot">{new Date(order.details.bookingSlot).toLocaleString()}</span>
+          )}
+        </div>
+      );
+    }
+    if (order.details?.consumeMode === "take_away") {
+      return (
+        <div className="origin-takeaway">
+          <Package size={14} />
+          <span>À emporter</span>
+          <span className="customer-name">{order.customer?.name || "Client"}</span>
+        </div>
+      );
+    }
+    // Sur place
+    const tableNumber = order.details?.tableNumber;
+    if (tableNumber) {
+      return (
+        <div className="origin-table">
+          <Utensils size={14} />
+          <span>Table {tableNumber}</span>
+          {order.customer?.name && <span className="customer-name">{order.customer.name}</span>}
+        </div>
+      );
+    }
+    return (
+      <div className="origin-default">
+        <Utensils size={14} />
+        <span>Sur place</span>
+      </div>
+    );
+  };
+
   return (
     <div className="orders-page">
-      <header className="admin-header-gold">
-        <div className="header-seal-small"><ShoppingBag size={18} /></div>
-        <span className="admin-badge">Flux total : {orders.length} commandes</span>
-        <h1 className="admin-main-title">Gestion des Commandes</h1>
-        <div className="header-double-line-gold"></div>
+      {/* Header Luxe */}
+      <header className="orders-header-luxury">
+        <div className="header-seal-terracotta">
+          <ShoppingBag size={24} />
+        </div>
+        <span className="header-badge-gold">Gestion des Commandes</span>
+        <h1 className="header-title-terracotta">Commandes en temps réel</h1>
+        <p className="header-subtitle">Total: {orders.length} commandes</p>
+        <div className="header-gold-line"></div>
       </header>
 
-      <section className="orders-content">
-        <div className="revenue-export-panel">
-          <div className="revenue-card">
-            <div className="rev-icon"><Wallet size={24} /></div>
-            <div className="rev-details">
-              <span className="rev-label">Encaissé sur la période</span>
-              <span className="rev-amount">{totalRevenue.toFixed(2)}€</span>
-            </div>
+      {/* Panneau Revenus & Filtres */}
+      <div className="revenue-panel-luxury">
+        <div className="revenue-card-luxury">
+          <div className="rev-icon-gold">
+            <Wallet size={24} />
           </div>
-
-          <div className="export-controls">
-            <div className="filter-wrapper">
-              <div className="filter-group">
-                <Calendar size={18} color="#D4AF37" />
-                <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
-                  <option value="365">Période : Tout</option>
-                  <option value="7">7 derniers jours</option>
-                  <option value="14">2 semaines</option>
-                  <option value="30">Dernier mois</option>
-                  <option value="custom">Période personnalisée...</option>
-                </select>
-              </div>
-
-              {activeFilter === "custom" && (
-                <div className="custom-date-picker">
-                  <input type="date" value={customRange.start} onChange={(e) => setCustomRange({...customRange, start: e.target.value})} />
-                  <span className="to-text">au</span>
-                  <input type="date" value={customRange.end} onChange={(e) => setCustomRange({...customRange, end: e.target.value})} />
-                </div>
-              )}
-            </div>
-            <button className="btn-download" onClick={downloadHistory}><Download size={18} /> Télécharger CSV</button>
+          <div className="rev-details">
+            <span className="rev-label">Encaissé sur la période</span>
+            <span className="rev-amount">{totalRevenue.toFixed(2)}€</span>
           </div>
         </div>
 
-        <div className="orders-stats-row">
-          <div className="order-stat-card highlight">
-            <div className="stat-icon-circle period"><ListOrdered size={20} /></div>
-            <div className="stat-info">
-              <span className="stat-value">{filteredOrders.length}</span>
-              <span className="stat-label">Commandes</span>
-            </div>
+        <div className="filter-controls">
+          <div className="filter-group-luxury">
+            <Calendar size={18} className="gold-icon" />
+            <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
+              <option value="365">📅 Tout l'historique</option>
+              <option value="7">📆 7 derniers jours</option>
+              <option value="14">📆 2 semaines</option>
+              <option value="30">📆 Dernier mois</option>
+              <option value="custom">⚙️ Période personnalisée</option>
+            </select>
           </div>
-          <div className="order-stat-card">
-            <div className="stat-icon-circle pending"><AlertCircle size={20} /></div>
-            <div className="stat-info">
-              <span className="stat-value">{filteredOrders.filter(o => o.status === "pending").length}</span>
-              <span className="stat-label">Attente</span>
+
+          {activeFilter === "custom" && (
+            <div className="custom-date-picker-luxury">
+              <input type="date" value={customRange.start} onChange={(e) => setCustomRange({...customRange, start: e.target.value})} />
+              <span className="to-text">→</span>
+              <input type="date" value={customRange.end} onChange={(e) => setCustomRange({...customRange, end: e.target.value})} />
             </div>
+          )}
+
+          <button className="btn-download-gold" onClick={downloadHistory}>
+            <Download size={18} />
+            <span>Exporter CSV</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Statistiques */}
+      <div className="stats-grid-luxury">
+        <div className="stat-card-luxury highlight">
+          <div className="stat-icon period">
+            <ListOrdered size={22} />
           </div>
-          <div className="order-stat-card">
-            <div className="stat-icon-circle cooking"><Clock size={20} /></div>
-            <div className="stat-info">
-              <span className="stat-value">{filteredOrders.filter(o => o.status === "cooking").length}</span>
-              <span className="stat-label">Cuisine</span>
-            </div>
-          </div>
-          <div className="order-stat-card">
-            <div className="stat-icon-circle done"><CheckCircle size={20} /></div>
-            <div className="stat-info">
-              <span className="stat-value">{filteredOrders.filter(o => o.status === "done").length}</span>
-              <span className="stat-label">À Archiver</span>
-            </div>
+          <div className="stat-info">
+            <span className="stat-value">{filteredOrders.length}</span>
+            <span className="stat-label">Commandes</span>
           </div>
         </div>
+        <div className="stat-card-luxury">
+          <div className="stat-icon pending">
+            <AlertCircle size={22} />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{filteredOrders.filter(o => o.status === "pending").length}</span>
+            <span className="stat-label">En attente</span>
+          </div>
+        </div>
+        <div className="stat-card-luxury">
+          <div className="stat-icon cooking">
+            <Clock size={22} />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{filteredOrders.filter(o => o.status === "cooking").length}</span>
+            <span className="stat-label">En cuisine</span>
+          </div>
+        </div>
+        <div className="stat-card-luxury">
+          <div className="stat-icon done">
+            <CheckCircle size={22} />
+          </div>
+          <div className="stat-info">
+            <span className="stat-value">{filteredOrders.filter(o => o.status === "done").length}</span>
+            <span className="stat-label">Prêts / Servis</span>
+          </div>
+        </div>
+      </div>
 
-        {loading ? (
-          <div className="loading-gold">Mise à jour des données...</div>
-        ) : (
-          <div className="orders-grid">
-            {filteredOrders.length === 0 ? (
-              <div className="no-orders">Aucune commande.</div>
-            ) : filteredOrders.map((order) => (
-              <div key={order._id} className={`order-card ${getStatusClass(order.status)}`}>
-                <div className="gold-thin-border"></div>
-                <div className="order-card-header">
-                  <div className="order-id-tag">
-                    {getModeIcon(order.mode, order.details)}
-                    <span>#{order._id.slice(-4).toUpperCase()}</span>
-                  </div>
-                  <span className="order-time">
-                    {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+      {/* Liste des commandes */}
+      {loading ? (
+        <div className="loading-luxury">
+          <Sparkles size={30} className="spinner-gold" />
+          <span>Chargement des commandes...</span>
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <div className="empty-orders">
+          <div className="empty-icon">📭</div>
+          <h3>Aucune commande</h3>
+          <p>Aucune commande trouvée pour cette période</p>
+        </div>
+      ) : (
+        <div className="orders-grid-luxury">
+          {filteredOrders.map((order) => (
+            <div key={order._id} className={`order-card-luxury ${getStatusClass(order.status)}`}>
+              <div className="gold-top-border"></div>
+              
+              <div className="order-card-header">
+                <div className="order-id">
+                  {getModeIcon(order.mode, order.details)}
+                  <span className="id-number">#{order._id.slice(-6).toUpperCase()}</span>
                 </div>
-
-                <div className="order-card-body">
-                  <div className="order-origin">
-                    {order.mode === "on_site" ? (
-                      <h3 className="table-number">{order.details?.tableNumber ? `Table ${order.details.tableNumber}` : "Sur place"}</h3>
-                    ) : (
-                      <h3 className="customer-name">{order.customer?.name || "Client Livraison"}</h3>
-                    )}
-                  </div>
-
-                  <div className="items-list">
-                    {order.items.map((item: any, idx: number) => (
-                      <div key={idx} className="order-item-row">
-                        <span className="item-qty">{item.quantity || 1}x</span>
-                        <div className="item-details-box">
-                           <span className="item-name">{item.name}</span>
-                           {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
-                             <small className="item-sub">Acc: {item.chosenAccompaniment}</small>
-                           )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="order-total-price">
-                    <span className="label">Total</span>
-                    <span className="value">{parseFloat(order.total).toFixed(2)}€</span>
-                  </div>
-                </div>
-
-                <div className="order-card-footer">
-                  <div className={`status-pill ${getStatusClass(order.status)}`}>
-                    <span className="dot"></span>
-                    {order.status === "pending" ? "En attente" : 
-                     order.status === "cooking" ? "En cuisine" : 
-                     order.status === "done" ? "Prêt / Servi" : "Archivée"}
-                  </div>
-                  
-                  <div className="order-actions">
-                    {order.status === "pending" && (
-                      <button className="order-action-btn cooking-btn" onClick={() => updateOrderStatus(order._id, "cooking")}>
-                        <Clock size={16} /> <span>Cuisine</span>
-                      </button>
-                    )}
-                    {order.status === "cooking" && (
-                      <button className="order-action-btn done-btn" onClick={() => updateOrderStatus(order._id, "done")}>
-                        <CheckCircle size={16} /> <span>Terminer</span>
-                      </button>
-                    )}
-                    {order.status === "done" && (
-                      <button className="order-action-btn archive-btn" onClick={() => updateOrderStatus(order._id, "archived")} title="Retirer le voyant chez le client">
-                        <Archive size={16} /> <span>Archiver</span>
-                      </button>
-                    )}
-                    
-                    <button className="order-action-btn view" title="Détails"><Eye size={18} /></button>
-                    <button className="order-action-btn print" title="Ticket"><Printer size={18} /></button>
-                  </div>
+                <div className="order-time">
+                  <Clock size={12} />
+                  <span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </section>
+
+              <div className="order-card-body">
+                <div className="order-origin">
+                  {getOrderOrigin(order)}
+                </div>
+
+                <div className="items-list-luxury">
+                  {order.items.slice(0, 3).map((item: any, idx: number) => (
+                    <div key={idx} className="order-item">
+                      <span className="item-qty">{item.quantity || 1}×</span>
+                      <span className="item-name">{item.name}</span>
+                      {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
+                        <span className="item-accompaniment">({item.chosenAccompaniment})</span>
+                      )}
+                    </div>
+                  ))}
+                  {order.items.length > 3 && (
+                    <div className="more-items">+{order.items.length - 3} autre(s)</div>
+                  )}
+                </div>
+
+                <div className="order-total">
+                  <span className="total-label">Total</span>
+                  <span className="total-value">{parseFloat(order.total).toFixed(2)}€</span>
+                </div>
+
+                {order.details?.deliveryService && (
+                  <div className="delivery-badge">
+                    <Truck size={12} />
+                    <span>{order.details.deliveryService}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="order-card-footer">
+                <div className={`status-pill-luxury ${getStatusClass(order.status)}`}>
+                  <span className="status-dot"></span>
+                  <span>{getStatusLabel(order.status)}</span>
+                </div>
+
+                <div className="order-actions-luxury">
+                  {order.status === "pending" && (
+                    <button className="action-btn cooking" onClick={() => updateOrderStatus(order._id, "cooking")}>
+                      <Clock size={14} />
+                      <span>Cuisine</span>
+                    </button>
+                  )}
+                  {order.status === "cooking" && (
+                    <button className="action-btn done" onClick={() => updateOrderStatus(order._id, "done")}>
+                      <CheckCircle size={14} />
+                      <span>Terminer</span>
+                    </button>
+                  )}
+                  {order.status === "done" && (
+                    <button className="action-btn archive" onClick={() => updateOrderStatus(order._id, "archived")}>
+                      <Archive size={14} />
+                      <span>Archiver</span>
+                    </button>
+                  )}
+                  <button className="action-btn icon-only" title="Voir détails">
+                    <Eye size={16} />
+                  </button>
+                  <button className="action-btn icon-only" title="Imprimer">
+                    <Printer size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
