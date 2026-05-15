@@ -3,7 +3,7 @@
 /* === BANNIÈRE NON BLOQUANTE (en bas) === */
 .install-banner {
   position: fixed;
-  bottom: 70px;
+  bottom: 120px;
   left: 20px;
   right: 20px;
   z-index: 9999;
@@ -253,7 +253,7 @@
   .install-banner {
     left: 12px;
     right: 12px;
-    bottom: 90px;
+    bottom: 130px;
   }
   
   .install-banner-content {
