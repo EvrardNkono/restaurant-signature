@@ -1,144 +1,119 @@
 /* src/components/InstallButton.css */
 
-/* === POPUP CENTRÉE === */
-.install-popup-overlay {
+/* === BANNIÈRE NON BLOQUANTE (en bas) === */
+.install-banner {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 10000;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 9999;
+  animation: slideUp 0.3s ease;
+}
+
+.install-banner-content {
+  background: white;
+  border-radius: 60px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.install-banner-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #2D2422 0%, #4A3733 100%);
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  animation: fadeIn 0.3s ease;
+  color: #D4AF37;
+  flex-shrink: 0;
 }
 
-.install-popup-modal {
-  background: white;
-  border-radius: 32px;
-  padding: 32px 28px;
-  max-width: 360px;
-  width: 100%;
-  text-align: center;
-  position: relative;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  animation: scaleIn 0.3s ease;
+.install-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.install-popup-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+.install-banner-text strong {
+  font-size: 0.85rem;
+  color: #2D2422;
+}
+
+.install-banner-text span {
+  font-size: 0.7rem;
+  color: #6B5B57;
+}
+
+.install-banner-btn {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8942E 100%);
+  border: none;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #2D2422;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.install-banner-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.install-banner-close {
   background: none;
   border: none;
   color: #6B5B57;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.install-popup-close:hover {
-  background: #f0f0f0;
-}
-
-.install-popup-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #2D2422 0%, #4A3733 100%);
-  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
-  color: #D4AF37;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.install-popup-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2D2422;
-  margin-bottom: 12px;
-}
-
-.install-popup-description {
-  font-size: 0.85rem;
-  color: #6B5B57;
-  line-height: 1.5;
-  margin-bottom: 24px;
-}
-
-.install-popup-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.install-popup-btn {
-  flex: 1;
-  padding: 12px 16px;
-  border-radius: 40px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.install-popup-btn.primary {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8942E 100%);
-  color: #2D2422;
-  border: none;
-}
-
-.install-popup-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
-}
-
-.install-popup-btn.secondary {
-  background: transparent;
-  color: #6B5B57;
-  border: 1px solid #ddd;
-}
-
-.install-popup-btn.secondary:hover {
-  border-color: #D4AF37;
+.install-banner-close:hover {
+  background: rgba(0, 0, 0, 0.05);
   color: #2D2422;
 }
 
-/* === GUIDE iOS (modal secondaire) === */
+/* === GUIDE iOS (modal bloquant - mais c'est voulu car c'est un guide) === */
 .ios-guide-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
-  z-index: 10001;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .ios-guide-modal {
   background: white;
   border-radius: 32px;
   padding: 32px 24px;
-  max-width: 340px;
+  max-width: 320px;
   width: 100%;
   text-align: center;
   position: relative;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  animation: scaleIn 0.3s ease;
+  animation: scaleIn 0.2s ease;
 }
 
 .ios-guide-close {
@@ -154,7 +129,7 @@
 }
 
 .ios-guide-icon {
-  font-size: 3.5rem;
+  font-size: 3rem;
   margin-bottom: 16px;
 }
 
@@ -175,7 +150,7 @@
 .ios-safari-steps {
   text-align: left;
   margin: 20px 0;
-  background: #f8f8f8;
+  background: #F5F0E8;
   border-radius: 20px;
   padding: 16px;
 }
@@ -219,29 +194,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e0e0e0;
+  background: white;
   width: 32px;
   height: 32px;
   border-radius: 8px;
   font-size: 1.2rem;
-}
-
-.ios-add-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #D4AF37;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1rem;
-  color: #2D2422;
-}
-
-.ios-action {
-  font-weight: 600;
-  color: #B8942E;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .ios-guide-ok {
@@ -253,35 +211,65 @@
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   width: 100%;
-  margin-top: 8px;
 }
 
 .ios-guide-ok:hover {
   background: #B8942E;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 /* === ANIMATIONS === */
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-/* Responsive */
+/* === RESPONSIVE === */
 @media (max-width: 480px) {
-  .install-popup-modal {
-    margin: 16px;
-    padding: 28px 20px;
+  .install-banner {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
   }
   
-  .install-popup-title {
-    font-size: 1.2rem;
+  .install-banner-content {
+    padding: 10px 12px;
+  }
+  
+  .install-banner-text strong {
+    font-size: 0.8rem;
+  }
+  
+  .install-banner-text span {
+    font-size: 0.65rem;
+  }
+  
+  .install-banner-btn {
+    padding: 6px 14px;
+    font-size: 0.7rem;
   }
 }
