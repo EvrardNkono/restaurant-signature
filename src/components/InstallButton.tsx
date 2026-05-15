@@ -13,10 +13,12 @@ export default function InstallButton() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const [showPopup, setShowPopup] = useState(false); // Popup principale
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    // Détection iOS plus précise
+    // Détection iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
@@ -28,12 +30,29 @@ export default function InstallButton() {
       setIsInstalled(true);
     }
 
+    // Vérifier si l'utilisateur a déjà fermé la popup
+    const hasDismissed = localStorage.getItem('install_popup_dismissed');
+    if (hasDismissed === 'true') {
+      setIsDismissed(true);
+    }
+
     // Écouter l'événement beforeinstallprompt (Android/Desktop)
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
+      // Afficher la popup après un court délai
+      setTimeout(() => {
+        setShowPopup(true);
+      }, 3000);
     };
+
+    // Pour iOS, afficher la popup après un délai
+    if (isIOSDevice && !isInStandaloneMode && !hasDismissed) {
+      setTimeout(() => {
+        setShowPopup(true);
+      }, 3000);
+    }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
@@ -41,15 +60,17 @@ export default function InstallButton() {
       setIsInstalled(true);
       setDeferredPrompt(null);
       setIsInstallable(false);
+      setShowPopup(false);
     });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [isIOS]);
 
   const handleInstallClick = async () => {
     if (isIOS) {
+      setShowPopup(false);
       setShowIOSGuide(true);
       return;
     }
@@ -60,33 +81,59 @@ export default function InstallButton() {
       if (outcome === 'accepted') {
         setIsInstalled(true);
         setIsInstallable(false);
+        setShowPopup(false);
       }
       setDeferredPrompt(null);
     }
   };
 
-  // Ne pas afficher si déjà installé
-  if (isInstalled) return null;
+  const handleDismiss = () => {
+    setShowPopup(false);
+    setIsDismissed(true);
+    localStorage.setItem('install_popup_dismissed', 'true');
+  };
+
+  // Ne pas afficher si déjà installé ou fermé
+  if (isInstalled || isDismissed) return null;
 
   return (
     <>
-      {/* Bouton pour Android/Desktop */}
-      {isInstallable && !isIOS && (
-        <button className="install-btn" onClick={handleInstallClick}>
-          <Download size={18} />
-          <span>Installer l'application</span>
-        </button>
+      {/* Popup centrée */}
+      {showPopup && (isInstallable || isIOS) && (
+        <div className="install-popup-overlay">
+          <div className="install-popup-modal">
+            <button className="install-popup-close" onClick={handleDismiss}>
+              <X size={20} />
+            </button>
+            
+            <div className="install-popup-icon">
+              {isIOS ? <Apple size={48} /> : <Download size={48} />}
+            </div>
+            
+            <h3 className="install-popup-title">
+              {isIOS ? "Ajoutez Restaurant Signature" : "Installez l'application"}
+            </h3>
+            
+            <p className="install-popup-description">
+              {isIOS 
+                ? "Ajoutez Restaurant Signature sur votre écran d'accueil pour y accéder en un clin d'œil"
+                : "Installez notre application pour une expérience plus rapide et des commandes simplifiées"
+              }
+            </p>
+            
+            <div className="install-popup-buttons">
+              <button className="install-popup-btn primary" onClick={handleInstallClick}>
+                {isIOS ? "Ajouter" : "Installer"}
+              </button>
+              <button className="install-popup-btn secondary" onClick={handleDismiss}>
+                Plus tard
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Bouton spécifique iOS - toujours visible sur iOS */}
-      {isIOS && (
-        <button className="install-btn ios" onClick={handleInstallClick}>
-          <Apple size={18} />
-          <span>Ajouter à l'écran d'accueil</span>
-        </button>
-      )}
-
-      {/* Guide d'installation pour iOS */}
+      {/* Guide d'installation pour iOS (modal secondaire) */}
       {showIOSGuide && (
         <div className="ios-guide-overlay">
           <div className="ios-guide-modal">
@@ -95,8 +142,8 @@ export default function InstallButton() {
             </button>
             
             <div className="ios-guide-icon">📱</div>
-            <h3>Installer Restaurant Signature</h3>
-            <p>Pour ajouter l'application sur votre iPhone :</p>
+            <h3>Ajouter à l'écran d'accueil</h3>
+            <p>Suivez ces étapes pour ajouter l'application :</p>
             
             <div className="ios-safari-steps">
               <div className="step">
@@ -131,11 +178,6 @@ export default function InstallButton() {
                   <strong>Ajouter</strong>
                 </div>
               </div>
-            </div>
-
-            <div className="ios-tip">
-              <span className="tip-icon">💡</span>
-              <span>L'icône apparaîtra sur votre écran d'accueil</span>
             </div>
             
             <button className="ios-guide-ok" onClick={() => setShowIOSGuide(false)}>

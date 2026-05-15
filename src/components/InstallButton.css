@@ -1,38 +1,7 @@
 /* src/components/InstallButton.css */
 
-.install-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, var(--gold, #D4AF37) 0%, var(--gold-dark, #B8942E) 100%);
-  color: var(--terracotta-dark, #2D2422);
-  border: none;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-}
-
-.install-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
-}
-
-.install-btn.ios {
-  background: linear-gradient(135deg, #2D2422 0%, #1A1513 100%);
-  color: var(--gold, #D4AF37);
-  border: 1px solid var(--gold, #D4AF37);
-}
-
-.install-btn.ios:hover {
-  background: linear-gradient(135deg, #3D2B27 0%, #2D2422 100%);
-}
-
-/* Modal guide iOS - Style amélioré */
-.ios-guide-overlay {
+/* === POPUP CENTRÉE === */
+.install-popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -48,6 +17,118 @@
   animation: fadeIn 0.3s ease;
 }
 
+.install-popup-modal {
+  background: white;
+  border-radius: 32px;
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease;
+}
+
+.install-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #6B5B57;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.install-popup-close:hover {
+  background: #f0f0f0;
+}
+
+.install-popup-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #2D2422 0%, #4A3733 100%);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: #D4AF37;
+}
+
+.install-popup-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2D2422;
+  margin-bottom: 12px;
+}
+
+.install-popup-description {
+  font-size: 0.85rem;
+  color: #6B5B57;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.install-popup-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.install-popup-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.install-popup-btn.primary {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8942E 100%);
+  color: #2D2422;
+  border: none;
+}
+
+.install-popup-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+
+.install-popup-btn.secondary {
+  background: transparent;
+  color: #6B5B57;
+  border: 1px solid #ddd;
+}
+
+.install-popup-btn.secondary:hover {
+  border-color: #D4AF37;
+  color: #2D2422;
+}
+
+/* === GUIDE iOS (modal secondaire) === */
+.ios-guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
 .ios-guide-modal {
   background: white;
   border-radius: 32px;
@@ -56,8 +137,8 @@
   width: 100%;
   text-align: center;
   position: relative;
-  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
-  animation: slideUp 0.4s ease;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  animation: scaleIn 0.3s ease;
 }
 
 .ios-guide-close {
@@ -66,15 +147,10 @@
   right: 16px;
   background: none;
   border: none;
-  color: var(--text-light, #6B5B57);
+  color: #6B5B57;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.ios-guide-close:hover {
-  background: #f0f0f0;
 }
 
 .ios-guide-icon {
@@ -84,19 +160,18 @@
 
 .ios-guide-modal h3 {
   font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: var(--terracotta-dark, #2D2422);
+  color: #2D2422;
   margin-bottom: 8px;
 }
 
 .ios-guide-modal p {
-  color: var(--text-light, #6B5B57);
+  color: #6B5B57;
   font-size: 0.85rem;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-/* Étapes iOS */
 .ios-safari-steps {
   text-align: left;
   margin: 20px 0;
@@ -119,8 +194,8 @@
 .step-num {
   width: 28px;
   height: 28px;
-  background: var(--gold, #D4AF37);
-  color: var(--terracotta-dark, #2D2422);
+  background: #D4AF37;
+  color: #2D2422;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -133,7 +208,7 @@
 .step-content {
   flex: 1;
   font-size: 0.85rem;
-  color: var(--text-dark, #2D2422);
+  color: #2D2422;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -155,39 +230,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--gold, #D4AF37);
+  background: #D4AF37;
   width: 28px;
   height: 28px;
   border-radius: 8px;
   font-weight: bold;
   font-size: 1rem;
-  color: var(--terracotta-dark);
+  color: #2D2422;
 }
 
 .ios-action {
   font-weight: 600;
-  color: var(--gold-dark, #B8942E);
-}
-
-.ios-tip {
-  background: rgba(212, 175, 55, 0.1);
-  border-radius: 16px;
-  padding: 12px;
-  margin: 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.8rem;
-  color: var(--gold-dark, #B8942E);
-}
-
-.tip-icon {
-  font-size: 1.2rem;
+  color: #B8942E;
 }
 
 .ios-guide-ok {
-  background: var(--gold, #D4AF37);
-  color: var(--terracotta-dark, #2D2422);
+  background: #D4AF37;
+  color: #2D2422;
   border: none;
   padding: 14px 24px;
   border-radius: 40px;
@@ -200,28 +259,29 @@
 }
 
 .ios-guide-ok:hover {
-  background: var(--gold-dark, #B8942E);
+  background: #B8942E;
   transform: translateY(-2px);
 }
 
+/* === ANIMATIONS === */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-  .ios-guide-modal {
+  .install-popup-modal {
     margin: 16px;
-    padding: 24px 20px;
+    padding: 28px 20px;
   }
   
-  .step-content {
-    font-size: 0.8rem;
+  .install-popup-title {
+    font-size: 1.2rem;
   }
 }
