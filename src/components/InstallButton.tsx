@@ -1,6 +1,6 @@
 // src/components/InstallButton.tsx
 import { useState, useEffect } from 'react';
-import { Download, Smartphone, X, Apple } from 'lucide-react';
+import { Download, X, Apple } from 'lucide-react';
 import './InstallButton.css';
 
 interface BeforeInstallPromptEvent extends Event {
