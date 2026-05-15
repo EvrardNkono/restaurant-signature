@@ -10,12 +10,13 @@ import MenuSoir from "./pages/MenuSoir";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
-import OrderSuccess from "./pages/OrderSuccess";// Import de la nouvelle page Success
+import OrderSuccess from "./pages/OrderSuccess";
 import Chatbot from "./components/Chatbot"; 
 import AdPopup from "./components/AdPopup"; 
 import ScrollToTop from "./components/ScrollToTop";
 import FloatingOrder from "./components/home/FloatingOrder";
 import { CartProvider } from "./context/CartContext";
+import InstallButton from './components/InstallButton';
 
 // Imports Administration
 import AdminLayout from "./admin/components/AdminLayout";
@@ -58,7 +59,9 @@ export default function AppRouter() {
                 <>
                   <AdPopup />
                   <Navbar />
-                  <FloatingOrder /> 
+                  <FloatingOrder />
+                  {/* Bouton d'installation PWA ajouté ici */}
+                  <InstallButton />
 
                   <main>
                     <Routes>
@@ -69,8 +72,7 @@ export default function AppRouter() {
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
-                      {/* Ajout de la route de succès après paiement */}
-                     <Route path="/order-success" element={<OrderSuccess />} />
+                      <Route path="/order-success" element={<OrderSuccess />} />
                     </Routes>
                   </main>
                   <Chatbot />

@@ -1,0 +1,227 @@
+/* src/components/InstallButton.css */
+
+.install-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--gold, #D4AF37) 0%, var(--gold-dark, #B8942E) 100%);
+  color: var(--terracotta-dark, #2D2422);
+  border: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.install-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+
+.install-btn.ios {
+  background: linear-gradient(135deg, #2D2422 0%, #1A1513 100%);
+  color: var(--gold, #D4AF37);
+  border: 1px solid var(--gold, #D4AF37);
+}
+
+.install-btn.ios:hover {
+  background: linear-gradient(135deg, #3D2B27 0%, #2D2422 100%);
+}
+
+/* Modal guide iOS - Style amélioré */
+.ios-guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.ios-guide-modal {
+  background: white;
+  border-radius: 32px;
+  padding: 32px 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
+  animation: slideUp 0.4s ease;
+}
+
+.ios-guide-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-light, #6B5B57);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.ios-guide-close:hover {
+  background: #f0f0f0;
+}
+
+.ios-guide-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+
+.ios-guide-modal h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--terracotta-dark, #2D2422);
+  margin-bottom: 8px;
+}
+
+.ios-guide-modal p {
+  color: var(--text-light, #6B5B57);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+
+/* Étapes iOS */
+.ios-safari-steps {
+  text-align: left;
+  margin: 20px 0;
+  background: #f8f8f8;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  background: var(--gold, #D4AF37);
+  color: var(--terracotta-dark, #2D2422);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--text-dark, #2D2422);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ios-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+.ios-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold, #D4AF37);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--terracotta-dark);
+}
+
+.ios-action {
+  font-weight: 600;
+  color: var(--gold-dark, #B8942E);
+}
+
+.ios-tip {
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 16px;
+  padding: 12px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--gold-dark, #B8942E);
+}
+
+.tip-icon {
+  font-size: 1.2rem;
+}
+
+.ios-guide-ok {
+  background: var(--gold, #D4AF37);
+  color: var(--terracotta-dark, #2D2422);
+  border: none;
+  padding: 14px 24px;
+  border-radius: 40px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.ios-guide-ok:hover {
+  background: var(--gold-dark, #B8942E);
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ios-guide-modal {
+    margin: 16px;
+    padding: 24px 20px;
+  }
+  
+  .step-content {
+    font-size: 0.8rem;
+  }
+}
