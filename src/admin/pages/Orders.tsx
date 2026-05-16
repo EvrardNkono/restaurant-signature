@@ -1,4 +1,5 @@
-// src/admin/pages/Orders.tsx
+// src/admin/pages/Orders.tsx - Version corrigée avec boutons bien visibles
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
@@ -564,7 +565,7 @@ export default function Orders() {
                           ? <span className="spinner-small" />
                           : <Clock size={14} />
                         }
-                        <span>Cuisine</span>
+                        <span>Passer en cuisine</span>
                       </button>
                     )}
                     {order.status === "cooking" && (
@@ -577,7 +578,7 @@ export default function Orders() {
                           ? <span className="spinner-small" />
                           : <CheckCircle size={14} />
                         }
-                        <span>Terminer</span>
+                        <span>Marquer prêt</span>
                       </button>
                     )}
                     {order.status === "done" && (
@@ -618,96 +619,6 @@ export default function Orders() {
           })}
         </div>
       )}
-
-      <style>{`
-        .toast-notification {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          padding: 12px 20px;
-          border-radius: 8px;
-          color: white;
-          font-weight: 500;
-          z-index: 10000;
-          animation: slideIn 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .toast-notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .toast-notification.error   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .toast-notification.info    { background: linear-gradient(135deg, #3498db, #2980b9); }
-
-        @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to   { transform: translateX(0);    opacity: 1; }
-        }
-
-        .fcm-indicator {
-          display: inline-flex;
-          align-items: center;
-          margin-left: 8px;
-          color: #2ecc71;
-          background: rgba(46, 204, 113, 0.1);
-          padding: 2px 6px;
-          border-radius: 12px;
-        }
-
-        .spinner-small {
-          width: 14px;
-          height: 14px;
-          border: 2px solid rgba(255,255,255,0.3);
-          border-radius: 50%;
-          border-top-color: white;
-          animation: spin 0.6s linear infinite;
-          display: inline-block;
-          flex-shrink: 0;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
-        .action-btn:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-          pointer-events: none;
-        }
-
-        .order-details-section {
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 8px;
-          padding: 8px 12px;
-          margin: 8px 0;
-          font-size: 0.75rem;
-        }
-
-        .detail-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 4px 0;
-          color: rgba(255, 255, 255, 0.7);
-        }
-
-        .detail-icon {
-          color: #D4AF37;
-          flex-shrink: 0;
-        }
-
-        .delivery-fee {
-          color: #D4AF37;
-          font-weight: 500;
-        }
-
-        .deposit-badge {
-          display: inline-block;
-          margin-left: 8px;
-          font-size: 0.7rem;
-          background: rgba(212, 175, 55, 0.2);
-          color: #D4AF37;
-          padding: 2px 6px;
-          border-radius: 12px;
-        }
-      `}</style>
     </div>
   );
 }
