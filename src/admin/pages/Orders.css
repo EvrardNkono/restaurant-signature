@@ -544,15 +544,16 @@
 /* === FOOTER DE CARTE — zone des boutons === */
 .order-card-footer {
   display: flex;
+  flex-direction: row;       /* status + boutons CÔTE À CÔTE */
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
+  padding: 12px 18px;
   background: var(--beige);
-  border-top: 1px solid var(--border-gold);
+  border-top: 2px solid var(--border-gold);
   border-radius: 0 0 20px 20px;
   flex-shrink: 0;
-  gap: 12px;
-  flex-wrap: wrap;          /* wrap sur petits écrans */
+  gap: 10px;
+  min-height: 56px;          /* hauteur minimale pour être toujours visible */
 }
 
 /* Pill de statut */
