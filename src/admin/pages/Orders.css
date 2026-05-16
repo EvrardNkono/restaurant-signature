@@ -1,4 +1,4 @@
-/* src/admin/pages/Orders.css - Version corrigée avec boutons visibles */
+/* src/admin/pages/Orders.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -286,16 +286,18 @@
   gap: 24px;
 }
 
-/* === CARTE COMMANDE === */
+/* === CARTE COMMANDE ===
+   IMPORTANT : pas de overflow:hidden sur la carte entière,
+   sinon le footer sort du flux visible  */
 .order-card-luxury {
   background: white;
   border-radius: 20px;
   border: 1px solid var(--border-gold);
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: column;   /* ← clé : footer colle en bas */
   transition: var(--transition);
-  overflow: hidden;
+  /* PAS de overflow:hidden ici */
 }
 
 .order-card-luxury:hover {
@@ -303,7 +305,7 @@
   box-shadow: var(--shadow-gold);
 }
 
-/* Barre colorée en haut */
+/* Barre colorée en haut — utilise border-radius sur les 2 coins hauts */
 .gold-top-border {
   height: 4px;
   border-radius: 20px 20px 0 0;
@@ -363,7 +365,7 @@
 /* === BODY DE CARTE === */
 .order-card-body {
   padding: 14px 18px;
-  flex: 1;
+  flex: 1;               /* prend tout l'espace disponible */
 }
 
 .order-origin {
@@ -539,13 +541,12 @@
   color: #3498db;
 }
 
-/* === FOOTER DE CARTE === */
+/* === FOOTER DE CARTE — zone des boutons === */
 .order-card-footer {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px 18px;
   background: var(--beige);
   border-top: 2px solid var(--border-gold);
   border-radius: 0 0 20px 20px;
@@ -588,101 +589,102 @@
   50%       { opacity: 0.5; transform: scale(0.8); }
 }
 
-/* === BOUTONS D'ACTION - CORRIGÉS POUR ÊTRE TRÈS VISIBLES === */
+/* === BOUTONS D'ACTION === */
 .order-actions-luxury {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
-/* Base commune des boutons */
+/* Base commune */
 .action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  line-height: 1;
-  min-height: 36px;
-  font-family: inherit;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 9px 18px !important;
+  border-radius: 10px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: var(--transition) !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  min-height: 38px !important;
+  text-decoration: none !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
 }
 
-/* Bouton "Passer en cuisine" - BLEU visible */
+/* Cuisine → bleu */
 .action-btn.cooking {
-  background: #3498db;
-  color: white;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+  background: #3498db !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(52,152,219,0.4) !important;
 }
-
 .action-btn.cooking:hover:not(:disabled) {
-  background: #2980b9;
+  background: #2980b9 !important;
+  box-shadow: 0 5px 14px rgba(52,152,219,0.55) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.5);
 }
 
-/* Bouton "Marquer prêt" - VERT visible */
+/* Terminer → vert */
 .action-btn.done {
-  background: #27ae60;
-  color: white;
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.4);
+  background: #27ae60 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(39,174,96,0.4) !important;
 }
-
 .action-btn.done:hover:not(:disabled) {
-  background: #219a52;
+  background: #219a52 !important;
+  box-shadow: 0 5px 14px rgba(39,174,96,0.55) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.5);
 }
 
-/* Bouton "Archiver" - ORANGE visible */
+/* Archiver → orange */
 .action-btn.archive {
-  background: #e67e22;
-  color: white;
-  box-shadow: 0 2px 8px rgba(230, 126, 34, 0.4);
+  background: #e67e22 !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(230,126,34,0.4) !important;
 }
-
 .action-btn.archive:hover:not(:disabled) {
-  background: #d35400;
+  background: #d35400 !important;
+  box-shadow: 0 5px 14px rgba(230,126,34,0.55) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.5);
 }
 
-/* Boutons icônes seuls */
+/* Icônes seules */
 .action-btn.icon-only {
-  background: white;
-  border: 1.5px solid var(--border-gold);
-  color: var(--text-light);
-  padding: 8px 10px;
-  min-width: 36px;
+  background: #ffffff !important;
+  border: 1.5px solid var(--border-gold) !important;
+  color: var(--text-light) !important;
+  padding: 8px 10px !important;
 }
-
 .action-btn.icon-only:hover {
-  border-color: var(--gold);
-  color: var(--gold-dark);
-  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--gold) !important;
+  color: var(--gold-dark) !important;
+  background: rgba(212,175,55,0.1) !important;
 }
 
 /* Désactivé pendant la requête */
 .action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
   transform: none !important;
   box-shadow: none !important;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 /* Spinner pendant la requête */
 .spinner-small {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255,255,255,0.35);
   border-radius: 50%;
   border-top-color: white;
   animation: spinBtn 0.6s linear infinite;
@@ -700,7 +702,7 @@
   align-items: center;
   margin-left: 6px;
   color: #27ae60;
-  background: rgba(46, 204, 113, 0.1);
+  background: rgba(46,204,113,0.1);
   padding: 2px 6px;
   border-radius: 12px;
 }
@@ -751,7 +753,7 @@
   font-weight: 600;
   z-index: 10000;
   animation: slideIn 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
   font-size: 0.85rem;
 }
 .toast-notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
@@ -784,23 +786,17 @@
   .stats-grid-luxury { grid-template-columns: repeat(2, 1fr); }
 
   .order-card-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    flex-direction: row;     /* reste côte à côte même sur mobile */
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .order-actions-luxury {
     flex-wrap: wrap;
-    justify-content: center;
   }
 
-  .action-btn { 
-    flex: 1 1 auto; 
-    justify-content: center; 
-  }
-  .action-btn.icon-only { 
-    flex: 0 0 auto; 
-  }
+  .action-btn { flex: 1 1 auto; justify-content: center; }
+  .action-btn.icon-only { flex: 0 0 auto; }
 }
 
 @media (max-width: 480px) {
