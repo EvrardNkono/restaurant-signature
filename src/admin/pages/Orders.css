@@ -808,3 +808,11 @@
     align-items: flex-start;
   }
 }
+
+/* Fix conteneur admin qui compresse les cartes */
+.admin-page-container {
+  overflow: visible !important;
+}
+.admin-main-content {
+  overflow: visible !important;
+}
