@@ -292,6 +292,22 @@ export default function Menu() {
     if (clientId) refetchOrders();
   }, [clientId, cart.length, refetchOrders]);
 
+  // ============================================
+  // 🆕 NETTOYAGE DU PANIER QUAND COMMANDE ARCHIVÉE
+  // ============================================
+  useEffect(() => {
+    const hasArchivedOrder = activeOrders.some((order: any) => order.status === "archived");
+    
+    if (hasArchivedOrder && cart.length > 0) {
+      console.log("🗑️ Commande archivée détectée, vidage du panier...");
+      // Vider tout le panier
+      cart.forEach(item => {
+        removeFromCart(item.cartItemId);
+      });
+      showToast("✓ Commande terminée, merci !", "success");
+    }
+  }, [activeOrders, cart, removeFromCart]);
+
   // --- FILTRAGE DYNAMIQUE ---
   const platsDeLaPeriode = useMemo(() => {
     if (!allPlats) return [];
