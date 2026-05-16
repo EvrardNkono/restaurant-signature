@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
   Printer, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
-  Truck, Sparkles, Bell, BellRing
+  Truck, Sparkles, Bell, BellRing, Phone, Mail, MapPin, Clock as ClockIcon
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
@@ -19,11 +19,9 @@ export default function Orders() {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [notifyingOrders, setNotifyingOrders] = useState<Set<string>>(new Set());
   
-  // États pour les filtres
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
 
-  // Toast notification state
   const [toast, setToast] = useState<{ show: boolean; message: string; type: string }>({
     show: false,
     message: "",
@@ -66,20 +64,19 @@ export default function Orders() {
   }, []);
 
   const fetchOrders = async () => {
-  try {
-    const res = await axios.get(`${BASE_API}/orders`);
-    // Au lieu de .reverse(), on trie par date décroissante
-    const data = res.data.data.sort((a: any, b: any) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    setOrders(data);
-    applyFilter(data, activeFilter, customRange);
-  } catch (err) {
-    console.error("Erreur chargement:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const res = await axios.get(`${BASE_API}/orders`);
+      const data = res.data.data.sort((a: any, b: any) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setOrders(data);
+      applyFilter(data, activeFilter, customRange);
+    } catch (err) {
+      console.error("Erreur chargement:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -87,23 +84,17 @@ export default function Orders() {
     return () => clearInterval(interval);
   }, [activeFilter, customRange, applyFilter]);
 
-  // Fonction mise à jour avec notification au client
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const now = new Date().toISOString();
-    
-    // Ajouter l'ordre à la liste des notifications en cours
     setNotifyingOrders(prev => new Set(prev).add(orderId));
     
     try {
-      // Mise à jour optimiste de l'UI
       setFilteredOrders(prev => 
         prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
       );
       
-      // 1. Mettre à jour le statut dans la base de données
       await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus, updatedAt: now });
       
-      // 2. Envoyer la notification au client
       const notificationResult = await axios.post(`${BASE_API}/notifications/order-status`, {
         orderId,
         newStatus
@@ -111,21 +102,17 @@ export default function Orders() {
       
       if (notificationResult.data.success) {
         showToast(`✅ Notification envoyée au client (statut: ${getStatusLabel(newStatus)})`, "success");
-        console.log(`📱 Notification client envoyée pour commande ${orderId}`);
       } else {
-        console.warn(`⚠️ Notification non envoyée: ${notificationResult.data.message}`);
         if (notificationResult.data.message !== 'Pas de token client pour cette commande') {
           showToast(`⚠️ Client non notifié: ${notificationResult.data.message}`, "info");
         }
       }
       
-      // Rafraîchir la liste
       await fetchOrders();
-      
     } catch (err: any) {
       console.error("❌ Erreur update statut:", err);
       showToast(`❌ Erreur: ${err.response?.data?.message || err.message}`, "error");
-      await fetchOrders(); // Recharger pour annuler la mise à jour optimiste
+      await fetchOrders();
     } finally {
       setNotifyingOrders(prev => {
         const newSet = new Set(prev);
@@ -135,7 +122,6 @@ export default function Orders() {
     }
   };
 
-  // Fonction pour envoyer une notification personnalisée
   const sendCustomNotification = async (orderId: string, title: string, body: string) => {
     try {
       const response = await axios.post(`${BASE_API}/notifications/custom-notification`, {
@@ -181,11 +167,16 @@ export default function Orders() {
         "Table / Client": tableOrClient,
         "Téléphone": o.customer?.phone || "-",
         "Email": o.customer?.email || "-",
+        "Adresse": o.customer?.address || "-",
+        "Heure livraison": o.details?.deliveryTime || "-",
+        "Service livraison": o.details?.deliveryService || "-",
+        "Frais livraison": o.details?.deliveryFee ? `${o.details.deliveryFee}€` : "-",
+        "Date réservation": o.details?.bookingSlot || "-",
         "Articles": articlesDetails,
         "Quantité": o.items.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0),
         "Total TTC": `${parseFloat(o.total).toFixed(2)} €`,
+        "Montant payé": `${parseFloat(o.amountPaid || 0).toFixed(2)} €`,
         "Statut": getStatusLabel(o.status),
-        "Service livraison": o.details?.deliveryService || "-",
         "Token FCM": o.fcmToken ? "✅ Oui" : "❌ Non",
       };
     });
@@ -193,8 +184,9 @@ export default function Orders() {
     const ws = XLSX.utils.json_to_sheet(data);
     ws['!cols'] = [
       { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, 
-      { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
-      { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 12 }
+      { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 15 },
+      { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
+      { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 12 }
     ];
 
     const wb = XLSX.utils.book_new();
@@ -279,16 +271,98 @@ export default function Orders() {
     );
   };
 
+  // Fonction pour afficher les détails spécifiques selon le mode
+  const getOrderDetails = (order: any) => {
+    if (order.mode === "delivery") {
+      return (
+        <div className="order-details-delivery">
+          <div className="detail-row">
+            <Phone size={14} className="detail-icon" />
+            <span>{order.customer?.phone || "Non renseigné"}</span>
+          </div>
+          <div className="detail-row">
+            <Mail size={14} className="detail-icon" />
+            <span>{order.customer?.email || "Non renseigné"}</span>
+          </div>
+          <div className="detail-row">
+            <MapPin size={14} className="detail-icon" />
+            <span>{order.customer?.address || "Non renseignée"}</span>
+          </div>
+          <div className="detail-row">
+            <ClockIcon size={14} className="detail-icon" />
+            <span>Livraison : {order.details?.deliveryTime || "Non spécifiée"}</span>
+          </div>
+          {order.details?.deliveryFee > 0 && (
+            <div className="detail-row delivery-fee">
+              <Truck size={14} className="detail-icon" />
+              <span>Frais de livraison : {order.details.deliveryFee}€</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    if (order.mode === "booking") {
+      return (
+        <div className="order-details-booking">
+          <div className="detail-row">
+            <Phone size={14} className="detail-icon" />
+            <span>{order.customer?.phone || "Non renseigné"}</span>
+          </div>
+          <div className="detail-row">
+            <Mail size={14} className="detail-icon" />
+            <span>{order.customer?.email || "Non renseigné"}</span>
+          </div>
+          <div className="detail-row">
+            <Calendar size={14} className="detail-icon" />
+            <span>Réservation : {order.details?.bookingSlot ? new Date(order.details.bookingSlot).toLocaleString() : "Non spécifiée"}</span>
+          </div>
+          <div className="detail-row">
+            <Wallet size={14} className="detail-icon" />
+            <span>Acompte versé : {order.amountPaid?.toFixed(2) || "0"}€ / {order.total?.toFixed(2)}€</span>
+          </div>
+        </div>
+      );
+    }
+    
+    if (order.mode === "on_site" && order.details?.consumeMode === "take_away") {
+      return (
+        <div className="order-details-takeaway">
+          <div className="detail-row">
+            <Phone size={14} className="detail-icon" />
+            <span>{order.customer?.phone || "Non renseigné"}</span>
+          </div>
+          <div className="detail-row">
+            <Mail size={14} className="detail-icon" />
+            <span>{order.customer?.email || "Non renseigné"}</span>
+          </div>
+        </div>
+      );
+    }
+    
+    // Sur place - afficher email si disponible
+    if (order.customer?.email && order.details?.paymentStatus === "pending_stripe") {
+      return (
+        <div className="order-details-onsite">
+          <div className="detail-row">
+            <Mail size={14} className="detail-icon" />
+            <span>{order.customer.email}</span>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+
   return (
     <div className="orders-page">
-      {/* Toast Notification */}
       {toast.show && (
         <div className={`toast-notification ${toast.type}`}>
           <span>{toast.message}</span>
         </div>
       )}
 
-      {/* Header Luxe */}
       <header className="orders-header-luxury">
         <div className="header-seal-terracotta">
           <ShoppingBag size={24} />
@@ -299,7 +373,6 @@ export default function Orders() {
         <div className="header-gold-line"></div>
       </header>
 
-      {/* Panneau Revenus & Filtres */}
       <div className="revenue-panel-luxury">
         <div className="revenue-card-luxury">
           <div className="rev-icon-gold">
@@ -333,12 +406,11 @@ export default function Orders() {
 
           <button className="btn-download-gold" onClick={downloadExcel}>
             <Download size={18} />
-            <span>Exporter CSV</span>
+            <span>Exporter Excel</span>
           </button>
         </div>
       </div>
 
-      {/* Statistiques */}
       <div className="stats-grid-luxury">
         <div className="stat-card-luxury highlight">
           <div className="stat-icon period">
@@ -378,7 +450,6 @@ export default function Orders() {
         </div>
       </div>
 
-      {/* Liste des commandes */}
       {loading ? (
         <div className="loading-luxury">
           <Sparkles size={30} className="spinner-gold" />
@@ -417,6 +488,11 @@ export default function Orders() {
                   {getOrderOrigin(order)}
                 </div>
 
+                {/* AFFICHAGE DES DÉTAILS SPÉCIFIQUES (TÉLÉPHONE, EMAIL, ETC.) */}
+                <div className="order-details-section">
+                  {getOrderDetails(order)}
+                </div>
+
                 <div className="items-list-luxury">
                   {order.items.slice(0, 3).map((item: any, idx: number) => (
                     <div key={idx} className="order-item">
@@ -435,6 +511,9 @@ export default function Orders() {
                 <div className="order-total">
                   <span className="total-label">Total</span>
                   <span className="total-value">{parseFloat(order.total).toFixed(2)}€</span>
+                  {order.amountPaid > 0 && order.amountPaid < order.total && (
+                    <span className="deposit-badge">Acompte: {order.amountPaid.toFixed(2)}€</span>
+                  )}
                 </div>
 
                 {order.details?.deliveryService && (
@@ -538,25 +617,15 @@ export default function Orders() {
           animation: slideIn 0.3s ease;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .toast-notification.success {
-          background: linear-gradient(135deg, #27ae60, #2ecc71);
-        }
-        .toast-notification.error {
-          background: linear-gradient(135deg, #e74c3c, #c0392b);
-        }
-        .toast-notification.info {
-          background: linear-gradient(135deg, #3498db, #2980b9);
-        }
+        .toast-notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .toast-notification.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .toast-notification.info { background: linear-gradient(135deg, #3498db, #2980b9); }
+        
         @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
+        
         .fcm-indicator {
           display: inline-flex;
           align-items: center;
@@ -566,6 +635,7 @@ export default function Orders() {
           padding: 2px 6px;
           border-radius: 12px;
         }
+        
         .spinner-small {
           width: 14px;
           height: 14px;
@@ -575,12 +645,51 @@ export default function Orders() {
           animation: spin 0.6s linear infinite;
           display: inline-block;
         }
+        
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        
         .action-btn:disabled {
           opacity: 0.7;
           cursor: not-allowed;
+        }
+        
+        /* Nouveaux styles pour les détails */
+        .order-details-section {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          padding: 8px 12px;
+          margin: 8px 0;
+          font-size: 0.75rem;
+        }
+        
+        .detail-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 4px 0;
+          color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .detail-icon {
+          color: #D4AF37;
+          flex-shrink: 0;
+        }
+        
+        .delivery-fee {
+          color: #D4AF37;
+          font-weight: 500;
+        }
+        
+        .deposit-badge {
+          display: inline-block;
+          margin-left: 8px;
+          font-size: 0.7rem;
+          background: rgba(212, 175, 55, 0.2);
+          color: #D4AF37;
+          padding: 2px 6px;
+          border-radius: 12px;
         }
       `}</style>
     </div>
