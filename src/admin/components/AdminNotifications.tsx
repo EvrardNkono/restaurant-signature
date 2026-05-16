@@ -1,7 +1,7 @@
 // src/admin/components/AdminNotifications.tsx
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
-import { getMessaging, getToken } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { app } from '../../services/firebase';
 
 const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
@@ -14,6 +14,18 @@ export default function AdminNotifications() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Écoute les messages quand l'onglet est actif (foreground)
+    const messaging = getMessaging(app);
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('📨 Message foreground reçu:', payload);
+      if (Notification.permission === 'granted') {
+        new Notification(payload.notification?.title || 'Nouvelle commande !', {
+          body: payload.notification?.body || '',
+          icon: '/icons/icon-192x192.png'
+        });
+      }
+    });
+
     const restoreNotifications = async () => {
       const savedState = localStorage.getItem('admin_notifications_enabled');
       const savedToken = localStorage.getItem('admin_token');
@@ -21,11 +33,8 @@ export default function AdminNotifications() {
       console.log('🔄 Vérification des notifications sauvegardées:', { savedState, hasToken: !!savedToken });
       
       if (savedState === 'true' && savedToken) {
-        // Vérifier si la permission est toujours accordée
         if (Notification.permission === 'granted') {
           console.log('✅ Permission toujours accordée, restauration en cours...');
-          
-          // Réactiver le token auprès du backend
           try {
             const response = await fetch(`${BASE_API}/notifications/register-admin`, {
               method: 'POST',
@@ -57,6 +66,8 @@ export default function AdminNotifications() {
     };
     
     restoreNotifications();
+
+    return () => unsubscribe();
   }, []);
 
   const enableNotifications = async () => {
@@ -74,11 +85,9 @@ export default function AdminNotifications() {
 
       const messaging = getMessaging(app);
       
-      // Vérifier si un token existe déjà
       let token = localStorage.getItem('admin_token');
       
       if (!token) {
-        // Générer un nouveau token
         token = await getToken(messaging, { vapidKey: VAPID_KEY });
         if (token) {
           localStorage.setItem('admin_token', token);
@@ -94,7 +103,6 @@ export default function AdminNotifications() {
         return;
       }
 
-      // Envoyer au backend
       const response = await fetch(`${BASE_API}/notifications/register-admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
