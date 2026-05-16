@@ -3,11 +3,11 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
   Printer, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
-  Truck, Sparkles
+  Truck, Sparkles, Bell, BellRing
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
- import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -17,10 +17,23 @@ export default function Orders() {
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [notifyingOrders, setNotifyingOrders] = useState<Set<string>>(new Set());
   
   // États pour les filtres
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: string }>({
+    show: false,
+    message: "",
+    type: ""
+  });
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+  };
 
   const applyFilter = useCallback((allOrders: any[], period: string, range: {start: string, end: string}) => {
     let filtered = [...allOrders];
@@ -71,72 +84,120 @@ export default function Orders() {
     return () => clearInterval(interval);
   }, [activeFilter, customRange, applyFilter]);
 
+  // Fonction mise à jour avec notification au client
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const now = new Date().toISOString();
+    
+    // Ajouter l'ordre à la liste des notifications en cours
+    setNotifyingOrders(prev => new Set(prev).add(orderId));
+    
     try {
+      // Mise à jour optimiste de l'UI
       setFilteredOrders(prev => 
         prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
       );
+      
+      // 1. Mettre à jour le statut dans la base de données
       await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus, updatedAt: now });
-      fetchOrders(); 
-    } catch (err) {
-      console.error("Erreur update statut:", err);
-      alert("Impossible de mettre à jour la commande.");
-      fetchOrders(); 
+      
+      // 2. Envoyer la notification au client
+      const notificationResult = await axios.post(`${BASE_API}/notifications/order-status`, {
+        orderId,
+        newStatus
+      });
+      
+      if (notificationResult.data.success) {
+        showToast(`✅ Notification envoyée au client (statut: ${getStatusLabel(newStatus)})`, "success");
+        console.log(`📱 Notification client envoyée pour commande ${orderId}`);
+      } else {
+        console.warn(`⚠️ Notification non envoyée: ${notificationResult.data.message}`);
+        if (notificationResult.data.message !== 'Pas de token client pour cette commande') {
+          showToast(`⚠️ Client non notifié: ${notificationResult.data.message}`, "info");
+        }
+      }
+      
+      // Rafraîchir la liste
+      await fetchOrders();
+      
+    } catch (err: any) {
+      console.error("❌ Erreur update statut:", err);
+      showToast(`❌ Erreur: ${err.response?.data?.message || err.message}`, "error");
+      await fetchOrders(); // Recharger pour annuler la mise à jour optimiste
+    } finally {
+      setNotifyingOrders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
     }
   };
 
- 
+  // Fonction pour envoyer une notification personnalisée
+  const sendCustomNotification = async (orderId: string, title: string, body: string) => {
+    try {
+      const response = await axios.post(`${BASE_API}/notifications/custom-notification`, {
+        orderId,
+        title,
+        body
+      });
+      
+      if (response.data.success) {
+        showToast(`✅ Notification personnalisée envoyée`, "success");
+      } else {
+        showToast(`⚠️ Échec: ${response.data.message}`, "error");
+      }
+    } catch (err: any) {
+      console.error("❌ Erreur envoi notification personnalisée:", err);
+      showToast(`❌ Erreur: ${err.message}`, "error");
+    }
+  };
 
-const downloadExcel = () => {
-  const data = filteredOrders.map(o => {
-    // 1. Calcul du prix unitaire (approximation ou premier item) et formatage articles
-    const articlesDetails = o.items.map((i: any) => {
-      const acc = i.chosenAccompaniment && i.chosenAccompaniment !== "Aucun" 
-        ? ` (Acc: ${i.chosenAccompaniment})` 
-        : "";
-      return `${i.name}${acc} x${i.quantity || 1}`;
-    }).join(", ");
+  const downloadExcel = () => {
+    const data = filteredOrders.map(o => {
+      const articlesDetails = o.items.map((i: any) => {
+        const acc = i.chosenAccompaniment && i.chosenAccompaniment !== "Aucun" 
+          ? ` (Acc: ${i.chosenAccompaniment})` 
+          : "";
+        return `${i.name}${acc} x${i.quantity || 1}`;
+      }).join(", ");
 
-    // 2. Gestion propre de la provenance (Table ou Client)
-    let tableOrClient = "-";
-    if (o.mode === "delivery") tableOrClient = o.customer?.name || "Livraison";
-    else if (o.details?.tableNumber) tableOrClient = `Table ${o.details.tableNumber}`;
-    else if (o.details?.consumeMode === "take_away") tableOrClient = `À emporter (${o.customer?.name || "Client"})`;
-    else tableOrClient = o.customer?.name || "Sur place";
+      let tableOrClient = "-";
+      if (o.mode === "delivery") tableOrClient = o.customer?.name || "Livraison";
+      else if (o.details?.tableNumber) tableOrClient = `Table ${o.details.tableNumber}`;
+      else if (o.details?.consumeMode === "take_away") tableOrClient = `À emporter (${o.customer?.name || "Client"})`;
+      else tableOrClient = o.customer?.name || "Sur place";
 
-    const dateObj = new Date(o.createdAt);
+      const dateObj = new Date(o.createdAt);
 
-    return {
-      "ID Commande": o._id.slice(-8).toUpperCase(),
-      "Date": dateObj.toLocaleDateString('fr-FR'),
-      "Heure": dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      "Jour": dateObj.toLocaleDateString('fr-FR', { weekday: 'long' }),
-      "Mode": o.mode === "delivery" ? "Livraison" : o.mode === "booking" ? "Réservation" : "Sur place",
-      "Table / Client": tableOrClient,
-      "Téléphone": o.customer?.phone || "-",
-      "Email": o.customer?.email || "-",
-      "Articles": articlesDetails,
-      "Quantité": o.items.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0),
-      "Total TTC": `${parseFloat(o.total).toFixed(2)} €`,
-      "Statut": getStatusLabel(o.status),
-      "Service livraison": o.details?.deliveryService || "-",
-    };
-  });
+      return {
+        "ID Commande": o._id.slice(-8).toUpperCase(),
+        "Date": dateObj.toLocaleDateString('fr-FR'),
+        "Heure": dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        "Jour": dateObj.toLocaleDateString('fr-FR', { weekday: 'long' }),
+        "Mode": o.mode === "delivery" ? "Livraison" : o.mode === "booking" ? "Réservation" : "Sur place",
+        "Table / Client": tableOrClient,
+        "Téléphone": o.customer?.phone || "-",
+        "Email": o.customer?.email || "-",
+        "Articles": articlesDetails,
+        "Quantité": o.items.reduce((acc: number, curr: any) => acc + (curr.quantity || 1), 0),
+        "Total TTC": `${parseFloat(o.total).toFixed(2)} €`,
+        "Statut": getStatusLabel(o.status),
+        "Service livraison": o.details?.deliveryService || "-",
+        "Token FCM": o.fcmToken ? "✅ Oui" : "❌ Non",
+      };
+    });
 
-  const ws = XLSX.utils.json_to_sheet(data);
-  
-  // Optionnel : Définir des largeurs de colonnes pour que ce soit propre à l'ouverture
-  ws['!cols'] = [
-    { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, 
-    { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
-    { wch: 12 }, { wch: 15 }, { wch: 15 }
-  ];
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = [
+      { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, 
+      { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
+      { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 12 }
+    ];
 
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Commandes");
-  XLSX.writeFile(wb, `signature_commandes_${new Date().toISOString().split('T')[0]}.xlsx`);
-};
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Commandes");
+    XLSX.writeFile(wb, `signature_commandes_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   const getStatusClass = (status: string) => {
     switch(status) {
@@ -165,7 +226,6 @@ const downloadExcel = () => {
     return <Utensils size={16} className="mode-icon on-site" />;
   };
 
-  // Fonction pour obtenir le nom de la table ou du client
   const getOrderOrigin = (order: any) => {
     if (order.mode === "delivery") {
       return (
@@ -198,7 +258,6 @@ const downloadExcel = () => {
         </div>
       );
     }
-    // Sur place
     const tableNumber = order.details?.tableNumber;
     if (tableNumber) {
       return (
@@ -219,6 +278,13 @@ const downloadExcel = () => {
 
   return (
     <div className="orders-page">
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`toast-notification ${toast.type}`}>
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       {/* Header Luxe */}
       <header className="orders-header-luxury">
         <div className="header-seal-terracotta">
@@ -331,6 +397,11 @@ const downloadExcel = () => {
                 <div className="order-id">
                   {getModeIcon(order.mode, order.details)}
                   <span className="id-number">#{order._id.slice(-6).toUpperCase()}</span>
+                  {order.fcmToken && (
+                    <span className="fcm-indicator" title="Client peut recevoir des notifications">
+                      <BellRing size={12} />
+                    </span>
+                  )}
                 </div>
                 <div className="order-time">
                   <Clock size={12} />
@@ -379,23 +450,65 @@ const downloadExcel = () => {
 
                 <div className="order-actions-luxury">
                   {order.status === "pending" && (
-                    <button className="action-btn cooking" onClick={() => updateOrderStatus(order._id, "cooking")}>
-                      <Clock size={14} />
-                      <span>Cuisine</span>
+                    <button 
+                      className="action-btn cooking" 
+                      onClick={() => updateOrderStatus(order._id, "cooking")}
+                      disabled={notifyingOrders.has(order._id)}
+                    >
+                      {notifyingOrders.has(order._id) ? (
+                        <span className="spinner-small"></span>
+                      ) : (
+                        <>
+                          <Clock size={14} />
+                          <span>Cuisine</span>
+                        </>
+                      )}
                     </button>
                   )}
                   {order.status === "cooking" && (
-                    <button className="action-btn done" onClick={() => updateOrderStatus(order._id, "done")}>
-                      <CheckCircle size={14} />
-                      <span>Terminer</span>
+                    <button 
+                      className="action-btn done" 
+                      onClick={() => updateOrderStatus(order._id, "done")}
+                      disabled={notifyingOrders.has(order._id)}
+                    >
+                      {notifyingOrders.has(order._id) ? (
+                        <span className="spinner-small"></span>
+                      ) : (
+                        <>
+                          <CheckCircle size={14} />
+                          <span>Terminer</span>
+                        </>
+                      )}
                     </button>
                   )}
                   {order.status === "done" && (
-                    <button className="action-btn archive" onClick={() => updateOrderStatus(order._id, "archived")}>
-                      <Archive size={14} />
-                      <span>Archiver</span>
+                    <button 
+                      className="action-btn archive" 
+                      onClick={() => updateOrderStatus(order._id, "archived")}
+                      disabled={notifyingOrders.has(order._id)}
+                    >
+                      {notifyingOrders.has(order._id) ? (
+                        <span className="spinner-small"></span>
+                      ) : (
+                        <>
+                          <Archive size={14} />
+                          <span>Archiver</span>
+                        </>
+                      )}
                     </button>
                   )}
+                  <button 
+                    className="action-btn icon-only" 
+                    title="Envoyer notification personnalisée"
+                    onClick={() => {
+                      const message = prompt("Message personnalisé à envoyer au client:");
+                      if (message) {
+                        sendCustomNotification(order._id, "📢 Message du restaurant", message);
+                      }
+                    }}
+                  >
+                    <Bell size={16} />
+                  </button>
                   <button className="action-btn icon-only" title="Voir détails">
                     <Eye size={16} />
                   </button>
@@ -408,6 +521,65 @@ const downloadExcel = () => {
           ))}
         </div>
       )}
+
+      <style>{`
+        .toast-notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 12px 20px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 500;
+          z-index: 10000;
+          animation: slideIn 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .toast-notification.success {
+          background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+        .toast-notification.error {
+          background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        .toast-notification.info {
+          background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .fcm-indicator {
+          display: inline-flex;
+          align-items: center;
+          margin-left: 8px;
+          color: #2ecc71;
+          background: rgba(46, 204, 113, 0.1);
+          padding: 2px 6px;
+          border-radius: 12px;
+        }
+        .spinner-small {
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-radius: 50%;
+          border-top-color: white;
+          animation: spin 0.6s linear infinite;
+          display: inline-block;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .action-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      `}</style>
     </div>
   );
 }

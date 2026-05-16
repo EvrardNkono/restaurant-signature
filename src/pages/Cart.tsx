@@ -9,12 +9,17 @@ import {
   Sparkles
 } from "lucide-react"; 
 import axios from "axios";
+import { getMessaging, getToken } from "firebase/messaging";
+import { app } from "../services/firebase";
 
 import "./cart.css";
 
 // Configuration de l'URL API
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
+
+// Clé VAPID pour FCM
+const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
 
 // Types pour les services de livraison
 type DeliveryService = "uber" | "deliveroo" | "justeat" | "signature" | null;
@@ -57,6 +62,41 @@ export default function Cart() {
     justeat: { fee: 0, label: "Just Eat", icon: "🍔", needsEstimate: true },
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
+
+  // SAUVEGARDE DU TOKEN FCM
+  useEffect(() => {
+    const saveFcmToken = async () => {
+      // Vérifier si les notifications sont autorisées
+      if (Notification.permission === 'granted') {
+        try {
+          const messaging = getMessaging(app);
+          const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+          if (token) {
+            localStorage.setItem('fcm_client_token', token);
+            console.log('✅ Token FCM sauvegardé:', token);
+          }
+        } catch (e) {
+          console.error('❌ Erreur récupération token FCM:', e);
+        }
+      } else if (Notification.permission === 'default') {
+        // Optionnel: Demander la permission
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          try {
+            const messaging = getMessaging(app);
+            const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+            if (token) {
+              localStorage.setItem('fcm_client_token', token);
+              console.log('✅ Token FCM sauvegardé après permission:', token);
+            }
+          } catch (e) {
+            console.error('❌ Erreur récupération token FCM:', e);
+          }
+        }
+      }
+    };
+    saveFcmToken();
+  }, []);
 
   // CHARGEMENT DES TABLES
   useEffect(() => {
@@ -183,6 +223,10 @@ export default function Cart() {
     console.log("=== handleFinalOrder appelé ===");
     setIsSubmitting(true);
     
+    // Récupérer le token FCM
+    const fcmToken = localStorage.getItem('fcm_client_token');
+    console.log("🔑 Token FCM récupéré:", fcmToken ? "✅ Oui" : "❌ Non");
+    
     let clientId = localStorage.getItem('signature_client_id');
     if (!clientId) {
       clientId = crypto.randomUUID();
@@ -194,6 +238,7 @@ export default function Cart() {
     
     const orderData = {
       clientId: clientId,
+      fcmToken: fcmToken || null, // 👈 AJOUT DU TOKEN FCM
       customer: {
         name: customerName || "Client Signature",
         email: customerEmail,
@@ -229,126 +274,126 @@ export default function Cart() {
     };
 
     try {
-  console.log("=== DÉBUT CRÉATION COMMANDE ===");
-  console.log("📦 OrderData envoyé:", JSON.stringify(orderData, null, 2));
-  
-  const response = await axios.post(`${BASE_API}/orders`, orderData);
-  console.log("📥 Réponse brute de l'API /orders:", response);
-  console.log("📥 Response.data:", response.data);
-  console.log("📥 Response.data.success:", response.data.success);
-  console.log("📥 Response.data.data:", response.data.data);
-  
-  if (response.data.success) {
-    // Essayer plusieurs façons de récupérer l'ID
-    const orderId = response.data.order?._id || 
-                response.data.order?.id || 
-                response.data.data?._id ||
-                response.data.orderId;
-    
-    console.log("🔑 OrderId extrait:", orderId);
-    console.log("🔑 Type de orderId:", typeof orderId);
-    console.log("🔑 Longueur orderId:", orderId?.length);
-    
-    if (!orderId) {
-      console.error("❌ CRITIQUE: Impossible de récupérer l'ID de la commande !");
-      console.error("📦 Structure de response.data:", JSON.stringify(response.data, null, 2));
-      alert("Erreur: L'ID de la commande n'a pas été retourné");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // ============================================
-    // CAS 1 : PAIEMENT À LA CAISSE (sans Stripe)
-    // ============================================
-    if (!needsPayment) {
-      console.log("💰 Paiement à la caisse - Notification immédiate");
-      console.log("📤 Détails notification:", {
-        orderId: orderId,
-        customerName: customerName || "Client Signature",
-        total: totalPrice.toFixed(2),
-        itemsCount: cart.length,
-        mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
-        tableNumber: selectedTable || null,
-        apiUrl: `${BASE_API}/notifications/new-order`
-      });
+      console.log("=== DÉBUT CRÉATION COMMANDE ===");
+      console.log("📦 OrderData envoyé:", JSON.stringify(orderData, null, 2));
       
-      try {
-        const notifResponse = await axios.post(`${BASE_API}/notifications/new-order`, {
-          orderId: orderId,
-          customerName: customerName || "Client Signature",
-          total: totalPrice.toFixed(2),
-          itemsCount: cart.length,
-          mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
-          tableNumber: selectedTable || null,
-          paymentMethod: "Caisse"
-        });
-        console.log("✅ Réponse notification:", notifResponse.data);
-        console.log("✅ Notification envoyée à l'admin (paiement caisse)");
-      } catch (notifError: any) {
-        console.error("❌ Erreur envoi notification:", notifError.message);
-        console.error("❌ Détails erreur:", notifError.response?.data);
-        console.error("❌ Status erreur:", notifError.response?.status);
-      }
+      const response = await axios.post(`${BASE_API}/orders`, orderData);
+      console.log("📥 Réponse brute de l'API /orders:", response);
+      console.log("📥 Response.data:", response.data);
+      console.log("📥 Response.data.success:", response.data.success);
+      console.log("📥 Response.data.data:", response.data.data);
       
-      console.log(`🔄 Redirection vers: /order-success?orderId=${orderId}`);
-      window.location.href = `/order-success?orderId=${orderId}`;
-    }
-    
-    // ============================================
-    // CAS 2 : PAIEMENT STRIPE
-    // ============================================
-    else {
-      console.log("💳 Paiement Stripe - Attente du paiement...");
-      console.log("🔑 OrderId pour Stripe:", orderId);
-      
-      const stripeItems = cart.map((item: any) => {
-        const unitPrice = parsePrice(item.price);
-        const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
-          return sum + parsePrice(supp.price);
-        }, 0) || 0;
-        const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
+      if (response.data.success) {
+        // Essayer plusieurs façons de récupérer l'ID
+        const orderId = response.data.order?._id || 
+                    response.data.order?.id || 
+                    response.data.data?._id ||
+                    response.data.orderId;
         
-        return {
-          name: item.name,
-          price: totalPrice,
-          quantity: 1,
-          chosenAccompaniment: item.chosenAccompaniment || "Aucun"
-        };
-      });
-      
-      console.log("📤 Envoi à Stripe avec items:", stripeItems.length);
-      
-      const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
-        items: stripeItems,
-        orderId: orderId
-      });
-      
-      console.log("📥 Réponse Stripe:", paymentResponse.data);
-      
-      if (paymentResponse.data.url) {
-        console.log("🔔 Redirection Stripe - notification sera envoyée après paiement");
-        window.location.href = paymentResponse.data.url;
+        console.log("🔑 OrderId extrait:", orderId);
+        console.log("🔑 Type de orderId:", typeof orderId);
+        console.log("🔑 Longueur orderId:", orderId?.length);
+        
+        if (!orderId) {
+          console.error("❌ CRITIQUE: Impossible de récupérer l'ID de la commande !");
+          console.error("📦 Structure de response.data:", JSON.stringify(response.data, null, 2));
+          alert("Erreur: L'ID de la commande n'a pas été retourné");
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // ============================================
+        // CAS 1 : PAIEMENT À LA CAISSE (sans Stripe)
+        // ============================================
+        if (!needsPayment) {
+          console.log("💰 Paiement à la caisse - Notification immédiate");
+          console.log("📤 Détails notification:", {
+            orderId: orderId,
+            customerName: customerName || "Client Signature",
+            total: totalPrice.toFixed(2),
+            itemsCount: cart.length,
+            mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
+            tableNumber: selectedTable || null,
+            apiUrl: `${BASE_API}/notifications/new-order`
+          });
+          
+          try {
+            const notifResponse = await axios.post(`${BASE_API}/notifications/new-order`, {
+              orderId: orderId,
+              customerName: customerName || "Client Signature",
+              total: totalPrice.toFixed(2),
+              itemsCount: cart.length,
+              mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
+              tableNumber: selectedTable || null,
+              paymentMethod: "Caisse"
+            });
+            console.log("✅ Réponse notification:", notifResponse.data);
+            console.log("✅ Notification envoyée à l'admin (paiement caisse)");
+          } catch (notifError: any) {
+            console.error("❌ Erreur envoi notification:", notifError.message);
+            console.error("❌ Détails erreur:", notifError.response?.data);
+            console.error("❌ Status erreur:", notifError.response?.status);
+          }
+          
+          console.log(`🔄 Redirection vers: /order-success?orderId=${orderId}`);
+          window.location.href = `/order-success?orderId=${orderId}`;
+        }
+        
+        // ============================================
+        // CAS 2 : PAIEMENT STRIPE
+        // ============================================
+        else {
+          console.log("💳 Paiement Stripe - Attente du paiement...");
+          console.log("🔑 OrderId pour Stripe:", orderId);
+          
+          const stripeItems = cart.map((item: any) => {
+            const unitPrice = parsePrice(item.price);
+            const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
+              return sum + parsePrice(supp.price);
+            }, 0) || 0;
+            const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
+            
+            return {
+              name: item.name,
+              price: totalPrice,
+              quantity: 1,
+              chosenAccompaniment: item.chosenAccompaniment || "Aucun"
+            };
+          });
+          
+          console.log("📤 Envoi à Stripe avec items:", stripeItems.length);
+          
+          const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
+            items: stripeItems,
+            orderId: orderId
+          });
+          
+          console.log("📥 Réponse Stripe:", paymentResponse.data);
+          
+          if (paymentResponse.data.url) {
+            console.log("🔔 Redirection Stripe - notification sera envoyée après paiement");
+            window.location.href = paymentResponse.data.url;
+          } else {
+            console.error("❌ Pas d'URL dans la réponse Stripe");
+            console.error("📥 Réponse complète:", paymentResponse.data);
+            alert("Erreur lors de la redirection Stripe");
+            setIsSubmitting(false);
+          }
+        }
       } else {
-        console.error("❌ Pas d'URL dans la réponse Stripe");
-        console.error("📥 Réponse complète:", paymentResponse.data);
-        alert("Erreur lors de la redirection Stripe");
+        console.error("❌ La commande n'a pas été créée (success: false)");
+        console.error("📥 Message d'erreur:", response.data.message);
+        alert(`Erreur: ${response.data.message || "Commande non créée"}`);
         setIsSubmitting(false);
       }
-    }
-  } else {
-    console.error("❌ La commande n'a pas été créée (success: false)");
-    console.error("📥 Message d'erreur:", response.data.message);
-    alert(`Erreur: ${response.data.message || "Commande non créée"}`);
-    setIsSubmitting(false);
-  }
-} catch (error: any) {
-  console.error("❌ EXCEPTION dans handleFinalOrder:", error);
-  console.error("❌ Message:", error.message);
-  console.error("❌ Response:", error.response?.data);
-  console.error("❌ Status:", error.response?.status);
-  alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
-  setIsSubmitting(false);
-} 
+    } catch (error: any) {
+      console.error("❌ EXCEPTION dans handleFinalOrder:", error);
+      console.error("❌ Message:", error.message);
+      console.error("❌ Response:", error.response?.data);
+      console.error("❌ Status:", error.response?.status);
+      alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
+      setIsSubmitting(false);
+    } 
   };
 
   // Validation du formulaire
