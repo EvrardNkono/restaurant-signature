@@ -1,6 +1,5 @@
 /* src/admin/pages/Orders.css */
 
-/* === IMPORT POLICES === */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* === VARIABLES === */
@@ -22,9 +21,11 @@
 /* === PAGE PRINCIPALE === */
 .orders-page {
   width: 100%;
-  padding: 0;
+  padding: 24px;
+  padding-bottom: 80px;
   background: linear-gradient(135deg, var(--cream) 0%, var(--beige) 100%);
   min-height: 100vh;
+  box-sizing: border-box;
   animation: fadeIn 0.4s ease;
 }
 
@@ -33,7 +34,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* === HEADER LUXE === */
+/* === HEADER === */
 .orders-header-luxury {
   text-align: center;
   margin-bottom: 32px;
@@ -155,9 +156,7 @@
   border: 1px solid var(--border-gold);
 }
 
-.filter-group-luxury .gold-icon {
-  color: var(--gold);
-}
+.filter-group-luxury .gold-icon { color: var(--gold); }
 
 .filter-group-luxury select {
   background: transparent;
@@ -253,16 +252,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.stat-icon.period { background: rgba(212, 175, 55, 0.12); color: var(--gold); }
+.stat-icon.period  { background: rgba(212, 175, 55, 0.12); color: var(--gold); }
 .stat-icon.pending { background: rgba(243, 156, 18, 0.12); color: #f39c12; }
 .stat-icon.cooking { background: rgba(52, 152, 219, 0.12); color: #3498db; }
-.stat-icon.done { background: rgba(46, 204, 113, 0.12); color: #27ae60; }
+.stat-icon.done    { background: rgba(46, 204, 113, 0.12); color: #27ae60; }
 
-.stat-info {
-  flex: 1;
-}
+.stat-info { flex: 1; }
 
 .stat-value {
   font-family: 'Playfair Display', serif;
@@ -270,6 +268,7 @@
   font-weight: 800;
   color: var(--terracotta-dark);
   line-height: 1;
+  display: block;
 }
 
 .stat-label {
@@ -277,6 +276,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-light);
+  display: block;
 }
 
 /* === GRILLE DES COMMANDES === */
@@ -286,14 +286,18 @@
   gap: 24px;
 }
 
-/* === CARTE COMMANDE === */
+/* === CARTE COMMANDE ===
+   IMPORTANT : pas de overflow:hidden sur la carte entière,
+   sinon le footer sort du flux visible  */
 .order-card-luxury {
   background: white;
   border-radius: 20px;
-  overflow: hidden;
-  transition: var(--transition);
   border: 1px solid var(--border-gold);
   position: relative;
+  display: flex;
+  flex-direction: column;   /* ← clé : footer colle en bas */
+  transition: var(--transition);
+  /* PAS de overflow:hidden ici */
 }
 
 .order-card-luxury:hover {
@@ -301,12 +305,14 @@
   box-shadow: var(--shadow-gold);
 }
 
+/* Barre colorée en haut — utilise border-radius sur les 2 coins hauts */
 .gold-top-border {
-  height: 3px;
+  height: 4px;
+  border-radius: 20px 20px 0 0;
   background: linear-gradient(90deg, var(--gold), var(--gold-dark), var(--gold));
+  flex-shrink: 0;
 }
 
-/* Status borders */
 .order-card-luxury.status-pending .gold-top-border {
   background: linear-gradient(90deg, #f39c12, #e67e22, #f39c12);
 }
@@ -316,19 +322,24 @@
 .order-card-luxury.status-done .gold-top-border {
   background: linear-gradient(90deg, #27ae60, #219a52, #27ae60);
 }
+.order-card-luxury.status-archived .gold-top-border {
+  background: linear-gradient(90deg, #95a5a6, #7f8c8d, #95a5a6);
+}
 
+/* === HEADER DE CARTE === */
 .order-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--border-gold);
+  flex-shrink: 0;
 }
 
 .order-id {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .order-id .id-number {
@@ -338,10 +349,10 @@
   color: var(--terracotta-dark);
 }
 
-.mode-icon.delivery { color: #3498db; }
-.mode-icon.booking { color: #e74c3c; }
-.mode-icon.takeaway { color: #f39c12; }
-.mode-icon.on-site { color: var(--gold); }
+.mode-icon.delivery  { color: #3498db; }
+.mode-icon.booking   { color: #e74c3c; }
+.mode-icon.takeaway  { color: #f39c12; }
+.mode-icon.on-site   { color: var(--gold); }
 
 .order-time {
   display: flex;
@@ -351,13 +362,15 @@
   color: var(--text-light);
 }
 
+/* === BODY DE CARTE === */
 .order-card-body {
-  padding: 16px 20px;
+  padding: 14px 18px;
+  flex: 1;               /* prend tout l'espace disponible */
 }
 
 .order-origin {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px dashed var(--border-gold);
 }
 
@@ -376,7 +389,8 @@
 .origin-table svg,
 .origin-delivery svg,
 .origin-takeaway svg,
-.origin-booking svg {
+.origin-booking svg,
+.origin-default svg {
   color: var(--gold);
   flex-shrink: 0;
 }
@@ -415,26 +429,50 @@
   border-radius: 20px;
 }
 
-.items-list-luxury {
-  margin-bottom: 16px;
+/* Détails livraison/réservation */
+.order-details-section {
+  background: var(--beige);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 10px 0;
+  font-size: 0.78rem;
 }
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  color: var(--text-light);
+}
+
+.detail-icon {
+  color: var(--gold-dark);
+  flex-shrink: 0;
+}
+
+.delivery-fee {
+  color: var(--gold-dark);
+  font-weight: 600;
+}
+
+/* Articles */
+.items-list-luxury { margin-bottom: 12px; }
 
 .order-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 5px 0;
   border-bottom: 1px dotted var(--border-gold);
 }
 
-.order-item:last-child {
-  border-bottom: none;
-}
+.order-item:last-child { border-bottom: none; }
 
 .item-qty {
   font-weight: 700;
   color: var(--gold-dark);
-  min-width: 30px;
+  min-width: 28px;
   font-size: 0.8rem;
 }
 
@@ -453,16 +491,17 @@
 .more-items {
   font-size: 0.7rem;
   color: var(--gold-dark);
-  margin-top: 8px;
+  margin-top: 6px;
   font-style: italic;
 }
 
+/* Total */
 .order-total {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 12px;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--border-gold);
 }
 
@@ -471,6 +510,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-light);
+  flex: 1;
 }
 
 .total-value {
@@ -480,6 +520,15 @@
   color: var(--gold-dark);
 }
 
+.deposit-badge {
+  font-size: 0.68rem;
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-dark);
+  padding: 2px 7px;
+  border-radius: 12px;
+  border: 1px solid var(--border-gold);
+}
+
 .delivery-badge {
   display: inline-flex;
   align-items: center;
@@ -487,121 +536,171 @@
   background: rgba(52, 152, 219, 0.1);
   padding: 4px 10px;
   border-radius: 20px;
-  margin-top: 12px;
+  margin-top: 8px;
   font-size: 0.7rem;
   color: #3498db;
 }
 
+/* === FOOTER DE CARTE — zone des boutons === */
 .order-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 20px;
+  padding: 14px 18px;
   background: var(--beige);
   border-top: 1px solid var(--border-gold);
+  border-radius: 0 0 20px 20px;
+  flex-shrink: 0;
+  gap: 12px;
+  flex-wrap: wrap;          /* wrap sur petits écrans */
 }
 
+/* Pill de statut */
 .status-pill-luxury {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   padding: 6px 12px;
   border-radius: 30px;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
-.status-pill-luxury.status-pending {
-  background: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
-}
-.status-pill-luxury.status-cooking {
-  background: rgba(52, 152, 219, 0.15);
-  color: #3498db;
-}
-.status-pill-luxury.status-done {
-  background: rgba(46, 204, 113, 0.15);
-  color: #27ae60;
-}
+.status-pill-luxury.status-pending  { background: rgba(243,156,18,0.15);  color: #e67e22; }
+.status-pill-luxury.status-cooking  { background: rgba(52,152,219,0.15);  color: #2980b9; }
+.status-pill-luxury.status-done     { background: rgba(46,204,113,0.15);  color: #27ae60; }
+.status-pill-luxury.status-archived { background: rgba(149,165,166,0.15); color: #7f8c8d; }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
-.status-pending .status-dot {
-  background: #f39c12;
-  animation: pulse 1.5s infinite;
-}
-.status-cooking .status-dot {
-  background: #3498db;
-}
-.status-done .status-dot {
-  background: #27ae60;
-}
+.status-pending .status-dot  { background: #f39c12; animation: pulse 1.5s infinite; }
+.status-cooking .status-dot  { background: #3498db; }
+.status-done .status-dot     { background: #27ae60; }
+.status-archived .status-dot { background: #95a5a6; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
 }
 
+/* === BOUTONS D'ACTION === */
 .order-actions-luxury {
   display: flex;
+  align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
+/* Base commune */
 .action-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 30px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
   border: none;
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
+  line-height: 1;
+  position: relative;
+  z-index: 1;             /* au-dessus de tout pseudo-élément parent */
 }
 
+/* Cuisine → bleu */
 .action-btn.cooking {
-  background: #e3f2fd;
-  color: #3498db;
-}
-.action-btn.cooking:hover {
   background: #3498db;
   color: white;
+  box-shadow: 0 3px 10px rgba(52,152,219,0.35);
+}
+.action-btn.cooking:hover:not(:disabled) {
+  background: #2980b9;
+  box-shadow: 0 5px 14px rgba(52,152,219,0.5);
+  transform: translateY(-1px);
 }
 
+/* Terminer → vert */
 .action-btn.done {
-  background: #e8f5e9;
-  color: #27ae60;
-}
-.action-btn.done:hover {
   background: #27ae60;
   color: white;
+  box-shadow: 0 3px 10px rgba(39,174,96,0.35);
+}
+.action-btn.done:hover:not(:disabled) {
+  background: #219a52;
+  box-shadow: 0 5px 14px rgba(39,174,96,0.5);
+  transform: translateY(-1px);
 }
 
+/* Archiver → orange */
 .action-btn.archive {
-  background: #fef3e2;
-  color: #e67e22;
-}
-.action-btn.archive:hover {
   background: #e67e22;
   color: white;
+  box-shadow: 0 3px 10px rgba(230,126,34,0.35);
+}
+.action-btn.archive:hover:not(:disabled) {
+  background: #d35400;
+  box-shadow: 0 5px 14px rgba(230,126,34,0.5);
+  transform: translateY(-1px);
 }
 
+/* Icônes seules */
 .action-btn.icon-only {
   background: white;
-  border: 1px solid var(--border-gold);
+  border: 1.5px solid var(--border-gold);
   color: var(--text-light);
-  padding: 6px 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
 }
-
 .action-btn.icon-only:hover {
   border-color: var(--gold);
-  color: var(--gold);
+  color: var(--gold-dark);
+  background: rgba(212,175,55,0.08);
+}
+
+/* Désactivé pendant la requête */
+.action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
+/* Spinner pendant la requête */
+.spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spinBtn 0.6s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes spinBtn {
+  to { transform: rotate(360deg); }
+}
+
+/* Indicateur FCM */
+.fcm-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: #27ae60;
+  background: rgba(46,204,113,0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
 }
 
 /* === LOADING & EMPTY === */
@@ -619,12 +718,7 @@
 
 .spinner-gold {
   color: var(--gold);
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  animation: spinBtn 1s linear infinite;
 }
 
 .empty-orders {
@@ -635,97 +729,79 @@
   border: 1px solid var(--border-gold);
 }
 
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-}
-
+.empty-icon    { font-size: 3rem; margin-bottom: 16px; }
 .empty-orders h3 {
   font-family: 'Playfair Display', serif;
   font-size: 1.3rem;
   color: var(--terracotta-dark);
   margin-bottom: 8px;
 }
+.empty-orders p { color: var(--text-light); }
 
-.empty-orders p {
-  color: var(--text-light);
+/* Toast */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  z-index: 10000;
+  animation: slideIn 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  font-size: 0.85rem;
+}
+.toast-notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.toast-notification.error   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.toast-notification.info    { background: linear-gradient(135deg, #3498db, #2980b9); }
+
+@keyframes slideIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
+  .orders-page { padding: 16px; }
+
   .revenue-panel-luxury {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .filter-group-luxury {
-    justify-content: space-between;
-  }
-  
-  .orders-grid-luxury {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid-luxury {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
+
+  .filter-group-luxury { justify-content: space-between; }
+
+  .orders-grid-luxury { grid-template-columns: 1fr; }
+
+  .stats-grid-luxury { grid-template-columns: repeat(2, 1fr); }
+
   .order-card-footer {
     flex-direction: column;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 10px;
   }
-  
+
   .order-actions-luxury {
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
   }
+
+  .action-btn { flex: 1 1 auto; justify-content: center; }
+  .action-btn.icon-only { flex: 0 0 auto; }
 }
 
 @media (max-width: 480px) {
-  .stats-grid-luxury {
-    grid-template-columns: 1fr;
-  }
-  
+  .stats-grid-luxury { grid-template-columns: 1fr; }
+
   .order-card-header {
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: flex-start;
   }
-  
-  .order-origin > div {
-    flex-wrap: wrap;
-  }
-}
-
-/* Assurer que la page peut scroller correctement */
-.orders-page {
-  min-height: 100vh;
-  height: auto;
-  overflow-y: auto;
-  padding-bottom: 100px; /* Espace en bas */
-}
-
-.orders-grid-luxury {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 24px;
-  padding: 20px;
-  margin-bottom: 40px;
-}
-
-/* S'assurer que le dernier élément est visible */
-.order-card-luxury:last-child {
-  margin-bottom: 50px;
-}
-
-/* Pour le conteneur principal */
-#root, .app-container {
-  height: auto;
-  min-height: 100vh;
-  overflow-y: auto;
 }
