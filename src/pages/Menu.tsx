@@ -293,20 +293,26 @@ export default function Menu() {
   }, [clientId, cart.length, refetchOrders]);
 
   // ============================================
-  // 🆕 NETTOYAGE DU PANIER QUAND COMMANDE ARCHIVÉE
+  // NETTOYAGE DU PANIER QUAND COMMANDE VIENT D'ÊTRE ARCHIVÉE
   // ============================================
   useEffect(() => {
-    const hasArchivedOrder = activeOrders.some((order: any) => order.status === "archived");
+    // Trouver une commande archivée depuis moins de 5 secondes
+    const now = Date.now();
+    const justArchivedOrder = activeOrders.find((order: any) => {
+      if (order.status !== "archived") return false;
+      const archivedDate = new Date(order.updatedAt || order.createdAt).getTime();
+      return (now - archivedDate) < 5000; // Archivée dans les 5 dernières secondes
+    });
     
-    if (hasArchivedOrder && cart.length > 0) {
-      console.log("🗑️ Commande archivée détectée, vidage du panier...");
+    if (justArchivedOrder && cart.length > 0) {
+      console.log("🗑️ Commande fraîchement archivée, vidage du panier...");
       // Vider tout le panier
-      cart.forEach(item => {
+      cart.forEach((item: any) => {
         removeFromCart(item.cartItemId);
       });
       showToast("✓ Commande terminée, merci !", "success");
     }
-  }, [activeOrders, cart, removeFromCart]);
+  }, [activeOrders]);
 
   // --- FILTRAGE DYNAMIQUE ---
   const platsDeLaPeriode = useMemo(() => {
@@ -622,11 +628,13 @@ export default function Menu() {
               const status = orderMatch.status;
               const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
               const now = Date.now();
+              // Exclure archived et done trop vieux
               if (status !== "archived" && !(status === "done" && now - lastUpdate > 600000)) {
                 currentStatus = status;
               }
             }
-            if (!currentStatus && quantityInCart > 0) currentStatus = "in_cart";
+            // Seulement si PAS de commande associée ET produit dans panier
+            if (!orderMatch && quantityInCart > 0) currentStatus = "in_cart";
 
             return (
               <div 
