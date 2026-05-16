@@ -677,9 +677,9 @@ export default function Menu() {
                       </div>
                       
                       <div className="price-chip">
-                        <span className="price-symbol">€</span>
-                        <span className="price-amount">{plat.price}</span>
-                      </div>
+  <span className="price-symbol">€</span>
+  <span className="price-amount">{plat.price.toFixed(2)}</span>
+</div>
                       
                       <div className="card-actions-floating">
                         <button 
@@ -889,7 +889,7 @@ export default function Menu() {
                       <div className="back-details">
                         <div className="back-category">{plat.category?.name}</div>
                         <h2 className="back-title">{plat.name}</h2>
-                        <div className="back-price-large">{plat.price}€</div>
+                        <div className="back-price-large">{plat.price.toFixed(2)}€</div>
                         
                         <div className="back-info-grid">
                           {plat.gastronomicNote && (
