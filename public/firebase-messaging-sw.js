@@ -14,6 +14,12 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// ✅ FORCER L'ACTIVATION IMMÉDIATE DU SERVICE WORKER
+self.addEventListener('install', (event) => {
+  console.log('🔥 SW FCM: Installation');
+  self.skipWaiting(); // Force l'activation sans attendre
+});
+
 // Gérer les notifications en arrière-plan
 messaging.onBackgroundMessage((payload) => {
   console.log('📨 Notification en arrière-plan reçue:', payload);
@@ -24,20 +30,18 @@ messaging.onBackgroundMessage((payload) => {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-96x96.png',
     vibrate: [200, 100, 200],
-    requireInteraction: true,  // ← RESTE À L'ÉCRAN
-    silent: false,             // ← AVEC SON
-    tag: 'new-order',          // ← ÉVITE DOUBLONS
-    renotify: true,            // ← NOTIFIE MÊME SI DÉJÀ AFFICHÉE
+    requireInteraction: true,
+    silent: false,
+    tag: 'new-order',
+    renotify: true,
     data: {
       url: payload.data?.url || '/admin/orders',
       click_action: '/admin/orders'
     }
   };
   
-  // Afficher la notification
   self.registration.showNotification(notificationTitle, notificationOptions);
   
-  // Forcer l'attention (vibration si supporté)
   self.registration.getNotifications().then(notifications => {
     console.log(`📬 ${notifications.length} notification(s) active(s)`);
   });
@@ -65,8 +69,8 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Au démarrage du SW
+// ✅ ACTIVATION AVEC CLAIM IMMÉDIAT
 self.addEventListener('activate', (event) => {
   console.log('🚀 Service Worker FCM activé');
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(self.clients.claim()); // Prend le contrôle immédiatement
 });
