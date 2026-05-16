@@ -22,7 +22,7 @@ const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-back
 const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
 
 // Types pour les services de livraison
-type DeliveryService = "uber" | "deliveroo" | "justeat" | "signature" | null;
+type DeliveryService = "signature" | null;
 
 export default function Cart() {
   // États de base
@@ -49,17 +49,13 @@ export default function Cart() {
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
 
-  // ÉTATS LIVRAISON MULTI-SERVICES
+  // ÉTATS LIVRAISON
   const [selectedDeliveryService, setSelectedDeliveryService] = useState<DeliveryService>(null);
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string, service: string} | null>(null);
-  const [isEstimating, setIsEstimating] = useState(false);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
-  // Configuration des frais de livraison par service
+  // Configuration des frais de livraison
   const deliveryFees = {
-    // uber: { fee: 0, label: "Uber Eats", icon: "🚲", needsEstimate: true },
-    // deliveroo: { fee: 0, label: "Deliveroo", icon: "🛵", needsEstimate: true },
-    // justeat: { fee: 0, label: "Just Eat", icon: "🍔", needsEstimate: true },
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
@@ -139,70 +135,16 @@ export default function Cart() {
     }
   }, [orderMode, consumeMode]);
 
-  // Fonction pour obtenir le devis selon le service sélectionné
-  const fetchDeliveryQuoteForService = async (service: DeliveryService, targetAddress: string) => {
-    if (!service) return;
-    
-    if (service === "signature") {
-      setDeliveryQuote({ 
-        fee: deliveryFees.signature.fee, 
-        id: "signature_delivery", 
-        service: "signature" 
-      });
-      setDeliveryError(null);
-      return;
-    }
-
-    // Commenté temporairement pour les autres services
-    /*
-    if (targetAddress.trim().length < 10) return;
-    
-    setIsEstimating(true);
-    setDeliveryError(null);
-    
-    try {
-      const response = await axios.post(`${BASE_API}/delivery/estimate`, { 
-        address: targetAddress,
-        service: service 
-      });
-      
-      setDeliveryQuote({ 
-        fee: response.data.fee, 
-        id: response.data.quoteId,
-        service: service 
-      });
-    } catch (err: any) {
-      setDeliveryError(`Service ${deliveryFees[service]?.label} non disponible à cette adresse.`);
-      setDeliveryQuote(null);
-    } finally {
-      setIsEstimating(false);
-    }
-    */
-  };
-
   const handleDeliveryServiceChange = (service: DeliveryService) => {
     setSelectedDeliveryService(service);
     if (service === "signature") {
       setDeliveryQuote({ fee: 5, id: "signature_delivery", service: "signature" });
       setDeliveryError(null);
-    } 
-    // Commenté temporairement
-    /*
-    else if (address.trim().length >= 10) {
-      fetchDeliveryQuoteForService(service, address);
-    } else {
-      setDeliveryQuote(null);
     }
-    */
   };
 
   const handleAddressBlur = () => {
-    // Commenté temporairement
-    /*
-    if (selectedDeliveryService && selectedDeliveryService !== "signature" && address.trim().length >= 10) {
-      fetchDeliveryQuoteForService(selectedDeliveryService, address);
-    }
-    */
+    // Pour Signature, pas besoin d'estimation
   };
 
   // CALCULS
@@ -218,7 +160,7 @@ export default function Cart() {
   const getAmountToPay = () => {
     let base = totalPrice;
     if (orderMode === "on_site") base = payNow ? totalPrice : 0;
-    if (orderMode === "booking") base = depositAmount;
+    if (orderMode === "booking") base = depositAmount; // Acompte 50%
     const shipping = (orderMode === "delivery" && deliveryQuote) ? deliveryQuote.fee : 0;
     return base + shipping;
   };
@@ -285,10 +227,7 @@ export default function Cart() {
       console.log("📦 OrderData envoyé:", JSON.stringify(orderData, null, 2));
       
       const response = await axios.post(`${BASE_API}/orders`, orderData);
-      console.log("📥 Réponse brute de l'API /orders:", response);
       console.log("📥 Response.data:", response.data);
-      console.log("📥 Response.data.success:", response.data.success);
-      console.log("📥 Response.data.data:", response.data.data);
       
       if (response.data.success) {
         const orderId = response.data.order?._id || 
@@ -309,7 +248,7 @@ export default function Cart() {
           console.log("💰 Paiement à la caisse - Notification immédiate");
           
           try {
-            const notifResponse = await axios.post(`${BASE_API}/notifications/new-order`, {
+            await axios.post(`${BASE_API}/notifications/new-order`, {
               orderId: orderId,
               customerName: customerName || "Client Signature",
               total: totalPrice.toFixed(2),
@@ -318,28 +257,30 @@ export default function Cart() {
               tableNumber: selectedTable || null,
               paymentMethod: "Caisse"
             });
-            console.log("✅ Réponse notification:", notifResponse.data);
+            console.log("✅ Notification envoyée à l'admin");
           } catch (notifError: any) {
             console.error("❌ Erreur envoi notification:", notifError.message);
           }
           
-          console.log(`🔄 Redirection vers: /order-success?orderId=${orderId}`);
           window.location.href = `/order-success?orderId=${orderId}`;
         }
         
         else {
-          console.log("💳 Paiement Stripe - Attente du paiement...");
+          console.log(`💳 Paiement Stripe - Montant: ${currentAmountToPay}€ (${orderMode === "booking" ? "Acompte 50%" : "Total"})`);
           
           const stripeItems = cart.map((item: any) => {
             const unitPrice = parsePrice(item.price);
             const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
               return sum + parsePrice(supp.price);
             }, 0) || 0;
-            const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
+            const itemTotal = (unitPrice + supplementsTotal) * (item.quantity || 1);
+            
+            // Pour une réservation, on ne prend que 50% du prix
+            const finalPrice = orderMode === "booking" ? itemTotal / 2 : itemTotal;
             
             return {
               name: item.name,
-              price: totalPrice,
+              price: finalPrice,
               quantity: 1,
               chosenAccompaniment: item.chosenAccompaniment || "Aucun"
             };
@@ -347,7 +288,9 @@ export default function Cart() {
           
           const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
             items: stripeItems,
-            orderId: orderId
+            orderId: orderId,
+            mode: orderMode,
+            depositPercentage: orderMode === "booking" ? 50 : 100
           });
           
           if (paymentResponse.data.url) {
@@ -384,7 +327,9 @@ export default function Cart() {
     }
     
     if (orderMode === 'booking') {
-      if (!customerName) return true;
+      if (!customerName || customerName.trim() === "") return true;
+      if (!customerEmail || !customerEmail.includes('@')) return true;
+      if (!customerPhone || customerPhone.trim() === "") return true;
       if (!bookingDate || !bookingTime) return true;
     }
     
@@ -527,12 +472,10 @@ export default function Cart() {
                         <input type="tel" placeholder="Votre numéro de téléphone" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                       </div>
                       
-                      {shouldShowEmailFields && (
-                        <div className="input-group full">
-                          <label>Email *</label>
-                          <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
-                        </div>
-                      )}
+                      <div className="input-group full">
+                        <label>Email</label>
+                        <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                      </div>
                       
                       <div className="input-group full">
                         <label><Bike size={14}/> Adresse de livraison *</label>
@@ -548,38 +491,6 @@ export default function Cart() {
                       <div className="delivery-services-section">
                         <label className="section-label">Choisissez votre service de livraison :</label>
                         <div className="delivery-services-grid">
-                          {/* Commenté temporairement
-                          <button
-                            type="button"
-                            className={`delivery-service-btn ${selectedDeliveryService === "uber" ? "active" : ""}`}
-                            onClick={() => handleDeliveryServiceChange("uber")}
-                          >
-                            <span className="service-icon">🚲</span>
-                            <span className="service-name">Uber Eats</span>
-                            <span className="service-price">Prix selon course</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            className={`delivery-service-btn ${selectedDeliveryService === "deliveroo" ? "active" : ""}`}
-                            onClick={() => handleDeliveryServiceChange("deliveroo")}
-                          >
-                            <span className="service-icon">🛵</span>
-                            <span className="service-name">Deliveroo</span>
-                            <span className="service-price">Prix selon course</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            className={`delivery-service-btn ${selectedDeliveryService === "justeat" ? "active" : ""}`}
-                            onClick={() => handleDeliveryServiceChange("justeat")}
-                          >
-                            <span className="service-icon">🍔</span>
-                            <span className="service-name">Just Eat</span>
-                            <span className="service-price">Prix selon course</span>
-                          </button>
-                          */}
-
                           <button
                             type="button"
                             className={`delivery-service-btn signature ${selectedDeliveryService === "signature" ? "active" : ""}`}
@@ -592,10 +503,6 @@ export default function Cart() {
                         </div>
                       </div>
 
-                      {isEstimating && (
-                        <small className="gold-text">Calcul des frais de livraison...</small>
-                      )}
-                      
                       {deliveryError && (
                         <small className="error-text">{deliveryError}</small>
                       )}
@@ -604,10 +511,7 @@ export default function Cart() {
                         <div className="delivery-quote-success">
                           <Sparkles size={16} />
                           <span>
-                            {deliveryQuote.service === "signature" 
-                              ? "✨ Livraison Signature : 5.00€ ajoutés à votre commande"
-                              : `✓ Livraison via ${deliveryFees[deliveryQuote.service as keyof typeof deliveryFees]?.label} : +${deliveryQuote.fee.toFixed(2)}€`
-                            }
+                            ✨ Livraison Signature : 5.00€ ajoutés à votre commande
                           </span>
                         </div>
                       )}
@@ -622,28 +526,34 @@ export default function Cart() {
                   {orderMode === "booking" && (
                     <div className="form-fade-in">
                       <div className="input-group full">
-                        <label>Nom de la réservation *</label>
-                        <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+                        <label>Nom complet *</label>
+                        <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
                       
                       <div className="input-group full">
                         <label>Email *</label>
                         <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                       </div>
+                      
                       <div className="input-group full">
-                        <label>Téléphone</label>
-                        <input type="tel" placeholder="Votre numéro" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+                        <label>Téléphone *</label>
+                        <input type="tel" placeholder="Votre numéro de téléphone" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                       </div>
                       
                       <div className="form-row">
                         <div className="input-group">
-                            <label>Date</label>
+                            <label>Date *</label>
                             <input type="date" min={new Date().toISOString().split("T")[0]} value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} />
                         </div>
                         <div className="input-group">
-                            <label>Heure</label>
+                            <label>Heure *</label>
                             <input type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} />
                         </div>
+                      </div>
+                      
+                      <div className="info-badge">
+                        <Sparkles size={14} />
+                        <span>Un acompte de 50% vous sera demandé pour valider la réservation</span>
                       </div>
                     </div>
                   )}
@@ -667,7 +577,7 @@ export default function Cart() {
 
               {orderMode === "delivery" && deliveryQuote && (
                 <div className="summary-line">
-                  <span>Frais de livraison ({deliveryFees[deliveryQuote.service as keyof typeof deliveryFees]?.label || "Livraison"})</span>
+                  <span>Frais de livraison ({deliveryFees.signature.label})</span>
                   <span className="gold-text">+{deliveryQuote.fee.toFixed(2)}€</span>
                 </div>
               )}
@@ -677,10 +587,17 @@ export default function Cart() {
                 <span>{amountToPay.toFixed(2)}€</span>
               </div>
 
+              {orderMode === "booking" && (
+                <div className="summary-line" style={{ fontSize: "0.8rem", opacity: 0.7 }}>
+                  <span>Solde restant à payer sur place</span>
+                  <span>{(totalPrice - amountToPay).toFixed(2)}€</span>
+                </div>
+              )}
+
               <div className="legal-notice">
                 <label className="checkbox-label">
                   <input type="checkbox" checked={isAgreed} onChange={(e) => setIsAgreed(e.target.checked)} />
-                  Commande <strong>non-remboursable</strong>.
+                  J'accepte les conditions générales. Commande <strong>non-remboursable</strong>.
                 </label>
               </div>
 
@@ -695,6 +612,21 @@ export default function Cart() {
           </div>
         )}
       </div>
+
+      <style>{`
+        .info-badge {
+          background: rgba(212, 175, 55, 0.1);
+          border: 1px solid #D4AF37;
+          border-radius: 8px;
+          padding: 10px 15px;
+          margin-top: 15px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 0.85rem;
+          color: #D4AF37;
+        }
+      `}</style>
     </section>
   );
 }
