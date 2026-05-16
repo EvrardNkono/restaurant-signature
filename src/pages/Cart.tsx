@@ -57,16 +57,15 @@ export default function Cart() {
 
   // Configuration des frais de livraison par service
   const deliveryFees = {
-    uber: { fee: 0, label: "Uber Eats", icon: "🚲", needsEstimate: true },
-    deliveroo: { fee: 0, label: "Deliveroo", icon: "🛵", needsEstimate: true },
-    justeat: { fee: 0, label: "Just Eat", icon: "🍔", needsEstimate: true },
+    // uber: { fee: 0, label: "Uber Eats", icon: "🚲", needsEstimate: true },
+    // deliveroo: { fee: 0, label: "Deliveroo", icon: "🛵", needsEstimate: true },
+    // justeat: { fee: 0, label: "Just Eat", icon: "🍔", needsEstimate: true },
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
   // SAUVEGARDE DU TOKEN FCM
   useEffect(() => {
     const saveFcmToken = async () => {
-      // Vérifier si les notifications sont autorisées
       if (Notification.permission === 'granted') {
         try {
           const messaging = getMessaging(app);
@@ -79,7 +78,6 @@ export default function Cart() {
           console.error('❌ Erreur récupération token FCM:', e);
         }
       } else if (Notification.permission === 'default') {
-        // Optionnel: Demander la permission
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           try {
@@ -155,6 +153,8 @@ export default function Cart() {
       return;
     }
 
+    // Commenté temporairement pour les autres services
+    /*
     if (targetAddress.trim().length < 10) return;
     
     setIsEstimating(true);
@@ -177,6 +177,7 @@ export default function Cart() {
     } finally {
       setIsEstimating(false);
     }
+    */
   };
 
   const handleDeliveryServiceChange = (service: DeliveryService) => {
@@ -184,17 +185,24 @@ export default function Cart() {
     if (service === "signature") {
       setDeliveryQuote({ fee: 5, id: "signature_delivery", service: "signature" });
       setDeliveryError(null);
-    } else if (address.trim().length >= 10) {
+    } 
+    // Commenté temporairement
+    /*
+    else if (address.trim().length >= 10) {
       fetchDeliveryQuoteForService(service, address);
     } else {
       setDeliveryQuote(null);
     }
+    */
   };
 
   const handleAddressBlur = () => {
+    // Commenté temporairement
+    /*
     if (selectedDeliveryService && selectedDeliveryService !== "signature" && address.trim().length >= 10) {
       fetchDeliveryQuoteForService(selectedDeliveryService, address);
     }
+    */
   };
 
   // CALCULS
@@ -223,7 +231,6 @@ export default function Cart() {
     console.log("=== handleFinalOrder appelé ===");
     setIsSubmitting(true);
     
-    // Récupérer le token FCM
     const fcmToken = localStorage.getItem('fcm_client_token');
     console.log("🔑 Token FCM récupéré:", fcmToken ? "✅ Oui" : "❌ Non");
     
@@ -238,7 +245,7 @@ export default function Cart() {
     
     const orderData = {
       clientId: clientId,
-      fcmToken: fcmToken || null, // 👈 AJOUT DU TOKEN FCM
+      fcmToken: fcmToken || null,
       customer: {
         name: customerName || "Client Signature",
         email: customerEmail,
@@ -284,38 +291,22 @@ export default function Cart() {
       console.log("📥 Response.data.data:", response.data.data);
       
       if (response.data.success) {
-        // Essayer plusieurs façons de récupérer l'ID
         const orderId = response.data.order?._id || 
                     response.data.order?.id || 
                     response.data.data?._id ||
                     response.data.orderId;
         
         console.log("🔑 OrderId extrait:", orderId);
-        console.log("🔑 Type de orderId:", typeof orderId);
-        console.log("🔑 Longueur orderId:", orderId?.length);
         
         if (!orderId) {
           console.error("❌ CRITIQUE: Impossible de récupérer l'ID de la commande !");
-          console.error("📦 Structure de response.data:", JSON.stringify(response.data, null, 2));
           alert("Erreur: L'ID de la commande n'a pas été retourné");
           setIsSubmitting(false);
           return;
         }
         
-        // ============================================
-        // CAS 1 : PAIEMENT À LA CAISSE (sans Stripe)
-        // ============================================
         if (!needsPayment) {
           console.log("💰 Paiement à la caisse - Notification immédiate");
-          console.log("📤 Détails notification:", {
-            orderId: orderId,
-            customerName: customerName || "Client Signature",
-            total: totalPrice.toFixed(2),
-            itemsCount: cart.length,
-            mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
-            tableNumber: selectedTable || null,
-            apiUrl: `${BASE_API}/notifications/new-order`
-          });
           
           try {
             const notifResponse = await axios.post(`${BASE_API}/notifications/new-order`, {
@@ -328,23 +319,16 @@ export default function Cart() {
               paymentMethod: "Caisse"
             });
             console.log("✅ Réponse notification:", notifResponse.data);
-            console.log("✅ Notification envoyée à l'admin (paiement caisse)");
           } catch (notifError: any) {
             console.error("❌ Erreur envoi notification:", notifError.message);
-            console.error("❌ Détails erreur:", notifError.response?.data);
-            console.error("❌ Status erreur:", notifError.response?.status);
           }
           
           console.log(`🔄 Redirection vers: /order-success?orderId=${orderId}`);
           window.location.href = `/order-success?orderId=${orderId}`;
         }
         
-        // ============================================
-        // CAS 2 : PAIEMENT STRIPE
-        // ============================================
         else {
           console.log("💳 Paiement Stripe - Attente du paiement...");
-          console.log("🔑 OrderId pour Stripe:", orderId);
           
           const stripeItems = cart.map((item: any) => {
             const unitPrice = parsePrice(item.price);
@@ -361,36 +345,26 @@ export default function Cart() {
             };
           });
           
-          console.log("📤 Envoi à Stripe avec items:", stripeItems.length);
-          
           const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
             items: stripeItems,
             orderId: orderId
           });
           
-          console.log("📥 Réponse Stripe:", paymentResponse.data);
-          
           if (paymentResponse.data.url) {
-            console.log("🔔 Redirection Stripe - notification sera envoyée après paiement");
             window.location.href = paymentResponse.data.url;
           } else {
             console.error("❌ Pas d'URL dans la réponse Stripe");
-            console.error("📥 Réponse complète:", paymentResponse.data);
             alert("Erreur lors de la redirection Stripe");
             setIsSubmitting(false);
           }
         }
       } else {
         console.error("❌ La commande n'a pas été créée (success: false)");
-        console.error("📥 Message d'erreur:", response.data.message);
         alert(`Erreur: ${response.data.message || "Commande non créée"}`);
         setIsSubmitting(false);
       }
     } catch (error: any) {
       console.error("❌ EXCEPTION dans handleFinalOrder:", error);
-      console.error("❌ Message:", error.message);
-      console.error("❌ Response:", error.response?.data);
-      console.error("❌ Status:", error.response?.status);
       alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
       setIsSubmitting(false);
     } 
@@ -404,7 +378,8 @@ export default function Cart() {
     if (orderMode === 'delivery') {
       if (!selectedDeliveryService) return true;
       if (!deliveryQuote) return true;
-      if (!customerName) return true;
+      if (!customerName || customerName.trim() === "") return true;
+      if (!customerPhone || customerPhone.trim() === "") return true;
       if (!address || address.trim().length < 10) return true;
     }
     
@@ -547,17 +522,16 @@ export default function Cart() {
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
                       
+                      <div className="input-group full">
+                        <label>Téléphone *</label>
+                        <input type="tel" placeholder="Votre numéro de téléphone" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+                      </div>
+                      
                       {shouldShowEmailFields && (
-                        <>
-                          <div className="input-group full">
-                            <label>Email *</label>
-                            <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
-                          </div>
-                          <div className="input-group full">
-                            <label>Téléphone</label>
-                            <input type="tel" placeholder="Votre numéro" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
-                          </div>
-                        </>
+                        <div className="input-group full">
+                          <label>Email *</label>
+                          <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                        </div>
                       )}
                       
                       <div className="input-group full">
@@ -574,6 +548,7 @@ export default function Cart() {
                       <div className="delivery-services-section">
                         <label className="section-label">Choisissez votre service de livraison :</label>
                         <div className="delivery-services-grid">
+                          {/* Commenté temporairement
                           <button
                             type="button"
                             className={`delivery-service-btn ${selectedDeliveryService === "uber" ? "active" : ""}`}
@@ -603,6 +578,7 @@ export default function Cart() {
                             <span className="service-name">Just Eat</span>
                             <span className="service-price">Prix selon course</span>
                           </button>
+                          */}
 
                           <button
                             type="button"
