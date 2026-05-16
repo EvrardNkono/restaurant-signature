@@ -1,0 +1,9 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyCNQL7GuZPLxRfXxgGsNS3JmNFVP_AKyj4",
+  authDomain: "restaurant-signature-16476.firebaseapp.com",
+  projectId: "restaurant-signature-16476",
+  storageBucket: "restaurant-signature-16476.firebasestorage.app",
+  messagingSenderId: "954016254361",
+  appId: "1:954016254361:web:f9d439d856daef0e3b6b08",
+  measurementId: "G-8S2SZR1X2L"
+};

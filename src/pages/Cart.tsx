@@ -105,7 +105,6 @@ export default function Cart() {
   const fetchDeliveryQuoteForService = async (service: DeliveryService, targetAddress: string) => {
     if (!service) return;
     
-    // Livraison Signature : frais fixes
     if (service === "signature") {
       setDeliveryQuote({ 
         fee: deliveryFees.signature.fee, 
@@ -140,7 +139,6 @@ export default function Cart() {
     }
   };
 
-  // Quand l'utilisateur change de service de livraison
   const handleDeliveryServiceChange = (service: DeliveryService) => {
     setSelectedDeliveryService(service);
     if (service === "signature") {
@@ -153,7 +151,6 @@ export default function Cart() {
     }
   };
 
-  // Quand l'adresse change, on re-calcule le devis pour le service sélectionné
   const handleAddressBlur = () => {
     if (selectedDeliveryService && selectedDeliveryService !== "signature" && address.trim().length >= 10) {
       fetchDeliveryQuoteForService(selectedDeliveryService, address);
@@ -181,7 +178,7 @@ export default function Cart() {
   const amountToPay = getAmountToPay();
   const shouldShowEmailFields = (payNow === true || orderMode === "booking") && amountToPay > 0;
 
-  // ACTION FINALE AVEC STRIPE SERVICE
+  // ACTION FINALE
   const handleFinalOrder = async () => {
     console.log("=== handleFinalOrder appelé ===");
     setIsSubmitting(true);
@@ -194,11 +191,6 @@ export default function Cart() {
 
     const currentAmountToPay = getAmountToPay();
     const needsPayment = currentAmountToPay > 0 && (payNow === true || orderMode === "booking");
-    
-    console.log("currentAmountToPay:", currentAmountToPay);
-    console.log("needsPayment:", needsPayment);
-    console.log("payNow:", payNow);
-    console.log("orderMode:", orderMode);
     
     const orderData = {
       clientId: clientId,
@@ -220,7 +212,7 @@ export default function Cart() {
       total: totalPrice,
       amountPaid: currentAmountToPay,
       mode: orderMode,
-      status: "pending",
+      status: needsPayment ? "pending_payment" : "pending",
       details: {
         consumeMode: orderMode === "on_site" ? consumeMode : null,
         tableNumber: selectedTable || null,
@@ -237,123 +229,152 @@ export default function Cart() {
     };
 
     try {
-      console.log("Création de la commande...");
-      const response = await axios.post(`${BASE_API}/orders`, orderData);
-      console.log("Réponse commande:", response.data);
-      
-      if (response.data.success) {
-        const orderId = response.data.data?._id || response.data.orderId;
-        console.log("OrderId:", orderId);
-
-        if (needsPayment) {
-          console.log("Paiement nécessaire, préparation des items Stripe...");
-          const stripeItems = cart.map((item: any) => {
-            const unitPrice = parsePrice(item.price);
-            const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
-              return sum + parsePrice(supp.price);
-            }, 0) || 0;
-            const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
-            
-            return {
-              name: item.name,
-              price: totalPrice,
-              quantity: 1,
-              chosenAccompaniment: item.chosenAccompaniment || "Aucun"
-            };
-          });
-          
-          console.log("Stripe items:", stripeItems);
-          
-          const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
-            items: stripeItems,
-            orderId: orderId
-          });
-          
-          console.log("Réponse paiement:", paymentResponse.data);
-
-          if (paymentResponse.data.url) {
-            console.log("Redirection vers Stripe:", paymentResponse.data.url);
-            window.location.href = paymentResponse.data.url;
-          } else {
-            console.error("Pas d'URL dans la réponse Stripe");
-          }
-        } else {
-          console.log("Pas de paiement nécessaire, redirection vers success");
-          window.location.href = `/order-success?orderId=${orderId}`;
-        }
-      }
-    } catch (error: any) {
-      console.error("Erreur commande:", error.response?.data || error);
-      alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
+  console.log("=== DÉBUT CRÉATION COMMANDE ===");
+  console.log("📦 OrderData envoyé:", JSON.stringify(orderData, null, 2));
+  
+  const response = await axios.post(`${BASE_API}/orders`, orderData);
+  console.log("📥 Réponse brute de l'API /orders:", response);
+  console.log("📥 Response.data:", response.data);
+  console.log("📥 Response.data.success:", response.data.success);
+  console.log("📥 Response.data.data:", response.data.data);
+  
+  if (response.data.success) {
+    // Essayer plusieurs façons de récupérer l'ID
+    const orderId = response.data.order?._id || 
+                response.data.order?.id || 
+                response.data.data?._id ||
+                response.data.orderId;
+    
+    console.log("🔑 OrderId extrait:", orderId);
+    console.log("🔑 Type de orderId:", typeof orderId);
+    console.log("🔑 Longueur orderId:", orderId?.length);
+    
+    if (!orderId) {
+      console.error("❌ CRITIQUE: Impossible de récupérer l'ID de la commande !");
+      console.error("📦 Structure de response.data:", JSON.stringify(response.data, null, 2));
+      alert("Erreur: L'ID de la commande n'a pas été retourné");
       setIsSubmitting(false);
+      return;
     }
+    
+    // ============================================
+    // CAS 1 : PAIEMENT À LA CAISSE (sans Stripe)
+    // ============================================
+    if (!needsPayment) {
+      console.log("💰 Paiement à la caisse - Notification immédiate");
+      console.log("📤 Détails notification:", {
+        orderId: orderId,
+        customerName: customerName || "Client Signature",
+        total: totalPrice.toFixed(2),
+        itemsCount: cart.length,
+        mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
+        tableNumber: selectedTable || null,
+        apiUrl: `${BASE_API}/notifications/new-order`
+      });
+      
+      try {
+        const notifResponse = await axios.post(`${BASE_API}/notifications/new-order`, {
+          orderId: orderId,
+          customerName: customerName || "Client Signature",
+          total: totalPrice.toFixed(2),
+          itemsCount: cart.length,
+          mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
+          tableNumber: selectedTable || null,
+          paymentMethod: "Caisse"
+        });
+        console.log("✅ Réponse notification:", notifResponse.data);
+        console.log("✅ Notification envoyée à l'admin (paiement caisse)");
+      } catch (notifError: any) {
+        console.error("❌ Erreur envoi notification:", notifError.message);
+        console.error("❌ Détails erreur:", notifError.response?.data);
+        console.error("❌ Status erreur:", notifError.response?.status);
+      }
+      
+      console.log(`🔄 Redirection vers: /order-success?orderId=${orderId}`);
+      window.location.href = `/order-success?orderId=${orderId}`;
+    }
+    
+    // ============================================
+    // CAS 2 : PAIEMENT STRIPE
+    // ============================================
+    else {
+      console.log("💳 Paiement Stripe - Attente du paiement...");
+      console.log("🔑 OrderId pour Stripe:", orderId);
+      
+      const stripeItems = cart.map((item: any) => {
+        const unitPrice = parsePrice(item.price);
+        const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
+          return sum + parsePrice(supp.price);
+        }, 0) || 0;
+        const totalPrice = (unitPrice + supplementsTotal) * (item.quantity || 1);
+        
+        return {
+          name: item.name,
+          price: totalPrice,
+          quantity: 1,
+          chosenAccompaniment: item.chosenAccompaniment || "Aucun"
+        };
+      });
+      
+      console.log("📤 Envoi à Stripe avec items:", stripeItems.length);
+      
+      const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
+        items: stripeItems,
+        orderId: orderId
+      });
+      
+      console.log("📥 Réponse Stripe:", paymentResponse.data);
+      
+      if (paymentResponse.data.url) {
+        console.log("🔔 Redirection Stripe - notification sera envoyée après paiement");
+        window.location.href = paymentResponse.data.url;
+      } else {
+        console.error("❌ Pas d'URL dans la réponse Stripe");
+        console.error("📥 Réponse complète:", paymentResponse.data);
+        alert("Erreur lors de la redirection Stripe");
+        setIsSubmitting(false);
+      }
+    }
+  } else {
+    console.error("❌ La commande n'a pas été créée (success: false)");
+    console.error("📥 Message d'erreur:", response.data.message);
+    alert(`Erreur: ${response.data.message || "Commande non créée"}`);
+    setIsSubmitting(false);
+  }
+} catch (error: any) {
+  console.error("❌ EXCEPTION dans handleFinalOrder:", error);
+  console.error("❌ Message:", error.message);
+  console.error("❌ Response:", error.response?.data);
+  console.error("❌ Status:", error.response?.status);
+  alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
+  setIsSubmitting(false);
+} 
   };
 
   // Validation du formulaire
   const isOrderDisabled = () => {
-    console.log("=== isOrderDisabled CALLED ===");
-    console.log("orderMode:", orderMode);
-    console.log("selectedDeliveryService:", selectedDeliveryService);
-    console.log("deliveryQuote:", deliveryQuote);
-    
-    if (!isAgreed) {
-      console.log("❌ BLOQUÉ: Conditions non acceptées");
-      return true;
-    }
-    if (isSubmitting) {
-      console.log("❌ BLOQUÉ: Soumission en cours");
-      return true;
-    }
+    if (!isAgreed) return true;
+    if (isSubmitting) return true;
     
     if (orderMode === 'delivery') {
-      if (!selectedDeliveryService) {
-        console.log("❌ BLOQUÉ (delivery): Aucun service de livraison sélectionné");
-        return true;
-      }
-      if (!deliveryQuote) {
-        console.log("❌ BLOQUÉ (delivery): Pas de devis livraison validé");
-        return true;
-      }
-      if (!customerName) {
-        console.log("❌ BLOQUÉ (delivery): Nom manquant");
-        return true;
-      }
-      if (!address || address.trim().length < 10) {
-        console.log("❌ BLOQUÉ (delivery): Adresse invalide");
-        return true;
-      }
+      if (!selectedDeliveryService) return true;
+      if (!deliveryQuote) return true;
+      if (!customerName) return true;
+      if (!address || address.trim().length < 10) return true;
     }
     
     if (orderMode === 'booking') {
-      if (!customerName) {
-        console.log("❌ BLOQUÉ (booking): Nom manquant");
-        return true;
-      }
-      if (!bookingDate || !bookingTime) {
-        console.log("❌ BLOQUÉ (booking): Date/heure manquante");
-        return true;
-      }
+      if (!customerName) return true;
+      if (!bookingDate || !bookingTime) return true;
     }
     
     if (orderMode === 'on_site') {
-      console.log("--- Mode en salle ---");
-      if (consumeMode === 'dine_in' && !selectedTable) {
-        console.log("❌ BLOQUÉ (en salle): Table non sélectionnée pour manger sur place");
-        return true;
-      }
-      if (payNow === true && (!customerEmail || !customerEmail.includes('@'))) {
-        console.log("❌ BLOQUÉ (en salle): Email requis pour paiement en ligne");
-        console.log("Email actuel:", customerEmail);
-        return true;
-      }
+      if (consumeMode === 'dine_in' && !selectedTable) return true;
+      if (payNow === true && (!customerEmail || !customerEmail.includes('@'))) return true;
     }
     
-    if (shouldShowEmailFields && (!customerEmail || !customerEmail.includes('@'))) {
-      console.log("❌ BLOQUÉ: Email invalide ou manquant");
-      return true;
-    }
+    if (shouldShowEmailFields && (!customerEmail || !customerEmail.includes('@'))) return true;
     
-    console.log("✅ BOUTON ACTIF - Toutes les conditions sont remplies");
     return false;
   };
 
@@ -505,7 +526,6 @@ export default function Cart() {
                         />
                       </div>
 
-                      {/* SECTION CHOIX DU SERVICE DE LIVRAISON */}
                       <div className="delivery-services-section">
                         <label className="section-label">Choisissez votre service de livraison :</label>
                         <div className="delivery-services-grid">
@@ -551,7 +571,6 @@ export default function Cart() {
                         </div>
                       </div>
 
-                      {/* Statut du devis */}
                       {isEstimating && (
                         <small className="gold-text">Calcul des frais de livraison...</small>
                       )}

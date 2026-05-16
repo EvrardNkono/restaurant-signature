@@ -41,7 +41,21 @@
     <meta name="description" content="Restaurant Signature - Découvrez nos plats raffinés et commandez en ligne" />
     
     <title>Restaurant Signature</title>
-  </head>
+  <!-- Firebase Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(registration => {
+          console.log('✅ Service Worker FCM enregistré:', registration);
+        })
+        .catch(error => {
+          console.log('❌ Erreur Service Worker FCM:', error);
+        });
+    });
+  }
+</script>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

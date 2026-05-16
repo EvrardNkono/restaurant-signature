@@ -113,3 +113,75 @@
     padding: 12px;
   }
 }
+
+/* Ajouter à la fin du fichier AdminLayout.css */
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Style pour le composant AdminNotifications dans le topbar */
+.admin-notifications-card {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.admin-notif-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f5f0e8;
+  color: #2D2422;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.admin-notif-btn.active {
+  background: #2D2422;
+  color: #D4AF37;
+  border-color: #D4AF37;
+}
+
+.admin-notif-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+}
+
+.admin-notif-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-notif-warning,
+.admin-notif-success {
+  display: none; /* Caché dans le topbar, trop petit */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-topbar-right {
+    gap: 8px;
+  }
+  
+  .admin-notif-btn span {
+    display: none; /* Cache le texte sur mobile, ne garde que l'icône */
+  }
+  
+  .admin-notif-btn {
+    padding: 8px;
+  }
+  
+  .admin-user-info {
+    display: none; /* Cache le texte admin sur très petit mobile */
+  }
+}
