@@ -1,5 +1,5 @@
 // src/admin/pages/Orders.tsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
   Printer, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
@@ -17,22 +17,27 @@ export default function Orders() {
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
-  
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
+
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
 
   const [toast, setToast] = useState<{ show: boolean; message: string; type: string }>({
-    show: false,
-    message: "",
-    type: ""
+    show: false, message: "", type: ""
   });
+
+  // Refs pour éviter les closures périmées dans setInterval
+  const activeFilterRef = useRef(activeFilter);
+  const customRangeRef = useRef(customRange);
+  activeFilterRef.current = activeFilter;
+  customRangeRef.current = customRange;
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
   };
 
-  const applyFilter = useCallback((allOrders: any[], period: string, range: {start: string, end: string}) => {
+  const applyFilter = useCallback((allOrders: any[], period: string, range: { start: string; end: string }) => {
     let filtered = [...allOrders];
     const now = new Date();
 
@@ -50,7 +55,6 @@ export default function Orders() {
       else if (period === "14") startDate.setDate(now.getDate() - 14);
       else if (period === "30") startDate.setMonth(now.getMonth() - 1);
       else startDate.setFullYear(now.getFullYear() - 1);
-      
       filtered = allOrders.filter(o => new Date(o.createdAt) >= startDate);
     }
 
@@ -62,84 +66,93 @@ export default function Orders() {
     setTotalRevenue(revenue);
   }, []);
 
-  const fetchOrders = async () => {
+  // fetchOrders ne dépend pas des états de filtre, utilise les refs
+  const fetchOrders = useCallback(async () => {
     try {
       const res = await axios.get(`${BASE_API}/orders`);
-      const data = res.data.data.sort((a: any, b: any) => 
+      const data = res.data.data.sort((a: any, b: any) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setOrders(data);
-      applyFilter(data, activeFilter, customRange);
+      applyFilter(data, activeFilterRef.current, customRangeRef.current);
     } catch (err) {
       console.error("Erreur chargement:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [applyFilter]);
 
+  // Re-appliquer le filtre quand il change (sans re-fetcher)
+  useEffect(() => {
+    applyFilter(orders, activeFilter, customRange);
+  }, [activeFilter, customRange]); // eslint-disable-line
+
+  // Fetch initial + polling
   useEffect(() => {
     fetchOrders();
     const interval = setInterval(fetchOrders, 15000);
     return () => clearInterval(interval);
-  }, [activeFilter, customRange, applyFilter]);
+  }, [fetchOrders]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    // Éviter les double-clics
+    if (updatingIds.has(orderId)) return;
+
     const now = new Date().toISOString();
-    
+
+    // 1. Marquer comme en cours de mise à jour
+    setUpdatingIds(prev => new Set(prev).add(orderId));
+
+    // 2. Mise à jour optimiste immédiate sur les deux states
+    const updateFn = (list: any[]) =>
+      list.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o);
+
+    setOrders(prev => updateFn(prev));
+    setFilteredOrders(prev => updateFn(prev));
+
     try {
-      // Mise à jour optimiste de l'UI
-      setFilteredOrders(prev => 
-        prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
-      );
-      
-      // 1. Mettre à jour le statut dans la base de données
+      // 3. Appel API principal (statut)
       await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus, updatedAt: now });
-      
-      // 2. Envoyer la notification au client
-      try {
-        const notificationResult = await axios.post(`${BASE_API}/notifications/order-status`, {
-          orderId,
-          newStatus
-        });
-        
-        if (notificationResult.data.success) {
-          showToast(`✅ Notification envoyée au client (statut: ${getStatusLabel(newStatus)})`, "success");
-          console.log(`📱 Notification client envoyée pour commande ${orderId}`);
-        } else {
-          console.warn(`⚠️ Notification non envoyée: ${notificationResult.data.message}`);
-          if (notificationResult.data.message !== 'Pas de token client pour cette commande') {
-            showToast(`⚠️ Client non notifié: ${notificationResult.data.message}`, "info");
+      showToast(`✅ Statut mis à jour : ${getStatusLabel(newStatus)}`, "success");
+
+      // 4. Notification en fire-and-forget (ne bloque pas)
+      axios.post(`${BASE_API}/notifications/order-status`, { orderId, newStatus })
+        .then(res => {
+          if (res.data?.success) {
+            console.log(`📱 Notification envoyée pour commande ${orderId}`);
           }
-        }
-      } catch (notifError) {
-        console.warn("Erreur envoi notification:", notifError);
-      }
-      
-      // Rafraîchir la liste
-      await fetchOrders();
-      
+        })
+        .catch(err => {
+          console.warn("⚠️ Notification non envoyée (non bloquant):", err.message);
+        });
+
     } catch (err: any) {
       console.error("❌ Erreur update statut:", err);
       showToast(`❌ Erreur: ${err.response?.data?.message || err.message}`, "error");
-      await fetchOrders();
+      // Rollback : recharger depuis le serveur
+      fetchOrders();
+    } finally {
+      // 5. Débloquer le bouton dans tous les cas
+      setUpdatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
+      });
     }
   };
 
   const sendCustomNotification = async (orderId: string, title: string, body: string) => {
     try {
       const response = await axios.post(`${BASE_API}/notifications/custom-notification`, {
-        orderId,
-        title,
-        body
+        orderId, title, body
       });
-      
       if (response.data.success) {
         showToast(`✅ Notification personnalisée envoyée`, "success");
       } else {
         showToast(`⚠️ Échec: ${response.data.message}`, "error");
       }
     } catch (err: any) {
-      console.error("❌ Erreur envoi notification personnalisée:", err);
+      console.error("❌ Erreur notification perso:", err);
       showToast(`❌ Erreur: ${err.message}`, "error");
     }
   };
@@ -147,9 +160,8 @@ export default function Orders() {
   const downloadExcel = () => {
     const data = filteredOrders.map(o => {
       const articlesDetails = o.items.map((i: any) => {
-        const acc = i.chosenAccompaniment && i.chosenAccompaniment !== "Aucun" 
-          ? ` (Acc: ${i.chosenAccompaniment})` 
-          : "";
+        const acc = i.chosenAccompaniment && i.chosenAccompaniment !== "Aucun"
+          ? ` (Acc: ${i.chosenAccompaniment})` : "";
         return `${i.name}${acc} x${i.quantity || 1}`;
       }).join(", ");
 
@@ -186,9 +198,9 @@ export default function Orders() {
 
     const ws = XLSX.utils.json_to_sheet(data);
     ws['!cols'] = [
-      { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, 
+      { wch: 15 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 },
       { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 30 }, { wch: 15 },
-      { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 50 }, { wch: 10 }, 
+      { wch: 15 }, { wch: 12 }, { wch: 20 }, { wch: 50 }, { wch: 10 },
       { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 12 }
     ];
 
@@ -198,7 +210,7 @@ export default function Orders() {
   };
 
   const getStatusClass = (status: string) => {
-    switch(status) {
+    switch (status) {
       case "pending": return "status-pending";
       case "cooking": return "status-cooking";
       case "done": return "status-done";
@@ -208,7 +220,7 @@ export default function Orders() {
   };
 
   const getStatusLabel = (status: string) => {
-    switch(status) {
+    switch (status) {
       case "pending": return "En attente";
       case "cooking": return "En cuisine";
       case "done": return "Prêt / Servi";
@@ -303,7 +315,6 @@ export default function Orders() {
         </div>
       );
     }
-    
     if (order.mode === "booking") {
       return (
         <div className="order-details-booking">
@@ -326,7 +337,6 @@ export default function Orders() {
         </div>
       );
     }
-    
     if (order.mode === "on_site" && order.details?.consumeMode === "take_away") {
       return (
         <div className="order-details-takeaway">
@@ -341,7 +351,6 @@ export default function Orders() {
         </div>
       );
     }
-    
     if (order.customer?.email && order.details?.paymentStatus === "pending_stripe") {
       return (
         <div className="order-details-onsite">
@@ -352,18 +361,19 @@ export default function Orders() {
         </div>
       );
     }
-    
     return null;
   };
 
   return (
     <div className="orders-page">
+      {/* Toast notification */}
       {toast.show && (
         <div className={`toast-notification ${toast.type}`}>
           <span>{toast.message}</span>
         </div>
       )}
 
+      {/* Header */}
       <header className="orders-header-luxury">
         <div className="header-seal-terracotta">
           <ShoppingBag size={24} />
@@ -374,6 +384,7 @@ export default function Orders() {
         <div className="header-gold-line"></div>
       </header>
 
+      {/* Revenus & Filtres */}
       <div className="revenue-panel-luxury">
         <div className="revenue-card-luxury">
           <div className="rev-icon-gold">
@@ -399,9 +410,17 @@ export default function Orders() {
 
           {activeFilter === "custom" && (
             <div className="custom-date-picker-luxury">
-              <input type="date" value={customRange.start} onChange={(e) => setCustomRange({...customRange, start: e.target.value})} />
+              <input
+                type="date"
+                value={customRange.start}
+                onChange={(e) => setCustomRange({ ...customRange, start: e.target.value })}
+              />
               <span className="to-text">→</span>
-              <input type="date" value={customRange.end} onChange={(e) => setCustomRange({...customRange, end: e.target.value})} />
+              <input
+                type="date"
+                value={customRange.end}
+                onChange={(e) => setCustomRange({ ...customRange, end: e.target.value })}
+              />
             </div>
           )}
 
@@ -412,6 +431,7 @@ export default function Orders() {
         </div>
       </div>
 
+      {/* Statistiques */}
       <div className="stats-grid-luxury">
         <div className="stat-card-luxury highlight">
           <div className="stat-icon period">
@@ -451,6 +471,7 @@ export default function Orders() {
         </div>
       </div>
 
+      {/* Liste des commandes */}
       {loading ? (
         <div className="loading-luxury">
           <Sparkles size={30} className="spinner-gold" />
@@ -464,122 +485,137 @@ export default function Orders() {
         </div>
       ) : (
         <div className="orders-grid-luxury">
-          {filteredOrders.map((order) => (
-            <div key={order._id} className={`order-card-luxury ${getStatusClass(order.status)}`}>
-              <div className="gold-top-border"></div>
-              
-              <div className="order-card-header">
-                <div className="order-id">
-                  {getModeIcon(order.mode, order.details)}
-                  <span className="id-number">#{order._id.slice(-6).toUpperCase()}</span>
-                  {order.fcmToken && (
-                    <span className="fcm-indicator" title="Client peut recevoir des notifications">
-                      <BellRing size={12} />
-                    </span>
-                  )}
-                </div>
-                <div className="order-time">
-                  <Clock size={12} />
-                  <span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-              </div>
+          {filteredOrders.map((order) => {
+            const isUpdating = updatingIds.has(order._id);
+            return (
+              <div key={order._id} className={`order-card-luxury ${getStatusClass(order.status)}`}>
+                <div className="gold-top-border"></div>
 
-              <div className="order-card-body">
-                <div className="order-origin">
-                  {getOrderOrigin(order)}
-                </div>
-
-                <div className="order-details-section">
-                  {getOrderDetails(order)}
-                </div>
-
-                <div className="items-list-luxury">
-                  {order.items.slice(0, 3).map((item: any, idx: number) => (
-                    <div key={idx} className="order-item">
-                      <span className="item-qty">{item.quantity || 1}×</span>
-                      <span className="item-name">{item.name}</span>
-                      {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
-                        <span className="item-accompaniment">({item.chosenAccompaniment})</span>
-                      )}
-                    </div>
-                  ))}
-                  {order.items.length > 3 && (
-                    <div className="more-items">+{order.items.length - 3} autre(s)</div>
-                  )}
-                </div>
-
-                <div className="order-total">
-                  <span className="total-label">Total</span>
-                  <span className="total-value">{parseFloat(order.total).toFixed(2)}€</span>
-                  {order.amountPaid > 0 && order.amountPaid < order.total && (
-                    <span className="deposit-badge">Acompte: {order.amountPaid.toFixed(2)}€</span>
-                  )}
-                </div>
-
-                {order.details?.deliveryService && (
-                  <div className="delivery-badge">
-                    <Truck size={12} />
-                    <span>{order.details.deliveryService}</span>
+                <div className="order-card-header">
+                  <div className="order-id">
+                    {getModeIcon(order.mode, order.details)}
+                    <span className="id-number">#{order._id.slice(-6).toUpperCase()}</span>
+                    {order.fcmToken && (
+                      <span className="fcm-indicator" title="Client peut recevoir des notifications">
+                        <BellRing size={12} />
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <div className="order-card-footer">
-                <div className={`status-pill-luxury ${getStatusClass(order.status)}`}>
-                  <span className="status-dot"></span>
-                  <span>{getStatusLabel(order.status)}</span>
+                  <div className="order-time">
+                    <Clock size={12} />
+                    <span>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
                 </div>
 
-                <div className="order-actions-luxury">
-                  {order.status === "pending" && (
-                    <button 
-                      className="action-btn cooking" 
-                      onClick={() => updateOrderStatus(order._id, "cooking")}
-                    >
-                      <Clock size={14} />
-                      <span>Cuisine</span>
-                    </button>
+                <div className="order-card-body">
+                  <div className="order-origin">
+                    {getOrderOrigin(order)}
+                  </div>
+
+                  <div className="order-details-section">
+                    {getOrderDetails(order)}
+                  </div>
+
+                  <div className="items-list-luxury">
+                    {order.items.slice(0, 3).map((item: any, idx: number) => (
+                      <div key={idx} className="order-item">
+                        <span className="item-qty">{item.quantity || 1}×</span>
+                        <span className="item-name">{item.name}</span>
+                        {item.chosenAccompaniment && item.chosenAccompaniment !== "Aucun" && (
+                          <span className="item-accompaniment">({item.chosenAccompaniment})</span>
+                        )}
+                      </div>
+                    ))}
+                    {order.items.length > 3 && (
+                      <div className="more-items">+{order.items.length - 3} autre(s)</div>
+                    )}
+                  </div>
+
+                  <div className="order-total">
+                    <span className="total-label">Total</span>
+                    <span className="total-value">{parseFloat(order.total).toFixed(2)}€</span>
+                    {order.amountPaid > 0 && order.amountPaid < order.total && (
+                      <span className="deposit-badge">Acompte: {order.amountPaid.toFixed(2)}€</span>
+                    )}
+                  </div>
+
+                  {order.details?.deliveryService && (
+                    <div className="delivery-badge">
+                      <Truck size={12} />
+                      <span>{order.details.deliveryService}</span>
+                    </div>
                   )}
-                  {order.status === "cooking" && (
-                    <button 
-                      className="action-btn done" 
-                      onClick={() => updateOrderStatus(order._id, "done")}
+                </div>
+
+                <div className="order-card-footer">
+                  <div className={`status-pill-luxury ${getStatusClass(order.status)}`}>
+                    <span className="status-dot"></span>
+                    <span>{getStatusLabel(order.status)}</span>
+                  </div>
+
+                  <div className="order-actions-luxury">
+                    {order.status === "pending" && (
+                      <button
+                        className="action-btn cooking"
+                        disabled={isUpdating}
+                        onClick={() => updateOrderStatus(order._id, "cooking")}
+                      >
+                        {isUpdating
+                          ? <span className="spinner-small" />
+                          : <Clock size={14} />
+                        }
+                        <span>Cuisine</span>
+                      </button>
+                    )}
+                    {order.status === "cooking" && (
+                      <button
+                        className="action-btn done"
+                        disabled={isUpdating}
+                        onClick={() => updateOrderStatus(order._id, "done")}
+                      >
+                        {isUpdating
+                          ? <span className="spinner-small" />
+                          : <CheckCircle size={14} />
+                        }
+                        <span>Terminer</span>
+                      </button>
+                    )}
+                    {order.status === "done" && (
+                      <button
+                        className="action-btn archive"
+                        disabled={isUpdating}
+                        onClick={() => updateOrderStatus(order._id, "archived")}
+                      >
+                        {isUpdating
+                          ? <span className="spinner-small" />
+                          : <Archive size={14} />
+                        }
+                        <span>Archiver</span>
+                      </button>
+                    )}
+                    <button
+                      className="action-btn icon-only"
+                      title="Envoyer notification personnalisée"
+                      onClick={() => {
+                        const message = prompt("Message personnalisé à envoyer au client:");
+                        if (message) {
+                          sendCustomNotification(order._id, "📢 Message du restaurant", message);
+                        }
+                      }}
                     >
-                      <CheckCircle size={14} />
-                      <span>Terminer</span>
+                      <Bell size={16} />
                     </button>
-                  )}
-                  {order.status === "done" && (
-                    <button 
-                      className="action-btn archive" 
-                      onClick={() => updateOrderStatus(order._id, "archived")}
-                    >
-                      <Archive size={14} />
-                      <span>Archiver</span>
+                    <button className="action-btn icon-only" title="Voir détails">
+                      <Eye size={16} />
                     </button>
-                  )}
-                  <button 
-                    className="action-btn icon-only" 
-                    title="Envoyer notification personnalisée"
-                    onClick={() => {
-                      const message = prompt("Message personnalisé à envoyer au client:");
-                      if (message) {
-                        sendCustomNotification(order._id, "📢 Message du restaurant", message);
-                      }
-                    }}
-                  >
-                    <Bell size={16} />
-                  </button>
-                  <button className="action-btn icon-only" title="Voir détails">
-                    <Eye size={16} />
-                  </button>
-                  <button className="action-btn icon-only" title="Imprimer">
-                    <Printer size={16} />
-                  </button>
+                    <button className="action-btn icon-only" title="Imprimer">
+                      <Printer size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -597,14 +633,14 @@ export default function Orders() {
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .toast-notification.success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
-        .toast-notification.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .toast-notification.info { background: linear-gradient(135deg, #3498db, #2980b9); }
-        
+        .toast-notification.error   { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .toast-notification.info    { background: linear-gradient(135deg, #3498db, #2980b9); }
+
         @keyframes slideIn {
           from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+          to   { transform: translateX(0);    opacity: 1; }
         }
-        
+
         .fcm-indicator {
           display: inline-flex;
           align-items: center;
@@ -614,7 +650,7 @@ export default function Orders() {
           padding: 2px 6px;
           border-radius: 12px;
         }
-        
+
         .spinner-small {
           width: 14px;
           height: 14px;
@@ -623,17 +659,19 @@ export default function Orders() {
           border-top-color: white;
           animation: spin 0.6s linear infinite;
           display: inline-block;
+          flex-shrink: 0;
         }
-        
+
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
-        
+
         .action-btn:disabled {
-          opacity: 0.7;
+          opacity: 0.6;
           cursor: not-allowed;
+          pointer-events: none;
         }
-        
+
         .order-details-section {
           background: rgba(0, 0, 0, 0.2);
           border-radius: 8px;
@@ -641,7 +679,7 @@ export default function Orders() {
           margin: 8px 0;
           font-size: 0.75rem;
         }
-        
+
         .detail-row {
           display: flex;
           align-items: center;
@@ -649,17 +687,17 @@ export default function Orders() {
           padding: 4px 0;
           color: rgba(255, 255, 255, 0.7);
         }
-        
+
         .detail-icon {
           color: #D4AF37;
           flex-shrink: 0;
         }
-        
+
         .delivery-fee {
           color: #D4AF37;
           font-weight: 500;
         }
-        
+
         .deposit-badge {
           display: inline-block;
           margin-left: 8px;
