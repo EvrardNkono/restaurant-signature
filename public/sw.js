@@ -55,25 +55,35 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
+  // ⚠️ IGNORER TOUTES LES MÉTHODES QUI NE SONT PAS GET
+  if (event.request.method !== 'GET') {
+    console.log('🚫 SW: Ignorer méthode', event.request.method, url.pathname);
+    return;
+  }
+  
   // Ne pas mettre en cache les appels API
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(event.request));
+    console.log('🚫 SW: Ignorer API', url.pathname);
     return;
   }
   
   // Ne pas mettre en cache les requêtes admin
   if (url.pathname.startsWith('/admin')) {
-    event.respondWith(fetch(event.request));
+    console.log('🚫 SW: Ignorer admin', url.pathname);
+    return;
+  }
+  
+  // Ignorer les requêtes vers le backend Vercel
+  if (url.hostname.includes('vercel.app') && url.pathname.startsWith('/api/')) {
+    console.log('🚫 SW: Ignorer backend Vercel', url.href);
     return;
   }
   
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
-        // Retourner la version en cache immédiatement
         const fetchPromise = fetch(event.request)
           .then(networkResponse => {
-            // Mettre à jour le cache avec la nouvelle version
             if (networkResponse && networkResponse.status === 200) {
               const responseToCache = networkResponse.clone();
               caches.open(DYNAMIC_CACHE)
@@ -84,10 +94,9 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch(() => {
-            console.log('⚠️ SW: Hors ligne, utilisation du cache');
+            console.log('⚠️ SW: Hors ligne, utilisation du cache pour', url.pathname);
           });
         
-        // Retourner la réponse cachée ou la requête réseau
         return cachedResponse || fetchPromise;
       })
   );
