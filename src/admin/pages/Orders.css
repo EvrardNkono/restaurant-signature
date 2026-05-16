@@ -701,3 +701,31 @@
     flex-wrap: wrap;
   }
 }
+
+/* Assurer que la page peut scroller correctement */
+.orders-page {
+  min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  padding-bottom: 100px; /* Espace en bas */
+}
+
+.orders-grid-luxury {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+/* S'assurer que le dernier élément est visible */
+.order-card-luxury:last-child {
+  margin-bottom: 50px;
+}
+
+/* Pour le conteneur principal */
+#root, .app-container {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+}
