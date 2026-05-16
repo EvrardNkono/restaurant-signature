@@ -9,12 +9,6 @@ const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBL
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
-// Fonction pour ouvrir la page admin
-const openAdminPage = () => {
-  window.focus();
-  window.location.href = '/admin';
-};
-
 export default function AdminNotifications() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -24,17 +18,35 @@ export default function AdminNotifications() {
     const messaging = getMessaging(app);
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('📨 Message foreground reçu:', payload);
+      
+      // Vérifier si l'API Notification est disponible
+      if (!('Notification' in window)) return;
+      
       if (Notification.permission === 'granted') {
-        const notification = new Notification(payload.notification?.title || 'Nouvelle commande !', {
+        // Créer la notification
+        const notificationTitle = payload.notification?.title || 'Nouvelle commande !';
+        const notificationOptions = {
           body: payload.notification?.body || '',
-          icon: '/icons/icon-192x192.png'
-        });
+          icon: '/icons/icon-192x192.png',
+          data: {
+            url: '/admin',
+            orderId: payload.data?.orderId || null
+          }
+        };
         
-        // 👇 AJOUT : Rediriger vers /admin quand on clique sur la notification
+        const notification = new Notification(notificationTitle, notificationOptions);
+        
+        // Gestion du clic sur la notification
         notification.onclick = (event) => {
           event.preventDefault();
-          window.focus();
-          window.location.href = '/admin';
+          notification.close();
+          
+          // Ouvrir ou focus sur la page admin
+          if (window.location.pathname !== '/admin') {
+            window.location.href = '/admin';
+          } else {
+            window.focus();
+          }
         };
       }
     });

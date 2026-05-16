@@ -66,17 +66,20 @@ export default function Orders() {
   }, []);
 
   const fetchOrders = async () => {
-    try {
-      const res = await axios.get(`${BASE_API}/orders`);
-      const data = res.data.data.reverse(); 
-      setOrders(data);
-      applyFilter(data, activeFilter, customRange);
-    } catch (err) {
-      console.error("Erreur chargement:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await axios.get(`${BASE_API}/orders`);
+    // Au lieu de .reverse(), on trie par date décroissante
+    const data = res.data.data.sort((a: any, b: any) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    setOrders(data);
+    applyFilter(data, activeFilter, customRange);
+  } catch (err) {
+    console.error("Erreur chargement:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchOrders();
