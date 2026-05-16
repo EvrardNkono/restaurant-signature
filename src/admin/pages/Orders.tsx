@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   ShoppingBag, Clock, CheckCircle, AlertCircle, Eye, 
   Printer, Utensils, Package, Download, Calendar, Wallet, ListOrdered, Archive,
-  Truck, Sparkles, Bell, BellRing, Phone, Mail, MapPin, Clock as ClockIcon
+  Truck, Sparkles, Bell, BellRing, Phone, Mail, MapPin, Clock as ClockIcon, Trash2
 } from "lucide-react";
 import axios from "axios";
 import "./Orders.css";
@@ -25,6 +25,13 @@ export default function Orders() {
   const [toast, setToast] = useState<{ show: boolean; message: string; type: string }>({
     show: false, message: "", type: ""
   });
+
+  const [confirmModal, setConfirmModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({ show: false, title: "", message: "", onConfirm: () => {} });
 
   // Refs pour éviter les closures périmées dans setInterval
   const activeFilterRef = useRef(activeFilter);
@@ -155,6 +162,47 @@ export default function Orders() {
       console.error("❌ Erreur notification perso:", err);
       showToast(`❌ Erreur: ${err.message}`, "error");
     }
+  };
+
+  const deleteArchivedOrders = async () => {
+    const archived = orders.filter(o => o.status === "archived");
+    if (archived.length === 0) {
+      showToast("Aucune commande archivée à supprimer", "info");
+      return;
+    }
+    setConfirmModal({
+      show: true,
+      title: "Supprimer les commandes archivées",
+      message: `Vous allez supprimer définitivement ${archived.length} commande(s) archivée(s). Cette action est irréversible.`,
+      onConfirm: async () => {
+        setConfirmModal(m => ({ ...m, show: false }));
+        try {
+          await Promise.all(archived.map(o => axios.delete(`${BASE_API}/orders/${o._id}`)));
+          showToast(`✅ ${archived.length} commande(s) archivée(s) supprimée(s)`, "success");
+          fetchOrders();
+        } catch (err: any) {
+          showToast(`❌ Erreur: ${err.message}`, "error");
+        }
+      }
+    });
+  };
+
+  const deleteAllOrders = async () => {
+    setConfirmModal({
+      show: true,
+      title: "⚠️ Supprimer TOUTES les commandes",
+      message: `Vous allez supprimer définitivement les ${orders.length} commande(s) de la base de données. Cette action est IRRÉVERSIBLE.`,
+      onConfirm: async () => {
+        setConfirmModal(m => ({ ...m, show: false }));
+        try {
+          await Promise.all(orders.map(o => axios.delete(`${BASE_API}/orders/${o._id}`)));
+          showToast(`✅ Toutes les commandes ont été supprimées`, "success");
+          fetchOrders();
+        } catch (err: any) {
+          showToast(`❌ Erreur: ${err.message}`, "error");
+        }
+      }
+    });
   };
 
   const downloadExcel = () => {
@@ -373,6 +421,49 @@ export default function Orders() {
         </div>
       )}
 
+      {/* Modale de confirmation */}
+      {confirmModal.show && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 20000, padding: "20px"
+        }}>
+          <div style={{
+            background: "white", borderRadius: "20px", padding: "32px",
+            maxWidth: "440px", width: "100%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            border: "1px solid rgba(212,175,55,0.3)"
+          }}>
+            <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.2rem", color: "#2D2422", marginBottom: "12px" }}>
+              {confirmModal.title}
+            </h3>
+            <p style={{ color: "#6B5B57", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "24px" }}>
+              {confirmModal.message}
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setConfirmModal(m => ({ ...m, show: false }))}
+                style={{
+                  padding: "10px 20px", borderRadius: "10px", border: "1px solid #ddd",
+                  background: "white", color: "#6B5B57", cursor: "pointer", fontWeight: 600
+                }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                style={{
+                  padding: "10px 20px", borderRadius: "10px", border: "none",
+                  background: "#e74c3c", color: "white", cursor: "pointer", fontWeight: 700
+                }}
+              >
+                Confirmer la suppression
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="orders-header-luxury">
         <div className="header-seal-terracotta">
@@ -427,6 +518,14 @@ export default function Orders() {
           <button className="btn-download-gold" onClick={downloadExcel}>
             <Download size={18} />
             <span>Exporter Excel</span>
+          </button>
+          <button className="btn-delete-archived" onClick={deleteArchivedOrders}>
+            <Trash2 size={18} />
+            <span>Vider archives</span>
+          </button>
+          <button className="btn-delete-all" onClick={deleteAllOrders}>
+            <Trash2 size={18} />
+            <span>Tout effacer</span>
           </button>
         </div>
       </div>

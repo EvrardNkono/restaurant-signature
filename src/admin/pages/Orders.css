@@ -809,10 +809,45 @@
   }
 }
 
-/* Fix conteneur admin qui compresse les cartes */
-.admin-page-container {
-  overflow: visible !important;
+/* === BOUTONS SUPPRESSION === */
+.btn-delete-archived {
+  background: rgba(231, 76, 60, 0.12) !important;
+  color: #e74c3c !important;
+  border: 1.5px solid rgba(231, 76, 60, 0.4) !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
 }
-.admin-main-content {
-  overflow: visible !important;
+.btn-delete-archived:hover {
+  background: #e74c3c !important;
+  color: white !important;
+  border-color: #e74c3c !important;
+}
+
+.btn-delete-all {
+  background: rgba(192, 57, 43, 0.12) !important;
+  color: #c0392b !important;
+  border: 1.5px solid rgba(192, 57, 43, 0.5) !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  white-space: nowrap !important;
+}
+.btn-delete-all:hover {
+  background: #c0392b !important;
+  color: white !important;
+  border-color: #c0392b !important;
 }
