@@ -1,9 +1,7 @@
-/* footer.css */
-
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Poppins:wght@200;300;400&display=swap');
 
 .footer {
-  background-color: #2D2422; /* Terracotta très sombre / Chocolat */
+  background-color: #2D2422;
   color: #FCF9F5;
   padding: 120px 10% 60px;
   position: relative;
@@ -119,7 +117,7 @@
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* --- NAVIGATION & HIGHLIGHTS --- */
+/* --- NAVIGATION --- */
 .footer-label {
   font-family: 'Playfair Display', serif;
   color: #D4AF37;
@@ -140,8 +138,14 @@
   background-color: #D4AF37;
 }
 
-.nav-list { list-style: none; padding: 0; }
-.nav-list li { margin-bottom: 22px; }
+.nav-list { 
+  list-style: none; 
+  padding: 0; 
+}
+
+.nav-list li { 
+  margin-bottom: 22px; 
+}
 
 .nav-list a {
   color: #FCF9F5;
@@ -157,17 +161,16 @@
   padding-left: 10px;
 }
 
-/* Mise en avant : Privatisation */
+/* Privatisation */
 .nav-link-highlight {
   opacity: 0.9 !important;
-  color: var(--gold-light);
   font-style: italic;
   font-family: 'Playfair Display', serif;
   font-size: 1.1rem !important;
   border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-/* Mise en avant : Réservations (Style Bouton) */
+/* Réservations */
 .nav-link-cta {
   opacity: 1 !important;
   background: rgba(212, 175, 55, 0.1);
@@ -185,7 +188,7 @@
 .nav-link-cta:hover {
   background: #D4AF37 !important;
   color: #2D2422 !important;
-  padding-left: 20px !important; /* On annule le padding-left de l'animation globale */
+  padding-left: 20px !important;
 }
 
 /* --- CONTACT --- */
@@ -196,12 +199,44 @@
   align-items: flex-start;
 }
 
-.gold-text { color: #D4AF37; margin-top: 4px; }
+.gold-text { 
+  color: #D4AF37; 
+  margin-top: 4px; 
+}
 
 .contact-link {
   text-decoration: none;
   color: inherit;
   transition: 0.3s;
+}
+
+.contact-link:hover {
+  color: #D4AF37;
+}
+
+/* --- HORAIRES --- */
+.hours-details {
+  line-height: 1.6;
+}
+
+.open-today {
+  color: #4ade80;
+  font-weight: 500;
+}
+
+.closed-today {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.hours-list {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hours-list p {
+  margin: 4px 0;
 }
 
 /* --- FOOTER BOTTOM --- */
@@ -220,11 +255,36 @@
   opacity: 0.4;
 }
 
-.designer-credit span { color: #D4AF37; font-weight: 600; }
+.designer-credit span { 
+  color: #D4AF37; 
+  font-weight: 600; 
+}
 
+/* --- RESPONSIVE --- */
 @media (max-width: 992px) {
-  .footer-container { grid-template-columns: 1fr; text-align: center; gap: 80px; }
-  .brand-description { margin: 0 auto 35px; }
-  .footer-socials, .contact-item { justify-content: center; }
-  .footer-label::after { left: 50%; transform: translateX(-50%); }
+  .footer-container { 
+    grid-template-columns: 1fr; 
+    text-align: center; 
+    gap: 80px; 
+  }
+  
+  .brand-description { 
+    margin: 0 auto 35px; 
+  }
+  
+  .footer-socials, 
+  .contact-item { 
+    justify-content: center; 
+  }
+  
+  .footer-label::after { 
+    left: 50%; 
+    transform: translateX(-50%); 
+  }
+  
+  .contact-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }

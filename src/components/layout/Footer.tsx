@@ -7,8 +7,47 @@ export default function Footer() {
   // Fonction pour ouvrir le popup flottant à distance
   const handleReservationClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    // On émet l'événement que le composant FloatingOrder écoute
     window.dispatchEvent(new CustomEvent('openReservation'));
+  };
+
+  // Horaires d'ouverture
+  const getOpeningHours = () => {
+    const days = [
+      { name: "Lundi", open: false, lunch: null, dinner: null },
+      { name: "Mardi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
+      { name: "Mercredi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
+      { name: "Jeudi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
+      { name: "Vendredi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
+      { name: "Samedi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "00h30" } },
+      { name: "Dimanche", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "00h30" } }
+    ];
+    return days;
+  };
+
+  const openingHours = getOpeningHours();
+  const today = new Date().getDay();
+  const todayIndex = today === 0 ? 6 : today - 1;
+  const todaySchedule = openingHours[todayIndex];
+
+  // Fonction pour formater l'affichage des horaires du jour
+  const getTodayHoursText = () => {
+    if (!todaySchedule.open) return "Aujourd'hui : Fermé";
+    
+    const lunchText = todaySchedule.lunch 
+      ? `${todaySchedule.lunch.start} - ${todaySchedule.lunch.end}` 
+      : "";
+    const dinnerText = todaySchedule.dinner 
+      ? `${todaySchedule.dinner.start} - ${todaySchedule.dinner.end}` 
+      : "";
+    
+    if (lunchText && dinnerText) {
+      return `Aujourd'hui : ${lunchText} / ${dinnerText}`;
+    } else if (lunchText) {
+      return `Aujourd'hui : ${lunchText}`;
+    } else if (dinnerText) {
+      return `Aujourd'hui : ${dinnerText}`;
+    }
+    return "Aujourd'hui : Fermé";
   };
 
   return (
@@ -20,7 +59,6 @@ export default function Footer() {
       </div>
 
       <div className="footer-container">
-        {/* Branding - Raffiné */}
         <div className="footer-brand">
           <h2 className="brand-title">
             Restaurant <span className="gold-italic">Signature</span>
@@ -43,7 +81,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Navigation */}
         <div className="footer-nav">
           <h4 className="footer-label">Exploration</h4>
           <ul className="nav-list">
@@ -66,7 +103,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Infos - Icônes fines */}
         <div className="footer-contact">
           <h4 className="footer-label">Rendez-vous</h4>
           <div className="contact-item">
@@ -75,7 +111,16 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <Clock size={18} className="gold-text" strokeWidth={1} />
-            <p>Mardi — Dimanche : 12h - 23h</p>
+            <div className="hours-details">
+              <p className={!todaySchedule.open ? "closed-today" : "open-today"}>
+                {getTodayHoursText()}
+              </p>
+              <div className="hours-list">
+                <p><span className="gold-text">Mardi - Vendredi</span> : 11h30 - 14h30 / 18h30 - 23h30</p>
+                <p><span className="gold-text">Samedi - Dimanche</span> : 11h30 - 14h30 / 18h30 - 00h30</p>
+                <p><span className="gold-text">Lundi</span> : Fermé</p>
+              </div>
+            </div>
           </div>
           <div className="contact-item">
             <Phone size={18} className="gold-text" strokeWidth={1} />
