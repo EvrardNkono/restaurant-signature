@@ -17,7 +17,6 @@ export default function Orders() {
   const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRevenue, setTotalRevenue] = useState(0);
-  const [notifyingOrders, setNotifyingOrders] = useState<Set<string>>(new Set());
   
   const [activeFilter, setActiveFilter] = useState("365");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
@@ -86,39 +85,43 @@ export default function Orders() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const now = new Date().toISOString();
-    setNotifyingOrders(prev => new Set(prev).add(orderId));
     
     try {
+      // Mise à jour optimiste de l'UI
       setFilteredOrders(prev => 
         prev.map(o => o._id === orderId ? { ...o, status: newStatus, updatedAt: now } : o)
       );
       
+      // 1. Mettre à jour le statut dans la base de données
       await axios.put(`${BASE_API}/orders/${orderId}`, { status: newStatus, updatedAt: now });
       
-      const notificationResult = await axios.post(`${BASE_API}/notifications/order-status`, {
-        orderId,
-        newStatus
-      });
-      
-      if (notificationResult.data.success) {
-        showToast(`✅ Notification envoyée au client (statut: ${getStatusLabel(newStatus)})`, "success");
-      } else {
-        if (notificationResult.data.message !== 'Pas de token client pour cette commande') {
-          showToast(`⚠️ Client non notifié: ${notificationResult.data.message}`, "info");
+      // 2. Envoyer la notification au client
+      try {
+        const notificationResult = await axios.post(`${BASE_API}/notifications/order-status`, {
+          orderId,
+          newStatus
+        });
+        
+        if (notificationResult.data.success) {
+          showToast(`✅ Notification envoyée au client (statut: ${getStatusLabel(newStatus)})`, "success");
+          console.log(`📱 Notification client envoyée pour commande ${orderId}`);
+        } else {
+          console.warn(`⚠️ Notification non envoyée: ${notificationResult.data.message}`);
+          if (notificationResult.data.message !== 'Pas de token client pour cette commande') {
+            showToast(`⚠️ Client non notifié: ${notificationResult.data.message}`, "info");
+          }
         }
+      } catch (notifError) {
+        console.warn("Erreur envoi notification:", notifError);
       }
       
+      // Rafraîchir la liste
       await fetchOrders();
+      
     } catch (err: any) {
       console.error("❌ Erreur update statut:", err);
       showToast(`❌ Erreur: ${err.response?.data?.message || err.message}`, "error");
       await fetchOrders();
-    } finally {
-      setNotifyingOrders(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(orderId);
-        return newSet;
-      });
     }
   };
 
@@ -271,7 +274,6 @@ export default function Orders() {
     );
   };
 
-  // Fonction pour afficher les détails spécifiques selon le mode
   const getOrderDetails = (order: any) => {
     if (order.mode === "delivery") {
       return (
@@ -340,7 +342,6 @@ export default function Orders() {
       );
     }
     
-    // Sur place - afficher email si disponible
     if (order.customer?.email && order.details?.paymentStatus === "pending_stripe") {
       return (
         <div className="order-details-onsite">
@@ -488,7 +489,6 @@ export default function Orders() {
                   {getOrderOrigin(order)}
                 </div>
 
-                {/* AFFICHAGE DES DÉTAILS SPÉCIFIQUES (TÉLÉPHONE, EMAIL, ETC.) */}
                 <div className="order-details-section">
                   {getOrderDetails(order)}
                 </div>
@@ -535,48 +535,27 @@ export default function Orders() {
                     <button 
                       className="action-btn cooking" 
                       onClick={() => updateOrderStatus(order._id, "cooking")}
-                      disabled={notifyingOrders.has(order._id)}
                     >
-                      {notifyingOrders.has(order._id) ? (
-                        <span className="spinner-small"></span>
-                      ) : (
-                        <>
-                          <Clock size={14} />
-                          <span>Cuisine</span>
-                        </>
-                      )}
+                      <Clock size={14} />
+                      <span>Cuisine</span>
                     </button>
                   )}
                   {order.status === "cooking" && (
                     <button 
                       className="action-btn done" 
                       onClick={() => updateOrderStatus(order._id, "done")}
-                      disabled={notifyingOrders.has(order._id)}
                     >
-                      {notifyingOrders.has(order._id) ? (
-                        <span className="spinner-small"></span>
-                      ) : (
-                        <>
-                          <CheckCircle size={14} />
-                          <span>Terminer</span>
-                        </>
-                      )}
+                      <CheckCircle size={14} />
+                      <span>Terminer</span>
                     </button>
                   )}
                   {order.status === "done" && (
                     <button 
                       className="action-btn archive" 
                       onClick={() => updateOrderStatus(order._id, "archived")}
-                      disabled={notifyingOrders.has(order._id)}
                     >
-                      {notifyingOrders.has(order._id) ? (
-                        <span className="spinner-small"></span>
-                      ) : (
-                        <>
-                          <Archive size={14} />
-                          <span>Archiver</span>
-                        </>
-                      )}
+                      <Archive size={14} />
+                      <span>Archiver</span>
                     </button>
                   )}
                   <button 
@@ -655,7 +634,6 @@ export default function Orders() {
           cursor: not-allowed;
         }
         
-        /* Nouveaux styles pour les détails */
         .order-details-section {
           background: rgba(0, 0, 0, 0.2);
           border-radius: 8px;
