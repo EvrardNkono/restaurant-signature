@@ -52,7 +52,6 @@ interface Plat {
   allowSupplements: boolean; 
   accompaniments: Accompaniment[]; 
   supplements: Supplement[];
-  // Ajout de la structure d'offre conformément au menu jour
   offer?: {
     enabled: boolean;
     requiredQuantity: number;
@@ -189,7 +188,6 @@ export default function MenuSoir() {
   const handleRemoveOne = (platId: string) => {
   const itemsInCart = cart.filter((i) => i.id === platId);
   if (itemsInCart.length > 0) {
-    // On retire le dernier ajouté (LIFO) pour respecter la logique de personnalisation
     const lastItem = itemsInCart[itemsInCart.length - 1];
     removeFromCart(lastItem.cartItemId);
   }
@@ -201,15 +199,12 @@ const handleAddClick = (plat: Plat) => {
     return;
   }
 
-  // 1. On récupère les infos
   const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
   const canHaveSupps = plat.allowSupplements || (plat.supplements && plat.supplements.length > 0);
   
-  // 2. On calcule si le quota est atteint AVEC ce clic (+1)
   const countInCart = getItemQuantity(plat._id); 
   const willReachOffer = plat.offer?.enabled && (countInCart + 1) >= plat.offer.requiredQuantity;
 
-  // 3. Création de l'objet temporaire
   const newItem: CartItem = {
     cartItemId: `${plat._id}-${Date.now()}`,
     id: plat._id,
@@ -224,13 +219,10 @@ const handleAddClick = (plat: Plat) => {
     offer: plat.offer 
   };
 
-  // 4. LA CONDITION CLÉ : 
-  // On ouvre si : il y a des accs OU des suppléments OU si on atteint le quota de l'offre
   if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
     setTempItem(newItem);
     scrollToDrawer(plat._id);
   } else {
-    // Sinon, ajout direct au panier
     const result = addToCart(newItem, "SOIR");
     if (result === "LOCK_ERROR") {
       alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
@@ -275,19 +267,14 @@ const handleAddClick = (plat: Plat) => {
   const handleConfirmAddition = () => {
   if (!tempItem) return;
 
-  // Récupération de l'objet plat d'origine pour vérifier l'offre
   const platOrigine = platsDuSoir.find(p => p._id === tempItem.id);
   
   let itemToSave = { ...tempItem };
 
-  // LOGIQUE DE PRIX : Si l'offre est atteinte, on peut marquer cet item 
-  // pour que le CartContext sache qu'il doit appliquer le prix spécial.
   if (platOrigine?.offer?.enabled) {
     const countInCart = cart.filter(item => item.id === tempItem.id).length;
     if ((countInCart + 1) >= platOrigine.offer.requiredQuantity) {
-      // Option A : On change le prix ici (mais attention à la 4ème bière)
-      // La meilleure pratique est de laisser le CartContext calculer le total global
-      // en cherchant les items de type "SOIR" qui ont une "offer"
+      // Logique d'offre gérée par CartContext
     }
   }
 
@@ -406,7 +393,6 @@ const handleAddClick = (plat: Plat) => {
                   <div className="menu-image-container">
                     {currentStatus && <OrderStatusBadge status={currentStatus} />}
 
-                    {/* RUBAN OFFRE (BIÈRES/FORMULES) */}
                     {plat.offer?.enabled && (
                       <div className="luxury-offer-ribbon">
                         <Sparkles size={10} className="ribbon-icon" />
@@ -415,7 +401,7 @@ const handleAddClick = (plat: Plat) => {
                     )}
 
                     {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-soir">Signature</div>}
-                    <div className="price-tag-evening"><span>{plat.price}€</span></div>
+                    <div className="price-tag-evening"><span>{plat.price.toFixed(2)}€</span></div>
                   </div>
 
                   <div className="details-container-soir">
@@ -426,42 +412,40 @@ const handleAddClick = (plat: Plat) => {
 
                     <div className="card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
   
-  {/* BOUTON AJOUTER (Principal) */}
-  <button 
-    className={`btn-add-soir ${isAnyDrawerOpen && !isExpanding ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
-    onClick={() => handleAddClick(plat)}
-    style={{ width: '100%' }}
-  >
-    {isExpanding ? "Configuration..." : (
-      <>
-        <PlusCircle size={18} style={{ marginRight: '8px' }} />
-        {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
-      </>
-    )}
-  </button>
+                      <button 
+                        className={`btn-add-soir ${isAnyDrawerOpen && !isExpanding ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
+                        onClick={() => handleAddClick(plat)}
+                        style={{ width: '100%' }}
+                      >
+                        {isExpanding ? "Configuration..." : (
+                          <>
+                            <PlusCircle size={18} style={{ marginRight: '8px' }} />
+                            {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
+                          </>
+                        )}
+                      </button>
 
-  {/* BOUTON RETIRER (Visible uniquement si déjà dans le panier) */}
-  {quantityInCart > 0 && !isExpanding && (
-    <button 
-      className="btn-remove-quick-soir"
-      onClick={() => handleRemoveOne(plat._id)}
-      style={{
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        padding: '10px',
-        fontSize: '0.8rem',
-        fontWeight: '700',
-        textTransform: 'uppercase'
-      }}
-    >
-      <MinusCircle size={18} />
-      <span>Retirer un article</span>
-    </button>
-  )}
-</div>
+                      {quantityInCart > 0 && !isExpanding && (
+                        <button 
+                          className="btn-remove-quick-soir"
+                          onClick={() => handleRemoveOne(plat._id)}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '10px',
+                            fontSize: '0.8rem',
+                            fontWeight: '700',
+                            textTransform: 'uppercase'
+                          }}
+                        >
+                          <MinusCircle size={18} />
+                          <span>Retirer un article</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* TIROIR DE PERSONNALISATION / OFFRE */}
@@ -477,37 +461,30 @@ const handleAddClick = (plat: Plat) => {
 
                       <div className="drawer-body-scroll">
                         
-                        {/* AFFICHAGE DE L'OFFRE ACTIVÉE DANS LE TIROIR */}
-{plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
-  const totalQtyAfterAdding = quantityInCart + 1;
-  const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
-  const reste = totalQtyAfterAdding % plat.offer.requiredQuantity;
-  const prixTotal = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
-
-  // Calcul du prix sans l'offre
-const prixNormal = totalQtyAfterAdding * plat.price;
-// Calcul de l'économie (Différence entre prix normal et prix promo)
-const economie = prixNormal - prixTotal;
-  return (
-    <div className="drawer-section offer-activation-zone">
-  <div className="offer-congrats">
-    <Sparkles size={18} className="ribbon-icon" />
-    <span>Offre Signature Activée !</span>
-  </div>
-  
-  <p className="offer-details">
-    Vos <strong>{totalQtyAfterAdding} {plat.name}</strong> passent à <strong>{prixTotal.toFixed(2)}€</strong>
-  </p>
-
-  {/* Affichage de l'économie */}
-  {economie > 0 && (
-    <p className="offer-subtext" style={{ color: '#4ade80', fontWeight: 'bold', marginTop: '5px' }}>
-      Vous économisez immédiatement {economie.toFixed(2)}€
-    </p>
-  )}
-</div>
-  );
-})()}
+                        {plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
+                          const totalQtyAfterAdding = quantityInCart + 1;
+                          const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
+                          const reste = totalQtyAfterAdding % plat.offer.requiredQuantity;
+                          const prixTotal = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                          const prixNormal = totalQtyAfterAdding * plat.price;
+                          const economie = prixNormal - prixTotal;
+                          return (
+                            <div className="drawer-section offer-activation-zone">
+                              <div className="offer-congrats">
+                                <Sparkles size={18} className="ribbon-icon" />
+                                <span>Offre Signature Activée !</span>
+                              </div>
+                              <p className="offer-details">
+                                Vos <strong>{totalQtyAfterAdding} {plat.name}</strong> passent à <strong>{prixTotal.toFixed(2)}€</strong>
+                              </p>
+                              {economie > 0 && (
+                                <p className="offer-subtext" style={{ color: '#4ade80', fontWeight: 'bold', marginTop: '5px' }}>
+                                  Vous économisez immédiatement {economie.toFixed(2)}€
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {(plat.accompaniments?.filter(a => a.active).length || 0) > 0 && (
                           <div className="drawer-section">
@@ -532,7 +509,7 @@ const economie = prixNormal - prixTotal;
                                   <div key={supp._id} className="supp-card-mini">
                                     <div className="supp-mini-info">
                                       <span className="supp-mini-name">{supp.name}</span>
-                                      <span className="supp-mini-price">+{supp.price}€</span>
+                                      <span className="supp-mini-price">+{supp.price.toFixed(2)}€</span>
                                     </div>
                                     <div className="supp-actions-wrapper">
                                       {count > 0 && (
@@ -570,7 +547,7 @@ const economie = prixNormal - prixTotal;
                       </div>
                       <div className="back-title-group">
                         <h4>{plat.name}</h4>
-                        <span className="back-price-soir">{plat.price}€</span>
+                        <span className="back-price-soir">{plat.price.toFixed(2)}€</span>
                       </div>
                     </div>
                     <div className="gold-separator-small"></div>
