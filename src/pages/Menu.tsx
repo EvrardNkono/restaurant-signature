@@ -11,6 +11,7 @@ import {
    Tv,  
 } from "lucide-react";
 import "./menu.css";
+import BillPopup from "../components/BillPopup"; // ← AJOUT
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -198,6 +199,9 @@ export default function Menu() {
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
 
+  // ─── AJOUT : état bill pending pour bloquer les commandes ───
+  const [hasPendingBill, setHasPendingBill] = useState(false);
+
   const isAnyDrawerOpen = selectingAccId !== null;
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
@@ -296,17 +300,14 @@ export default function Menu() {
   // NETTOYAGE DU PANIER QUAND COMMANDE VIENT D'ÊTRE ARCHIVÉE
   // ============================================
   useEffect(() => {
-    // Trouver une commande archivée depuis moins de 5 secondes
     const now = Date.now();
     const justArchivedOrder = activeOrders.find((order: any) => {
       if (order.status !== "archived") return false;
       const archivedDate = new Date(order.updatedAt || order.createdAt).getTime();
-      return (now - archivedDate) < 5000; // Archivée dans les 5 dernières secondes
+      return (now - archivedDate) < 5000;
     });
     
     if (justArchivedOrder && cart.length > 0) {
-      console.log("🗑️ Commande fraîchement archivée, vidage du panier...");
-      // Vider tout le panier
       cart.forEach((item: any) => {
         removeFromCart(item.cartItemId);
       });
@@ -358,6 +359,12 @@ export default function Menu() {
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
+    // ─── BLOCAGE si une addition est en attente ───
+    if (hasPendingBill) {
+      showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
+      return;
+    }
+
     // Si un autre drawer est ouvert, on le ferme d'abord
     if (isAnyDrawerOpen && selectingAccId !== plat._id) {
       setSelectingAccId(null);
@@ -628,12 +635,10 @@ export default function Menu() {
               const status = orderMatch.status;
               const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
               const now = Date.now();
-              // Exclure archived et done trop vieux
               if (status !== "archived" && !(status === "done" && now - lastUpdate > 600000)) {
                 currentStatus = status;
               }
             }
-            // Seulement si PAS de commande associée ET produit dans panier
             if (!orderMatch && quantityInCart > 0) currentStatus = "in_cart";
 
             return (
@@ -677,9 +682,9 @@ export default function Menu() {
                       </div>
                       
                       <div className="price-chip">
-  <span className="price-symbol">€</span>
-  <span className="price-amount">{plat.price.toFixed(2)}</span>
-</div>
+                        <span className="price-symbol">€</span>
+                        <span className="price-amount">{plat.price.toFixed(2)}</span>
+                      </div>
                       
                       <div className="card-actions-floating">
                         <button 
@@ -956,7 +961,9 @@ export default function Menu() {
         )}
       </div>
 
-      
+      {/* ─── POPUP ADDITION (polling toutes les 10s, bloque si pending) ─── */}
+      <BillPopup onBillPending={setHasPendingBill} />
+
     </section>
   );
 }

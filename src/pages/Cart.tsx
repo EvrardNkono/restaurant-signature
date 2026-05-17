@@ -6,7 +6,8 @@ import {
   Bike, 
   Trash2, 
   ShoppingBag,
-  Sparkles
+  Sparkles,
+  UtensilsCrossed
 } from "lucide-react"; 
 import axios from "axios";
 import { getMessaging, getToken } from "firebase/messaging";
@@ -14,31 +15,27 @@ import { app } from "../services/firebase";
 
 import "./cart.css";
 
-// Configuration de l'URL API
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
-// Clé VAPID pour FCM
 const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
 
-// Types pour les services de livraison
 type DeliveryService = "signature" | null;
 
 export default function Cart() {
-  // États de base
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
   const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in");
+  
+  // ⚠️ payNow n'est plus utilisé pour dine_in — gardé uniquement pour take_away
   const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { cart, removeFromCart, getCartTotal, getCartSavings } = useCart();
   
-  // ÉTATS DES TABLES
   const [tables, setTables] = useState<any[]>([]);
   const [selectedTable, setSelectedTable] = useState("");
   
-  // États Formulaire
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -49,27 +46,24 @@ export default function Cart() {
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
 
-  // ÉTATS LIVRAISON
   const [selectedDeliveryService, setSelectedDeliveryService] = useState<DeliveryService>(null);
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string, service: string} | null>(null);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
-  // Configuration des frais de livraison
   const deliveryFees = {
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
-  // SAUVEGARDE DU TOKEN FCM
+  // ─── Détermine si c'est une "tab ouverte" (sur place, assis à une table) ───
+  const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in";
+
   useEffect(() => {
     const saveFcmToken = async () => {
       if (Notification.permission === 'granted') {
         try {
           const messaging = getMessaging(app);
           const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-          if (token) {
-            localStorage.setItem('fcm_client_token', token);
-            console.log('✅ Token FCM sauvegardé:', token);
-          }
+          if (token) localStorage.setItem('fcm_client_token', token);
         } catch (e) {
           console.error('❌ Erreur récupération token FCM:', e);
         }
@@ -79,10 +73,7 @@ export default function Cart() {
           try {
             const messaging = getMessaging(app);
             const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-            if (token) {
-              localStorage.setItem('fcm_client_token', token);
-              console.log('✅ Token FCM sauvegardé après permission:', token);
-            }
+            if (token) localStorage.setItem('fcm_client_token', token);
           } catch (e) {
             console.error('❌ Erreur récupération token FCM:', e);
           }
@@ -92,7 +83,6 @@ export default function Cart() {
     saveFcmToken();
   }, []);
 
-  // CHARGEMENT DES TABLES
   useEffect(() => {
     const fetchTables = async () => {
       try {
@@ -107,7 +97,6 @@ export default function Cart() {
     fetchTables();
   }, []);
 
-  // GESTION DU TEMPS MINIMUM (Livraison +90min)
   useEffect(() => {
     const updateMinTime = () => {
       const now = new Date();
@@ -123,7 +112,6 @@ export default function Cart() {
     return () => clearInterval(interval);
   }, [deliveryTime]);
 
-  // RÉINITIALISATION DES MODES
   useEffect(() => {
     if (orderMode !== "delivery") {
       setDeliveryQuote(null);
@@ -143,11 +131,6 @@ export default function Cart() {
     }
   };
 
-  const handleAddressBlur = () => {
-    // Pour Signature, pas besoin d'estimation
-  };
-
-  // CALCULS
   const parsePrice = (val: any) => {
     const str = String(val || "0");
     return parseFloat(str.replace(/[^\d.]/g, "")) || 0;
@@ -158,23 +141,23 @@ export default function Cart() {
   const depositAmount = totalPrice / 2;
 
   const getAmountToPay = () => {
+    // ─── Sur place assis : RIEN à payer maintenant (tab ouverte) ───
+    if (isOpenTab) return 0;
+
     let base = totalPrice;
-    if (orderMode === "on_site") base = payNow ? totalPrice : 0;
-    if (orderMode === "booking") base = depositAmount; // Acompte 50%
+    if (orderMode === "on_site") base = payNow ? totalPrice : 0; // take_away uniquement
+    if (orderMode === "booking") base = depositAmount;
     const shipping = (orderMode === "delivery" && deliveryQuote) ? deliveryQuote.fee : 0;
     return base + shipping;
   };
 
   const amountToPay = getAmountToPay();
-  const shouldShowEmailFields = (payNow === true || orderMode === "booking") && amountToPay > 0;
+  const shouldShowEmailFields = !isOpenTab && (payNow === true || orderMode === "booking") && amountToPay > 0;
 
-  // ACTION FINALE
   const handleFinalOrder = async () => {
-    console.log("=== handleFinalOrder appelé ===");
     setIsSubmitting(true);
     
     const fcmToken = localStorage.getItem('fcm_client_token');
-    console.log("🔑 Token FCM récupéré:", fcmToken ? "✅ Oui" : "❌ Non");
     
     let clientId = localStorage.getItem('signature_client_id');
     if (!clientId) {
@@ -183,16 +166,18 @@ export default function Cart() {
     }
 
     const currentAmountToPay = getAmountToPay();
-    const needsPayment = currentAmountToPay > 0 && (payNow === true || orderMode === "booking");
+
+    // ─── Pour une tab ouverte : pas de paiement, status direct "pending" ───
+    const needsPayment = !isOpenTab && currentAmountToPay > 0 && (payNow === true || orderMode === "booking");
     
     const orderData = {
-      clientId: clientId,
+      clientId,
       fcmToken: fcmToken || null,
       customer: {
         name: customerName || "Client Signature",
         email: customerEmail,
         phone: customerPhone,
-        address: orderMode === "delivery" ? address : "Vente à emporter / Sur place",
+        address: orderMode === "delivery" ? address : "Sur place",
       },
       items: cart.map((item: any) => ({
         productId: item.id || item._id,
@@ -206,6 +191,7 @@ export default function Cart() {
       total: totalPrice,
       amountPaid: currentAmountToPay,
       mode: orderMode,
+      // ─── Tab ouverte → "pending" directement, pas de pending_payment ───
       status: needsPayment ? "pending_payment" : "pending",
       details: {
         consumeMode: orderMode === "on_site" ? consumeMode : null,
@@ -213,69 +199,56 @@ export default function Cart() {
         guestCount: orderMode === "booking" ? guestCount : null,
         bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
         deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-        paymentStatus: needsPayment ? "pending_stripe" : "pending_at_counter",
+        // ─── Tab ouverte → open_tab, sinon logique habituelle ───
+        paymentStatus: isOpenTab ? "open_tab" : needsPayment ? "pending_stripe" : "pending_at_counter",
         deliveryService: deliveryQuote?.service || null,
         deliveryQuoteId: deliveryQuote?.id || null,
         deliveryFee: deliveryQuote?.fee || 0,
-        customerEmail: customerEmail,
-        customerPhone: customerPhone
+        customerEmail,
+        customerPhone
       }
     };
 
     try {
-      console.log("=== DÉBUT CRÉATION COMMANDE ===");
-      console.log("📦 OrderData envoyé:", JSON.stringify(orderData, null, 2));
-      
       const response = await axios.post(`${BASE_API}/orders`, orderData);
-      console.log("📥 Response.data:", response.data);
       
       if (response.data.success) {
         const orderId = response.data.order?._id || 
-                    response.data.order?.id || 
-                    response.data.data?._id ||
-                    response.data.orderId;
-        
-        console.log("🔑 OrderId extrait:", orderId);
+                        response.data.order?.id || 
+                        response.data.data?._id ||
+                        response.data.orderId;
         
         if (!orderId) {
-          console.error("❌ CRITIQUE: Impossible de récupérer l'ID de la commande !");
           alert("Erreur: L'ID de la commande n'a pas été retourné");
           setIsSubmitting(false);
           return;
         }
         
-        if (!needsPayment) {
-          console.log("💰 Paiement à la caisse - Notification immédiate");
-          
+        // ─── Tab ouverte : notification immédiate + redirect success ───
+        if (isOpenTab || !needsPayment) {
           try {
             await axios.post(`${BASE_API}/notifications/new-order`, {
-              orderId: orderId,
+              orderId,
               customerName: customerName || "Client Signature",
               total: totalPrice.toFixed(2),
               itemsCount: cart.length,
-              mode: orderMode === "delivery" ? "Livraison" : orderMode === "booking" ? "Réservation" : "Sur place",
+              mode: isOpenTab ? "Sur place (table ouverte)" : "Sur place",
               tableNumber: selectedTable || null,
-              paymentMethod: "Caisse"
+              paymentMethod: isOpenTab ? "Addition en fin de repas" : "Caisse"
             });
-            console.log("✅ Notification envoyée à l'admin");
           } catch (notifError: any) {
             console.error("❌ Erreur envoi notification:", notifError.message);
           }
           
           window.location.href = `/order-success?orderId=${orderId}`;
-        }
-        
-        else {
-          console.log(`💳 Paiement Stripe - Montant: ${currentAmountToPay}€ (${orderMode === "booking" ? "Acompte 50%" : "Total"})`);
-          
+        } else {
+          // Paiement Stripe (take_away en ligne, booking, delivery)
           const stripeItems = cart.map((item: any) => {
             const unitPrice = parsePrice(item.price);
             const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
               return sum + parsePrice(supp.price);
             }, 0) || 0;
             const itemTotal = (unitPrice + supplementsTotal) * (item.quantity || 1);
-            
-            // Pour une réservation, on ne prend que 50% du prix
             const finalPrice = orderMode === "booking" ? itemTotal / 2 : itemTotal;
             
             return {
@@ -288,7 +261,7 @@ export default function Cart() {
           
           const paymentResponse = await axios.post(`${BASE_API}/payments/create-checkout-session`, {
             items: stripeItems,
-            orderId: orderId,
+            orderId,
             mode: orderMode,
             depositPercentage: orderMode === "booking" ? 50 : 100
           });
@@ -296,49 +269,44 @@ export default function Cart() {
           if (paymentResponse.data.url) {
             window.location.href = paymentResponse.data.url;
           } else {
-            console.error("❌ Pas d'URL dans la réponse Stripe");
             alert("Erreur lors de la redirection Stripe");
             setIsSubmitting(false);
           }
         }
       } else {
-        console.error("❌ La commande n'a pas été créée (success: false)");
         alert(`Erreur: ${response.data.message || "Commande non créée"}`);
         setIsSubmitting(false);
       }
     } catch (error: any) {
-      console.error("❌ EXCEPTION dans handleFinalOrder:", error);
-      alert(`Erreur : ${error.response?.data?.message || error.message || "Veuillez vérifier vos informations"}`);
+      alert(`Erreur : ${error.response?.data?.message || error.message}`);
       setIsSubmitting(false);
     } 
   };
 
-  // Validation du formulaire
   const isOrderDisabled = () => {
-    if (!isAgreed) return true;
-    if (isSubmitting) return true;
+    if (!isAgreed || isSubmitting) return true;
     
     if (orderMode === 'delivery') {
-      if (!selectedDeliveryService) return true;
-      if (!deliveryQuote) return true;
-      if (!customerName || customerName.trim() === "") return true;
-      if (!customerPhone || customerPhone.trim() === "") return true;
+      if (!selectedDeliveryService || !deliveryQuote) return true;
+      if (!customerName?.trim() || !customerPhone?.trim()) return true;
       if (!address || address.trim().length < 10) return true;
     }
     
     if (orderMode === 'booking') {
-      if (!customerName || customerName.trim() === "") return true;
-      if (!customerEmail || !customerEmail.includes('@')) return true;
-      if (!customerPhone || customerPhone.trim() === "") return true;
+      if (!customerName?.trim()) return true;
+      if (!customerEmail?.includes('@')) return true;
+      if (!customerPhone?.trim()) return true;
       if (!bookingDate || !bookingTime) return true;
     }
     
     if (orderMode === 'on_site') {
+      // dine_in : seulement la table obligatoire, pas d'email
       if (consumeMode === 'dine_in' && !selectedTable) return true;
-      if (payNow === true && (!customerEmail || !customerEmail.includes('@'))) return true;
+      // take_away : si paiement en ligne, email obligatoire
+      if (consumeMode === 'take_away' && payNow && !customerEmail?.includes('@')) return true;
     }
     
-    if (shouldShowEmailFields && (!customerEmail || !customerEmail.includes('@'))) return true;
+    if (shouldShowEmailFields && !customerEmail?.includes('@')) return true;
     
     return false;
   };
@@ -432,29 +400,46 @@ export default function Cart() {
                         <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
                       </div>
 
+                      {/* ─── DINE_IN : table ouverte, pas de paiement immédiat ─── */}
                       {consumeMode === "dine_in" && (
-                        <div className="table-selector-box form-fade-in">
-                          <div className="table-header-select">
-                             <Smartphone size={18} color="#D4AF37" />
-                             <label>Numéro de table :</label>
+                        <div className="form-fade-in">
+                          <div className="table-selector-box">
+                            <div className="table-header-select">
+                              <Smartphone size={18} color="#D4AF37" />
+                              <label>Numéro de table :</label>
+                            </div>
+                            <select className="luxury-select" value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
+                              <option value="">-- Sélectionnez votre table --</option>
+                              {tables.map(t => <option key={t._id} value={t.number}>Table n°{t.number}</option>)}
+                            </select>
                           </div>
-                          <select className="luxury-select" value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
-                            <option value="">-- Sélectionnez --</option>
-                            {tables.map(t => <option key={t._id} value={t.number}>Table n°{t.number}</option>)}
-                          </select>
+
+                          {/* Bandeau informatif "tab ouverte" */}
+                          <div className="open-tab-info-banner">
+                            <UtensilsCrossed size={18} color="#D4AF37" />
+                            <div>
+                              <strong>Commande sur table ouverte</strong>
+                              <p>Vous pouvez commander autant de fois que vous le souhaitez. L'addition sera présentée en fin de repas, à votre demande ou par votre serveur.</p>
+                            </div>
+                          </div>
                         </div>
                       )}
 
-                      <p className="form-instruction">Règlement :</p>
-                      <div className="selection-grid small">
-                        <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
-                        <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
-                      </div>
-                      
-                      {payNow === true && amountToPay > 0 && (
-                        <div className="input-group full">
-                          <label>Email * (pour le reçu)</label>
-                          <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                      {/* ─── TAKE_AWAY : paiement immédiat comme avant ─── */}
+                      {consumeMode === "take_away" && (
+                        <div className="form-fade-in">
+                          <p className="form-instruction">Règlement :</p>
+                          <div className="selection-grid small">
+                            <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
+                            <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
+                          </div>
+                          
+                          {payNow && amountToPay > 0 && (
+                            <div className="input-group full">
+                              <label>Email * (pour le reçu)</label>
+                              <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -466,28 +451,18 @@ export default function Cart() {
                         <label>Nom complet *</label>
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
-                      
                       <div className="input-group full">
                         <label>Téléphone *</label>
                         <input type="tel" placeholder="Votre numéro de téléphone" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                       </div>
-                      
                       <div className="input-group full">
                         <label>Email</label>
                         <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                       </div>
-                      
                       <div className="input-group full">
                         <label><Bike size={14}/> Adresse de livraison *</label>
-                        <input 
-                          type="text" 
-                          placeholder="Adresse précise..." 
-                          value={address} 
-                          onChange={(e) => setAddress(e.target.value)} 
-                          onBlur={handleAddressBlur}
-                        />
+                        <input type="text" placeholder="Adresse précise..." value={address} onChange={(e) => setAddress(e.target.value)} />
                       </div>
-
                       <div className="delivery-services-section">
                         <label className="section-label">Choisissez votre service de livraison :</label>
                         <div className="delivery-services-grid">
@@ -502,20 +477,13 @@ export default function Cart() {
                           </button>
                         </div>
                       </div>
-
-                      {deliveryError && (
-                        <small className="error-text">{deliveryError}</small>
-                      )}
-                      
+                      {deliveryError && <small className="error-text">{deliveryError}</small>}
                       {deliveryQuote && !deliveryError && (
                         <div className="delivery-quote-success">
                           <Sparkles size={16} />
-                          <span>
-                            ✨ Livraison Signature : 5.00€ ajoutés à votre commande
-                          </span>
+                          <span>✨ Livraison Signature : 5.00€ ajoutés à votre commande</span>
                         </div>
                       )}
-
                       <div className="input-group full">
                         <label>Heure souhaitée (min {minTime})</label>
                         <input type="time" min={minTime} value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)} />
@@ -529,28 +497,24 @@ export default function Cart() {
                         <label>Nom complet *</label>
                         <input type="text" placeholder="Votre nom" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                       </div>
-                      
                       <div className="input-group full">
                         <label>Email *</label>
                         <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                       </div>
-                      
                       <div className="input-group full">
                         <label>Téléphone *</label>
                         <input type="tel" placeholder="Votre numéro de téléphone" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
                       </div>
-                      
                       <div className="form-row">
                         <div className="input-group">
-                            <label>Date *</label>
-                            <input type="date" min={new Date().toISOString().split("T")[0]} value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} />
+                          <label>Date *</label>
+                          <input type="date" min={new Date().toISOString().split("T")[0]} value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} />
                         </div>
                         <div className="input-group">
-                            <label>Heure *</label>
-                            <input type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} />
+                          <label>Heure *</label>
+                          <input type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} />
                         </div>
                       </div>
-                      
                       <div className="info-badge">
                         <Sparkles size={14} />
                         <span>Un acompte de 50% vous sera demandé pour valider la réservation</span>
@@ -561,6 +525,7 @@ export default function Cart() {
               </div>
             </div>
 
+            {/* ─── RÉCAPITULATIF ─── */}
             <div className="cart-summary">
               <h3 className="summary-title">Récapitulatif</h3>
               <div className="summary-line">
@@ -582,10 +547,25 @@ export default function Cart() {
                 </div>
               )}
 
-              <div className="summary-line total">
-                <span>{orderMode === "booking" ? "Acompte (50%) :" : "À payer :"}</span>
-                <span>{amountToPay.toFixed(2)}€</span>
-              </div>
+              {/* ─── Pour une tab ouverte : afficher le total sans "à payer maintenant" ─── */}
+              {isOpenTab ? (
+                <div className="summary-line total">
+                  <span>Total de la commande :</span>
+                  <span>{totalPrice.toFixed(2)}€</span>
+                </div>
+              ) : (
+                <div className="summary-line total">
+                  <span>{orderMode === "booking" ? "Acompte (50%) :" : "À payer :"}</span>
+                  <span>{amountToPay.toFixed(2)}€</span>
+                </div>
+              )}
+
+              {isOpenTab && (
+                <div className="open-tab-summary-note">
+                  <UtensilsCrossed size={14} />
+                  <span>Paiement à la fin du repas</span>
+                </div>
+              )}
 
               {orderMode === "booking" && (
                 <div className="summary-line" style={{ fontSize: "0.8rem", opacity: 0.7 }}>
@@ -606,7 +586,12 @@ export default function Cart() {
                 disabled={isOrderDisabled()}
                 onClick={handleFinalOrder}
               >
-                {isSubmitting ? "Traitement..." : "Confirmer la commande"}
+                {isSubmitting
+                  ? "Traitement..."
+                  : isOpenTab
+                    ? "Envoyer ma commande en cuisine"
+                    : "Confirmer la commande"
+                }
               </button>
             </div>
           </div>
@@ -625,6 +610,43 @@ export default function Cart() {
           gap: 10px;
           font-size: 0.85rem;
           color: #D4AF37;
+        }
+
+        /* ─── Bandeau tab ouverte ─── */
+        .open-tab-info-banner {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03));
+          border: 1px solid rgba(212,175,55,0.4);
+          border-left: 3px solid #D4AF37;
+          border-radius: 10px;
+          padding: 14px 16px;
+          margin-top: 16px;
+        }
+        .open-tab-info-banner strong {
+          display: block;
+          color: #D4AF37;
+          font-size: 0.9rem;
+          margin-bottom: 4px;
+        }
+        .open-tab-info-banner p {
+          color: rgba(255,255,255,0.6);
+          font-size: 0.78rem;
+          line-height: 1.5;
+          margin: 0;
+        }
+
+        /* ─── Note récap tab ouverte ─── */
+        .open-tab-summary-note {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.78rem;
+          color: #D4AF37;
+          opacity: 0.8;
+          margin-top: 4px;
+          margin-bottom: 8px;
         }
       `}</style>
     </section>

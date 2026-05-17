@@ -8,6 +8,7 @@ import {
   Clock, CreditCard
 } from "lucide-react"; 
 import "./menuSoir.css";
+import BillPopup from "../components/BillPopup"; // ← AJOUT
 
 // --- CONFIGURATION DES ENDPOINTS ---
 const isLocal = window.location.hostname === "localhost";
@@ -119,6 +120,9 @@ export default function MenuSoir() {
   const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
   const [tempItem, setTempItem] = useState<CartItem | null>(null);
 
+  // ─── AJOUT : état bill pending pour bloquer les commandes ───
+  const [hasPendingBill, setHasPendingBill] = useState(false);
+
   const isAnyDrawerOpen = tempItem !== null;
 
   // --- DATA FETCHERS ---
@@ -186,49 +190,55 @@ export default function MenuSoir() {
   // --- ACTIONS ---
 
   const handleRemoveOne = (platId: string) => {
-  const itemsInCart = cart.filter((i) => i.id === platId);
-  if (itemsInCart.length > 0) {
-    const lastItem = itemsInCart[itemsInCart.length - 1];
-    removeFromCart(lastItem.cartItemId);
-  }
-};
-
-const handleAddClick = (plat: Plat) => {
-  if (isAnyDrawerOpen) {
-    alert(`Veuillez d'abord terminer la configuration de votre ${tempItem?.name}.`);
-    return;
-  }
-
-  const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-  const canHaveSupps = plat.allowSupplements || (plat.supplements && plat.supplements.length > 0);
-  
-  const countInCart = getItemQuantity(plat._id); 
-  const willReachOffer = plat.offer?.enabled && (countInCart + 1) >= plat.offer.requiredQuantity;
-
-  const newItem: CartItem = {
-    cartItemId: `${plat._id}-${Date.now()}`,
-    id: plat._id,
-    name: plat.name,
-    price: plat.price,
-    quantity: 1, 
-    image: plat.image,
-    chosenAccompaniment: (activeAccs.length > 0) ? "Standard" : "Aucun",
-    supplements: [],
-    status: "pending",
-    type: "SOIR",
-    offer: plat.offer 
+    const itemsInCart = cart.filter((i) => i.id === platId);
+    if (itemsInCart.length > 0) {
+      const lastItem = itemsInCart[itemsInCart.length - 1];
+      removeFromCart(lastItem.cartItemId);
+    }
   };
 
-  if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
-    setTempItem(newItem);
-    scrollToDrawer(plat._id);
-  } else {
-    const result = addToCart(newItem, "SOIR");
-    if (result === "LOCK_ERROR") {
-      alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
+  const handleAddClick = (plat: Plat) => {
+    // ─── BLOCAGE si une addition est en attente ───
+    if (hasPendingBill) {
+      alert("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.");
+      return;
     }
-  }
-};
+
+    if (isAnyDrawerOpen) {
+      alert(`Veuillez d'abord terminer la configuration de votre ${tempItem?.name}.`);
+      return;
+    }
+
+    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+    const canHaveSupps = plat.allowSupplements || (plat.supplements && plat.supplements.length > 0);
+    
+    const countInCart = getItemQuantity(plat._id); 
+    const willReachOffer = plat.offer?.enabled && (countInCart + 1) >= plat.offer.requiredQuantity;
+
+    const newItem: CartItem = {
+      cartItemId: `${plat._id}-${Date.now()}`,
+      id: plat._id,
+      name: plat.name,
+      price: plat.price,
+      quantity: 1, 
+      image: plat.image,
+      chosenAccompaniment: (activeAccs.length > 0) ? "Standard" : "Aucun",
+      supplements: [],
+      status: "pending",
+      type: "SOIR",
+      offer: plat.offer 
+    };
+
+    if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
+      setTempItem(newItem);
+      scrollToDrawer(plat._id);
+    } else {
+      const result = addToCart(newItem, "SOIR");
+      if (result === "LOCK_ERROR") {
+        alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
+      }
+    }
+  };
 
   const handleUpdateTempAcc = (accName: string) => {
     if (!tempItem) return;
@@ -265,26 +275,26 @@ const handleAddClick = (plat: Plat) => {
   };
 
   const handleConfirmAddition = () => {
-  if (!tempItem) return;
+    if (!tempItem) return;
 
-  const platOrigine = platsDuSoir.find(p => p._id === tempItem.id);
-  
-  let itemToSave = { ...tempItem };
+    const platOrigine = platsDuSoir.find(p => p._id === tempItem.id);
+    
+    let itemToSave = { ...tempItem };
 
-  if (platOrigine?.offer?.enabled) {
-    const countInCart = cart.filter(item => item.id === tempItem.id).length;
-    if ((countInCart + 1) >= platOrigine.offer.requiredQuantity) {
-      // Logique d'offre gérée par CartContext
+    if (platOrigine?.offer?.enabled) {
+      const countInCart = cart.filter(item => item.id === tempItem.id).length;
+      if ((countInCart + 1) >= platOrigine.offer.requiredQuantity) {
+        // Logique d'offre gérée par CartContext
+      }
     }
-  }
 
-  const result = addToCart(itemToSave, "SOIR");
-  if (result === "LOCK_ERROR") {
-    alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
-  } else {
-    setTempItem(null);
-  }
-};
+    const result = addToCart(itemToSave, "SOIR");
+    if (result === "LOCK_ERROR") {
+      alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
+    } else {
+      setTempItem(null);
+    }
+  };
 
   const handleUniversChange = (newUnivers: "Cuisine" | "Boissons") => {
     if (isAnyDrawerOpen) return;
@@ -559,6 +569,10 @@ const handleAddClick = (plat: Plat) => {
           );
         })}
       </div>
+
+      {/* ─── POPUP ADDITION (polling toutes les 10s, bloque si pending) ─── */}
+      <BillPopup onBillPending={setHasPendingBill} />
+
     </section>
   );
 }
