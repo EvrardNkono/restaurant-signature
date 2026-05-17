@@ -13,7 +13,6 @@ import * as XLSX from 'xlsx';
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
-// ─── Groupe de table : toutes les commandes open_tab d'une même table ───
 interface TableGroup {
   tableNumber: string;
   orders: any[];
@@ -113,9 +112,7 @@ export default function Orders() {
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  // ─────────────────────────────────────────────────────────────
   // GROUPEMENT PAR TABLE
-  // ─────────────────────────────────────────────────────────────
   const tableGroups = useMemo<TableGroup[]>(() => {
     const openTabOrders = orders.filter(o =>
       o.details?.paymentStatus === "open_tab" &&
@@ -152,9 +149,7 @@ export default function Orders() {
     );
   }, [orders]);
 
-  // ─────────────────────────────────────────────────────────────
   // ENVOYER L'ADDITION À UNE TABLE
-  // ─────────────────────────────────────────────────────────────
   const sendBillToTable = async (group: TableGroup) => {
     const key = group.tableNumber;
     if (sendingBillIds.has(key)) return;
@@ -192,7 +187,7 @@ export default function Orders() {
   };
 
   // ─────────────────────────────────────────────────────────────
-  // NOUVEAU : FERMER LA TAB APRÈS PAIEMENT CAISSE
+  // FIX 4 : FERMER LA TAB + NOTIFIER LE CLIENT
   // ─────────────────────────────────────────────────────────────
   const closeTabAndMarkPaid = async (group: TableGroup) => {
     const key = group.tableNumber;
@@ -206,14 +201,12 @@ export default function Orders() {
       const pendingBill = billsRes.data.data.find((b: any) => b.tableNumber === group.tableNumber);
       
       if (pendingBill) {
-        // Fermer la bill via close-tab
         await axios.post(`${BASE_API}/bills/${pendingBill._id}/close-tab`, {
           clientId: group.clientIds[0],
           tableNumber: group.tableNumber,
         });
-        showToast(`✅ Table ${group.tableNumber} — Paiement enregistré, tab fermée`, "success");
       } else {
-        // Pas de bill, fermer directement les commandes
+        // Pas de bill existante : fermer les commandes directement
         for (const order of group.orders) {
           await axios.put(`${BASE_API}/orders/${order._id}`, {
             'details.paymentStatus': 'closed',
@@ -221,10 +214,25 @@ export default function Orders() {
             paidAt: new Date().toISOString()
           });
         }
-        showToast(`✅ Table ${group.tableNumber} — Commandes fermées`, "success");
       }
-      
-      fetchOrders(); // Rafraîchir la liste
+
+      // ─── FIX 4 : Notifier le client que son paiement est confirmé ───
+      // On envoie une notification FCM distincte de "send-bill" pour indiquer
+      // que le paiement a bien été encaissé, permettant au client de voir
+      // son addition se résoudre et de savoir qu'il peut partir.
+      if (group.fcmTokens.length > 0) {
+        await axios.post(`${BASE_API}/notifications/payment-confirmed`, {
+          fcmTokens: group.fcmTokens,
+          tableNumber: group.tableNumber,
+          total: group.totalCumule.toFixed(2),
+        }).catch((err) => {
+          // Non bloquant : la tab est déjà fermée, la notification est best-effort
+          console.warn("⚠️ Notification paiement non envoyée:", err.message);
+        });
+      }
+
+      showToast(`✅ Table ${group.tableNumber} — Paiement enregistré, tab fermée`, "success");
+      fetchOrders();
     } catch (err: any) {
       showToast(`❌ Erreur: ${err.message}`, "error");
     } finally {
@@ -236,9 +244,7 @@ export default function Orders() {
     }
   };
 
-  // ─────────────────────────────────────────────────────────────
   // UPDATE STATUT
-  // ─────────────────────────────────────────────────────────────
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     if (updatingIds.has(orderId)) return;
     const now = new Date().toISOString();
@@ -457,7 +463,6 @@ export default function Orders() {
     return null;
   };
 
-  // ─── Carte commande individuelle ───
   const OrderCard = ({ order }: { order: any }) => {
     const isUpdating = updatingIds.has(order._id);
     const isOpenTab = order.details?.paymentStatus === "open_tab";
@@ -563,7 +568,6 @@ export default function Orders() {
     );
   };
 
-  // ─── Carte groupe de table AVEC BOUTON PAYÉ ───
   const TableGroupCard = ({ group }: { group: TableGroup }) => {
     const isExpanded = expandedTables.has(group.tableNumber);
     const isSending = sendingBillIds.has(group.tableNumber);
@@ -607,7 +611,6 @@ export default function Orders() {
               <span className="tg-total-amount">{group.totalCumule.toFixed(2)}€</span>
             </div>
 
-            {/* BOUTON ENVOYER L'ADDITION */}
             <button
               className={`send-bill-btn ${isSending ? "sending" : ""}`}
               disabled={isSending}
@@ -629,7 +632,7 @@ export default function Orders() {
               <span>{isSending ? "Envoi..." : "L'addition"}</span>
             </button>
 
-            {/* NOUVEAU BOUTON PAYÉ / FERMER LA TAB */}
+            {/* FIX 4 : message de confirmation mis à jour pour indiquer la notification client */}
             <button
               className={`close-tab-btn ${isClosing ? "closing" : ""}`}
               disabled={isClosing}
@@ -638,14 +641,14 @@ export default function Orders() {
                 setConfirmModal({
                   show: true,
                   title: `💰 Paiement encaissé — Table ${group.tableNumber}`,
-                  message: `Confirmez-vous que la table ${group.tableNumber} a bien réglé ${group.totalCumule.toFixed(2)}€ ?\n\nLes commandes seront marquées comme payées et la tab sera fermée.`,
+                  message: `Confirmez-vous que la table ${group.tableNumber} a bien réglé ${group.totalCumule.toFixed(2)}€ ?\n\nLes commandes seront marquées comme payées, la tab sera fermée et le client recevra une confirmation sur son téléphone.`,
                   onConfirm: () => {
                     setConfirmModal(m => ({ ...m, show: false }));
                     closeTabAndMarkPaid(group);
                   }
                 });
               }}
-              title="Marquer comme payé et fermer la tab"
+              title="Marquer comme payé, fermer la tab et notifier le client"
             >
               {isClosing ? <span className="spinner-small" /> : <CheckCircle size={16} />}
               <span>{isClosing ? "Fermeture..." : "Payé"}</span>
@@ -691,7 +694,7 @@ export default function Orders() {
             <h3 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.2rem", color: "#2D2422", marginBottom: "12px" }}>
               {confirmModal.title}
             </h3>
-            <p style={{ color: "#6B5B57", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "24px" }}>
+            <p style={{ color: "#6B5B57", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "24px", whiteSpace: "pre-line" }}>
               {confirmModal.message}
             </p>
             <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
@@ -796,17 +799,11 @@ export default function Orders() {
       </div>
 
       <div className="view-toggle-bar">
-        <button
-          className={`view-toggle-btn ${viewMode === "all" ? "active" : ""}`}
-          onClick={() => setViewMode("all")}
-        >
+        <button className={`view-toggle-btn ${viewMode === "all" ? "active" : ""}`} onClick={() => setViewMode("all")}>
           <ListOrdered size={16} />
           <span>Toutes les commandes</span>
         </button>
-        <button
-          className={`view-toggle-btn ${viewMode === "tables" ? "active" : ""}`}
-          onClick={() => setViewMode("tables")}
-        >
+        <button className={`view-toggle-btn ${viewMode === "tables" ? "active" : ""}`} onClick={() => setViewMode("tables")}>
           <Users size={16} />
           <span>Par table</span>
           {tableGroups.length > 0 && (
@@ -915,10 +912,7 @@ export default function Orders() {
         }
         .table-group-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .tg-meta-item { display: flex; align-items: center; gap: 4px; font-size: 0.78rem; color: rgba(255,255,255,0.5); }
-        .tg-badge {
-          font-size: 0.7rem; font-weight: 600; padding: 2px 8px;
-          border-radius: 20px;
-        }
+        .tg-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
         .tg-badge.pending { background: rgba(243,156,18,0.2); color: #F39C12; }
         .tg-badge.cooking { background: rgba(231,76,60,0.2); color: #E74C3C; }
         .tg-badge.done    { background: rgba(39,174,96,0.2); color: #27AE60; }
@@ -937,14 +931,10 @@ export default function Orders() {
           transition: all 0.2s; white-space: nowrap;
           box-shadow: 0 4px 15px rgba(212,175,55,0.3);
         }
-        .send-bill-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(212,175,55,0.45);
-        }
+        .send-bill-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.45); }
         .send-bill-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .send-bill-btn.sending { background: rgba(212,175,55,0.3); color: #D4AF37; }
 
-        /* ─── BOUTON PAYÉ / FERMER LA TAB ─── */
         .close-tab-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 10px 18px; border-radius: 12px;
@@ -954,10 +944,7 @@ export default function Orders() {
           transition: all 0.2s; white-space: nowrap;
           box-shadow: 0 4px 15px rgba(39,174,96,0.3);
         }
-        .close-tab-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(39,174,96,0.45);
-        }
+        .close-tab-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39,174,96,0.45); }
         .close-tab-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .close-tab-btn.closing { background: rgba(39,174,96,0.3); color: white; }
 
@@ -971,12 +958,11 @@ export default function Orders() {
         .tg-expand-btn:hover { background: rgba(255,255,255,0.1); }
 
         .table-group-orders {
-          padding: 0 16px 16px;
+          padding: 16px;
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 12px;
           border-top: 1px solid rgba(212,175,55,0.1);
-          padding-top: 16px;
         }
 
         .open-tab-badge-card {
@@ -992,7 +978,6 @@ export default function Orders() {
           padding: 1px 6px; border-radius: 10px; margin-left: 4px;
         }
         .open-tab-card { border-color: rgba(212,175,55,0.35) !important; }
-
         .fcm-indicator {
           display: inline-flex; align-items: center;
           margin-left: 8px; color: #2ecc71;

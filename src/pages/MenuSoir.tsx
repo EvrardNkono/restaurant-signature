@@ -8,7 +8,7 @@ import {
   Clock, CreditCard
 } from "lucide-react"; 
 import "./menuSoir.css";
-import BillPopup from "../components/BillPopup"; // ← AJOUT
+import BillPopup from "../components/BillPopup";
 
 // --- CONFIGURATION DES ENDPOINTS ---
 const isLocal = window.location.hostname === "localhost";
@@ -18,7 +18,6 @@ const BASE_URL = isLocal
 
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
-
 
 // --- INTERFACES ---
 interface Category {
@@ -110,7 +109,17 @@ const scrollToDrawer = (id: string) => {
 };
 
 export default function MenuSoir() {
-  const { cart, addToCart, removeFromCart, getItemQuantity } = useCart();
+  const { 
+    cart, 
+    addToCart, 
+    removeFromCart, 
+    getItemQuantity,
+    // ─── FIX 3 : on importe les fonctions d'édition post-ajout ───
+    addSupplementToLine,
+    removeSupplementFromLine,
+    updateLineAccompaniment,
+  } = useCart();
+
   const clientId = localStorage.getItem("signature_client_id");
 
   // --- ÉTATS ---
@@ -118,12 +127,26 @@ export default function MenuSoir() {
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
   const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
+
+  // tempItem = item en cours de configuration AVANT confirmation (même logique que l'original)
   const [tempItem, setTempItem] = useState<CartItem | null>(null);
 
-  // ─── AJOUT : état bill pending pour bloquer les commandes ───
+  // ─── FIX 3 : editingCartItemId = cartItemId d'un item DÉJÀ en panier qu'on ré-édite ───
+  // Quand ce state est défini, le tiroir travaille directement sur le panier via CartContext
+  // (addSupplementToLine / removeSupplementFromLine / updateLineAccompaniment),
+  // exactement comme Menu.tsx le fait. tempItem reste null dans ce mode.
+  const [editingCartItemId, setEditingCartItemId] = useState<string | null>(null);
+
   const [hasPendingBill, setHasPendingBill] = useState(false);
 
-  const isAnyDrawerOpen = tempItem !== null;
+  // Le tiroir est ouvert soit en mode "nouveau" (tempItem) soit en mode "édition" (editingCartItemId)
+  const isAnyDrawerOpen = tempItem !== null || editingCartItemId !== null;
+
+  // L'id du plat dont le tiroir est ouvert (pour savoir quelle carte affiche le tiroir)
+  const openDrawerPlatId = tempItem?.id ?? 
+    (editingCartItemId 
+      ? cart.find(i => i.cartItemId === editingCartItemId)?.id ?? null 
+      : null);
 
   // --- DATA FETCHERS ---
   const { data: allPlats, isLoading: isLoadingMenu } = useQuery<Plat[]>({
@@ -144,7 +167,6 @@ export default function MenuSoir() {
     staleTime: 1000 * 60 * 30,
   });
 
-  // RÉCUPÉRATION DES COMMANDES RÉELLES (Tracking)
   const { data: activeOrders = [], refetch: refetchOrders } = useQuery({
     queryKey: ["active-orders", clientId],
     queryFn: async () => {
@@ -156,12 +178,42 @@ export default function MenuSoir() {
     enabled: !!clientId
   });
 
-  // --- SYNCHRONISATION DES STATUTS ---
   useEffect(() => {
-    if (clientId) {
-      refetchOrders();
-    }
+    if (clientId) refetchOrders();
   }, [clientId, cart.length, refetchOrders]);
+
+  // ─── FIX 2 : Nettoyage du panier quand une commande est archivée ───
+  // Utilise un ref pour mémoriser les IDs déjà vus comme "archived" et ne déclencher
+  // le nettoyage qu'une seule fois par commande (pas dépendant d'une fenêtre de 5s)
+  const seenArchivedIds = useState<Set<string>>(() => new Set())[0];
+
+  useEffect(() => {
+    if (!activeOrders.length) return;
+
+    const newlyArchived = activeOrders.find((order: any) => {
+      if (order.status !== "archived") return false;
+      // On ne déclenche que si on n'a pas encore traité cet ID
+      return !seenArchivedIds.has(order._id);
+    });
+
+    if (newlyArchived) {
+      seenArchivedIds.add(newlyArchived._id);
+      if (cart.length > 0) {
+        cart.forEach((item: any) => removeFromCart(item.cartItemId));
+        // Toast léger sans dépendre de DOM direct (réutilise le même pattern que l'original)
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+          background:#27ae60;color:#fff;padding:12px 24px;border-radius:10px;
+          font-size:0.9rem;font-weight:600;z-index:9999;
+          box-shadow:0 4px 20px rgba(0,0,0,0.25);
+        `;
+        toast.textContent = "✓ Commande terminée, merci !";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+    }
+  }, [activeOrders]);
 
   // --- FILTRAGE ---
   const platsDuSoir = useMemo(() => 
@@ -198,20 +250,38 @@ export default function MenuSoir() {
   };
 
   const handleAddClick = (plat: Plat) => {
-    // ─── BLOCAGE si une addition est en attente ───
     if (hasPendingBill) {
-      alert("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.");
+      // ─── FIX : toast cohérent avec Menu.tsx au lieu d'un alert() natif ───
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
+        font-size:0.9rem;font-weight:600;z-index:9999;
+        box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      `;
+      toast.textContent = "⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
       return;
     }
 
     if (isAnyDrawerOpen) {
-      alert(`Veuillez d'abord terminer la configuration de votre ${tempItem?.name}.`);
+      // ─── FIX : toast cohérent au lieu d'un alert() natif ───
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:#f39c12;color:#fff;padding:12px 24px;border-radius:10px;
+        font-size:0.9rem;font-weight:600;z-index:9999;
+        box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      `;
+      toast.textContent = `Veuillez d'abord terminer la configuration en cours.`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
       return;
     }
 
     const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
     const canHaveSupps = plat.allowSupplements || (plat.supplements && plat.supplements.length > 0);
-    
     const countInCart = getItemQuantity(plat._id); 
     const willReachOffer = plat.offer?.enabled && (countInCart + 1) >= plat.offer.requiredQuantity;
 
@@ -230,16 +300,39 @@ export default function MenuSoir() {
     };
 
     if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
+      // Ouvre le tiroir en mode "nouveau" avec tempItem
       setTempItem(newItem);
+      setEditingCartItemId(null);
       scrollToDrawer(plat._id);
     } else {
       const result = addToCart(newItem, "SOIR");
       if (result === "LOCK_ERROR") {
-        alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+          background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
+          font-size:0.9rem;font-weight:600;z-index:9999;
+          box-shadow:0 4px 20px rgba(0,0,0,0.25);
+        `;
+        toast.textContent = "Votre panier contient déjà des produits d'un autre service (MIDI).";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
       }
     }
   };
 
+  // ─── FIX 3 : Ouvrir le tiroir sur un item DÉJÀ en panier pour l'éditer ───
+  const handleEditExistingItem = (plat: Plat) => {
+    if (isAnyDrawerOpen) return;
+    const itemsInCart = cart.filter(i => i.id === plat._id);
+    if (itemsInCart.length === 0) return;
+    const lastItem = itemsInCart[itemsInCart.length - 1];
+    setEditingCartItemId(lastItem.cartItemId);
+    setTempItem(null);
+    scrollToDrawer(plat._id);
+  };
+
+  // --- Handlers tempItem (mode "nouveau") ---
   const handleUpdateTempAcc = (accName: string) => {
     if (!tempItem) return;
     setTempItem({ ...tempItem, chosenAccompaniment: accName });
@@ -263,10 +356,7 @@ export default function MenuSoir() {
     const supps = [...tempItem.supplements];
     let targetIndex = -1;
     for (let i = supps.length - 1; i >= 0; i--) {
-      if (supps[i].id === suppId) {
-        targetIndex = i;
-        break;
-      }
+      if (supps[i].id === suppId) { targetIndex = i; break; }
     }
     if (targetIndex !== -1) {
       supps.splice(targetIndex, 1);
@@ -276,24 +366,27 @@ export default function MenuSoir() {
 
   const handleConfirmAddition = () => {
     if (!tempItem) return;
-
-    const platOrigine = platsDuSoir.find(p => p._id === tempItem.id);
-    
-    let itemToSave = { ...tempItem };
-
-    if (platOrigine?.offer?.enabled) {
-      const countInCart = cart.filter(item => item.id === tempItem.id).length;
-      if ((countInCart + 1) >= platOrigine.offer.requiredQuantity) {
-        // Logique d'offre gérée par CartContext
-      }
-    }
-
-    const result = addToCart(itemToSave, "SOIR");
+    const result = addToCart(tempItem, "SOIR");
     if (result === "LOCK_ERROR") {
-      alert("Votre panier contient déjà des produits d'un autre service (MIDI).");
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
+        font-size:0.9rem;font-weight:600;z-index:9999;
+        box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      `;
+      toast.textContent = "Votre panier contient déjà des produits d'un autre service (MIDI).";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
     } else {
       setTempItem(null);
     }
+  };
+
+  // Ferme le tiroir (les deux modes)
+  const handleCloseDrawer = () => {
+    setTempItem(null);
+    setEditingCartItemId(null);
   };
 
   const handleUniversChange = (newUnivers: "Cuisine" | "Boissons") => {
@@ -302,21 +395,18 @@ export default function MenuSoir() {
     setFilter("Tous");
   };
 
-  // --- EFFET DE REBOND DE SCROLL ---
   useEffect(() => {
-    if (tempItem) {
+    if (tempItem || editingCartItemId) {
       const scrollContainer = document.querySelector('.drawer-body-scroll');
       if (scrollContainer) {
         const timer = setTimeout(() => {
           scrollContainer.classList.add('hint-active');
-          setTimeout(() => {
-            scrollContainer.classList.remove('hint-active');
-          }, 2000); 
+          setTimeout(() => scrollContainer.classList.remove('hint-active'), 2000);
         }, 600);
         return () => clearTimeout(timer);
       }
     }
-  }, [tempItem]);
+  }, [tempItem, editingCartItemId]);
 
   if (isLoadingMenu) {
     return (
@@ -329,7 +419,7 @@ export default function MenuSoir() {
 
   return (
     <section className="menu-soir-section">
-      {isAnyDrawerOpen && <div className="global-drawer-overlay" />}
+      {isAnyDrawerOpen && <div className="global-drawer-overlay" onClick={handleCloseDrawer} />}
 
       <div className="menu-header-soir">
         <div className="header-overlay-dark"></div>
@@ -370,7 +460,10 @@ export default function MenuSoir() {
         {platsFiltres.map(plat => {
           const itemsInCart = cart.filter((i: CartItem) => i.id === plat._id);
           const isFlipped = flippedId === plat._id;
-          const isExpanding = tempItem?.id === plat._id; 
+
+          // ─── FIX 3 : le tiroir de ce plat est ouvert soit en mode nouveau soit en mode édition ───
+          const isExpanding = openDrawerPlatId === plat._id;
+
           const quantityInCart = getItemQuantity(plat._id);
           const orderMatch = activeOrders.find((order: any) => 
             order.items.some((item: any) => item.productId === plat._id)
@@ -386,7 +479,6 @@ export default function MenuSoir() {
             else if (status === "done" && (now - lastUpdate > tenMinutes)) { currentStatus = null; } 
             else { currentStatus = status; }
           } 
-          
           if (!currentStatus && itemsInCart.length > 0) {
             currentStatus = "in_cart"; 
           }
@@ -394,6 +486,16 @@ export default function MenuSoir() {
           const suppsToShow = plat.allowSupplements 
             ? (supplementsList?.filter(s => s.active) || []) 
             : (plat.supplements?.filter(s => s.active) || []);
+
+          // ─── FIX 3 : dans le mode édition, on récupère l'item en panier ciblé ───
+          const editingItem = editingCartItemId 
+            ? cart.find(i => i.cartItemId === editingCartItemId) ?? null 
+            : null;
+
+          // L'item de référence pour afficher les sélections dans le tiroir :
+          // - en mode "nouveau" : tempItem
+          // - en mode "édition" : l'item en panier
+          const drawerItem = tempItem?.id === plat._id ? tempItem : editingItem;
 
           return (
             <div key={plat._id} className={`menu-card-outer soir-variant ${isExpanding ? "is-expanded" : ""}`}>
@@ -427,13 +529,40 @@ export default function MenuSoir() {
                         onClick={() => handleAddClick(plat)}
                         style={{ width: '100%' }}
                       >
-                        {isExpanding ? "Configuration..." : (
+                        {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
                           <>
                             <PlusCircle size={18} style={{ marginRight: '8px' }} />
                             {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
                           </>
                         )}
                       </button>
+
+                      {/* ─── FIX 3 : bouton "Modifier ma commande" sur les items déjà en panier ─── */}
+                      {quantityInCart > 0 && !isExpanding && (
+                        <button 
+                          className="btn-edit-soir"
+                          onClick={() => handleEditExistingItem(plat)}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            padding: '10px',
+                            fontSize: '0.8rem',
+                            fontWeight: '700',
+                            textTransform: 'uppercase',
+                            background: 'rgba(212,175,55,0.12)',
+                            border: '1px solid rgba(212,175,55,0.4)',
+                            borderRadius: '8px',
+                            color: '#D4AF37',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Sparkles size={14} />
+                          <span>Modifier ma commande</span>
+                        </button>
+                      )}
 
                       {quantityInCart > 0 && !isExpanding && (
                         <button 
@@ -458,96 +587,146 @@ export default function MenuSoir() {
                     </div>
                   </div>
 
-                  {/* TIROIR DE PERSONNALISATION / OFFRE */}
+                  {/* TIROIR DE PERSONNALISATION */}
                   <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
-                      <div className="drawer-header">
-                        <div className="drawer-title">
-                          <Sparkles size={14} color="#d4af37" /> <span>Personnalisation</span>
-                        </div>
-                        <button className="btn-cancel-config" onClick={() => setTempItem(null)}>
-                          <Trash2 size={16} /> <span>Annuler</span>
-                        </button>
+                    <div className="drawer-header">
+                      <div className="drawer-title">
+                        <Sparkles size={14} color="#d4af37" />
+                        {/* ─── FIX 3 : titre différent selon le mode ─── */}
+                        <span>{editingCartItemId && editingItem?.id === plat._id ? "Modifier votre commande" : "Personnalisation"}</span>
                       </div>
+                      <button className="btn-cancel-config" onClick={handleCloseDrawer}>
+                        <Trash2 size={16} /> <span>{editingCartItemId ? "Fermer" : "Annuler"}</span>
+                      </button>
+                    </div>
 
-                      <div className="drawer-body-scroll">
-                        
-                        {plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
-                          const totalQtyAfterAdding = quantityInCart + 1;
-                          const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
-                          const reste = totalQtyAfterAdding % plat.offer.requiredQuantity;
-                          const prixTotal = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
-                          const prixNormal = totalQtyAfterAdding * plat.price;
-                          const economie = prixNormal - prixTotal;
-                          return (
-                            <div className="drawer-section offer-activation-zone">
-                              <div className="offer-congrats">
-                                <Sparkles size={18} className="ribbon-icon" />
-                                <span>Offre Signature Activée !</span>
-                              </div>
-                              <p className="offer-details">
-                                Vos <strong>{totalQtyAfterAdding} {plat.name}</strong> passent à <strong>{prixTotal.toFixed(2)}€</strong>
+                    <div className="drawer-body-scroll">
+
+                      {/* Offre — uniquement en mode "nouveau" */}
+                      {tempItem?.id === plat._id && plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
+                        const totalQtyAfterAdding = quantityInCart + 1;
+                        const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
+                        const reste = totalQtyAfterAdding % plat.offer.requiredQuantity;
+                        const prixTotal = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                        const prixNormal = totalQtyAfterAdding * plat.price;
+                        const economie = prixNormal - prixTotal;
+                        return (
+                          <div className="drawer-section offer-activation-zone">
+                            <div className="offer-congrats">
+                              <Sparkles size={18} className="ribbon-icon" />
+                              <span>Offre Signature Activée !</span>
+                            </div>
+                            <p className="offer-details">
+                              Vos <strong>{totalQtyAfterAdding} {plat.name}</strong> passent à <strong>{prixTotal.toFixed(2)}€</strong>
+                            </p>
+                            {economie > 0 && (
+                              <p className="offer-subtext" style={{ color: '#4ade80', fontWeight: 'bold', marginTop: '5px' }}>
+                                Vous économisez immédiatement {economie.toFixed(2)}€
                               </p>
-                              {economie > 0 && (
-                                <p className="offer-subtext" style={{ color: '#4ade80', fontWeight: 'bold', marginTop: '5px' }}>
-                                  Vous économisez immédiatement {economie.toFixed(2)}€
-                                </p>
-                              )}
-                            </div>
-                          );
-                        })()}
-
-                        {(plat.accompaniments?.filter(a => a.active).length || 0) > 0 && (
-                          <div className="drawer-section">
-                            <p className="drawer-label">Accompagnement (Gratuit)</p>
-                            <div className="acc-options-grid">
-                              <button className={`acc-mini-choice ${tempItem?.chosenAccompaniment === "Aucun" ? "selected" : ""}`} onClick={() => handleUpdateTempAcc("Aucun")}>Aucun</button>
-                              <button className={`acc-mini-choice ${tempItem?.chosenAccompaniment === "Standard" ? "selected" : ""}`} onClick={() => handleUpdateTempAcc("Standard")}>Standard</button>
-                              {plat.accompaniments?.filter(a => a.active).map(acc => (
-                                <button key={acc._id} className={`acc-mini-choice ${tempItem?.chosenAccompaniment === acc.name ? "selected" : ""}`} onClick={() => handleUpdateTempAcc(acc.name)}>{acc.name}</button>
-                              ))}
-                            </div>
+                            )}
                           </div>
-                        )}
+                        );
+                      })()}
 
-                        {suppsToShow.length > 0 && (
-                          <div className="drawer-section">
-                            <p className="drawer-label">Extras (Payant)</p>
-                            <div className="supps-list-container">
-                              {isLoadingSupps ? <Loader2 className="animate-spin" /> : suppsToShow.map(supp => {
-                                const count = tempItem?.supplements?.filter(s => s.id === supp._id).length || 0;
-                                return (
-                                  <div key={supp._id} className="supp-card-mini">
-                                    <div className="supp-mini-info">
-                                      <span className="supp-mini-name">{supp.name}</span>
-                                      <span className="supp-mini-price">+{supp.price.toFixed(2)}€</span>
-                                    </div>
-                                    <div className="supp-actions-wrapper">
-                                      {count > 0 && (
-                                        <button className="supp-mini-remove" onClick={() => handleRemoveTempSupp(supp._id)}>
-                                          <MinusCircle size={20} />
-                                        </button>
-                                      )}
-                                      {count > 0 && <span className="supp-count-badge">{count}</span>}
-                                      <button 
-                                        className={`supp-mini-add ${addedSuppId === supp._id ? "success" : ""}`} 
-                                        onClick={() => handleAddTempSupp({ id: supp._id, name: supp.name, price: supp.price })}
-                                      >
-                                        {addedSuppId === supp._id ? <Check size={20} /> : <PlusCircle size={20} />}
-                                      </button>
-                                    </div>
+                      {/* Accompagnements */}
+                      {(plat.accompaniments?.filter(a => a.active).length || 0) > 0 && drawerItem && (
+                        <div className="drawer-section">
+                          <p className="drawer-label">Accompagnement (Gratuit)</p>
+                          <div className="acc-options-grid">
+                            {["Aucun", "Standard", ...plat.accompaniments.filter(a => a.active).map(a => a.name)].map(accName => (
+                              <button
+                                key={accName}
+                                className={`acc-mini-choice ${drawerItem.chosenAccompaniment === accName ? "selected" : ""}`}
+                                onClick={() => {
+                                  if (tempItem?.id === plat._id) {
+                                    // Mode nouveau : on modifie tempItem
+                                    handleUpdateTempAcc(accName);
+                                  } else if (editingCartItemId) {
+                                    // ─── FIX 3 : Mode édition → CartContext directement ───
+                                    updateLineAccompaniment(editingCartItemId, accName);
+                                  }
+                                }}
+                              >
+                                {accName}
+                                {drawerItem.chosenAccompaniment === accName && <Check size={12} />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Suppléments */}
+                      {suppsToShow.length > 0 && drawerItem && (
+                        <div className="drawer-section">
+                          <p className="drawer-label">Extras (Payant)</p>
+                          <div className="supps-list-container">
+                            {isLoadingSupps ? <Loader2 className="animate-spin" /> : suppsToShow.map(supp => {
+                              const count = drawerItem.supplements?.filter(s => s.id === supp._id).length || 0;
+                              return (
+                                <div key={supp._id} className="supp-card-mini">
+                                  <div className="supp-mini-info">
+                                    <span className="supp-mini-name">{supp.name}</span>
+                                    <span className="supp-mini-price">+{supp.price.toFixed(2)}€</span>
                                   </div>
-                                );
-                              })}
-                            </div>
+                                  <div className="supp-actions-wrapper">
+                                    {count > 0 && (
+                                      <button className="supp-mini-remove" onClick={() => {
+                                        if (tempItem?.id === plat._id) {
+                                          handleRemoveTempSupp(supp._id);
+                                        } else if (editingCartItemId) {
+                                          // ─── FIX 3 : Mode édition → CartContext directement ───
+                                          removeSupplementFromLine(editingCartItemId, supp._id);
+                                        }
+                                      }}>
+                                        <MinusCircle size={20} />
+                                      </button>
+                                    )}
+                                    {count > 0 && <span className="supp-count-badge">{count}</span>}
+                                    <button 
+                                      className={`supp-mini-add ${addedSuppId === supp._id ? "success" : ""}`} 
+                                      onClick={() => {
+                                        if (tempItem?.id === plat._id) {
+                                          handleAddTempSupp({ id: supp._id, name: supp.name, price: supp.price });
+                                        } else if (editingCartItemId) {
+                                          // ─── FIX 3 : Mode édition → CartContext directement ───
+                                          addSupplementToLine(editingCartItemId, {
+                                            id: supp._id,
+                                            name: supp.name,
+                                            price: supp.price,
+                                          });
+                                          setAddedSuppId(supp._id);
+                                          setTimeout(() => setAddedSuppId(null), 800);
+                                        }
+                                      }}
+                                    >
+                                      {addedSuppId === supp._id ? <Check size={20} /> : <PlusCircle size={20} />}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        )}
+                        </div>
+                      )}
+
+                      {/* Bouton de confirmation — uniquement en mode "nouveau" */}
+                      {tempItem?.id === plat._id && (
                         <button type="button" className="btn-confirm-drawer" onClick={handleConfirmAddition}>
                           <Check size={20} /> Terminer et ajouter
                         </button>
-                      </div>
+                      )}
+
+                      {/* En mode édition, un simple bouton fermer suffit */}
+                      {editingCartItemId && editingItem?.id === plat._id && (
+                        <button type="button" className="btn-confirm-drawer" onClick={handleCloseDrawer}>
+                          <Check size={20} /> Valider les modifications
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
+                {/* FACE ARRIÈRE */}
                 <div className="card-face-soir card-back-soir">
                   <button className="close-back-btn-soir" onClick={() => setFlippedId(null)}><X size={20} /></button>
                   <div className="back-content-soir">
@@ -570,9 +749,7 @@ export default function MenuSoir() {
         })}
       </div>
 
-      {/* ─── POPUP ADDITION (polling toutes les 10s, bloque si pending) ─── */}
       <BillPopup onBillPending={setHasPendingBill} />
-
     </section>
   );
 }
