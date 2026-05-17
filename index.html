@@ -3,59 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icone11.png" />
-    
+
     <!-- Viewport pour mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    
+
     <!-- ========== CONFIGURATION PWA GÉNÉRALE ========== -->
     <meta name="theme-color" content="#2D2422" />
-    <link rel="manifest" href="/manifest.json" />
-    
+
+    <!-- Manifest dynamique : admin ou client -->
+    <script>
+      (function() {
+        const isAdmin = window.location.pathname.startsWith('/admin');
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = isAdmin ? '/manifest-admin.json' : '/manifest.json';
+        document.head.appendChild(link);
+      })();
+    </script>
+
     <!-- ========== CONFIGURATION SPÉCIFIQUE iOS ========== -->
-    <!-- Forcer Safari à ouvrir en mode application -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    
-    <!-- Style de la barre d'état (black-translucent, default, black) -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    
-    <!-- Titre de l'application sur l'écran d'accueil -->
     <meta name="apple-mobile-web-app-title" content="Restaurant Signature" />
-    
-    <!-- Icônes pour iOS (différentes tailles pour différents appareils) -->
+
+    <!-- Icônes iOS -->
     <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167x167.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
-    
-    <!-- Icône de démarrage (splash screen) pour iOS -->
-    <link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1536x2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-1668x2224.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/icons/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
-    
-    <!-- Description pour le référencement -->
+
+    <!-- Splash screens iOS -->
+    <link rel="apple-touch-startup-image" href="/icons/splash-640x1136.png"   media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.png"   media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2208.png"  media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.png"  media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1242x2688.png"  media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1536x2048.png"  media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-1668x2224.png"  media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" />
+    <link rel="apple-touch-startup-image" href="/icons/splash-2048x2732.png"  media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
+
+    <!-- SEO -->
     <meta name="description" content="Restaurant Signature - Découvrez nos plats raffinés et commandez en ligne" />
-    
+
     <title>Restaurant Signature</title>
-  <!-- Firebase Service Worker Registration -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then(registration => {
-          console.log('✅ Service Worker FCM enregistré:', registration);
-        })
-        .catch(error => {
-          console.log('❌ Erreur Service Worker FCM:', error);
+
+    <!-- ========== SERVICE WORKERS ========== -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+
+          // SW Firebase (notifications push) — scope racine
+          navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then(reg => console.log('✅ SW Firebase enregistré:', reg.scope))
+            .catch(err => console.error('❌ SW Firebase erreur:', err));
+
+          // SW Admin PWA — uniquement sur /admin
+          if (window.location.pathname.startsWith('/admin')) {
+            navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' })
+              .then(reg => console.log('✅ SW Admin enregistré:', reg.scope))
+              .catch(err => console.error('❌ SW Admin erreur:', err));
+          }
+
         });
-    });
-  }
-</script>
-</head>
+      }
+    </script>
+
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

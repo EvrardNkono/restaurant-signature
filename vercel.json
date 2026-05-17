@@ -1,4 +1,12 @@
 {
+  "headers": [
+    {
+      "source": "/admin-sw.js",
+      "headers": [
+        { "key": "Service-Worker-Allowed", "value": "/admin" }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

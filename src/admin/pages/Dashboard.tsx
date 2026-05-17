@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
+import InstallButtonAdmin from '../components/InstallButtonAdmin';
+
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -60,6 +62,13 @@ export default function Dashboard() {
     const interval = setInterval(fetchDashboardStats, 30000);
     return () => clearInterval(interval);
   }, []);
+  useEffect(() => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' })
+      .then(reg => console.log('✅ Admin SW enregistré:', reg.scope))
+      .catch(err => console.error('❌ Admin SW erreur:', err));
+  }
+}, []);
 
   const formattedRevenue = new Intl.NumberFormat('fr-FR', { 
     style: 'currency', 
@@ -188,6 +197,8 @@ export default function Dashboard() {
           <div className="preview-bar"></div>
         </div>
       </div>
+      <InstallButtonAdmin />
     </div>
+    
   );
 }
