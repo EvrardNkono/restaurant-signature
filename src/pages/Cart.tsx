@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { 
@@ -7,7 +7,10 @@ import {
   Trash2, 
   ShoppingBag,
   Sparkles,
-  UtensilsCrossed
+  UtensilsCrossed,
+  MapPin,
+  AlertTriangle,
+  CheckCircle2
 } from "lucide-react"; 
 import axios from "axios";
 import { getMessaging, getToken } from "firebase/messaging";
@@ -20,13 +23,17 @@ const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-back
 
 const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
 
+// 📍 Coordonnées exactes du restaurant — À REMPLACER par vos vraies coordonnées GPS
+const RESTAURANT_LAT = 48.5419175;
+const RESTAURANT_LON = 2.6555848;
+const MAX_DELIVERY_KM = 6;
+
 type DeliveryService = "signature" | null;
 
 export default function Cart() {
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
   const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in");
   
-  // ⚠️ payNow n'est plus utilisé pour dine_in — gardé uniquement pour take_away
   const [payNow, setPayNow] = useState<boolean>(true);
   const [isAgreed, setIsAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,12 +57,32 @@ export default function Cart() {
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string, service: string} | null>(null);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
+  // ─── Nominatim autocomplete + distance ───
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [isTooFar, setIsTooFar] = useState(false);
+  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const nominatimTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
+
   const deliveryFees = {
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
-  // ─── Détermine si c'est une "tab ouverte" (sur place, assis à une table) ───
   const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in";
+
+  // ─── Fermer suggestions si clic extérieur ───
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const saveFcmToken = async () => {
@@ -117,11 +144,83 @@ export default function Cart() {
       setDeliveryQuote(null);
       setDeliveryError(null);
       setSelectedDeliveryService(null);
+      setAddress("");
+      setDistanceKm(null);
+      setIsTooFar(false);
+      setSelectedCoords(null);
+      setAddressSuggestions([]);
     }
     if (consumeMode !== "dine_in") {
       setSelectedTable("");
     }
   }, [orderMode, consumeMode]);
+
+  // ─── Distance Haversine (en km) ───
+  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  // ─── Saisie adresse avec debounce Nominatim ───
+  const handleAddressInput = (value: string) => {
+    setAddress(value);
+    setSelectedCoords(null);
+    setDistanceKm(null);
+    setIsTooFar(false);
+
+    if (nominatimTimeout.current) clearTimeout(nominatimTimeout.current);
+
+    if (value.trim().length < 5) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setAddressLoading(true);
+    nominatimTimeout.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(value)}`,
+          { headers: { "Accept-Language": "fr" } }
+        );
+        const data = await res.json();
+        setAddressSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      } catch {
+        setAddressSuggestions([]);
+      } finally {
+        setAddressLoading(false);
+      }
+    }, 500);
+  };
+
+  // ─── Sélection d'une suggestion Nominatim ───
+  const handleSelectSuggestion = (suggestion: any) => {
+    const lat = parseFloat(suggestion.lat);
+    const lon = parseFloat(suggestion.lon);
+    const dist = haversineDistance(RESTAURANT_LAT, RESTAURANT_LON, lat, lon);
+    const rounded = Math.round(dist * 10) / 10;
+
+    setAddress(suggestion.display_name);
+    setSelectedCoords({ lat, lon });
+    setDistanceKm(rounded);
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+
+    if (dist > MAX_DELIVERY_KM) {
+      setIsTooFar(true);
+    } else {
+      setIsTooFar(false);
+    }
+  };
 
   const handleDeliveryServiceChange = (service: DeliveryService) => {
     setSelectedDeliveryService(service);
@@ -141,11 +240,9 @@ export default function Cart() {
   const depositAmount = totalPrice / 2;
 
   const getAmountToPay = () => {
-    // ─── Sur place assis : RIEN à payer maintenant (tab ouverte) ───
     if (isOpenTab) return 0;
-
     let base = totalPrice;
-    if (orderMode === "on_site") base = payNow ? totalPrice : 0; // take_away uniquement
+    if (orderMode === "on_site") base = payNow ? totalPrice : 0;
     if (orderMode === "booking") base = depositAmount;
     const shipping = (orderMode === "delivery" && deliveryQuote) ? deliveryQuote.fee : 0;
     return base + shipping;
@@ -166,8 +263,6 @@ export default function Cart() {
     }
 
     const currentAmountToPay = getAmountToPay();
-
-    // ─── Pour une tab ouverte : pas de paiement, status direct "pending" ───
     const needsPayment = !isOpenTab && currentAmountToPay > 0 && (payNow === true || orderMode === "booking");
     
     const orderData = {
@@ -191,7 +286,6 @@ export default function Cart() {
       total: totalPrice,
       amountPaid: currentAmountToPay,
       mode: orderMode,
-      // ─── Tab ouverte → "pending" directement, pas de pending_payment ───
       status: needsPayment ? "pending_payment" : "pending",
       details: {
         consumeMode: orderMode === "on_site" ? consumeMode : null,
@@ -199,7 +293,6 @@ export default function Cart() {
         guestCount: orderMode === "booking" ? guestCount : null,
         bookingSlot: orderMode === "booking" ? `${bookingDate} ${bookingTime}` : null,
         deliveryTime: orderMode === "delivery" ? deliveryTime : null,
-        // ─── Tab ouverte → open_tab, sinon logique habituelle ───
         paymentStatus: isOpenTab ? "open_tab" : needsPayment ? "pending_stripe" : "pending_at_counter",
         deliveryService: deliveryQuote?.service || null,
         deliveryQuoteId: deliveryQuote?.id || null,
@@ -224,7 +317,6 @@ export default function Cart() {
           return;
         }
         
-        // ─── Tab ouverte : notification immédiate + redirect success ───
         if (isOpenTab || !needsPayment) {
           try {
             await axios.post(`${BASE_API}/notifications/new-order`, {
@@ -242,7 +334,6 @@ export default function Cart() {
           
           window.location.href = `/order-success?orderId=${orderId}`;
         } else {
-          // Paiement Stripe (take_away en ligne, booking, delivery)
           const stripeItems = cart.map((item: any) => {
             const unitPrice = parsePrice(item.price);
             const supplementsTotal = item.supplements?.reduce((sum: number, supp: any) => {
@@ -290,6 +381,9 @@ export default function Cart() {
       if (!selectedDeliveryService || !deliveryQuote) return true;
       if (!customerName?.trim() || !customerPhone?.trim()) return true;
       if (!address || address.trim().length < 10) return true;
+      // ─── Bloquer si adresse hors zone ou pas encore validée ───
+      if (!selectedCoords) return true;
+      if (isTooFar) return true;
     }
     
     if (orderMode === 'booking') {
@@ -300,9 +394,7 @@ export default function Cart() {
     }
     
     if (orderMode === 'on_site') {
-      // dine_in : seulement la table obligatoire, pas d'email
       if (consumeMode === 'dine_in' && !selectedTable) return true;
-      // take_away : si paiement en ligne, email obligatoire
       if (consumeMode === 'take_away' && payNow && !customerEmail?.includes('@')) return true;
     }
     
@@ -400,7 +492,6 @@ export default function Cart() {
                         <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
                       </div>
 
-                      {/* ─── DINE_IN : table ouverte, pas de paiement immédiat ─── */}
                       {consumeMode === "dine_in" && (
                         <div className="form-fade-in">
                           <div className="table-selector-box">
@@ -414,7 +505,6 @@ export default function Cart() {
                             </select>
                           </div>
 
-                          {/* Bandeau informatif "tab ouverte" */}
                           <div className="open-tab-info-banner">
                             <UtensilsCrossed size={18} color="#D4AF37" />
                             <div>
@@ -425,7 +515,6 @@ export default function Cart() {
                         </div>
                       )}
 
-                      {/* ─── TAKE_AWAY : paiement immédiat comme avant ─── */}
                       {consumeMode === "take_away" && (
                         <div className="form-fade-in">
                           <p className="form-instruction">Règlement :</p>
@@ -459,10 +548,83 @@ export default function Cart() {
                         <label>Email</label>
                         <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                       </div>
-                      <div className="input-group full">
-                        <label><Bike size={14}/> Adresse de livraison *</label>
-                        <input type="text" placeholder="Adresse précise..." value={address} onChange={(e) => setAddress(e.target.value)} />
+
+                      {/* ─── Champ adresse avec autocomplétion Nominatim ─── */}
+                      <div className="input-group full" style={{ position: "relative" }}>
+                        <label>
+                          <Bike size={14} style={{ marginRight: 6 }} />
+                          Adresse de livraison *
+                        </label>
+                        <div style={{ position: "relative" }}>
+                          <input
+                            type="text"
+                            placeholder="Commencez à taper votre adresse..."
+                            value={address}
+                            onChange={(e) => handleAddressInput(e.target.value)}
+                            onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
+                            autoComplete="off"
+                            className={isTooFar ? "input-error" : selectedCoords ? "input-success" : ""}
+                          />
+                          {addressLoading && (
+                            <span className="address-loading-indicator">⏳</span>
+                          )}
+                        </div>
+
+                        {/* Dropdown suggestions */}
+                        {showSuggestions && addressSuggestions.length > 0 && (
+                          <ul className="nominatim-suggestions" ref={suggestionsRef}>
+                            {addressSuggestions.map((s, i) => (
+                              <li key={i} onClick={() => handleSelectSuggestion(s)}>
+                                <MapPin size={13} style={{ flexShrink: 0, color: "#D4AF37" }} />
+                                <span>{s.display_name}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {/* ─── Distance OK ─── */}
+                        {selectedCoords && !isTooFar && distanceKm !== null && (
+                          <div className="distance-ok-badge">
+                            <CheckCircle2 size={15} />
+                            <span>Adresse confirmée · {distanceKm} km du restaurant — livraison possible ✓</span>
+                          </div>
+                        )}
+
+                        {/* ─── Distance TROP LOIN — message bloquant ─── */}
+                        {isTooFar && distanceKm !== null && (
+                          <div className="distance-too-far-banner">
+                            <div className="too-far-header">
+                              <AlertTriangle size={20} />
+                              <strong>Zone hors livraison</strong>
+                            </div>
+                            <p>
+                              Votre adresse se trouve à <strong>{distanceKm} km</strong> du restaurant, 
+                              au-delà de notre rayon de livraison maximum de <strong>{MAX_DELIVERY_KM} km</strong>.
+                            </p>
+                            <div className="too-far-actions">
+                              <span>Que souhaitez-vous faire ?</span>
+                              <div className="too-far-btns">
+                                <button
+                                  type="button"
+                                  className="too-far-btn change-address"
+                                  onClick={() => {
+                                    setAddress("");
+                                    setSelectedCoords(null);
+                                    setDistanceKm(null);
+                                    setIsTooFar(false);
+                                  }}
+                                >
+                                  ✏️ Changer d'adresse
+                                </button>
+                                <Link to="/carte" className="too-far-btn come-to-us">
+                                  🍽️ Venir au restaurant
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
+
                       <div className="delivery-services-section">
                         <label className="section-label">Choisissez votre service de livraison :</label>
                         <div className="delivery-services-grid">
@@ -547,7 +709,6 @@ export default function Cart() {
                 </div>
               )}
 
-              {/* ─── Pour une tab ouverte : afficher le total sans "à payer maintenant" ─── */}
               {isOpenTab ? (
                 <div className="summary-line total">
                   <span>Total de la commande :</span>
@@ -612,7 +773,7 @@ export default function Cart() {
           color: #D4AF37;
         }
 
-        /* ─── Bandeau tab ouverte ─── */
+        /* ─── Tab ouverte ─── */
         .open-tab-info-banner {
           display: flex;
           align-items: flex-start;
@@ -636,8 +797,6 @@ export default function Cart() {
           line-height: 1.5;
           margin: 0;
         }
-
-        /* ─── Note récap tab ouverte ─── */
         .open-tab-summary-note {
           display: flex;
           align-items: center;
@@ -647,6 +806,159 @@ export default function Cart() {
           opacity: 0.8;
           margin-top: 4px;
           margin-bottom: 8px;
+        }
+
+        /* ─── Nominatim suggestions ─── */
+        .nominatim-suggestions {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          background: #1a1a1a;
+          border: 1px solid rgba(212,175,55,0.35);
+          border-top: none;
+          border-radius: 0 0 10px 10px;
+          margin: 0;
+          padding: 4px 0;
+          list-style: none;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+          max-height: 220px;
+          overflow-y: auto;
+        }
+        .nominatim-suggestions li {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          padding: 10px 14px;
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.8);
+          cursor: pointer;
+          line-height: 1.4;
+          transition: background 0.15s;
+        }
+        .nominatim-suggestions li:hover {
+          background: rgba(212,175,55,0.1);
+          color: #fff;
+        }
+
+        /* ─── Indicateur chargement adresse ─── */
+        .address-loading-indicator {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 0.75rem;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          from { transform: translateY(-50%) rotate(0deg); }
+          to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* ─── Inputs états ─── */
+        .input-error {
+          border-color: #e74c3c !important;
+          box-shadow: 0 0 0 2px rgba(231,76,60,0.15) !important;
+        }
+        .input-success {
+          border-color: #27ae60 !important;
+          box-shadow: 0 0 0 2px rgba(39,174,96,0.15) !important;
+        }
+
+        /* ─── Badge distance OK ─── */
+        .distance-ok-badge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 8px;
+          padding: 8px 12px;
+          background: rgba(39,174,96,0.1);
+          border: 1px solid rgba(39,174,96,0.35);
+          border-radius: 8px;
+          font-size: 0.78rem;
+          color: #2ecc71;
+        }
+
+        /* ─── Bannière trop loin ─── */
+        .distance-too-far-banner {
+          margin-top: 12px;
+          background: linear-gradient(135deg, rgba(231,76,60,0.12), rgba(192,57,43,0.06));
+          border: 1px solid rgba(231,76,60,0.45);
+          border-left: 4px solid #e74c3c;
+          border-radius: 12px;
+          padding: 16px 18px;
+          animation: fadeInBanner 0.3s ease;
+        }
+        @keyframes fadeInBanner {
+          from { opacity: 0; transform: translateY(-6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .too-far-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #e74c3c;
+          margin-bottom: 8px;
+        }
+        .too-far-header strong {
+          font-size: 0.95rem;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+        }
+        .distance-too-far-banner p {
+          color: rgba(255,255,255,0.7);
+          font-size: 0.82rem;
+          line-height: 1.6;
+          margin: 0 0 14px 0;
+        }
+        .distance-too-far-banner p strong {
+          color: #e74c3c;
+        }
+        .too-far-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .too-far-actions > span {
+          font-size: 0.78rem;
+          color: rgba(255,255,255,0.45);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .too-far-btns {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .too-far-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 9px 16px;
+          border-radius: 8px;
+          font-size: 0.82rem;
+          font-weight: 600;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.2s;
+          border: none;
+        }
+        .too-far-btn.change-address {
+          background: rgba(212,175,55,0.15);
+          border: 1px solid rgba(212,175,55,0.4);
+          color: #D4AF37;
+        }
+        .too-far-btn.change-address:hover {
+          background: rgba(212,175,55,0.25);
+        }
+        .too-far-btn.come-to-us {
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.15);
+          color: rgba(255,255,255,0.8);
+        }
+        .too-far-btn.come-to-us:hover {
+          background: rgba(255,255,255,0.12);
         }
       `}</style>
     </section>
