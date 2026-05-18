@@ -116,10 +116,10 @@ export default function Footer() {
                 {getTodayHoursText()}
               </p>
               <div className="hours-list">
-                <p><span className="gold-text">Mardi - Vendredi</span> : 11h30 - 14h30 / 18h30 - 23h30</p>
-                <p><span className="gold-text">Samedi - Dimanche</span> : 11h30 - 14h30 / 18h30 - 00h30</p>
-                <p><span className="gold-text">Lundi</span> : Fermé</p>
-              </div>
+  <p><span className="gold-text">Mardi - Vendredi</span> : 12h00 - 14h00 / 18h00 - 23h00</p>
+  <p><span className="gold-text">Samedi - Dimanche</span> : 12h00 - 14h00 / 18h00 - 00h00</p>
+  <p><span className="gold-text">Lundi</span> : Fermé</p>
+</div>
             </div>
           </div>
           <div className="contact-item">
