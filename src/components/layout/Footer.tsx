@@ -1,6 +1,6 @@
 import React from 'react';
 import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone } from "lucide-react";
-import "./footer.css";
+
 
 export default function Footer() {
   
@@ -10,16 +10,16 @@ export default function Footer() {
     window.dispatchEvent(new CustomEvent('openReservation'));
   };
 
-  // Horaires d'ouverture
+  // Horaires d'ouverture (mis à jour)
   const getOpeningHours = () => {
     const days = [
       { name: "Lundi", open: false, lunch: null, dinner: null },
-      { name: "Mardi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
-      { name: "Mercredi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
-      { name: "Jeudi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
-      { name: "Vendredi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "23h30" } },
-      { name: "Samedi", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "00h30" } },
-      { name: "Dimanche", open: true, lunch: { start: "11h30", end: "14h30" }, dinner: { start: "18h30", end: "00h30" } }
+      { name: "Mardi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Mercredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Jeudi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Vendredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Samedi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "00h00" } },
+      { name: "Dimanche", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "00h00" } }
     ];
     return days;
   };
@@ -116,8 +116,8 @@ export default function Footer() {
                 {getTodayHoursText()}
               </p>
               <div className="hours-list">
-                <p><span className="gold-text">Mardi - Vendredi</span> : 11h30 - 14h30 / 18h30 - 23h30</p>
-                <p><span className="gold-text">Samedi - Dimanche</span> : 11h30 - 14h30 / 18h30 - 00h30</p>
+                <p><span className="gold-text">Mardi - Vendredi</span> : 12h00 - 14h00 / 18h00 - 23h00</p>
+                <p><span className="gold-text">Samedi - Dimanche</span> : 12h00 - 14h00 / 18h00 - 00h00</p>
                 <p><span className="gold-text">Lundi</span> : Fermé</p>
               </div>
             </div>
