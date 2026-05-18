@@ -186,9 +186,7 @@ export default function Orders() {
     }
   };
 
-  // ─────────────────────────────────────────────────────────────
-  // FIX 4 : FERMER LA TAB + NOTIFIER LE CLIENT
-  // ─────────────────────────────────────────────────────────────
+  // FERMER LA TAB + NOTIFIER LE CLIENT
   const closeTabAndMarkPaid = async (group: TableGroup) => {
     const key = group.tableNumber;
     if (closingTabIds.has(key)) return;
@@ -216,17 +214,13 @@ export default function Orders() {
         }
       }
 
-      // ─── FIX 4 : Notifier le client que son paiement est confirmé ───
-      // On envoie une notification FCM distincte de "send-bill" pour indiquer
-      // que le paiement a bien été encaissé, permettant au client de voir
-      // son addition se résoudre et de savoir qu'il peut partir.
+      // Notifier le client que son paiement est confirmé
       if (group.fcmTokens.length > 0) {
         await axios.post(`${BASE_API}/notifications/payment-confirmed`, {
           fcmTokens: group.fcmTokens,
           tableNumber: group.tableNumber,
           total: group.totalCumule.toFixed(2),
         }).catch((err) => {
-          // Non bloquant : la tab est déjà fermée, la notification est best-effort
           console.warn("⚠️ Notification paiement non envoyée:", err.message);
         });
       }
@@ -632,7 +626,6 @@ export default function Orders() {
               <span>{isSending ? "Envoi..." : "L'addition"}</span>
             </button>
 
-            {/* FIX 4 : message de confirmation mis à jour pour indiquer la notification client */}
             <button
               className={`close-tab-btn ${isClosing ? "closing" : ""}`}
               disabled={isClosing}
@@ -922,31 +915,47 @@ export default function Orders() {
         .tg-total-label { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
         .tg-total-amount { font-size: 1.3rem; font-weight: 700; color: #D4AF37; font-family: "Playfair Display", serif; }
 
+        /* === BOUTON ADDITION CORRIGÉ - TEXTE BIEN VISIBLE === */
         .send-bill-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 10px 18px; border-radius: 12px;
-          background: linear-gradient(135deg, #D4AF37, #B8962E);
-          border: none; color: #1a0a00;
-          font-weight: 700; font-size: 0.85rem; cursor: pointer;
-          transition: all 0.2s; white-space: nowrap;
-          box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+          background: linear-gradient(135deg, #D4AF37, #C8A230);
+          border: none;
+          font-weight: 800; font-size: 0.85rem;
+          cursor: pointer; transition: all 0.2s;
+          white-space: nowrap; box-shadow: 0 4px 12px rgba(212,175,55,0.35);
         }
-        .send-bill-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.45); }
+        .send-bill-btn span { color: #2D2422 !important; font-weight: 800; }
+        .send-bill-btn svg { stroke: #2D2422; stroke-width: 1.5; }
+        .send-bill-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, #E5C158, #D4AF37);
+          box-shadow: 0 6px 20px rgba(212,175,55,0.45);
+        }
         .send-bill-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .send-bill-btn.sending { background: rgba(212,175,55,0.3); color: #D4AF37; }
+        .send-bill-btn.sending { background: rgba(212,175,55,0.25); backdrop-filter: blur(4px); }
+        .send-bill-btn.sending span { color: #D4AF37 !important; }
 
+        /* === BOUTON PAYÉ CORRIGÉ - TEXTE BLANC BIEN VISIBLE === */
         .close-tab-btn {
           display: flex; align-items: center; gap: 8px;
           padding: 10px 18px; border-radius: 12px;
-          background: linear-gradient(135deg, #27ae60, #1e8449);
-          border: none; color: white;
-          font-weight: 700; font-size: 0.85rem; cursor: pointer;
-          transition: all 0.2s; white-space: nowrap;
-          box-shadow: 0 4px 15px rgba(39,174,96,0.3);
+          background: linear-gradient(135deg, #2DCC70, #27AE60);
+          border: none;
+          font-weight: 800; font-size: 0.85rem;
+          cursor: pointer; transition: all 0.2s;
+          white-space: nowrap; box-shadow: 0 4px 12px rgba(39,174,96,0.35);
         }
-        .close-tab-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39,174,96,0.45); }
+        .close-tab-btn span { color: white !important; font-weight: 800; }
+        .close-tab-btn svg { stroke: white; stroke-width: 1.5; }
+        .close-tab-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, #33E880, #2DCC70);
+          box-shadow: 0 6px 20px rgba(39,174,96,0.45);
+        }
         .close-tab-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .close-tab-btn.closing { background: rgba(39,174,96,0.3); color: white; }
+        .close-tab-btn.closing { background: rgba(39,174,96,0.25); backdrop-filter: blur(4px); }
+        .close-tab-btn.closing span { color: #2DCC70 !important; }
 
         .tg-expand-btn {
           width: 36px; height: 36px; border-radius: 10px;
@@ -963,6 +972,45 @@ export default function Orders() {
           grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 12px;
           border-top: 1px solid rgba(212,175,55,0.1);
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 768px) {
+          .table-group-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+          }
+          .table-group-right {
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap;
+          }
+          .send-bill-btn, .close-tab-btn {
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            flex: 1;
+            justify-content: center;
+          }
+          .table-group-total {
+            text-align: left;
+          }
+          .tg-total-amount {
+            font-size: 1.1rem;
+          }
+          .table-group-orders {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .send-bill-btn span, .close-tab-btn span {
+            font-size: 0.7rem;
+          }
+          .send-bill-btn, .close-tab-btn {
+            padding: 6px 10px;
+          }
         }
 
         .open-tab-badge-card {
