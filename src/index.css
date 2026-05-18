@@ -77,3 +77,17 @@ button {
 .action-btn.done     { background-color: #27ae60 !important; color: #fff !important; }
 .action-btn.archive  { background-color: #e67e22 !important; color: #fff !important; }
 .action-btn.icon-only { background-color: #ffffff !important; border: 1.5px solid rgba(212,175,55,0.3) !important; }
+
+/* Dans votre fichier CSS global (ex: index.css ou App.css) */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}

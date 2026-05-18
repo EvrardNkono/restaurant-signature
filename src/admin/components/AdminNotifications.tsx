@@ -19,15 +19,15 @@ export default function AdminNotifications() {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('📨 Message foreground reçu:', payload);
       
-      // Vérifier si l'API Notification est disponible
       if (!('Notification' in window)) return;
       
       if (Notification.permission === 'granted') {
-        // Créer la notification
         const notificationTitle = payload.notification?.title || 'Nouvelle commande !';
         const notificationOptions = {
           body: payload.notification?.body || '',
           icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-72x72.png',
+          tag: 'order-notification',
           data: {
             url: '/admin',
             orderId: payload.data?.orderId || null
@@ -36,12 +36,10 @@ export default function AdminNotifications() {
         
         const notification = new Notification(notificationTitle, notificationOptions);
         
-        // Gestion du clic sur la notification
         notification.onclick = (event) => {
           event.preventDefault();
           notification.close();
           
-          // Ouvrir ou focus sur la page admin
           if (window.location.pathname !== '/admin') {
             window.location.href = '/admin';
           } else {
@@ -80,10 +78,12 @@ export default function AdminNotifications() {
           }
         } else if (Notification.permission === 'default') {
           console.log('⏳ Permission pas encore accordée');
+          setIsEnabled(false);
         } else {
           console.warn('⚠️ Permission refusée, nettoyage des préférences');
           localStorage.removeItem('admin_notifications_enabled');
           localStorage.removeItem('admin_token');
+          setIsEnabled(false);
         }
       } else {
         console.log('ℹ️ Aucune notification sauvegardée');
@@ -99,35 +99,75 @@ export default function AdminNotifications() {
     setLoading(true);
     
     try {
-      if (Notification.permission !== 'granted') {
-        const permission = await Notification.requestPermission();
+      // Vérifier si le navigateur supporte les notifications
+      if (!('Notification' in window)) {
+        alert('❌ Votre navigateur ne supporte pas les notifications');
+        setLoading(false);
+        return;
+      }
+
+      // Vérifier l'état actuel des permissions
+      let permission = Notification.permission;
+      
+      // Si déjà refusé, informer l'utilisateur
+      if (permission === 'denied') {
+        alert('❌ Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.');
+        setLoading(false);
+        return;
+      }
+      
+      // Si jamais demandé, demander maintenant
+      if (permission === 'default') {
+        const result = await Notification.requestPermission();
+        permission = result;
+        
         if (permission !== 'granted') {
-          alert('❌ Vous devez autoriser les notifications');
+          alert('❌ Vous devez autoriser les notifications pour continuer');
           setLoading(false);
           return;
         }
       }
-
+      
+      // Si permission === 'granted', continuer
+      console.log('✅ Permission accordée, activation en cours...');
+      
+      // Obtenir le token Firebase
       const messaging = getMessaging(app);
       
       let token = localStorage.getItem('admin_token');
       
       if (!token) {
-        token = await getToken(messaging, { vapidKey: VAPID_KEY });
-        if (token) {
-          localStorage.setItem('admin_token', token);
-          console.log('📱 Nouveau token généré et stocké');
+        try {
+          token = await getToken(messaging, { vapidKey: VAPID_KEY });
+          if (token) {
+            localStorage.setItem('admin_token', token);
+            console.log('📱 Nouveau token généré et stocké');
+          } else {
+            throw new Error('Token vide retourné par Firebase');
+          }
+        } catch (tokenError: any) {
+          console.error('Erreur détaillée token:', tokenError);
+          
+          // Message d'erreur plus explicite
+          if (tokenError.code === 'messaging/permission-blocked') {
+            alert('❌ Les notifications sont bloquées par le navigateur. Vérifiez vos paramètres.');
+          } else if (tokenError.code === 'messaging/failed-service-worker-registration') {
+            alert('❌ Erreur Service Worker. Rafraîchissez la page et réessayez.');
+          } else {
+            alert(`❌ Impossible d'obtenir le token: ${tokenError.message || 'Erreur inconnue'}`);
+          }
+          setLoading(false);
+          return;
         }
-      } else {
-        console.log('📱 Token existant réutilisé:', token.substring(0, 30) + '...');
       }
       
       if (!token) {
-        alert('❌ Impossible d\'obtenir le token');
+        alert('❌ Impossible d\'obtenir le token de notification');
         setLoading(false);
         return;
       }
 
+      // Envoyer au serveur
       const response = await fetch(`${BASE_API}/notifications/register-admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,13 +177,15 @@ export default function AdminNotifications() {
       if (response.ok) {
         localStorage.setItem('admin_notifications_enabled', 'true');
         setIsEnabled(true);
-        alert('✅ Notifications activées !');
+        alert('✅ Notifications activées avec succès !');
       } else {
-        throw new Error('Erreur serveur');
+        const errorText = await response.text();
+        console.error('Erreur serveur:', errorText);
+        throw new Error(`Erreur serveur: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Erreur:', error);
-      alert('❌ Impossible d\'activer les notifications');
+      console.error('❌ Erreur complète:', error);
+      alert('❌ Impossible d\'activer les notifications. Vérifiez la console pour plus de détails.');
     } finally {
       setLoading(false);
     }
@@ -152,15 +194,33 @@ export default function AdminNotifications() {
   const disableNotifications = async () => {
     setLoading(true);
     try {
+      // Optionnel: informer le serveur de supprimer le token
+      const savedToken = localStorage.getItem('admin_token');
+      if (savedToken) {
+        try {
+          await fetch(`${BASE_API}/notifications/unregister-admin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: savedToken })
+          });
+        } catch (error) {
+          console.warn('Erreur lors de la désinscription serveur:', error);
+        }
+      }
+      
       localStorage.removeItem('admin_notifications_enabled');
       localStorage.removeItem('admin_token');
       setIsEnabled(false);
       alert('🔕 Notifications désactivées');
+    } catch (error) {
+      console.error('Erreur désactivation:', error);
+      alert('❌ Erreur lors de la désactivation');
     } finally {
       setLoading(false);
     }
   };
 
+  // Ne pas afficher si non supporté
   if (!('Notification' in window)) return null;
 
   return (
@@ -177,19 +237,37 @@ export default function AdminNotifications() {
         color: isEnabled ? '#D4AF37' : '#2D2422',
         border: '1px solid #D4AF37',
         borderRadius: '30px',
-        cursor: 'pointer',
+        cursor: loading ? 'wait' : 'pointer',
         fontWeight: 500,
-        fontFamily: 'inherit'
+        fontFamily: 'inherit',
+        opacity: loading ? 0.7 : 1,
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        if (!loading) {
+          e.currentTarget.style.transform = 'scale(1.02)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
       }}
     >
       {loading ? (
-        <Loader2 size={16} className="spinner" />
+        <Loader2 size={16} className="spinner" style={{ animation: 'spin 1s linear infinite' }} />
       ) : isEnabled ? (
         <BellOff size={16} />
       ) : (
         <Bell size={16} />
       )}
-      <span>{isEnabled ? 'Notif. actives' : 'Activer notifs'}</span>
+      <span>
+        {loading 
+          ? 'Chargement...' 
+          : isEnabled 
+            ? 'Notif. actives' 
+            : Notification.permission === 'denied'
+              ? 'Notif. bloquées'
+              : 'Activer notifs'}
+      </span>
     </button>
   );
 }
