@@ -14,6 +14,9 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// URL ABSOLUE de l'administration
+const ADMIN_URL = "https://restaurantsignature.fr/admin";
+
 // ✅ FORCER L'ACTIVATION IMMÉDIATE DU SERVICE WORKER
 self.addEventListener('install', (event) => {
   console.log('🔥 SW FCM: Installation');
@@ -24,19 +27,31 @@ self.addEventListener('install', (event) => {
 messaging.onBackgroundMessage((payload) => {
   console.log('📨 Notification en arrière-plan reçue:', payload);
   
+  // Extraire l'ID de commande si disponible
+  const orderId = payload.data?.orderId || payload.data?.order_id || '';
+  const orderRef = payload.data?.orderRef || '';
+  
+  // Construire le message
+  let bodyText = payload.notification?.body || 'Nouvelle commande !';
+  if (orderId) {
+    bodyText = `Commande #${orderId} - ${bodyText}`;
+  }
+  
   const notificationTitle = payload.notification?.title || 'Restaurant Signature';
   const notificationOptions = {
-    body: payload.notification?.body || 'Nouvelle commande !',
+    body: bodyText,
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-96x96.png',
     vibrate: [200, 100, 200],
     requireInteraction: true,
     silent: false,
-    tag: 'new-order',
+    tag: `order-${orderId || Date.now()}`,
     renotify: true,
     data: {
-      url: payload.data?.url || '/admin/orders',
-      click_action: '/admin/orders'
+      url: ADMIN_URL,
+      orderId: orderId,
+      orderRef: orderRef,
+      click_action: ADMIN_URL
     }
   };
   
@@ -52,20 +67,29 @@ self.addEventListener('notificationclick', (event) => {
   console.log('🔔 Clic sur notification:', event.notification);
   event.notification.close();
   
-  const urlToOpen = event.notification.data?.url || '/admin/orders';
+  // Utiliser l'URL absolue stockée dans les données
+  const urlToOpen = event.notification.data?.url || ADMIN_URL;
+  const orderId = event.notification.data?.orderId;
+  
+  console.log(`🔗 Ouverture de: ${urlToOpen} ${orderId ? `(commande #${orderId})` : ''}`);
   
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(windowClients => {
-        for (let client of windowClients) {
-          if (client.url.includes('/admin') && 'focus' in client) {
-            return client.focus();
-          }
+    clients.matchAll({ 
+      type: 'window', 
+      includeUncontrolled: true 
+    }).then(windowClients => {
+      // Chercher une fenêtre admin déjà ouverte
+      for (let client of windowClients) {
+        // Vérifier si c'est une page admin (restaurantsignature.fr/admin ou localhost/admin)
+        if ((client.url.includes('restaurantsignature.fr/admin') || client.url.includes('localhost/admin')) && 'focus' in client) {
+          console.log('✅ Fenêtre admin trouvée, focus');
+          return client.focus();
         }
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
+      }
+      // Sinon ouvrir une nouvelle fenêtre
+      console.log('🆕 Ouverture d\'une nouvelle fenêtre admin');
+      return clients.openWindow(urlToOpen);
+    })
   );
 });
 

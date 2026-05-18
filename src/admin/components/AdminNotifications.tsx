@@ -9,6 +9,9 @@ const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBL
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
+// URL complète de l'administration
+const ADMIN_URL = "https://restaurantsignature.fr/admin";
+
 export default function AdminNotifications() {
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,21 +32,30 @@ export default function AdminNotifications() {
           badge: '/icons/icon-72x72.png',
           tag: 'order-notification',
           data: {
-            url: '/admin',
+            url: ADMIN_URL,
             orderId: payload.data?.orderId || null
           }
         };
         
         const notification = new Notification(notificationTitle, notificationOptions);
         
+        // Gestion du clic sur la notification
         notification.onclick = (event) => {
           event.preventDefault();
           notification.close();
           
-          if (window.location.pathname !== '/admin') {
-            window.location.href = '/admin';
-          } else {
+          // Vérifier si on est déjà sur la page admin
+          const currentPath = window.location.pathname;
+          const isOnAdmin = currentPath === '/admin' || currentPath.startsWith('/admin/');
+          const currentHost = window.location.hostname;
+          const isCorrectHost = currentHost === 'restaurantsignature.fr' || currentHost === 'localhost';
+          
+          if (isOnAdmin && isCorrectHost) {
+            // Déjà sur l'admin, juste focus
             window.focus();
+          } else {
+            // Ouvrir l'administration
+            window.location.href = ADMIN_URL;
           }
         };
       }
@@ -99,24 +111,20 @@ export default function AdminNotifications() {
     setLoading(true);
     
     try {
-      // Vérifier si le navigateur supporte les notifications
       if (!('Notification' in window)) {
         alert('❌ Votre navigateur ne supporte pas les notifications');
         setLoading(false);
         return;
       }
 
-      // Vérifier l'état actuel des permissions
       let permission = Notification.permission;
       
-      // Si déjà refusé, informer l'utilisateur
       if (permission === 'denied') {
         alert('❌ Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.');
         setLoading(false);
         return;
       }
       
-      // Si jamais demandé, demander maintenant
       if (permission === 'default') {
         const result = await Notification.requestPermission();
         permission = result;
@@ -128,10 +136,8 @@ export default function AdminNotifications() {
         }
       }
       
-      // Si permission === 'granted', continuer
       console.log('✅ Permission accordée, activation en cours...');
       
-      // Obtenir le token Firebase
       const messaging = getMessaging(app);
       
       let token = localStorage.getItem('admin_token');
@@ -148,7 +154,6 @@ export default function AdminNotifications() {
         } catch (tokenError: any) {
           console.error('Erreur détaillée token:', tokenError);
           
-          // Message d'erreur plus explicite
           if (tokenError.code === 'messaging/permission-blocked') {
             alert('❌ Les notifications sont bloquées par le navigateur. Vérifiez vos paramètres.');
           } else if (tokenError.code === 'messaging/failed-service-worker-registration') {
@@ -167,7 +172,6 @@ export default function AdminNotifications() {
         return;
       }
 
-      // Envoyer au serveur
       const response = await fetch(`${BASE_API}/notifications/register-admin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -194,7 +198,6 @@ export default function AdminNotifications() {
   const disableNotifications = async () => {
     setLoading(true);
     try {
-      // Optionnel: informer le serveur de supprimer le token
       const savedToken = localStorage.getItem('admin_token');
       if (savedToken) {
         try {
@@ -220,7 +223,6 @@ export default function AdminNotifications() {
     }
   };
 
-  // Ne pas afficher si non supporté
   if (!('Notification' in window)) return null;
 
   return (
