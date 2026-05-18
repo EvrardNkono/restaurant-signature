@@ -14,7 +14,7 @@ export default function Footer() {
   const getOpeningHours = () => {
     const days = [
       { name: "Lundi", open: false, lunch: null, dinner: null },
-      { name: "Mardi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Mardi", open: true, lunch: { start: "12h00", end: " 14h00" }, dinner: { start: "18h00", end: "23h00" } },
       { name: "Mercredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
       { name: "Jeudi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
       { name: "Vendredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
