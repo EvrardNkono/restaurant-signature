@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Indique ton sitemap si tu en as un (fortement recommandé pour le SEO)
+Sitemap: https://www.propertycameroon.com/sitemap.xml
