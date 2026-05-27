@@ -9,6 +9,7 @@ import {
 } from "lucide-react"; 
 import "./menuSoir.css";
 import BillPopup from "../components/BillPopup";
+import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
 // --- CONFIGURATION DES ENDPOINTS ---
 const isLocal = window.location.hostname === "localhost";
@@ -109,12 +110,14 @@ const scrollToDrawer = (id: string) => {
 };
 
 export default function MenuSoir() {
+  // Gestion des horaires du restaurant
+  const { currentPeriod, nextPeriodInfo } = useRestaurantHours();
+  
   const { 
     cart, 
     addToCart, 
     removeFromCart, 
     getItemQuantity,
-    // ─── FIX 3 : on importe les fonctions d'édition post-ajout ───
     addSupplementToLine,
     removeSupplementFromLine,
     updateLineAccompaniment,
@@ -122,27 +125,23 @@ export default function MenuSoir() {
 
   const clientId = localStorage.getItem("signature_client_id");
 
+  // Vérification que le service du soir est disponible
+  const isSoirServiceAvailable = currentPeriod === "SOIR";
+  const isRestaurantClosed = currentPeriod === "FERME";
+
   // --- ÉTATS ---
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
   const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
-
-  // tempItem = item en cours de configuration AVANT confirmation (même logique que l'original)
   const [tempItem, setTempItem] = useState<CartItem | null>(null);
-
-  // ─── FIX 3 : editingCartItemId = cartItemId d'un item DÉJÀ en panier qu'on ré-édite ───
-  // Quand ce state est défini, le tiroir travaille directement sur le panier via CartContext
-  // (addSupplementToLine / removeSupplementFromLine / updateLineAccompaniment),
-  // exactement comme Menu.tsx le fait. tempItem reste null dans ce mode.
   const [editingCartItemId, setEditingCartItemId] = useState<string | null>(null);
-
   const [hasPendingBill, setHasPendingBill] = useState(false);
 
   // Le tiroir est ouvert soit en mode "nouveau" (tempItem) soit en mode "édition" (editingCartItemId)
   const isAnyDrawerOpen = tempItem !== null || editingCartItemId !== null;
 
-  // L'id du plat dont le tiroir est ouvert (pour savoir quelle carte affiche le tiroir)
+  // L'id du plat dont le tiroir est ouvert
   const openDrawerPlatId = tempItem?.id ?? 
     (editingCartItemId 
       ? cart.find(i => i.cartItemId === editingCartItemId)?.id ?? null 
@@ -182,9 +181,7 @@ export default function MenuSoir() {
     if (clientId) refetchOrders();
   }, [clientId, cart.length, refetchOrders]);
 
-  // ─── FIX 2 : Nettoyage du panier quand une commande est archivée ───
-  // Utilise un ref pour mémoriser les IDs déjà vus comme "archived" et ne déclencher
-  // le nettoyage qu'une seule fois par commande (pas dépendant d'une fenêtre de 5s)
+  // Nettoyage du panier quand une commande est archivée
   const seenArchivedIds = useState<Set<string>>(() => new Set())[0];
 
   useEffect(() => {
@@ -192,7 +189,6 @@ export default function MenuSoir() {
 
     const newlyArchived = activeOrders.find((order: any) => {
       if (order.status !== "archived") return false;
-      // On ne déclenche que si on n'a pas encore traité cet ID
       return !seenArchivedIds.has(order._id);
     });
 
@@ -200,7 +196,6 @@ export default function MenuSoir() {
       seenArchivedIds.add(newlyArchived._id);
       if (cart.length > 0) {
         cart.forEach((item: any) => removeFromCart(item.cartItemId));
-        // Toast léger sans dépendre de DOM direct (réutilise le même pattern que l'original)
         const toast = document.createElement('div');
         toast.style.cssText = `
           position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -239,8 +234,26 @@ export default function MenuSoir() {
     }), 
   [platsDuSoir, univers, filter]);
 
-  // --- ACTIONS ---
+  // Fonction utilitaire pour afficher les toasts
+  const showToast = (message: string, type: "success" | "error" | "warning" = "error") => {
+    const colors = {
+      success: "#27ae60",
+      error: "#e74c3c",
+      warning: "#f39c12"
+    };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:${colors[type]};color:#fff;padding:12px 24px;border-radius:10px;
+      font-size:0.9rem;font-weight:600;z-index:10000;
+      box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  };
 
+  // --- ACTIONS ---
   const handleRemoveOne = (platId: string) => {
     const itemsInCart = cart.filter((i) => i.id === platId);
     if (itemsInCart.length > 0) {
@@ -250,33 +263,32 @@ export default function MenuSoir() {
   };
 
   const handleAddClick = (plat: Plat) => {
+    // Vérification des horaires
+    if (isRestaurantClosed) {
+      showToast(
+        nextPeriodInfo 
+          ? `🍽️ Restaurant fermé. Prochain service : ${nextPeriodInfo}`
+          : "🍽️ Restaurant fermé pour le moment",
+        "error"
+      );
+      return;
+    }
+    
+    if (!isSoirServiceAvailable) {
+      showToast(
+        "🍽️ Le menu du soir n'est pas encore disponible. Service à partir de 18h00.",
+        "warning"
+      );
+      return;
+    }
+
     if (hasPendingBill) {
-      // ─── FIX : toast cohérent avec Menu.tsx au lieu d'un alert() natif ───
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-        background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
-        font-size:0.9rem;font-weight:600;z-index:9999;
-        box-shadow:0 4px 20px rgba(0,0,0,0.25);
-      `;
-      toast.textContent = "⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.";
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+      showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.", "error");
       return;
     }
 
     if (isAnyDrawerOpen) {
-      // ─── FIX : toast cohérent au lieu d'un alert() natif ───
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-        background:#f39c12;color:#fff;padding:12px 24px;border-radius:10px;
-        font-size:0.9rem;font-weight:600;z-index:9999;
-        box-shadow:0 4px 20px rgba(0,0,0,0.25);
-      `;
-      toast.textContent = `Veuillez d'abord terminer la configuration en cours.`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      showToast("Veuillez d'abord terminer la configuration en cours.", "warning");
       return;
     }
 
@@ -300,29 +312,25 @@ export default function MenuSoir() {
     };
 
     if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
-      // Ouvre le tiroir en mode "nouveau" avec tempItem
       setTempItem(newItem);
       setEditingCartItemId(null);
       scrollToDrawer(plat._id);
     } else {
       const result = addToCart(newItem, "SOIR");
       if (result === "LOCK_ERROR") {
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-          position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-          background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
-          font-size:0.9rem;font-weight:600;z-index:9999;
-          box-shadow:0 4px 20px rgba(0,0,0,0.25);
-        `;
-        toast.textContent = "Votre panier contient déjà des produits d'un autre service (MIDI).";
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
+        showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
+      } else {
+        showToast(`✓ ${plat.name} ajouté au panier`, "success");
       }
     }
   };
 
-  // ─── FIX 3 : Ouvrir le tiroir sur un item DÉJÀ en panier pour l'éditer ───
+  // Ouvrir le tiroir sur un item DÉJÀ en panier pour l'éditer
   const handleEditExistingItem = (plat: Plat) => {
+    if (isRestaurantClosed || !isSoirServiceAvailable) {
+      showToast("Impossible de modifier : restaurant fermé", "error");
+      return;
+    }
     if (isAnyDrawerOpen) return;
     const itemsInCart = cart.filter(i => i.id === plat._id);
     if (itemsInCart.length === 0) return;
@@ -368,17 +376,9 @@ export default function MenuSoir() {
     if (!tempItem) return;
     const result = addToCart(tempItem, "SOIR");
     if (result === "LOCK_ERROR") {
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-        background:#e74c3c;color:#fff;padding:12px 24px;border-radius:10px;
-        font-size:0.9rem;font-weight:600;z-index:9999;
-        box-shadow:0 4px 20px rgba(0,0,0,0.25);
-      `;
-      toast.textContent = "Votre panier contient déjà des produits d'un autre service (MIDI).";
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+      showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
     } else {
+      showToast(`✓ ${tempItem.name} ajouté au panier`, "success");
       setTempItem(null);
     }
   };
@@ -390,6 +390,10 @@ export default function MenuSoir() {
   };
 
   const handleUniversChange = (newUnivers: "Cuisine" | "Boissons") => {
+    if (isRestaurantClosed) {
+      showToast("Restaurant fermé, impossible de changer d'univers", "warning");
+      return;
+    }
     if (isAnyDrawerOpen) return;
     setUnivers(newUnivers);
     setFilter("Tous");
@@ -419,6 +423,34 @@ export default function MenuSoir() {
 
   return (
     <section className="menu-soir-section">
+      {/* BANNIÈRES DE STATUT DU RESTAURANT */}
+      {!isRestaurantClosed && isSoirServiceAvailable && (
+        <div className="restaurant-open-banner">
+          <Clock size={18} />
+          <span>SERVICE SOIR EN COURS • Dernières commandes dans 30 min</span>
+        </div>
+      )}
+      
+      {isRestaurantClosed && (
+        <div className="restaurant-closed-banner">
+          <Clock size={18} />
+          <span>
+            Restaurant fermé
+            {nextPeriodInfo && ` • Prochain service : ${nextPeriodInfo}`}
+          </span>
+        </div>
+      )}
+      
+      {!isRestaurantClosed && !isSoirServiceAvailable && (
+        <div className="restaurant-warning-banner">
+          <Clock size={18} />
+          <span>
+            Menu du soir disponible à partir de 18h00
+            {nextPeriodInfo && ` • ${nextPeriodInfo}`}
+          </span>
+        </div>
+      )}
+
       {isAnyDrawerOpen && <div className="global-drawer-overlay" onClick={handleCloseDrawer} />}
 
       <div className="menu-header-soir">
@@ -435,10 +467,18 @@ export default function MenuSoir() {
 
       <div className="univers-selector-container-soir">
         <div className="univers-selector-soir">
-          <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} onClick={() => handleUniversChange("Cuisine")}>
+          <button 
+            className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled-btn" : ""}`} 
+            onClick={() => handleUniversChange("Cuisine")}
+            disabled={isRestaurantClosed}
+          >
             <Utensils size={18} /> La Table
           </button>
-          <button className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} onClick={() => handleUniversChange("Boissons")}>
+          <button 
+            className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled-btn" : ""}`} 
+            onClick={() => handleUniversChange("Boissons")}
+            disabled={isRestaurantClosed}
+          >
             <GlassWater size={18} /> La Cave
           </button>
         </div>
@@ -448,7 +488,12 @@ export default function MenuSoir() {
         <div className="menu-filtres-track-soir">
           <div className="menu-filtres-list-soir">
             {currentCategories.map((cat, idx) => (
-              <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} onClick={() => !isAnyDrawerOpen && setFilter(cat as string)}>
+              <button 
+                key={idx} 
+                className={`filter-btn-soir ${filter === cat ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled-btn" : ""}`} 
+                onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setFilter(cat as string)}
+                disabled={isRestaurantClosed}
+              >
                 {cat as string}
               </button>
             ))}
@@ -460,11 +505,9 @@ export default function MenuSoir() {
         {platsFiltres.map(plat => {
           const itemsInCart = cart.filter((i: CartItem) => i.id === plat._id);
           const isFlipped = flippedId === plat._id;
-
-          // ─── FIX 3 : le tiroir de ce plat est ouvert soit en mode nouveau soit en mode édition ───
           const isExpanding = openDrawerPlatId === plat._id;
-
           const quantityInCart = getItemQuantity(plat._id);
+          
           const orderMatch = activeOrders.find((order: any) => 
             order.items.some((item: any) => item.productId === plat._id)
           );
@@ -487,14 +530,10 @@ export default function MenuSoir() {
             ? (supplementsList?.filter(s => s.active) || []) 
             : (plat.supplements?.filter(s => s.active) || []);
 
-          // ─── FIX 3 : dans le mode édition, on récupère l'item en panier ciblé ───
           const editingItem = editingCartItemId 
             ? cart.find(i => i.cartItemId === editingCartItemId) ?? null 
             : null;
 
-          // L'item de référence pour afficher les sélections dans le tiroir :
-          // - en mode "nouveau" : tempItem
-          // - en mode "édition" : l'item en panier
           const drawerItem = tempItem?.id === plat._id ? tempItem : editingItem;
 
           return (
@@ -520,14 +559,21 @@ export default function MenuSoir() {
                     <h3>{plat.name}</h3>
                     <div className="gold-separator"></div>
                     <p className="description-preview-soir">{plat.description}</p>
-                    <button className="view-details-btn-soir" onClick={() => !isAnyDrawerOpen && setFlippedId(plat._id)}>Voir plus...</button>
+                    <button 
+                      className="view-details-btn-soir" 
+                      onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setFlippedId(plat._id)}
+                      disabled={isRestaurantClosed}
+                    >
+                      Voir plus...
+                    </button>
 
                     <div className="card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
   
                       <button 
-                        className={`btn-add-soir ${isAnyDrawerOpen && !isExpanding ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
+                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) || isRestaurantClosed || !isSoirServiceAvailable ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
                         onClick={() => handleAddClick(plat)}
                         style={{ width: '100%' }}
+                        disabled={isRestaurantClosed || !isSoirServiceAvailable}
                       >
                         {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
                           <>
@@ -537,8 +583,7 @@ export default function MenuSoir() {
                         )}
                       </button>
 
-                      {/* ─── FIX 3 : bouton "Modifier ma commande" sur les items déjà en panier ─── */}
-                      {quantityInCart > 0 && !isExpanding && (
+                      {quantityInCart > 0 && !isExpanding && !isRestaurantClosed && isSoirServiceAvailable && (
                         <button 
                           className="btn-edit-soir"
                           onClick={() => handleEditExistingItem(plat)}
@@ -564,7 +609,7 @@ export default function MenuSoir() {
                         </button>
                       )}
 
-                      {quantityInCart > 0 && !isExpanding && (
+                      {quantityInCart > 0 && !isExpanding && !isRestaurantClosed && isSoirServiceAvailable && (
                         <button 
                           className="btn-remove-quick-soir"
                           onClick={() => handleRemoveOne(plat._id)}
@@ -592,7 +637,6 @@ export default function MenuSoir() {
                     <div className="drawer-header">
                       <div className="drawer-title">
                         <Sparkles size={14} color="#d4af37" />
-                        {/* ─── FIX 3 : titre différent selon le mode ─── */}
                         <span>{editingCartItemId && editingItem?.id === plat._id ? "Modifier votre commande" : "Personnalisation"}</span>
                       </div>
                       <button className="btn-cancel-config" onClick={handleCloseDrawer}>
@@ -639,10 +683,8 @@ export default function MenuSoir() {
                                 className={`acc-mini-choice ${drawerItem.chosenAccompaniment === accName ? "selected" : ""}`}
                                 onClick={() => {
                                   if (tempItem?.id === plat._id) {
-                                    // Mode nouveau : on modifie tempItem
                                     handleUpdateTempAcc(accName);
                                   } else if (editingCartItemId) {
-                                    // ─── FIX 3 : Mode édition → CartContext directement ───
                                     updateLineAccompaniment(editingCartItemId, accName);
                                   }
                                 }}
@@ -674,7 +716,6 @@ export default function MenuSoir() {
                                         if (tempItem?.id === plat._id) {
                                           handleRemoveTempSupp(supp._id);
                                         } else if (editingCartItemId) {
-                                          // ─── FIX 3 : Mode édition → CartContext directement ───
                                           removeSupplementFromLine(editingCartItemId, supp._id);
                                         }
                                       }}>
@@ -688,7 +729,6 @@ export default function MenuSoir() {
                                         if (tempItem?.id === plat._id) {
                                           handleAddTempSupp({ id: supp._id, name: supp.name, price: supp.price });
                                         } else if (editingCartItemId) {
-                                          // ─── FIX 3 : Mode édition → CartContext directement ───
                                           addSupplementToLine(editingCartItemId, {
                                             id: supp._id,
                                             name: supp.name,

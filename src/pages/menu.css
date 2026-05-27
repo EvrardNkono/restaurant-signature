@@ -2099,3 +2099,76 @@ body.drawer-open {
   0%, 100% { background: transparent; border-left-color: transparent; }
   50% { background: rgba(212,175,55,0.15); border-left: 3px solid var(--gold-primary); }
 }
+
+/* BANNIÈRES DE STATUT DU RESTAURANT */
+.restaurant-open-banner,
+.restaurant-closed-banner,
+.restaurant-warning-banner {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.3s ease-out;
+}
+
+.restaurant-open-banner {
+  background: linear-gradient(135deg, #27AE60, #1E8449);
+  color: white;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.restaurant-closed-banner {
+  background: linear-gradient(135deg, #E74C3C, #C0392B);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.restaurant-warning-banner {
+  background: linear-gradient(135deg, #F39C12, #E67E22);
+  color: white;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+@keyframes slideDown {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+  to {
+    top: 80px;
+    opacity: 1;
+  }
+}
+
+/* ÉTATS DÉSACTIVÉS */
+.univers-tab.disabled,
+.category-chip-enhanced.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.add-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #95a5a6 !important;
+}
+
+.add-btn.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

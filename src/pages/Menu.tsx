@@ -11,7 +11,8 @@ import {
    Tv,  
 } from "lucide-react";
 import "./menu.css";
-import BillPopup from "../components/BillPopup"; // ← AJOUT
+import BillPopup from "../components/BillPopup";
+import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -177,6 +178,9 @@ interface Supplement {
 }
 
 export default function Menu() {
+  // Gestion des horaires du restaurant
+  const { currentPeriod, nextPeriodInfo } = useRestaurantHours();
+  
   const { 
     cart, 
     addToCart, 
@@ -188,6 +192,11 @@ export default function Menu() {
   } = useCart();
 
   const clientId = localStorage.getItem("signature_client_id");
+  
+  // Vérification que le service du jour est disponible
+  const isJourServiceAvailable = currentPeriod === "JOUR";
+  const isRestaurantClosed = currentPeriod === "FERME";
+  
   const [period] = useState<"JOUR" | "SOIR">("JOUR"); 
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
@@ -198,8 +207,6 @@ export default function Menu() {
   const [searchTerm, setSearchTerm] = useState("");
   const [quickViewId, setQuickViewId] = useState<string | null>(null);
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
-
-  // ─── AJOUT : état bill pending pour bloquer les commandes ───
   const [hasPendingBill, setHasPendingBill] = useState(false);
 
   const isAnyDrawerOpen = selectingAccId !== null;
@@ -357,9 +364,68 @@ export default function Menu() {
     return filtered;
   }, [platsDeLaPeriode, univers, filter, searchTerm]);
 
+  // Fonction utilitaire pour afficher les toasts
+  const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
+    const colors = {
+      success: "#27ae60",
+      error: "#e74c3c",
+      info: "#3498db",
+      warning: "#f39c12"
+    };
+    const toast = document.createElement('div');
+    toast.className = `custom-toast-enhanced ${type}`;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${colors[type]};
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 10000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    `;
+    toast.innerHTML = `
+      <div class="toast-content">
+        <span class="toast-message">${message}</span>
+        <button class="toast-close" style="margin-left: 12px; background: none; border: none; color: white; cursor: pointer;">×</button>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn?.addEventListener('click', () => toast.remove());
+    
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  };
+
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    // ─── BLOCAGE si une addition est en attente ───
+    // Vérification des horaires
+    if (isRestaurantClosed) {
+      showToast(
+        nextPeriodInfo 
+          ? `🍽️ Restaurant fermé. Prochain service : ${nextPeriodInfo}`
+          : "🍽️ Restaurant fermé pour le moment",
+        "error"
+      );
+      return;
+    }
+    
+    if (!isJourServiceAvailable) {
+      showToast(
+        "🍽️ Le menu du jour n'est pas encore disponible. Service à partir de 12h00.",
+        "warning"
+      );
+      return;
+    }
+    
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
       return;
@@ -410,26 +476,6 @@ export default function Menu() {
     }
   };
 
-  const showToast = (message: string, type: "success" | "error" | "info") => {
-    const toast = document.createElement('div');
-    toast.className = `custom-toast-enhanced ${type}`;
-    toast.innerHTML = `
-      <div class="toast-content">
-        <span class="toast-message">${message}</span>
-        <button class="toast-close">×</button>
-      </div>
-    `;
-    document.body.appendChild(toast);
-    
-    const closeBtn = toast.querySelector('.toast-close');
-    closeBtn?.addEventListener('click', () => toast.remove());
-    
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  };
-
   const toggleLike = (platId: string) => {
     setLikedItems(prev => {
       const newSet = new Set(prev);
@@ -463,6 +509,34 @@ export default function Menu() {
 
   return (
     <section className="menu-section-enhanced">
+      {/* BANNIÈRES DE STATUT DU RESTAURANT */}
+      {!isRestaurantClosed && isJourServiceAvailable && (
+        <div className="restaurant-open-banner">
+          <Clock size={18} />
+          <span>SERVICE DÉJEUNER EN COURS • Dernières commandes dans 30 min</span>
+        </div>
+      )}
+      
+      {isRestaurantClosed && (
+        <div className="restaurant-closed-banner">
+          <Clock size={18} />
+          <span>
+            Restaurant fermé
+            {nextPeriodInfo && ` • Prochain service : ${nextPeriodInfo}`}
+          </span>
+        </div>
+      )}
+      
+      {!isRestaurantClosed && !isJourServiceAvailable && (
+        <div className="restaurant-warning-banner">
+          <Clock size={18} />
+          <span>
+            Menu du jour disponible à partir de 12h00
+            {nextPeriodInfo && ` • ${nextPeriodInfo}`}
+          </span>
+        </div>
+      )}
+
       {/* Overlay adapté selon mobile/desktop */}
       {isAnyDrawerOpen && (
         <div 
@@ -556,6 +630,7 @@ export default function Menu() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input-enhanced"
+              disabled={isRestaurantClosed}
             />
             {searchTerm && (
               <button className="search-clear" onClick={() => setSearchTerm("")}>
@@ -566,15 +641,17 @@ export default function Menu() {
 
           <div className="univers-tabs">
             <button 
-              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
-              onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
+              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setUnivers("Cuisine")}
+              disabled={isRestaurantClosed}
             >
               <Utensils size={18} />
               <span>Cuisine</span>
             </button>
             <button 
-              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
-              onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
+              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setUnivers("Boissons")}
+              disabled={isRestaurantClosed}
             >
               <GlassWater size={18} />
               <span>Boissons</span>
@@ -589,8 +666,9 @@ export default function Menu() {
           {currentCategories.map((cat, idx) => (
             <button 
               key={idx} 
-              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
-              onClick={() => !isAnyDrawerOpen && setFilter(cat)}
+              className={`category-chip-enhanced ${filter === cat ? "active" : ""} ${isRestaurantClosed ? "disabled" : ""}`} 
+              onClick={() => !isRestaurantClosed && setFilter(cat)}
+              disabled={isRestaurantClosed}
             >
               <span className="chip-text">{cat}</span>
               {filter === cat && <div className="chip-active-indicator" />}
@@ -690,12 +768,14 @@ export default function Menu() {
                         <button 
                           className={`action-btn like-btn ${isLiked ? "active" : ""}`}
                           onClick={() => toggleLike(plat._id)}
+                          disabled={isRestaurantClosed}
                         >
                           <Heart size={16} fill={isLiked ? "#E74C3C" : "none"} />
                         </button>
                         <button 
                           className="action-btn view-btn"
                           onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
+                          disabled={isRestaurantClosed}
                         >
                           <Eye size={16} />
                         </button>
@@ -723,7 +803,7 @@ export default function Menu() {
                       
                       <div className="card-footer">
                         <div className="quantity-controls">
-                          {quantityInCart > 0 && !isExpanding && (
+                          {quantityInCart > 0 && !isExpanding && !isRestaurantClosed && isJourServiceAvailable && (
                             <button 
                               className="qty-btn remove"
                               onClick={() => handleRemoveOne(itemsInCart, plat.name)}
@@ -735,8 +815,9 @@ export default function Menu() {
                             <span className="qty-badge">{quantityInCart}</span>
                           )}
                           <button
-                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""}`}
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${isRestaurantClosed || !isJourServiceAvailable ? "disabled" : ""}`}
                             onClick={() => handleAddClick(plat, quantityInCart)}
+                            disabled={isRestaurantClosed || !isJourServiceAvailable}
                           >
                             {isExpanding ? (
                               <>
@@ -752,7 +833,11 @@ export default function Menu() {
                           </button>
                         </div>
                         
-                        <button className="details-link" onClick={() => setFlippedId(plat._id)}>
+                        <button 
+                          className="details-link" 
+                          onClick={() => setFlippedId(plat._id)}
+                          disabled={isRestaurantClosed}
+                        >
                           <span>Détails</span>
                           <ArrowRight size={14} />
                         </button>
@@ -929,10 +1014,14 @@ export default function Menu() {
                         </div>
                         
                         <div className="back-actions">
-                          <button className="order-now-btn" onClick={() => {
-                            setFlippedId(null);
-                            handleAddClick(plat, quantityInCart);
-                          }}>
+                          <button 
+                            className="order-now-btn" 
+                            onClick={() => {
+                              setFlippedId(null);
+                              handleAddClick(plat, quantityInCart);
+                            }}
+                            disabled={isRestaurantClosed || !isJourServiceAvailable}
+                          >
                             Commander maintenant
                           </button>
                         </div>
