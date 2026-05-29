@@ -46,7 +46,7 @@ const ServiceLockedBanner = ({
           </p>
         )}
         <p className="locked-hint">
-          Vous pouvez tout de même parcourir la carte et préparer votre commande.
+          Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service. ou simplement de vous faire livrer.
         </p>
       </div>
       <button className="locked-cta-btn" onClick={onUnlock}>
