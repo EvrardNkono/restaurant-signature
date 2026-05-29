@@ -117,7 +117,7 @@ export default function Footer() {
               </p>
               <div className="hours-list">
                 <p><span className="gold-text">Mardi - Vendredi</span> : 12h00 - 15h00 / 18h00 - 23h00</p>
-                <p><span className="gold-text">Samedi - Dimanche</span> : 10h00 - 15h00 / 18h00 - 00h00</p>
+                <p><span className="gold-text">Samedi - Dimanche</span> : 10h00 - 00h00 </p>
                 <p><span className="gold-text">Lundi</span> : Fermé</p>
               </div>
             </div>
