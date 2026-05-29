@@ -41,7 +41,7 @@ const ServiceLockedBanner = ({
         <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
         {nextInfo && (
           <p className="locked-subtitle">
-            Le service en salle sera disponible à partir du{" "}
+            Le service en salle sera disponible à partir d'{" "}
             <strong>{nextInfo}</strong>
           </p>
         )}
