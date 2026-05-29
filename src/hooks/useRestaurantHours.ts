@@ -1,164 +1,115 @@
-import { useState, useEffect } from 'react';
+// hooks/useRestaurantHours.ts
 
-interface TimeSlot {
-  start: string;
-  end: string;
+export type ServicePeriod = "JOUR" | "SOIR" | "FERME";
+
+export interface RestaurantHoursResult {
+  currentPeriod: ServicePeriod;
+  isJourOpen: boolean;
+  isSoirOpen: boolean;
+  nextJourInfo: string | null;
+  nextSoirInfo: string | null;
+  nextPeriodInfo: string | null;
 }
 
-interface DaySchedule {
-  name: string;
-  open: boolean;
-  lunch: TimeSlot | null;
-  dinner: TimeSlot | null;
+/**
+ * Horaires du restaurant Signature :
+ * - Lundi        : Fermé
+ * - Mardi–Vendredi : Déjeuner 12h00–15h00 / Dîner 18h00–23h00
+ * - Samedi–Dimanche : Déjeuner 10h00–15h30 / Dîner 18h00–00h00
+ */
+function getHoursStatus(): RestaurantHoursResult {
+  const now = new Date();
+  const day = now.getDay(); // 0=Dim, 1=Lun, 2=Mar, 3=Mer, 4=Jeu, 5=Ven, 6=Sam
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const totalMinutes = h * 60 + m;
+
+  const toMin = (hh: number, mm = 0) => hh * 60 + mm;
+
+  const DAY_NAMES = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+
+  // Lundi : fermé toute la journée
+  if (day === 1) {
+    return {
+      currentPeriod: "FERME",
+      isJourOpen: false,
+      isSoirOpen: false,
+      nextJourInfo: "Mardi à 12h00",
+      nextSoirInfo: "Mardi à 18h00",
+      nextPeriodInfo: "Mardi à 12h00",
+    };
+  }
+
+  // Samedi (6) & Dimanche (0)
+  if (day === 0 || day === 6) {
+    const jourStart = toMin(10);
+    const jourEnd = toMin(15, 30);
+    const soirStart = toMin(18);
+    const soirEnd = toMin(24); // minuit
+
+    const isJourOpen = totalMinutes >= jourStart && totalMinutes < jourEnd;
+    const isSoirOpen = totalMinutes >= soirStart && totalMinutes < soirEnd;
+
+    let currentPeriod: ServicePeriod = "FERME";
+    if (isJourOpen) currentPeriod = "JOUR";
+    else if (isSoirOpen) currentPeriod = "SOIR";
+
+    const nextDayName = day === 6 ? "dimanche" : "lundi (fermé) — mardi";
+
+    return {
+      currentPeriod,
+      isJourOpen,
+      isSoirOpen,
+      nextJourInfo: isJourOpen ? null : (totalMinutes < jourStart ? `Aujourd'hui à 10h00` : `${nextDayName} à 10h00`),
+      nextSoirInfo: isSoirOpen ? null : (totalMinutes < soirStart ? `Aujourd'hui à 18h00` : `${nextDayName} à 18h00`),
+      nextPeriodInfo: currentPeriod !== "FERME" ? null : (
+        totalMinutes < jourStart ? `Aujourd'hui à 10h00` :
+        totalMinutes < soirStart ? `Aujourd'hui à 18h00` :
+        `${nextDayName} à 10h00`
+      ),
+    };
+  }
+
+  // Mardi–Vendredi (day 2–5)
+  const jourStart = toMin(12);
+  const jourEnd = toMin(15);
+  const soirStart = toMin(18);
+  const soirEnd = toMin(23);
+
+  const isJourOpen = totalMinutes >= jourStart && totalMinutes < jourEnd;
+  const isSoirOpen = totalMinutes >= soirStart && totalMinutes < soirEnd;
+
+  let currentPeriod: ServicePeriod = "FERME";
+  if (isJourOpen) currentPeriod = "JOUR";
+  else if (isSoirOpen) currentPeriod = "SOIR";
+
+  const nextDayName = day < 5 ? DAY_NAMES[day + 1] : "samedi";
+
+  return {
+    currentPeriod,
+    isJourOpen,
+    isSoirOpen,
+    nextJourInfo: isJourOpen ? null : (totalMinutes < jourStart ? `Aujourd'hui à 12h00` : `${nextDayName} à 12h00`),
+    nextSoirInfo: isSoirOpen ? null : (totalMinutes < soirStart ? `Aujourd'hui à 18h00` : `${nextDayName} à 18h00`),
+    nextPeriodInfo: currentPeriod !== "FERME" ? null : (
+      totalMinutes < jourStart ? `Aujourd'hui à 12h00` :
+      totalMinutes < soirStart ? `Aujourd'hui à 18h00` :
+      `${nextDayName} à 12h00`
+    ),
+  };
 }
 
-export function useRestaurantHours() {
-  const [currentPeriod, setCurrentPeriod] = useState<"JOUR" | "SOIR" | "FERME">("FERME");
-  const [nextPeriodInfo, setNextPeriodInfo] = useState<string | null>(null);
+import { useState, useEffect } from "react";
 
-  const openingHours: DaySchedule[] = [
-    { name: "Lundi", open: false, lunch: null, dinner: null },
-    { name: "Mardi", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "23:00" } },
-    { name: "Mercredi", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "23:00" } },
-    { name: "Jeudi", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "23:00" } },
-    { name: "Vendredi", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "23:00" } },
-    { name: "Samedi", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "00:00" } },
-    { name: "Dimanche", open: true, lunch: { start: "12:00", end: "14:00" }, dinner: { start: "18:00", end: "00:00" } }
-  ];
-
-  const parseTime = (timeStr: string): Date => {
-    const [hours, minutes] = timeStr.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    return date;
-  };
-
-  const isTimeInRange = (current: Date, start: Date, end: Date): boolean => {
-    // Gestion spéciale pour minuit
-    if (end.getHours() === 0 && end.getMinutes() === 0) {
-      end.setHours(23, 59, 59);
-    }
-    return current >= start && current <= end;
-  };
-
-  const getNextPeriod = (currentDate: Date): { period: "JOUR" | "SOIR", time: string, day: string } | null => {
-    const currentDay = currentDate.getDay();
-    const currentDayIndex = currentDay === 0 ? 6 : currentDay - 1;
-    const currentTime = parseTime(`${currentDate.getHours()}:${currentDate.getMinutes()}`);
-    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-    
-    // Vérifier si on peut encore commander pour le déjeuner aujourd'hui
-    const todaySchedule = openingHours[currentDayIndex];
-    if (todaySchedule.open && todaySchedule.lunch) {
-      const lunchStart = parseTime(todaySchedule.lunch.start);
-      const lunchEnd = parseTime(todaySchedule.lunch.end);
-      
-      // Si on est avant le déjeuner
-      if (currentTime < lunchStart) {
-        return { period: "JOUR", time: todaySchedule.lunch.start, day: "aujourd'hui" };
-      }
-      // Si on est pendant le déjeuner mais avant la fin (dernière commande 30 min avant)
-      if (currentTime >= lunchStart && currentTime <= new Date(lunchEnd.getTime() - 30 * 60000)) {
-        return { period: "JOUR", time: "maintenant", day: "aujourd'hui" };
-      }
-    }
-    
-    // Vérifier le dîner aujourd'hui
-    if (todaySchedule.open && todaySchedule.dinner) {
-      const dinnerStart = parseTime(todaySchedule.dinner.start);
-      const dinnerEnd = parseTime(todaySchedule.dinner.end);
-      
-      if (currentTime < dinnerStart) {
-        return { period: "SOIR", time: todaySchedule.dinner.start, day: "aujourd'hui" };
-      }
-      if (currentTime >= dinnerStart && currentTime <= new Date(dinnerEnd.getTime() - 30 * 60000)) {
-        return { period: "SOIR", time: "maintenant", day: "aujourd'hui" };
-      }
-    }
-    
-    // Chercher le prochain service
-    for (let i = 1; i <= 7; i++) {
-      const nextDayIndex = (currentDayIndex + i) % 7;
-      const nextSchedule = openingHours[nextDayIndex];
-      
-      if (nextSchedule.open) {
-        // Priorité au déjeuner
-        if (nextSchedule.lunch) {
-          return { 
-            period: "JOUR", 
-            time: nextSchedule.lunch.start, 
-            day: days[nextDayIndex] 
-          };
-        }
-        // Sinon dîner
-        if (nextSchedule.dinner) {
-          return { 
-            period: "SOIR", 
-            time: nextSchedule.dinner.start, 
-            day: days[nextDayIndex] 
-          };
-        }
-      }
-    }
-    
-    return null;
-  };
-
-  const checkCurrentPeriod = () => {
-    const now = new Date();
-    const currentDay = now.getDay();
-    const currentDayIndex = currentDay === 0 ? 6 : currentDay - 1;
-    const todaySchedule = openingHours[currentDayIndex];
-    const currentTime = parseTime(`${now.getHours()}:${now.getMinutes()}`);
-    
-    if (!todaySchedule.open) {
-      const next = getNextPeriod(now);
-      setCurrentPeriod("FERME");
-      setNextPeriodInfo(next ? `${next.period === "JOUR" ? "Déjeuner" : "Dîner"} le ${next.day} à ${next.time}` : null);
-      return;
-    }
-    
-    // Vérifier service du midi
-    if (todaySchedule.lunch) {
-      const lunchStart = parseTime(todaySchedule.lunch.start);
-      const lunchEnd = parseTime(todaySchedule.lunch.end);
-      // Dernière commande 30 min avant fermeture
-      const lastOrderTime = new Date(lunchEnd.getTime() - 30 * 60000);
-      
-      if (isTimeInRange(currentTime, lunchStart, lastOrderTime)) {
-        setCurrentPeriod("JOUR");
-        setNextPeriodInfo(null);
-        return;
-      }
-    }
-    
-    // Vérifier service du soir
-    if (todaySchedule.dinner) {
-      const dinnerStart = parseTime(todaySchedule.dinner.start);
-      let dinnerEnd = parseTime(todaySchedule.dinner.end);
-      if (todaySchedule.dinner.end === "00:00") {
-        dinnerEnd = parseTime("23:59");
-      }
-      const lastOrderTime = new Date(dinnerEnd.getTime() - 30 * 60000);
-      
-      if (isTimeInRange(currentTime, dinnerStart, lastOrderTime)) {
-        setCurrentPeriod("SOIR");
-        setNextPeriodInfo(null);
-        return;
-      }
-    }
-    
-    // Entre les services ou après fermeture
-    const next = getNextPeriod(now);
-    setCurrentPeriod("FERME");
-    setNextPeriodInfo(next ? `${next.period === "JOUR" ? "Déjeuner" : "Dîner"} le ${next.day} à ${next.time}` : null);
-  };
+export function useRestaurantHours(): RestaurantHoursResult {
+  const [status, setStatus] = useState<RestaurantHoursResult>(getHoursStatus());
 
   useEffect(() => {
-    checkCurrentPeriod();
-    const interval = setInterval(checkCurrentPeriod, 60000);
+    const interval = setInterval(() => {
+      setStatus(getHoursStatus());
+    }, 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  return { currentPeriod, nextPeriodInfo, openingHours };
+  return status;
 }

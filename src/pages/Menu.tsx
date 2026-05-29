@@ -7,8 +7,7 @@ import {
   Check, PlusCircle, Sparkles, MinusCircle,
   Clock, CreditCard, Gift, Flame,
   Star, Eye, Award, Search, ArrowRight,
-  Heart, Zap, ChefHat,
-   Tv,  
+  Heart, Zap, ChefHat, Tv, CalendarClock,
 } from "lucide-react";
 import "./menu.css";
 import BillPopup from "../components/BillPopup";
@@ -22,6 +21,41 @@ const BASE_URL = isLocal
 
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
+
+// --- BANNIÈRE SERVICE VERROUILLÉ ---
+const ServiceLockedBanner = ({
+  serviceLabel,
+  nextInfo,
+  onUnlock,
+}: {
+  serviceLabel: string;
+  nextInfo: string | null;
+  onUnlock: () => void;
+}) => (
+  <div className="service-locked-banner">
+    <div className="locked-banner-content">
+      <div className="locked-icon-wrap">
+        <CalendarClock size={36} className="locked-icon" />
+      </div>
+      <div className="locked-text">
+        <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
+        {nextInfo && (
+          <p className="locked-subtitle">
+            Le service en salle sera disponible à partir du{" "}
+            <strong>{nextInfo}</strong>
+          </p>
+        )}
+        <p className="locked-hint">
+          Vous pouvez tout de même parcourir la carte et préparer votre commande.
+        </p>
+      </div>
+      <button className="locked-cta-btn" onClick={onUnlock}>
+        <span>Voir la carte &amp; Réserver</span>
+        <ArrowRight size={18} />
+      </button>
+    </div>
+  </div>
+);
 
 // --- COMPOSANT VOYANT DE STATUT AVEC PROGRESSION ---
 const OrderStatusBadge = ({ status }: { status: string }) => {
@@ -111,18 +145,10 @@ const scrollToDrawer = (id: string) => {
       if (card) {
         const cardRect = card.getBoundingClientRect();
         const scrollTarget = window.scrollY + cardRect.top - 100;
-        
-        window.scrollTo({
-          top: scrollTarget + 120,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: scrollTarget + 120, behavior: 'smooth' });
       } else {
-        element.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start'
-        });
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      
       element.classList.add('drawer-highlight');
       setTimeout(() => element.classList.remove('drawer-highlight'), 1000);
     }
@@ -178,9 +204,15 @@ interface Supplement {
 }
 
 export default function Menu() {
-  // Gestion des horaires du restaurant
-  const { currentPeriod, nextPeriodInfo } = useRestaurantHours();
-  
+  // ─── HORAIRES ───────────────────────────────────────────────
+  const { isJourOpen, nextJourInfo } = useRestaurantHours();
+  const [unlocked, setUnlocked] = useState(false);
+
+  // Le menu Jour est actif soit si c'est l'heure, soit si l'utilisateur a déverrouillé manuellement
+  const isJourAvailable = isJourOpen || unlocked;
+  // Une fois déverrouillé, les commandes sont autorisées (livraison, réservation, emporter)
+  const canOrder = isJourOpen || unlocked;
+
   const { 
     cart, 
     addToCart, 
@@ -192,11 +224,7 @@ export default function Menu() {
   } = useCart();
 
   const clientId = localStorage.getItem("signature_client_id");
-  
-  // Vérification que le service du jour est disponible
-  const isJourServiceAvailable = currentPeriod === "JOUR";
-  const isRestaurantClosed = currentPeriod === "FERME";
-  
+
   const [period] = useState<"JOUR" | "SOIR">("JOUR"); 
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
@@ -214,7 +242,6 @@ export default function Menu() {
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const lastScrollY = useRef(0);
 
-  // Détection du scroll pour masquer/afficher la barre de contrôle
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -229,14 +256,12 @@ export default function Menu() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Détection du mobile pour l'overlay
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fermeture du drawer au clic en dehors sur mobile
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (isAnyDrawerOpen && isMobile) {
@@ -247,7 +272,6 @@ export default function Menu() {
         }
       }
     };
-    
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isAnyDrawerOpen, isMobile]);
@@ -303,9 +327,6 @@ export default function Menu() {
     if (clientId) refetchOrders();
   }, [clientId, cart.length, refetchOrders]);
 
-  // ============================================
-  // NETTOYAGE DU PANIER QUAND COMMANDE VIENT D'ÊTRE ARCHIVÉE
-  // ============================================
   useEffect(() => {
     const now = Date.now();
     const justArchivedOrder = activeOrders.find((order: any) => {
@@ -313,16 +334,13 @@ export default function Menu() {
       const archivedDate = new Date(order.updatedAt || order.createdAt).getTime();
       return (now - archivedDate) < 5000;
     });
-    
     if (justArchivedOrder && cart.length > 0) {
-      cart.forEach((item: any) => {
-        removeFromCart(item.cartItemId);
-      });
+      cart.forEach((item: any) => { removeFromCart(item.cartItemId); });
       showToast("✓ Commande terminée, merci !", "success");
     }
   }, [activeOrders]);
 
-  // --- FILTRAGE DYNAMIQUE ---
+  // --- FILTRAGE ---
   const platsDeLaPeriode = useMemo(() => {
     if (!allPlats) return [];
     return period === "JOUR" 
@@ -331,8 +349,7 @@ export default function Menu() {
   }, [allPlats, period]);
 
   const supplementsDisponibles = useMemo(() => 
-    (supplementsList?.filter(s => s.active) || [])
-      .sort((a, b) => a.name.localeCompare(b.name)), 
+    (supplementsList?.filter(s => s.active) || []).sort((a, b) => a.name.localeCompare(b.name)), 
   [supplementsList]);
 
   const currentCategories = useMemo(() => [
@@ -352,7 +369,6 @@ export default function Menu() {
       if (filter === "Tous") return true;
       return p.category?.name === filter;
     });
-    
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(p => 
@@ -360,78 +376,38 @@ export default function Menu() {
         p.description.toLowerCase().includes(term)
       );
     }
-    
     return filtered;
   }, [platsDeLaPeriode, univers, filter, searchTerm]);
 
-  // Fonction utilitaire pour afficher les toasts
   const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
-    const colors = {
-      success: "#27ae60",
-      error: "#e74c3c",
-      info: "#3498db",
-      warning: "#f39c12"
-    };
+    const colors = { success: "#27ae60", error: "#e74c3c", info: "#3498db", warning: "#f39c12" };
     const toast = document.createElement('div');
-    toast.className = `custom-toast-enhanced ${type}`;
     toast.style.cssText = `
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: ${colors[type]};
-      color: white;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      z-index: 10000;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:${colors[type]};color:white;padding:12px 24px;border-radius:10px;
+      font-size:0.9rem;font-weight:600;z-index:10000;
+      box-shadow:0 4px 20px rgba(0,0,0,0.25);
     `;
-    toast.innerHTML = `
-      <div class="toast-content">
-        <span class="toast-message">${message}</span>
-        <button class="toast-close" style="margin-left: 12px; background: none; border: none; color: white; cursor: pointer;">×</button>
-      </div>
-    `;
+    toast.innerHTML = `<span>${message}</span>`;
     document.body.appendChild(toast);
-    
-    const closeBtn = toast.querySelector('.toast-close');
-    closeBtn?.addEventListener('click', () => toast.remove());
-    
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 3500);
   };
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    // Vérification des horaires
-    if (isRestaurantClosed) {
+    if (!canOrder) {
       showToast(
-        nextPeriodInfo 
-          ? `🍽️ Restaurant fermé. Prochain service : ${nextPeriodInfo}`
-          : "🍽️ Restaurant fermé pour le moment",
-        "error"
-      );
-      return;
-    }
-    
-    if (!isJourServiceAvailable) {
-      showToast(
-        "🍽️ Le menu du jour n'est pas encore disponible. Service à partir de 12h00.",
+        nextJourInfo
+          ? `🍽️ Les commandes ouvrent ${nextJourInfo}. Vous pouvez parcourir la carte !`
+          : "🍽️ Service non disponible pour le moment.",
         "warning"
       );
       return;
     }
-    
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
       return;
     }
-
-    // Si un autre drawer est ouvert, on le ferme d'abord
     if (isAnyDrawerOpen && selectingAccId !== plat._id) {
       setSelectingAccId(null);
       setTimeout(() => handleAddClick(plat, currentQty), 300);
@@ -440,13 +416,8 @@ export default function Menu() {
 
     const result = addToCart(
       { 
-        id: plat._id, 
-        name: plat.name, 
-        price: plat.price, 
-        image: plat.image,
-        type: period, 
-        supplements: [],
-        offer: plat.offer 
+        id: plat._id, name: plat.name, price: plat.price, image: plat.image,
+        type: period, supplements: [], offer: plat.offer 
       }, 
       period
     );
@@ -479,13 +450,8 @@ export default function Menu() {
   const toggleLike = (platId: string) => {
     setLikedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(platId)) {
-        newSet.delete(platId);
-        showToast("Retiré de vos favoris", "info");
-      } else {
-        newSet.add(platId);
-        showToast("Ajouté à vos favoris", "success");
-      }
+      if (newSet.has(platId)) { newSet.delete(platId); showToast("Retiré de vos favoris", "info"); }
+      else { newSet.add(platId); showToast("Ajouté à vos favoris", "success"); }
       return newSet;
     });
   };
@@ -507,37 +473,169 @@ export default function Menu() {
     );
   }
 
+  // ─── SI LE SERVICE N'EST PAS DISPONIBLE ET PAS DÉVERROUILLÉ ─────────────────
+  if (!isJourAvailable) {
+    return (
+      <section className="menu-section-enhanced">
+        {/* HERO SECTION */}
+        <div className="menu-hero-cinematic">
+          <div className="hero-video-backdrop">
+            <div className="hero-gradient-overlay"></div>
+            <div className="hero-particles-container">
+              {[...Array(30)].map((_, i) => (
+                <div key={i} className="hero-particle" style={{ 
+                  '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
+                  '--duration': `${5 + Math.random() * 10}s`
+                } as React.CSSProperties} />
+              ))}
+            </div>
+          </div>
+          <div className="hero-content-cinematic">
+            <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
+            <h1 className="hero-title-cinematic">
+              L'Art de la<span className="gold-gradient"> Table Signature</span>
+            </h1>
+            <div className="hero-separator-cinematic">
+              <div className="separator-line gold"></div>
+              <ChefHat size={28} className="separator-icon" />
+              <div className="separator-line gold"></div>
+            </div>
+            <p className="hero-description-cinematic">
+              Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+              Découvrez l'excellence gastronomique réinventée
+            </p>
+          </div>
+        </div>
+
+        {/* BANNIÈRE VERROUILLAGE */}
+        <ServiceLockedBanner
+          serviceLabel="Déjeuner"
+          nextInfo={nextJourInfo}
+          onUnlock={() => {
+            setUnlocked(true);
+            setTimeout(() => {
+              document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+        />
+
+        {/* ON AFFICHE QUAND MÊME LA CARTE EN MODE LECTURE SEULE */}
+        <div className="controls-bar-enhanced visible">
+          <div className="controls-container">
+            <div className="search-wrapper">
+              <Search className="search-icon" size={18} />
+              <input 
+                type="text" placeholder="Rechercher un plat, une saveur..."
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input-enhanced"
+              />
+              {searchTerm && (
+                <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
+              )}
+            </div>
+            <div className="univers-tabs">
+              <button className={`univers-tab ${univers === "Cuisine" ? "active" : ""}`} onClick={() => setUnivers("Cuisine")}>
+                <Utensils size={18} /><span>Cuisine</span>
+              </button>
+              <button className={`univers-tab ${univers === "Boissons" ? "active" : ""}`} onClick={() => setUnivers("Boissons")}>
+                <GlassWater size={18} /><span>Boissons</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="categories-bar-enhanced">
+          <div className="categories-scroll">
+            {currentCategories.map((cat, idx) => (
+              <button key={idx} className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat)}>
+                <span className="chip-text">{cat}</span>
+                {filter === cat && <div className="chip-active-indicator" />}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Carte en lecture seule (commandes désactivées) */}
+        <div className="menu-grid-enhanced menu-readonly">
+          {platsFiltres.map((plat, index) => (
+            <div key={plat._id} className="menu-card-enhanced readonly" style={{ animationDelay: `${index * 0.03}s` }}>
+              <div className="card-perspective">
+                <div className="card-front-enhanced">
+                  <div className="card-media">
+                    <div className="media-wrapper">
+                      {plat.image ? (
+                        <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
+                      ) : (
+                        <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
+                      )}
+                      <div className="media-overlay"></div>
+                    </div>
+                    <div className="price-chip">
+                      <span className="price-symbol">€</span>
+                      <span className="price-amount">{plat.price.toFixed(2)}</span>
+                    </div>
+                    <div className="card-badges">
+                      {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                      {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                      {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
+                    </div>
+                  </div>
+                  <div className="card-content">
+                    <div className="card-header">
+                      <div className="category-tag">{plat.category?.name}</div>
+                      {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
+                    </div>
+                    <h3 className="plat-title">{plat.name}</h3>
+                    <div className="title-underline"></div>
+                    <p className="plat-description">
+                      {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
+                    </p>
+                    {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
+                    <div className="card-footer">
+                      <button
+                        className="add-btn readonly-order-btn"
+                        onClick={() => showToast(
+                          nextJourInfo ? `🍽️ Commandes disponibles ${nextJourInfo}` : "🍽️ Service non disponible",
+                          "warning"
+                        )}
+                      >
+                        <Clock size={16} />
+                        <span>{nextJourInfo ? `Dispo ${nextJourInfo}` : "Bientôt disponible"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <BillPopup onBillPending={setHasPendingBill} />
+      </section>
+    );
+  }
+
+  // ─── AFFICHAGE NORMAL (service disponible ou déverrouillé) ──────────────────
   return (
     <section className="menu-section-enhanced">
-      {/* BANNIÈRES DE STATUT DU RESTAURANT */}
-      {!isRestaurantClosed && isJourServiceAvailable && (
+
+      {/* BANNIÈRE SERVICE OUVERT */}
+      {isJourOpen && (
         <div className="restaurant-open-banner">
           <Clock size={18} />
-          <span>SERVICE DÉJEUNER EN COURS • Dernières commandes dans 30 min</span>
+          <span>SERVICE DÉJEUNER EN COURS • Dernières commandes à 15h00</span>
         </div>
       )}
-      
-      {isRestaurantClosed && (
-        <div className="restaurant-closed-banner">
-          <Clock size={18} />
+
+      {/* BANNIÈRE MODE PRÉVISUALISATION (déverrouillé manuellement) */}
+      {!isJourOpen && unlocked && (
+        <div className="restaurant-preview-banner">
+          <Eye size={18} />
           <span>
-            Restaurant fermé
-            {nextPeriodInfo && ` • Prochain service : ${nextPeriodInfo}`}
-          </span>
-        </div>
-      )}
-      
-      {!isRestaurantClosed && !isJourServiceAvailable && (
-        <div className="restaurant-warning-banner">
-          <Clock size={18} />
-          <span>
-            Menu du jour disponible à partir de 12h00
-            {nextPeriodInfo && ` • ${nextPeriodInfo}`}
+            Mode aperçu — Les commandes seront disponibles{" "}
+            {nextJourInfo ? nextJourInfo : "à l'ouverture du service"}
           </span>
         </div>
       )}
 
-      {/* Overlay adapté selon mobile/desktop */}
       {isAnyDrawerOpen && (
         <div 
           className={isMobile ? "drawer-overlay-mobile" : "drawer-overlay-premium"} 
@@ -545,130 +643,92 @@ export default function Menu() {
         />
       )}
 
-      {/* HERO SECTION CINÉMATIQUE */}
+      {/* HERO SECTION */}
       <div className="menu-hero-cinematic">
         <div className="hero-video-backdrop">
           <div className="hero-gradient-overlay"></div>
           <div className="hero-particles-container">
             {[...Array(30)].map((_, i) => (
               <div key={i} className="hero-particle" style={{ 
-                '--delay': `${i * 0.3}s`, 
-                '--x': `${Math.random() * 100}%`,
+                '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
                 '--duration': `${5 + Math.random() * 10}s`
               } as React.CSSProperties} />
             ))}
           </div>
         </div>
-        
         <div className="hero-content-cinematic">
-          <div className="hero-badge-cinematic">
-            <Award size={16} />
-            <span> ⭐⭐⭐</span>
-          </div>
-          
+          <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
           <h1 className="hero-title-cinematic">
-            L'Art de la
-            <span className="gold-gradient"> Table Signature</span>
+            L'Art de la<span className="gold-gradient"> Table Signature</span>
           </h1>
-          
           <div className="hero-separator-cinematic">
             <div className="separator-line gold"></div>
             <ChefHat size={28} className="separator-icon" />
             <div className="separator-line gold"></div>
           </div>
-          
           <p className="hero-description-cinematic">
             Une symphonie de saveurs où chaque met raconte une histoire unique<br />
             Découvrez l'excellence gastronomique réinventée
           </p>
-          
           <div className="hero-stats-cinematic">
-            <div className="hero-stat">
-              <span className="stat-number">15+</span>
-              <span className="stat-label">Plats Signature</span>
-            </div>
-            <div className="hero-stat">
-              <span className="stat-number">100%</span>
-              <span className="stat-label">Produits Frais</span>
-            </div>
-            <div className="hero-stat">
-              <span className="stat-number">⭐ 4.9</span>
-              <span className="stat-label">Notes Clients</span>
-            </div>
+            <div className="hero-stat"><span className="stat-number">15+</span><span className="stat-label">Plats Signature</span></div>
+            <div className="hero-stat"><span className="stat-number">100%</span><span className="stat-label">Produits Frais</span></div>
+            <div className="hero-stat"><span className="stat-number">⭐ 4.9</span><span className="stat-label">Notes Clients</span></div>
           </div>
-          
           <div className="hero-cta-cinematic">
             <button className="cta-primary" onClick={() => {
               document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
             }}>
-              <span>Découvrir la carte</span>
-              <ArrowRight size={18} />
+              <span>Découvrir la carte</span><ArrowRight size={18} />
             </button>
-            <button className="cta-secondary">
-              <span>Réservation</span>
-              <Tv size={16} />
-            </button>
+            <button className="cta-secondary"><span>Réservation</span><Tv size={16} /></button>
           </div>
         </div>
-        
         <div className="hero-scroll-indicator">
-          <div className="scroll-mouse">
-            <div className="scroll-wheel"></div>
-          </div>
+          <div className="scroll-mouse"><div className="scroll-wheel"></div></div>
           <span>Scroll</span>
         </div>
       </div>
 
-      {/* BARRE DE CONTRÔLE STICKY AVEC ANIMATION */}
+      {/* BARRE DE CONTRÔLE STICKY */}
       <div className={`controls-bar-enhanced ${scrollDirection === "up" ? "visible" : "hidden"}`}>
         <div className="controls-container">
           <div className="search-wrapper">
             <Search className="search-icon" size={18} />
             <input 
-              type="text"
-              placeholder="Rechercher un plat, une saveur..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              type="text" placeholder="Rechercher un plat, une saveur..."
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input-enhanced"
-              disabled={isRestaurantClosed}
             />
             {searchTerm && (
-              <button className="search-clear" onClick={() => setSearchTerm("")}>
-                <X size={14} />
-              </button>
+              <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
             )}
           </div>
-
           <div className="univers-tabs">
             <button 
-              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled" : ""}`} 
-              onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setUnivers("Cuisine")}
-              disabled={isRestaurantClosed}
+              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
             >
-              <Utensils size={18} />
-              <span>Cuisine</span>
+              <Utensils size={18} /><span>Cuisine</span>
             </button>
             <button 
-              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen || isRestaurantClosed ? "disabled" : ""}`} 
-              onClick={() => !isAnyDrawerOpen && !isRestaurantClosed && setUnivers("Boissons")}
-              disabled={isRestaurantClosed}
+              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
             >
-              <GlassWater size={18} />
-              <span>Boissons</span>
+              <GlassWater size={18} /><span>Boissons</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* CATÉGORIES FILTRES AVEC SCROLL HORIZONTAL */}
+      {/* CATÉGORIES */}
       <div className="categories-bar-enhanced">
         <div className="categories-scroll">
           {currentCategories.map((cat, idx) => (
             <button 
               key={idx} 
-              className={`category-chip-enhanced ${filter === cat ? "active" : ""} ${isRestaurantClosed ? "disabled" : ""}`} 
-              onClick={() => !isRestaurantClosed && setFilter(cat)}
-              disabled={isRestaurantClosed}
+              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
+              onClick={() => setFilter(cat)}
             >
               <span className="chip-text">{cat}</span>
               {filter === cat && <div className="chip-active-indicator" />}
@@ -677,17 +737,10 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* RÉSULTATS DE RECHERCHE */}
       {searchTerm && (
         <div className="search-results-enhanced">
-          <div className="results-info">
-            <Sparkles size={14} />
-            <span>{platsFiltres.length} résultat(s) trouvé(s)</span>
-          </div>
-          <button className="clear-search" onClick={() => setSearchTerm("")}>
-            <X size={14} />
-            Effacer
-          </button>
+          <div className="results-info"><Sparkles size={14} /><span>{platsFiltres.length} résultat(s)</span></div>
+          <button className="clear-search" onClick={() => setSearchTerm("")}><X size={14} />Effacer</button>
         </div>
       )}
 
@@ -707,7 +760,6 @@ export default function Menu() {
             let orderMatch = activeOrders.find((order: any) =>
               order.items.some((item: any) => item.productId === plat._id)
             );
-
             let currentStatus = null;
             if (orderMatch) {
               const status = orderMatch.status;
@@ -733,7 +785,6 @@ export default function Menu() {
                   <div className="card-front-enhanced">
                     <div className="card-media">
                       {currentStatus && <OrderStatusBadge status={currentStatus} />}
-                      
                       <div className="card-badges">
                         {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (
                           <OfferBadge quantity={quantityInCart} requiredQuantity={plat.offer.requiredQuantity} />
@@ -742,40 +793,28 @@ export default function Menu() {
                         {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
                         {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
                       </div>
-                      
                       <div className="media-wrapper">
                         {plat.image ? (
-                          <img 
-                            src={plat.image} 
-                            alt={plat.name} 
-                            className="card-image-enhanced"
-                            loading="lazy"
-                          />
+                          <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
                         ) : (
-                          <div className="image-placeholder-enhanced">
-                            <Utensils size={32} />
-                          </div>
+                          <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
                         )}
                         <div className="media-overlay"></div>
                       </div>
-                      
                       <div className="price-chip">
                         <span className="price-symbol">€</span>
                         <span className="price-amount">{plat.price.toFixed(2)}</span>
                       </div>
-                      
                       <div className="card-actions-floating">
                         <button 
                           className={`action-btn like-btn ${isLiked ? "active" : ""}`}
                           onClick={() => toggleLike(plat._id)}
-                          disabled={isRestaurantClosed}
                         >
                           <Heart size={16} fill={isLiked ? "#E74C3C" : "none"} />
                         </button>
                         <button 
                           className="action-btn view-btn"
                           onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
-                          disabled={isRestaurantClosed}
                         >
                           <Eye size={16} />
                         </button>
@@ -787,59 +826,36 @@ export default function Menu() {
                         <div className="category-tag">{plat.category?.name}</div>
                         {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
                       </div>
-                      
                       <h3 className="plat-title">{plat.name}</h3>
                       <div className="title-underline"></div>
-                      
                       <p className="plat-description">
-                        {plat.description.length > 90 
-                          ? `${plat.description.substring(0, 90)}...` 
-                          : plat.description}
+                        {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
                       </p>
-                      
-                      {plat.preparationTime && (
-                        <PreparationTimer minutes={plat.preparationTime} />
-                      )}
+                      {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
                       
                       <div className="card-footer">
                         <div className="quantity-controls">
-                          {quantityInCart > 0 && !isExpanding && !isRestaurantClosed && isJourServiceAvailable && (
-                            <button 
-                              className="qty-btn remove"
-                              onClick={() => handleRemoveOne(itemsInCart, plat.name)}
-                            >
+                          {quantityInCart > 0 && !isExpanding && canOrder && (
+                            <button className="qty-btn remove" onClick={() => handleRemoveOne(itemsInCart, plat.name)}>
                               <MinusCircle size={18} />
                             </button>
                           )}
-                          {quantityInCart > 0 && (
-                            <span className="qty-badge">{quantityInCart}</span>
-                          )}
+                          {quantityInCart > 0 && <span className="qty-badge">{quantityInCart}</span>}
                           <button
-                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${isRestaurantClosed || !isJourServiceAvailable ? "disabled" : ""}`}
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${!canOrder ? "preview-mode" : ""}`}
                             onClick={() => handleAddClick(plat, quantityInCart)}
-                            disabled={isRestaurantClosed || !isJourServiceAvailable}
                           >
                             {isExpanding ? (
-                              <>
-                                <Loader2 className="spin" size={16} />
-                                <span>Configuration...</span>
-                              </>
+                              <><Loader2 className="spin" size={16} /><span>Configuration...</span></>
+                            ) : !canOrder ? (
+                              <><Clock size={16} /><span>Aperçu</span></>
                             ) : (
-                              <>
-                                <PlusCircle size={18} />
-                                <span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span>
-                              </>
+                              <><PlusCircle size={18} /><span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span></>
                             )}
                           </button>
                         </div>
-                        
-                        <button 
-                          className="details-link" 
-                          onClick={() => setFlippedId(plat._id)}
-                          disabled={isRestaurantClosed}
-                        >
-                          <span>Détails</span>
-                          <ArrowRight size={14} />
+                        <button className="details-link" onClick={() => setFlippedId(plat._id)}>
+                          <span>Détails</span><ArrowRight size={14} />
                         </button>
                       </div>
                     </div>
@@ -852,24 +868,18 @@ export default function Menu() {
                           <Sparkles size={16} color="#D4AF37" />
                           <span>Personnalisez votre expérience</span>
                         </div>
-                        <button className="drawer-close" onClick={() => setSelectingAccId(null)}>
-                          <X size={18} />
-                        </button>
+                        <button className="drawer-close" onClick={() => setSelectingAccId(null)}><X size={18} /></button>
                       </div>
 
                       <div className="drawer-content-enhanced">
-                        {/* OFFRE DYNAMIQUE */}
                         {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
                           const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
                           const reste = quantityInCart % plat.offer.requiredQuantity;
                           const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
                           const economie = (plat.price * quantityInCart) - prixPromo;
-
                           return (
                             <div className="offer-card">
-                              <div className="offer-icon">
-                                <Gift size={20} />
-                              </div>
+                              <div className="offer-icon"><Gift size={20} /></div>
                               <div className="offer-info">
                                 <div className="offer-title">Offre Signature Activée !</div>
                                 <div className="offer-price">
@@ -881,22 +891,15 @@ export default function Menu() {
                           );
                         })()}
 
-                        {/* ACCOMPAGNEMENTS */}
                         {activeAccs.length > 0 && lastItemAdded && (
                           <div className="drawer-section">
-                            <label className="section-title">
-                              <Utensils size={14} />
-                              Accompagnement
-                            </label>
+                            <label className="section-title"><Utensils size={14} />Accompagnement</label>
                             <div className="options-grid">
                               {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
                                 <button
                                   key={accName}
                                   className={`option ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
-                                  onClick={() => {
-                                    updateLineAccompaniment(lastItemAdded.cartItemId, accName);
-                                    triggerBounceHint();
-                                  }}
+                                  onClick={() => { updateLineAccompaniment(lastItemAdded.cartItemId, accName); triggerBounceHint(); }}
                                 >
                                   {accName}
                                   {lastItemAdded.chosenAccompaniment === accName && <Check size={12} />}
@@ -906,13 +909,9 @@ export default function Menu() {
                           </div>
                         )}
 
-                        {/* SUPPLÉMENTS */}
                         {plat.allowSupplements && lastItemAdded && (
                           <div className="drawer-section">
-                            <label className="section-title">
-                              <PlusCircle size={14} />
-                              Extras & Suppléments
-                            </label>
+                            <label className="section-title"><PlusCircle size={14} />Extras & Suppléments</label>
                             <div className="supplements-list">
                               {isLoadingSupps ? (
                                 <div className="supp-loader"><Loader2 className="spin" size={24} /></div>
@@ -927,10 +926,7 @@ export default function Menu() {
                                       </div>
                                       <div className="supp-quantity">
                                         {count > 0 && (
-                                          <button 
-                                            className="supp-qty-btn"
-                                            onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}
-                                          >
+                                          <button className="supp-qty-btn" onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
                                             <MinusCircle size={16} />
                                           </button>
                                         )}
@@ -938,11 +934,7 @@ export default function Menu() {
                                         <button 
                                           className="supp-qty-btn add"
                                           onClick={() => {
-                                            addSupplementToLine(lastItemAdded.cartItemId, {
-                                              id: supp._id,
-                                              name: supp.name,
-                                              price: supp.price,
-                                            });
+                                            addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
                                             setAddedSuppId(supp._id);
                                             triggerBounceHint();
                                             setTimeout(() => setAddedSuppId(null), 600);
@@ -960,69 +952,46 @@ export default function Menu() {
                         )}
 
                         <button className="drawer-confirm" onClick={() => setSelectingAccId(null)}>
-                          <Check size={18} />
-                          <span>Valider ma sélection</span>
+                          <Check size={18} /><span>Valider ma sélection</span>
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* FACE ARRIÈRE - DÉTAILS COMPLETS */}
+                  {/* FACE ARRIÈRE */}
                   <div className="card-back-enhanced">
-                    <button className="back-close" onClick={() => setFlippedId(null)}>
-                      <X size={18} />
-                    </button>
+                    <button className="back-close" onClick={() => setFlippedId(null)}><X size={18} /></button>
                     <div className="back-scroll">
-                      <div className="back-image">
-                        <img src={plat.image} alt={plat.name} />
-                      </div>
+                      <div className="back-image"><img src={plat.image} alt={plat.name} /></div>
                       <div className="back-details">
                         <div className="back-category">{plat.category?.name}</div>
                         <h2 className="back-title">{plat.name}</h2>
                         <div className="back-price-large">{plat.price.toFixed(2)}€</div>
-                        
                         <div className="back-info-grid">
                           {plat.gastronomicNote && (
-                            <div className="info-item">
-                              <Star size={14} />
-                              <span>Note gastronomique: {plat.gastronomicNote}/5</span>
-                            </div>
+                            <div className="info-item"><Star size={14} /><span>Note : {plat.gastronomicNote}/5</span></div>
                           )}
                           {plat.preparationTime && (
-                            <div className="info-item">
-                              <Clock size={14} />
-                              <span>Préparation: {plat.preparationTime} min</span>
-                            </div>
+                            <div className="info-item"><Clock size={14} /><span>Préparation : {plat.preparationTime} min</span></div>
                           )}
                           {plat.calories && (
-                            <div className="info-item">
-                              <Zap size={14} />
-                              <span>Calories: {plat.calories} kcal</span>
-                            </div>
+                            <div className="info-item"><Zap size={14} /><span>Calories : {plat.calories} kcal</span></div>
                           )}
                         </div>
-                        
                         <div className="back-divider"></div>
-                        
                         <p className="back-description-full">{plat.description}</p>
-                        
                         <div className="back-tags">
                           {plat.spicy && <span className="tag spicy">🌶️ Épicé</span>}
                           {plat.vegetarian && <span className="tag veg">🌱 Végétarien</span>}
                           {plat.vegan && <span className="tag vegan">🌿 Vegan</span>}
                           {plat.glutenFree && <span className="tag gluten">🚫 Sans gluten</span>}
                         </div>
-                        
                         <div className="back-actions">
                           <button 
                             className="order-now-btn" 
-                            onClick={() => {
-                              setFlippedId(null);
-                              handleAddClick(plat, quantityInCart);
-                            }}
-                            disabled={isRestaurantClosed || !isJourServiceAvailable}
+                            onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
                           >
-                            Commander maintenant
+                            {canOrder ? "Commander maintenant" : `Disponible ${nextJourInfo || "bientôt"}`}
                           </button>
                         </div>
                       </div>
@@ -1050,9 +1019,7 @@ export default function Menu() {
         )}
       </div>
 
-      {/* ─── POPUP ADDITION (polling toutes les 10s, bloque si pending) ─── */}
       <BillPopup onBillPending={setHasPendingBill} />
-
     </section>
   );
 }

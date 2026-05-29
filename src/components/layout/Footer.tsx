@@ -10,16 +10,16 @@ export default function Footer() {
     window.dispatchEvent(new CustomEvent('openReservation'));
   };
 
-  // Horaires d'ouverture
+  // Horaires d'ouverture (MISES À JOUR)
   const getOpeningHours = () => {
     const days = [
       { name: "Lundi", open: false, lunch: null, dinner: null },
-      { name: "Mardi", open: true, lunch: { start: "12h00", end: " 14h00" }, dinner: { start: "18h00", end: "23h00" } },
-      { name: "Mercredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
-      { name: "Jeudi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
-      { name: "Vendredi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "23h00" } },
-      { name: "Samedi", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "00h00" } },
-      { name: "Dimanche", open: true, lunch: { start: "12h00", end: "14h00" }, dinner: { start: "18h00", end: "00h00" } }
+      { name: "Mardi", open: true, lunch: { start: "12h00", end: "15h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Mercredi", open: true, lunch: { start: "12h00", end: "15h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Jeudi", open: true, lunch: { start: "12h00", end: "15h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Vendredi", open: true, lunch: { start: "12h00", end: "15h00" }, dinner: { start: "18h00", end: "23h00" } },
+      { name: "Samedi", open: true, lunch: { start: "10h00", end: "15h00" }, dinner: { start: "18h00", end: "00h00" } },
+      { name: "Dimanche", open: true, lunch: { start: "10h00", end: "15h00" }, dinner: { start: "18h00", end: "00h00" } }
     ];
     return days;
   };
@@ -116,10 +116,10 @@ export default function Footer() {
                 {getTodayHoursText()}
               </p>
               <div className="hours-list">
-  <p><span className="gold-text">Mardi - Vendredi</span> : 12h00 - 14h00 / 18h00 - 23h00</p>
-  <p><span className="gold-text">Samedi - Dimanche</span> : 12h00 - 14h00 / 18h00 - 00h00</p>
-  <p><span className="gold-text">Lundi</span> : Fermé</p>
-</div>
+                <p><span className="gold-text">Mardi - Vendredi</span> : 12h00 - 15h00 / 18h00 - 23h00</p>
+                <p><span className="gold-text">Samedi - Dimanche</span> : 10h00 - 15h00 / 18h00 - 00h00</p>
+                <p><span className="gold-text">Lundi</span> : Fermé</p>
+              </div>
             </div>
           </div>
           <div className="contact-item">

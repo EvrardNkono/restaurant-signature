@@ -2173,3 +2173,308 @@ button:disabled {
   opacity: 0.5;
 }
 
+
+
+
+/* ============================================================
+   STYLES BANNIÈRES DE VERROUILLAGE DU SERVICE
+   À ajouter dans menu.css ET menuSoir.css
+   ============================================================ */
+
+/* ── BANNIÈRE VERROUILLAGE MENU JOUR ── */
+.service-locked-banner {
+  margin: 0 auto 2rem;
+  max-width: 860px;
+  padding: 0 1rem;
+}
+
+.locked-banner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(212,175,55,0.1);
+}
+
+.locked-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.12);
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-icon {
+  color: #D4AF37;
+  animation: pulse-gold 2s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.locked-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.locked-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f0e6c8;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.locked-subtitle {
+  font-size: 0.95rem;
+  color: #bdb0a0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.locked-subtitle strong {
+  color: #D4AF37;
+}
+
+.locked-hint {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+  font-style: italic;
+}
+
+.locked-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8962E 100%);
+  color: #1a1a1a;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.35);
+  margin-top: 0.5rem;
+}
+
+.locked-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212,175,55,0.5);
+}
+
+.locked-cta-btn:active {
+  transform: translateY(0);
+}
+
+/* ── BANNIÈRE APERÇU (après déverrouillage) ── */
+.restaurant-preview-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08));
+  border-bottom: 1px solid rgba(212,175,55,0.3);
+  color: #D4AF37;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* ── CARTE EN LECTURE SEULE ── */
+.menu-grid-enhanced.menu-readonly .menu-card-enhanced,
+.menu-card-outer.readonly-card {
+  opacity: 0.85;
+}
+
+.add-btn.readonly-order-btn {
+  background: rgba(100, 100, 100, 0.25) !important;
+  border: 1px solid rgba(150, 150, 150, 0.3) !important;
+  color: #aaa !important;
+  cursor: default !important;
+  font-size: 0.78rem !important;
+  gap: 6px;
+}
+
+.add-btn.readonly-order-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.add-btn.preview-mode {
+  background: rgba(212,175,55,0.15) !important;
+  border: 1px solid rgba(212,175,55,0.3) !important;
+  color: #D4AF37 !important;
+  font-size: 0.82rem !important;
+}
+
+/* ── BANNIÈRE VERROUILLAGE MENU SOIR ── */
+.service-locked-banner-soir {
+  margin: 0 auto 2rem;
+  max-width: 860px;
+  padding: 0 1rem;
+}
+
+.locked-banner-content-soir {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a1409 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,175,55,0.08);
+}
+
+.locked-icon-wrap-soir {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.08);
+  border: 2px solid rgba(212, 175, 55, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-icon-soir {
+  color: #D4AF37;
+  animation: pulse-gold 2s ease-in-out infinite;
+}
+
+.locked-text-soir {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.locked-title-soir {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f0e6c8;
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 0.02em;
+}
+
+.locked-subtitle-soir {
+  font-size: 0.95rem;
+  color: #bdb0a0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.locked-subtitle-soir strong {
+  color: #D4AF37;
+}
+
+.locked-hint-soir {
+  font-size: 0.85rem;
+  color: #777;
+  margin: 0;
+  font-style: italic;
+}
+
+.locked-cta-btn-soir {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #D4AF37 0%, #8B6914 100%);
+  color: #0d0d0d;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 24px rgba(212,175,55,0.3);
+  margin-top: 0.5rem;
+}
+
+.locked-cta-btn-soir:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(212,175,55,0.45);
+}
+
+.restaurant-preview-banner-soir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+  border-bottom: 1px solid rgba(212,175,55,0.25);
+  color: #D4AF37;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+/* ── BANNIÈRES DE STATUT EXISTANTES ── */
+.restaurant-open-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #1a4a1a, #0d2d0d);
+  border-bottom: 1px solid rgba(46, 204, 113, 0.3);
+  color: #4ade80;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.restaurant-closed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #2d0d0d, #1a0a0a);
+  border-bottom: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .locked-banner-content,
+  .locked-banner-content-soir {
+    padding: 2rem 1.2rem;
+  }
+  .locked-title,
+  .locked-title-soir {
+    font-size: 1.1rem;
+  }
+  .locked-cta-btn,
+  .locked-cta-btn-soir {
+    padding: 12px 24px;
+    font-size: 0.85rem;
+  }
+}
