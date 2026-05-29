@@ -5,7 +5,7 @@ import {
   ShoppingBag, DollarSign, 
   TrendingUp, Calendar, AlertCircle, Clock, CheckCircle,
   ListOrdered, Utensils, Truck, ToggleLeft, ToggleRight,
-  RefreshCw
+  RefreshCw, Download, Image
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
@@ -31,6 +31,10 @@ export default function Dashboard() {
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  
+  // État pour le téléchargement des images
+  const [downloadingImages, setDownloadingImages] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
 
   // === RÉCUPÉRATION DES COMMANDES DEPUIS L'API ===
   const fetchDashboardStats = async () => {
@@ -92,7 +96,6 @@ export default function Dashboard() {
           text: newState ? '✓ Livraisons activées' : '✓ Livraisons désactivées'
         });
         
-        // Effacer le message après 3 secondes
         setTimeout(() => setSettingsMessage(null), 3000);
       } else {
         throw new Error("Réponse invalide");
@@ -109,9 +112,64 @@ export default function Dashboard() {
     }
   };
 
+  // Télécharger toutes les images
+  const downloadAllImages = async () => {
+    setDownloadingImages(true);
+    setDownloadProgress({ current: 0, total: 0 });
+    
+    try {
+      const response = await axios.get(`${BASE_API}/export-images`);
+      const images = response.data.images;
+      
+      if (!images || images.length === 0) {
+        alert("Aucune image trouvée");
+        setDownloadingImages(false);
+        return;
+      }
+      
+      setDownloadProgress({ current: 0, total: images.length });
+      
+      let downloaded = 0;
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        try {
+          // Nettoyer le nom du fichier
+          const fileName = img.name
+            .replace(/[^a-z0-9]/gi, '_')
+            .substring(0, 50) + '.png';
+          
+          // Créer un lien de téléchargement
+          const link = document.createElement('a');
+          link.href = img.url;
+          link.download = fileName;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          downloaded++;
+          setDownloadProgress({ current: downloaded, total: images.length });
+          
+          // Petit délai entre chaque téléchargement
+          await new Promise(r => setTimeout(r, 300));
+        } catch(e) {
+          console.error(`Erreur: ${img.name}`);
+        }
+      }
+      
+      alert(`✅ ${downloaded}/${images.length} images téléchargées !\n\n📁 Les fichiers sont dans votre dossier "Téléchargements"`);
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur lors du téléchargement des images');
+    } finally {
+      setDownloadingImages(false);
+      setDownloadProgress({ current: 0, total: 0 });
+    }
+  };
+
   useEffect(() => {
     fetchDashboardStats();
-    fetchSettings(); // Récupérer les paramètres au chargement
+    fetchSettings();
     const interval = setInterval(fetchDashboardStats, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -277,6 +335,51 @@ export default function Dashboard() {
               </p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* SECTION EXPORT DES IMAGES */}
+      <div className="export-section">
+        <div className="delivery-config-header">
+          <Image size={20} className="delivery-icon" />
+          <h2 className="section-title-modern">Export des images</h2>
+        </div>
+        
+        <div className="export-card">
+          <div className="export-info">
+            <p className="export-description">
+              Téléchargez toutes les images des plats en une seule fois.
+              <br />
+              <small>📸 Les images seront sauvegardées dans votre dossier "Téléchargements"</small>
+            </p>
+          </div>
+          
+          <button 
+            className="export-images-btn"
+            onClick={downloadAllImages}
+            disabled={downloadingImages}
+          >
+            {downloadingImages ? (
+              <>
+                <RefreshCw size={20} className="spinning" />
+                <span>Téléchargement... {downloadProgress.current}/{downloadProgress.total}</span>
+              </>
+            ) : (
+              <>
+                <Download size={20} />
+                <span>📸 Télécharger toutes les images des plats</span>
+              </>
+            )}
+          </button>
+          
+          {downloadingImages && downloadProgress.total > 0 && (
+            <div className="download-progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
+              />
+            </div>
+          )}
         </div>
       </div>
 
