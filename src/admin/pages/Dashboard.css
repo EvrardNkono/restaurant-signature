@@ -466,3 +466,231 @@
 
 
 /* Gardez le padding seulement sur le conteneur parent */
+
+
+/* src/admin/pages/Dashboard.css - Ajoutez à la fin du fichier */
+
+/* === SECTION CONFIGURATION LIVRAISON === */
+.delivery-config-section {
+  margin-bottom: 32px;
+  margin-top: 16px;
+}
+
+.delivery-config-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.delivery-icon {
+  color: var(--gold);
+}
+
+.delivery-config-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border-gold);
+  padding: 24px 28px;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.delivery-config-card:hover {
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.1);
+  border-color: var(--gold);
+}
+
+.delivery-config-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.delivery-config-info {
+  flex: 1;
+}
+
+.delivery-config-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.label-icon {
+  font-size: 1.2rem;
+}
+
+.label-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--terracotta-dark);
+  font-family: 'Playfair Display', serif;
+}
+
+.delivery-config-description {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.delivery-config-control {
+  flex-shrink: 0;
+}
+
+.delivery-toggle-admin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.delivery-toggle-admin.active {
+  background: linear-gradient(135deg, #1D9E75 0%, #158f64 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(29, 158, 117, 0.3);
+}
+
+.delivery-toggle-admin.inactive {
+  background: linear-gradient(135deg, #B4B2A9 0%, #9a9891 100%);
+  color: white;
+}
+
+.delivery-toggle-admin:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.delivery-toggle-admin:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.delivery-config-message {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+.delivery-config-message.success {
+  background: rgba(29, 158, 117, 0.1);
+  color: #1D9E75;
+  border: 1px solid rgba(29, 158, 117, 0.3);
+}
+
+.delivery-config-message.error {
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delivery-config-status {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-gold);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.status-badge.status-active {
+  background: rgba(29, 158, 117, 0.15);
+  color: #1D9E75;
+}
+
+.status-badge.status-inactive {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.status-warning {
+  margin-top: 12px;
+  color: #e67e22;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(230, 126, 34, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .delivery-config-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .delivery-config-card {
+    padding: 20px;
+  }
+  
+  .delivery-config-control {
+    width: 100%;
+  }
+  
+  .delivery-toggle-admin {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-config-section {
+    margin-bottom: 24px;
+  }
+  
+  .delivery-config-card {
+    padding: 16px;
+  }
+  
+  .label-title {
+    font-size: 1rem;
+  }
+  
+  .delivery-config-description {
+    font-size: 0.75rem;
+  }
+}

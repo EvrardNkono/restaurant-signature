@@ -10,7 +10,8 @@ import {
   UtensilsCrossed,
   MapPin,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Truck
 } from "lucide-react"; 
 import axios from "axios";
 import { getMessaging, getToken } from "firebase/messaging";
@@ -23,7 +24,7 @@ const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-back
 
 const VAPID_KEY = "BOmQ73MJH6SreFfExPUgCXuuUpEnR1zwqGGC2LWs6yqZvpjy3yWlHtcOX9LBLVMcEBq9FtwqB2OG1Z-j8TxPjdQ";
 
-// 📍 Coordonnées exactes du restaurant — À REMPLACER par vos vraies coordonnées GPS
+// 📍 Coordonnées exactes du restaurant
 const RESTAURANT_LAT = 48.5419175;
 const RESTAURANT_LON = 2.6555848;
 const MAX_DELIVERY_KM = 6;
@@ -57,6 +58,10 @@ export default function Cart() {
   const [deliveryQuote, setDeliveryQuote] = useState<{fee: number, id: string, service: string} | null>(null);
   const [deliveryError, setDeliveryError] = useState<string | null>(null);
 
+  // État pour la disponibilité des livraisons depuis l'admin
+  const [deliveryAvailable, setDeliveryAvailable] = useState(true);
+  const [deliverySettingsLoading, setDeliverySettingsLoading] = useState(true);
+
   // ─── Nominatim autocomplete + distance ───
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [addressLoading, setAddressLoading] = useState(false);
@@ -72,6 +77,29 @@ export default function Cart() {
   };
 
   const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in";
+
+  // ─── Récupérer la disponibilité des livraisons depuis l'API ───
+  const fetchDeliverySettings = async () => {
+    setDeliverySettingsLoading(true);
+    try {
+      const res = await axios.get(`${BASE_API}/settings`);
+      if (res.data.success && res.data.data) {
+        const available = res.data.data.deliveryAvailable ?? true;
+        setDeliveryAvailable(available);
+        
+        // Si les livraisons sont désactivées et que le mode actuel est "delivery", basculer vers "on_site"
+        if (!available && orderMode === "delivery") {
+          setOrderMode("on_site");
+        }
+      }
+    } catch (err) {
+      console.error("Erreur chargement paramètres livraison:", err);
+      // En cas d'erreur, on garde true par défaut
+      setDeliveryAvailable(true);
+    } finally {
+      setDeliverySettingsLoading(false);
+    }
+  };
 
   // ─── Fermer suggestions si clic extérieur ───
   useEffect(() => {
@@ -108,6 +136,7 @@ export default function Cart() {
       }
     };
     saveFcmToken();
+    fetchDeliverySettings(); // Récupérer les paramètres au chargement
   }, []);
 
   useEffect(() => {
@@ -378,10 +407,11 @@ export default function Cart() {
     if (!isAgreed || isSubmitting) return true;
     
     if (orderMode === 'delivery') {
+      // Vérifier d'abord si les livraisons sont disponibles
+      if (!deliveryAvailable) return true;
       if (!selectedDeliveryService || !deliveryQuote) return true;
       if (!customerName?.trim() || !customerPhone?.trim()) return true;
       if (!address || address.trim().length < 10) return true;
-      // ─── Bloquer si adresse hors zone ou pas encore validée ───
       if (!selectedCoords) return true;
       if (isTooFar) return true;
     }
@@ -477,10 +507,36 @@ export default function Cart() {
 
               <div className="order-options-box">
                 <h3 className="options-title">Comment souhaitez-vous commander ?</h3>
+                
+                {/* Message d'indisponibilité des livraisons */}
+                {!deliveryAvailable && !deliverySettingsLoading && (
+                  <div className="delivery-unavailable-warning">
+                    <Truck size={18} />
+                    <span>Le service de livraison est actuellement indisponible</span>
+                  </div>
+                )}
+                
                 <div className="selection-grid">
-                  <button className={`select-btn ${orderMode === "on_site" ? "active" : ""}`} onClick={() => setOrderMode("on_site")}>📍 En salle</button>
-                  <button className={`select-btn ${orderMode === "booking" ? "active" : ""}`} onClick={() => setOrderMode("booking")}>📅 Réserver</button>
-                  <button className={`select-btn ${orderMode === "delivery" ? "active" : ""}`} onClick={() => setOrderMode("delivery")}>🚲 Livraison</button>
+                  <button 
+                    className={`select-btn ${orderMode === "on_site" ? "active" : ""}`} 
+                    onClick={() => setOrderMode("on_site")}
+                  >
+                    📍 En salle
+                  </button>
+                  <button 
+                    className={`select-btn ${orderMode === "booking" ? "active" : ""}`} 
+                    onClick={() => setOrderMode("booking")}
+                  >
+                    📅 Réserver
+                  </button>
+                  <button 
+                    className={`select-btn ${orderMode === "delivery" ? "active" : ""} ${!deliveryAvailable ? 'disabled' : ''}`} 
+                    onClick={() => deliveryAvailable && setOrderMode("delivery")}
+                    disabled={!deliveryAvailable}
+                    style={!deliveryAvailable ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                  >
+                    🚲 Livraison {!deliveryAvailable && "(indisponible)"}
+                  </button>
                 </div>
 
                 <div className="dynamic-form-container">
@@ -534,7 +590,7 @@ export default function Cart() {
                     </div>
                   )}
 
-                  {orderMode === "delivery" && (
+                  {orderMode === "delivery" && deliveryAvailable && (
                     <div className="form-fade-in">
                       <div className="input-group full">
                         <label>Nom complet *</label>
@@ -549,7 +605,7 @@ export default function Cart() {
                         <input type="email" placeholder="votre@email.com" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
                       </div>
 
-                      {/* ─── Champ adresse avec autocomplétion Nominatim ─── */}
+                      {/* Champ adresse avec autocomplétion Nominatim */}
                       <div className="input-group full" style={{ position: "relative" }}>
                         <label>
                           <Bike size={14} style={{ marginRight: 6 }} />
@@ -582,7 +638,7 @@ export default function Cart() {
                           </ul>
                         )}
 
-                        {/* ─── Distance OK ─── */}
+                        {/* Distance OK */}
                         {selectedCoords && !isTooFar && distanceKm !== null && (
                           <div className="distance-ok-badge">
                             <CheckCircle2 size={15} />
@@ -590,7 +646,7 @@ export default function Cart() {
                           </div>
                         )}
 
-                        {/* ─── Distance TROP LOIN — message bloquant ─── */}
+                        {/* Distance TROP LOIN — message bloquant */}
                         {isTooFar && distanceKm !== null && (
                           <div className="distance-too-far-banner">
                             <div className="too-far-header">
@@ -653,6 +709,16 @@ export default function Cart() {
                     </div>
                   )}
 
+                  {orderMode === "delivery" && !deliveryAvailable && (
+                    <div className="delivery-disabled-message">
+                      <Truck size={24} />
+                      <div>
+                        <strong>Service de livraison indisponible</strong>
+                        <p>Le service de livraison est actuellement désactivé. Veuillez choisir "En salle" ou "Réservation".</p>
+                      </div>
+                    </div>
+                  )}
+
                   {orderMode === "booking" && (
                     <div className="form-fade-in">
                       <div className="input-group full">
@@ -687,7 +753,7 @@ export default function Cart() {
               </div>
             </div>
 
-            {/* ─── RÉCAPITULATIF ─── */}
+            {/* RÉCAPITULATIF */}
             <div className="cart-summary">
               <h3 className="summary-title">Récapitulatif</h3>
               <div className="summary-line">
@@ -773,7 +839,45 @@ export default function Cart() {
           color: #D4AF37;
         }
 
-        /* ─── Tab ouverte ─── */
+        /* Message d'indisponibilité des livraisons */
+        .delivery-unavailable-warning {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(231, 76, 60, 0.1);
+          border: 1px solid rgba(231, 76, 60, 0.3);
+          border-radius: 10px;
+          padding: 10px 15px;
+          margin-bottom: 15px;
+          color: #e74c3c;
+          font-size: 0.85rem;
+        }
+
+        .delivery-disabled-message {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          background: rgba(231, 76, 60, 0.08);
+          border: 1px solid rgba(231, 76, 60, 0.25);
+          border-radius: 12px;
+          padding: 20px;
+          text-align: center;
+          margin: 20px 0;
+        }
+        
+        .delivery-disabled-message strong {
+          display: block;
+          color: #e74c3c;
+          margin-bottom: 5px;
+        }
+        
+        .delivery-disabled-message p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: rgba(255,255,255,0.7);
+        }
+
+        /* Tab ouverte */
         .open-tab-info-banner {
           display: flex;
           align-items: flex-start;
@@ -808,7 +912,7 @@ export default function Cart() {
           margin-bottom: 8px;
         }
 
-        /* ─── Nominatim suggestions ─── */
+        /* Nominatim suggestions */
         .nominatim-suggestions {
           position: absolute;
           top: 100%;
@@ -842,7 +946,7 @@ export default function Cart() {
           color: #fff;
         }
 
-        /* ─── Indicateur chargement adresse ─── */
+        /* Indicateur chargement adresse */
         .address-loading-indicator {
           position: absolute;
           right: 12px;
@@ -856,7 +960,7 @@ export default function Cart() {
           to { transform: translateY(-50%) rotate(360deg); }
         }
 
-        /* ─── Inputs états ─── */
+        /* Inputs états */
         .input-error {
           border-color: #e74c3c !important;
           box-shadow: 0 0 0 2px rgba(231,76,60,0.15) !important;
@@ -866,7 +970,7 @@ export default function Cart() {
           box-shadow: 0 0 0 2px rgba(39,174,96,0.15) !important;
         }
 
-        /* ─── Badge distance OK ─── */
+        /* Badge distance OK */
         .distance-ok-badge {
           display: flex;
           align-items: center;
@@ -880,7 +984,7 @@ export default function Cart() {
           color: #2ecc71;
         }
 
-        /* ─── Bannière trop loin ─── */
+        /* Bannière trop loin */
         .distance-too-far-banner {
           margin-top: 12px;
           background: linear-gradient(135deg, rgba(231,76,60,0.12), rgba(192,57,43,0.06));

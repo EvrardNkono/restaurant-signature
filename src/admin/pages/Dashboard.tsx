@@ -4,12 +4,12 @@ import {
   Sun, Moon, LayoutGrid, 
   ShoppingBag, DollarSign, 
   TrendingUp, Calendar, AlertCircle, Clock, CheckCircle,
-  ListOrdered, Utensils  // ← J'ai ajouté ListOrdered et Utensils ici
+  ListOrdered, Utensils, Truck, ToggleLeft, ToggleRight,
+  RefreshCw
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
 import InstallButtonAdmin from '../components/InstallButtonAdmin';
-
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -26,6 +26,11 @@ export default function Dashboard() {
     doneOrders: 0
   });
   const [loading, setLoading] = useState(true);
+  
+  // État pour la disponibilité des livraisons
+  const [deliveryAvailable, setDeliveryAvailable] = useState(true);
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // === RÉCUPÉRATION DES COMMANDES DEPUIS L'API ===
   const fetchDashboardStats = async () => {
@@ -57,18 +62,67 @@ export default function Dashboard() {
     }
   };
 
+  // Récupérer les paramètres actuels
+  const fetchSettings = async () => {
+    try {
+      const res = await axios.get(`${BASE_API}/settings`);
+      if (res.data.success && res.data.data) {
+        setDeliveryAvailable(res.data.data.deliveryAvailable ?? true);
+      }
+    } catch (err) {
+      console.error("Erreur chargement paramètres:", err);
+    }
+  };
+
+  // Basculer l'état des livraisons
+  const toggleDeliveryAvailability = async () => {
+    setDeliveryLoading(true);
+    setSettingsMessage(null);
+    
+    try {
+      const newState = !deliveryAvailable;
+      const res = await axios.put(`${BASE_API}/settings`, {
+        deliveryAvailable: newState
+      });
+      
+      if (res.data.success) {
+        setDeliveryAvailable(newState);
+        setSettingsMessage({
+          type: 'success',
+          text: newState ? '✓ Livraisons activées' : '✓ Livraisons désactivées'
+        });
+        
+        // Effacer le message après 3 secondes
+        setTimeout(() => setSettingsMessage(null), 3000);
+      } else {
+        throw new Error("Réponse invalide");
+      }
+    } catch (err) {
+      console.error("Erreur mise à jour:", err);
+      setSettingsMessage({
+        type: 'error',
+        text: '❌ Erreur lors de la modification'
+      });
+      setTimeout(() => setSettingsMessage(null), 3000);
+    } finally {
+      setDeliveryLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardStats();
+    fetchSettings(); // Récupérer les paramètres au chargement
     const interval = setInterval(fetchDashboardStats, 30000);
     return () => clearInterval(interval);
   }, []);
+  
   useEffect(() => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' })
-      .then(reg => console.log('✅ Admin SW enregistré:', reg.scope))
-      .catch(err => console.error('❌ Admin SW erreur:', err));
-  }
-}, []);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' })
+        .then(reg => console.log('✅ Admin SW enregistré:', reg.scope))
+        .catch(err => console.error('❌ Admin SW erreur:', err));
+    }
+  }, []);
 
   const formattedRevenue = new Intl.NumberFormat('fr-FR', { 
     style: 'currency', 
@@ -165,6 +219,67 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* SECTION CONFIGURATION LIVRAISON */}
+      <div className="delivery-config-section">
+        <div className="delivery-config-header">
+          <Truck size={20} className="delivery-icon" />
+          <h2 className="section-title-modern">Configuration des livraisons</h2>
+        </div>
+        
+        <div className="delivery-config-card">
+          <div className="delivery-config-row">
+            <div className="delivery-config-info">
+              <div className="delivery-config-label">
+                <span className="label-icon">🚚</span>
+                <span className="label-title">Service de livraison</span>
+              </div>
+              <p className="delivery-config-description">
+                Activez ou désactivez la livraison pour tous les clients
+              </p>
+            </div>
+            
+            <div className="delivery-config-control">
+              <button 
+                className={`delivery-toggle-admin ${deliveryAvailable ? 'active' : 'inactive'}`}
+                onClick={toggleDeliveryAvailability}
+                disabled={deliveryLoading}
+              >
+                {deliveryLoading ? (
+                  <RefreshCw size={20} className="spinning" />
+                ) : deliveryAvailable ? (
+                  <>
+                    <ToggleRight size={24} />
+                    <span>Activé</span>
+                  </>
+                ) : (
+                  <>
+                    <ToggleLeft size={24} />
+                    <span>Désactivé</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          
+          {settingsMessage && (
+            <div className={`delivery-config-message ${settingsMessage.type}`}>
+              {settingsMessage.text}
+            </div>
+          )}
+          
+          <div className="delivery-config-status">
+            <div className={`status-badge ${deliveryAvailable ? 'status-active' : 'status-inactive'}`}>
+              {deliveryAvailable ? '🟢 Livraisons ouvertes' : '🔴 Livraisons fermées'}
+            </div>
+            {!deliveryAvailable && (
+              <p className="status-warning">
+                ⚠️ Les clients ne pourront pas sélectionner la livraison tant que ce service est désactivé
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="mode-section">
         <h2 className="section-title-modern">Mode d'affichage du menu</h2>
         
@@ -199,6 +314,5 @@ export default function Dashboard() {
       </div>
       <InstallButtonAdmin />
     </div>
-    
   );
 }

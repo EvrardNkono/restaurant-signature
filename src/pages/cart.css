@@ -702,3 +702,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.delivery-unavailable-message {
+  margin-top: 15px;
+  padding: 12px;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 10px;
+  color: #e74c3c;
+  font-size: 0.85rem;
+  text-align: center;
+}
