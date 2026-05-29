@@ -14,6 +14,13 @@ import InstallButtonAdmin from '../components/InstallButtonAdmin';
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
+// Déclaration du type JSZip pour TypeScript
+declare global {
+  interface Window {
+    JSZip: any;
+  }
+}
+
 export default function Dashboard() {
   const [displayMode, setDisplayMode] = useState("JOUR");
   
@@ -112,55 +119,87 @@ export default function Dashboard() {
     }
   };
 
-  // Télécharger toutes les images
-  const downloadAllImages = async () => {
+  // Fonction pour charger JSZip
+  const loadJSZip = (): Promise<void> => {
+    return new Promise((resolve) => {
+      if (window.JSZip) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      script.onload = () => resolve();
+      document.head.appendChild(script);
+    });
+  };
+
+  // Télécharger toutes les images en UN SEUL fichier ZIP
+  const downloadAllImagesAsZip = async () => {
     setDownloadingImages(true);
     setDownloadProgress({ current: 0, total: 0 });
     
     try {
+      // 1. Récupérer la liste des images
+      console.log("📸 Récupération de la liste des images...");
       const response = await axios.get(`${BASE_API}/export-images`);
       const images = response.data.images;
       
       if (!images || images.length === 0) {
-        alert("Aucune image trouvée");
+        alert("❌ Aucune image trouvée");
         setDownloadingImages(false);
         return;
       }
       
+      console.log(`✅ ${images.length} images trouvées`);
       setDownloadProgress({ current: 0, total: images.length });
       
-      let downloaded = 0;
-      for (let i = 0; i < images.length; i++) {
-        const img = images[i];
+      // 2. Charger la librairie JSZip
+      await loadJSZip();
+      const zip = new window.JSZip();
+      
+      let count = 0;
+      
+      // 3. Ajouter chaque image au ZIP
+      for (const img of images) {
         try {
+          console.log(`📥 Téléchargement: ${img.name.substring(0, 40)}...`);
+          
+          // Télécharger l'image depuis Cloudinary
+          const imgResponse = await fetch(img.url);
+          const blob = await imgResponse.blob();
+          
           // Nettoyer le nom du fichier
           const fileName = img.name
             .replace(/[^a-z0-9]/gi, '_')
             .substring(0, 50) + '.png';
           
-          // Créer un lien de téléchargement
-          const link = document.createElement('a');
-          link.href = img.url;
-          link.download = fileName;
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          // Ajouter au ZIP
+          zip.file(fileName, blob);
+          count++;
           
-          downloaded++;
-          setDownloadProgress({ current: downloaded, total: images.length });
-          
-          // Petit délai entre chaque téléchargement
-          await new Promise(r => setTimeout(r, 300));
+          setDownloadProgress({ current: count, total: images.length });
+          console.log(`✅ ${count}/${images.length} - ${img.name.substring(0, 40)}`);
         } catch(e) {
-          console.error(`Erreur: ${img.name}`);
+          console.error(`❌ Erreur: ${img.name}`);
         }
       }
       
-      alert(`✅ ${downloaded}/${images.length} images téléchargées !\n\n📁 Les fichiers sont dans votre dossier "Téléchargements"`);
+      // 4. Générer et télécharger le ZIP
+      console.log("📦 Création du fichier ZIP...");
+      const content = await zip.generateAsync({ type: "blob" });
+      
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = `signature_images_${Date.now()}.zip`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      
+      console.log(`✨ ZIP créé avec ${count}/${images.length} images !`);
+      alert(`✅ ZIP créé avec succès !\n\n📦 ${count}/${images.length} images\n📁 Fichier: signature_images_${Date.now()}.zip`);
+      
     } catch (error) {
-      console.error('Erreur:', error);
-      alert('❌ Erreur lors du téléchargement des images');
+      console.error('❌ Erreur:', error);
+      alert('❌ Erreur lors de la création du ZIP. Vérifiez la console pour plus de détails.');
     } finally {
       setDownloadingImages(false);
       setDownloadProgress({ current: 0, total: 0 });
@@ -338,7 +377,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SECTION EXPORT DES IMAGES */}
+      {/* SECTION EXPORT DES IMAGES - VERSION ZIP UNIQUE */}
       <div className="export-section">
         <div className="delivery-config-header">
           <Image size={20} className="delivery-icon" />
@@ -348,26 +387,26 @@ export default function Dashboard() {
         <div className="export-card">
           <div className="export-info">
             <p className="export-description">
-              Téléchargez toutes les images des plats en une seule fois.
+              Téléchargez TOUTES les images des plats en un seul fichier ZIP.
               <br />
-              <small>📸 Les images seront sauvegardées dans votre dossier "Téléchargements"</small>
+              <small>📦 Un clic = un fichier ZIP contenant toutes les images ({stats.totalOrders ? '126' : '...'} images)</small>
             </p>
           </div>
           
           <button 
             className="export-images-btn"
-            onClick={downloadAllImages}
+            onClick={downloadAllImagesAsZip}
             disabled={downloadingImages}
           >
             {downloadingImages ? (
               <>
                 <RefreshCw size={20} className="spinning" />
-                <span>Téléchargement... {downloadProgress.current}/{downloadProgress.total}</span>
+                <span>Création du ZIP... {downloadProgress.current}/{downloadProgress.total} images</span>
               </>
             ) : (
               <>
                 <Download size={20} />
-                <span>📸 Télécharger toutes les images des plats</span>
+                <span>📦 Télécharger TOUTES les images (ZIP unique)</span>
               </>
             )}
           </button>
