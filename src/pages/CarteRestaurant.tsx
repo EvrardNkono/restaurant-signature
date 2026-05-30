@@ -34,6 +34,11 @@ const fetchFullCatalog = async () => {
   return response.data.data;
 };
 
+// Helper pour formater le prix
+const formatPrice = (price: number): string => {
+  return price.toFixed(2);
+};
+
 export default function CarteRestaurant() {
   // --- UTILISATION DU CACHE ---
   // On utilise la même clé 'full-catalog' que dans Home.tsx
@@ -157,7 +162,7 @@ export default function CarteRestaurant() {
                       <Share2 size={18} />
                     </button>
                     {plat.image ? <img src={plat.image} alt={plat.name} className="plat-img" /> : <div className="placeholder-img">Signature</div>}
-                    <div className="price-badge-luxury"><span>{plat.price}€</span></div>
+                    <div className="price-badge-luxury"><span>{formatPrice(plat.price)}€</span></div>
                   </div>
                   <div className="plat-details-terracotta">
                     <h3>{plat.name}</h3>
@@ -180,7 +185,7 @@ export default function CarteRestaurant() {
                         <div className="modal-header-info">
                           <span className="modal-badge">{plat.category?.name}</span>
                           <h3>{plat.name}</h3>
-                          <div className="modal-price-tag">{plat.price}€</div>
+                          <div className="modal-price-tag">{formatPrice(plat.price)}€</div>
                         </div>
                       </div>
                       <div className="title-underline-gold full-width"></div>
