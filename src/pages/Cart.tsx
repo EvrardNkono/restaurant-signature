@@ -11,11 +11,14 @@ import {
   MapPin,
   AlertTriangle,
   CheckCircle2,
-  Truck
+  Truck,
+  Clock,
+  CreditCard
 } from "lucide-react"; 
 import axios from "axios";
 import { getMessaging, getToken } from "firebase/messaging";
 import { app } from "../services/firebase";
+import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
 import "./cart.css";
 
@@ -32,6 +35,8 @@ const MAX_DELIVERY_KM = 6;
 type DeliveryService = "signature" | null;
 
 export default function Cart() {
+  const { isJourOpen, nextJourInfo } = useRestaurantHours();
+  
   const [orderMode, setOrderMode] = useState<"on_site" | "booking" | "delivery">("on_site");
   const [consumeMode, setConsumeMode] = useState<"dine_in" | "take_away">("dine_in");
   
@@ -76,7 +81,8 @@ export default function Cart() {
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
-  const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in";
+  // 🔴 MODIFICATION: Le paiement en salle n'est possible que si le restaurant est OUVERT
+  const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in" && isJourOpen;
 
   // ─── Récupérer la disponibilité des livraisons depuis l'API ───
   const fetchDeliverySettings = async () => {
@@ -100,6 +106,20 @@ export default function Cart() {
       setDeliverySettingsLoading(false);
     }
   };
+
+  // 🔴 NOUVEAU: Forcer le passage à "take_away" et payNow=true si restaurant fermé
+  useEffect(() => {
+    if (!isJourOpen && orderMode === "on_site") {
+      // Si le restaurant est fermé, on ne peut pas être en "dine_in"
+      if (consumeMode === "dine_in") {
+        setConsumeMode("take_away");
+      }
+      // Forcer le paiement en ligne quand le restaurant est fermé
+      if (!payNow) {
+        setPayNow(true);
+      }
+    }
+  }, [isJourOpen, orderMode, consumeMode, payNow]);
 
   // ─── Fermer suggestions si clic extérieur ───
   useEffect(() => {
@@ -136,7 +156,7 @@ export default function Cart() {
       }
     };
     saveFcmToken();
-    fetchDeliverySettings(); // Récupérer les paramètres au chargement
+    fetchDeliverySettings();
   }, []);
 
   useEffect(() => {
@@ -280,7 +300,14 @@ export default function Cart() {
   const amountToPay = getAmountToPay();
   const shouldShowEmailFields = !isOpenTab && (payNow === true || orderMode === "booking") && amountToPay > 0;
 
+  // 🔴 MODIFICATION: Vérification supplémentaire des horaires
   const handleFinalOrder = async () => {
+    // Vérifier si on essaie de faire un open tab alors que le restaurant est fermé
+    if (orderMode === "on_site" && consumeMode === "dine_in" && !isJourOpen) {
+      alert(`Le service en salle est actuellement fermé. ${nextJourInfo ? `Réouverture ${nextJourInfo}` : "Veuillez choisir 'À emporter'."}`);
+      return;
+    }
+    
     setIsSubmitting(true);
     
     const fcmToken = localStorage.getItem('fcm_client_token');
@@ -403,11 +430,16 @@ export default function Cart() {
     } 
   };
 
+  // 🔴 MODIFICATION: Désactiver complètement l'option "Sur place" si restaurant fermé
   const isOrderDisabled = () => {
     if (!isAgreed || isSubmitting) return true;
     
+    // 🔴 NOUVEAU: Bloquer si le restaurant est fermé ET qu'on essaie de faire du "sur place"
+    if (!isJourOpen && orderMode === "on_site" && consumeMode === "dine_in") {
+      return true;
+    }
+    
     if (orderMode === 'delivery') {
-      // Vérifier d'abord si les livraisons sont disponibles
       if (!deliveryAvailable) return true;
       if (!selectedDeliveryService || !deliveryQuote) return true;
       if (!customerName?.trim() || !customerPhone?.trim()) return true;
@@ -425,7 +457,10 @@ export default function Cart() {
     
     if (orderMode === 'on_site') {
       if (consumeMode === 'dine_in' && !selectedTable) return true;
-      if (consumeMode === 'take_away' && payNow && !customerEmail?.includes('@')) return true;
+      // Si le restaurant est fermé, on force l'email pour le take_away
+      if (consumeMode === 'take_away') {
+        if (payNow && !customerEmail?.includes('@')) return true;
+      }
     }
     
     if (shouldShowEmailFields && !customerEmail?.includes('@')) return true;
@@ -443,6 +478,17 @@ export default function Cart() {
           <div className="header-double-line"></div>
         </div>
       </div>
+
+      {/* 🔴 NOUVEAU: Bannière d'information si restaurant fermé */}
+      {!isJourOpen && (
+        <div className="restaurant-closed-warning">
+          <Clock size={18} />
+          <div>
+            <strong>Service en salle actuellement fermé</strong>
+            {nextJourInfo && <p>Réouverture : {nextJourInfo}</p>}
+          </div>
+        </div>
+      )}
 
       <div className="cart-container">
         {cart.length === 0 ? (
@@ -544,11 +590,32 @@ export default function Cart() {
                     <div className="form-fade-in">
                       <p className="form-instruction">Consommation :</p>
                       <div className="selection-grid small">
-                        <button className={`select-btn ${consumeMode === "dine_in" ? "active" : ""}`} onClick={() => setConsumeMode("dine_in")}>🍽️ Sur place</button>
-                        <button className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} onClick={() => setConsumeMode("take_away")}>🥡 À emporter</button>
+                        {/* 🔴 MODIFICATION: Désactiver l'option "Sur place" si restaurant fermé */}
+                        <button 
+                          className={`select-btn ${consumeMode === "dine_in" ? "active" : ""} ${!isJourOpen ? "disabled" : ""}`} 
+                          onClick={() => isJourOpen && setConsumeMode("dine_in")}
+                          disabled={!isJourOpen}
+                          style={!isJourOpen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                        >
+                          🍽️ Sur place {!isJourOpen && "(fermé)"}
+                        </button>
+                        <button 
+                          className={`select-btn ${consumeMode === "take_away" ? "active" : ""}`} 
+                          onClick={() => setConsumeMode("take_away")}
+                        >
+                          🥡 À emporter
+                        </button>
                       </div>
 
-                      {consumeMode === "dine_in" && (
+                      {/* 🔴 NOUVEAU: Message d'avertissement si restaurant fermé */}
+                      {!isJourOpen && consumeMode === "dine_in" && (
+                        <div className="warning-banner">
+                          <AlertTriangle size={16} />
+                          <span>Le service en salle est actuellement fermé. Veuillez choisir "À emporter".</span>
+                        </div>
+                      )}
+
+                      {consumeMode === "dine_in" && isJourOpen && (
                         <div className="form-fade-in">
                           <div className="table-selector-box">
                             <div className="table-header-select">
@@ -576,8 +643,24 @@ export default function Cart() {
                           <p className="form-instruction">Règlement :</p>
                           <div className="selection-grid small">
                             <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
-                            <button className={`select-btn ${!payNow ? "active" : ""}`} onClick={() => setPayNow(false)}>💵 À la caisse</button>
+                            {/* 🔴 MODIFICATION: Désactiver paiement à la caisse si restaurant fermé */}
+                            <button 
+                              className={`select-btn ${!payNow ? "active" : ""} ${!isJourOpen ? "disabled" : ""}`} 
+                              onClick={() => isJourOpen && setPayNow(false)}
+                              disabled={!isJourOpen}
+                              style={!isJourOpen ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                            >
+                              💵 À la caisse {!isJourOpen && "(indisponible)"}
+                            </button>
                           </div>
+                          
+                          {/* 🔴 NOUVEAU: Message si paiement caisse forcé en ligne */}
+                          {!isJourOpen && !payNow && (
+                            <div className="force-online-payment">
+                              <CreditCard size={14} />
+                              <span>Paiement à la caisse impossible : le restaurant est fermé. Paiement en ligne obligatoire.</span>
+                            </div>
+                          )}
                           
                           {payNow && amountToPay > 0 && (
                             <div className="input-group full">
@@ -837,6 +920,59 @@ export default function Cart() {
           gap: 10px;
           font-size: 0.85rem;
           color: #D4AF37;
+        }
+
+        /* 🔴 NOUVEAU: Bannière restaurant fermé */
+        .restaurant-closed-warning {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.08));
+          border: 1px solid rgba(231, 76, 60, 0.4);
+          border-left: 4px solid #e74c3c;
+          border-radius: 12px;
+          padding: 15px 20px;
+          margin: 20px auto;
+          max-width: 1200px;
+        }
+        .restaurant-closed-warning strong {
+          display: block;
+          color: #e74c3c;
+          font-size: 0.9rem;
+          margin-bottom: 4px;
+        }
+        .restaurant-closed-warning p {
+          margin: 0;
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.7);
+        }
+
+        /* 🔴 NOUVEAU: Bannière d'avertissement */
+        .warning-banner {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(231, 76, 60, 0.1);
+          border-left: 3px solid #e74c3c;
+          padding: 10px 15px;
+          margin: 10px 0;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          color: #e74c3c;
+        }
+
+        /* 🔴 NOUVEAU: Paiement en ligne forcé */
+        .force-online-payment {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(52, 152, 219, 0.1);
+          border: 1px solid rgba(52, 152, 219, 0.3);
+          border-radius: 8px;
+          padding: 8px 12px;
+          margin-top: 10px;
+          font-size: 0.8rem;
+          color: #3498db;
         }
 
         /* Message d'indisponibilité des livraisons */
