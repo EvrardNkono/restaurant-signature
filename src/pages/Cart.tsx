@@ -81,7 +81,7 @@ export default function Cart() {
     signature: { fee: 5, label: "Livraison Signature", icon: "✨", needsEstimate: false }
   };
 
-  // 🔴 MODIFICATION: Le paiement en salle n'est possible que si le restaurant est OUVERT
+  // 🔴 CORRECTION: Le paiement en salle n'est possible que si le restaurant est OUVERT
   const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in" && isJourOpen;
 
   // ─── Récupérer la disponibilité des livraisons depuis l'API ───
@@ -107,7 +107,7 @@ export default function Cart() {
     }
   };
 
-  // 🔴 NOUVEAU: Forcer le passage à "take_away" et payNow=true si restaurant fermé
+  // 🔴 CORRECTION: Forcer le passage à "take_away" et payNow=true si restaurant fermé
   useEffect(() => {
     if (!isJourOpen && orderMode === "on_site") {
       // Si le restaurant est fermé, on ne peut pas être en "dine_in"
@@ -300,7 +300,7 @@ export default function Cart() {
   const amountToPay = getAmountToPay();
   const shouldShowEmailFields = !isOpenTab && (payNow === true || orderMode === "booking") && amountToPay > 0;
 
-  // 🔴 MODIFICATION: Vérification supplémentaire des horaires
+  // 🔴 CORRECTION: Vérification supplémentaire des horaires
   const handleFinalOrder = async () => {
     // Vérifier si on essaie de faire un open tab alors que le restaurant est fermé
     if (orderMode === "on_site" && consumeMode === "dine_in" && !isJourOpen) {
@@ -430,11 +430,11 @@ export default function Cart() {
     } 
   };
 
-  // 🔴 MODIFICATION: Désactiver complètement l'option "Sur place" si restaurant fermé
+  // 🔴 CORRECTION: Désactiver complètement l'option "Sur place" si restaurant fermé
   const isOrderDisabled = () => {
     if (!isAgreed || isSubmitting) return true;
     
-    // 🔴 NOUVEAU: Bloquer si le restaurant est fermé ET qu'on essaie de faire du "sur place"
+    // 🔴 CORRECTION: Bloquer si le restaurant est fermé ET qu'on essaie de faire du "sur place"
     if (!isJourOpen && orderMode === "on_site" && consumeMode === "dine_in") {
       return true;
     }
@@ -479,13 +479,14 @@ export default function Cart() {
         </div>
       </div>
 
-      {/* 🔴 NOUVEAU: Bannière d'information si restaurant fermé */}
+      {/* 🔴 CORRECTION: Bannière d'information si restaurant fermé */}
       {!isJourOpen && (
         <div className="restaurant-closed-warning">
           <Clock size={18} />
           <div>
             <strong>Service en salle actuellement fermé</strong>
             {nextJourInfo && <p>Réouverture : {nextJourInfo}</p>}
+            <p style={{ fontSize: '0.7rem', marginTop: '4px' }}>Commandes possibles uniquement à emporter ou livraison avec paiement en ligne.</p>
           </div>
         </div>
       )}
@@ -590,7 +591,7 @@ export default function Cart() {
                     <div className="form-fade-in">
                       <p className="form-instruction">Consommation :</p>
                       <div className="selection-grid small">
-                        {/* 🔴 MODIFICATION: Désactiver l'option "Sur place" si restaurant fermé */}
+                        {/* 🔴 CORRECTION: Désactiver l'option "Sur place" si restaurant fermé */}
                         <button 
                           className={`select-btn ${consumeMode === "dine_in" ? "active" : ""} ${!isJourOpen ? "disabled" : ""}`} 
                           onClick={() => isJourOpen && setConsumeMode("dine_in")}
@@ -607,7 +608,7 @@ export default function Cart() {
                         </button>
                       </div>
 
-                      {/* 🔴 NOUVEAU: Message d'avertissement si restaurant fermé */}
+                      {/* 🔴 CORRECTION: Message d'avertissement si restaurant fermé */}
                       {!isJourOpen && consumeMode === "dine_in" && (
                         <div className="warning-banner">
                           <AlertTriangle size={16} />
@@ -643,7 +644,7 @@ export default function Cart() {
                           <p className="form-instruction">Règlement :</p>
                           <div className="selection-grid small">
                             <button className={`select-btn ${payNow ? "active" : ""}`} onClick={() => setPayNow(true)}>💳 En ligne</button>
-                            {/* 🔴 MODIFICATION: Désactiver paiement à la caisse si restaurant fermé */}
+                            {/* 🔴 CORRECTION: Désactiver paiement à la caisse si restaurant fermé */}
                             <button 
                               className={`select-btn ${!payNow ? "active" : ""} ${!isJourOpen ? "disabled" : ""}`} 
                               onClick={() => isJourOpen && setPayNow(false)}
@@ -654,7 +655,7 @@ export default function Cart() {
                             </button>
                           </div>
                           
-                          {/* 🔴 NOUVEAU: Message si paiement caisse forcé en ligne */}
+                          {/* 🔴 CORRECTION: Message si paiement caisse forcé en ligne */}
                           {!isJourOpen && !payNow && (
                             <div className="force-online-payment">
                               <CreditCard size={14} />
@@ -922,7 +923,7 @@ export default function Cart() {
           color: #D4AF37;
         }
 
-        /* 🔴 NOUVEAU: Bannière restaurant fermé */
+        /* Bannière restaurant fermé */
         .restaurant-closed-warning {
           display: flex;
           align-items: center;
@@ -947,7 +948,7 @@ export default function Cart() {
           color: rgba(255,255,255,0.7);
         }
 
-        /* 🔴 NOUVEAU: Bannière d'avertissement */
+        /* Bannière d'avertissement */
         .warning-banner {
           display: flex;
           align-items: center;
@@ -961,7 +962,7 @@ export default function Cart() {
           color: #e74c3c;
         }
 
-        /* 🔴 NOUVEAU: Paiement en ligne forcé */
+        /* Paiement en ligne forcé */
         .force-online-payment {
           display: flex;
           align-items: center;

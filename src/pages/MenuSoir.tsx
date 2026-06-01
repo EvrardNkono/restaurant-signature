@@ -123,10 +123,9 @@ export default function MenuSoir() {
   const { isSoirOpen, nextSoirInfo } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // Le menu Soir est navigable si c'est l'heure OU si l'utilisateur a déverrouillé
-  const isSoirAvailable = isSoirOpen || unlocked;
-  // Une fois déverrouillé, les commandes sont autorisées (livraison, réservation, emporter)
-  const canOrder = isSoirOpen || unlocked;
+  // 🔴 CORRECTION 1: Séparer "voir la carte" de "pouvoir commander"
+  const isSoirAvailable = isSoirOpen || unlocked; // Pour afficher la carte
+  const canOrder = isSoirOpen; // 🔴 CHANGEMENT: Commander uniquement si le service est vraiment ouvert
 
   const { 
     cart, addToCart, removeFromCart, getItemQuantity,
@@ -227,8 +226,10 @@ export default function MenuSoir() {
     if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
   };
 
+  // 🔴 CORRECTION 2: Vérification stricte avec isSoirOpen
   const handleAddClick = (plat: Plat) => {
-    if (!canOrder) {
+    // 🔴 CHANGEMENT: Utiliser isSoirOpen au lieu de canOrder
+    if (!isSoirOpen) {
       showToast(
         nextSoirInfo
           ? `🍽️ Les commandes ouvrent ${nextSoirInfo}. Vous pouvez parcourir la carte !`
@@ -273,8 +274,12 @@ export default function MenuSoir() {
     }
   };
 
+  // 🔴 CORRECTION 3: Vérification stricte pour l'édition
   const handleEditExistingItem = (plat: Plat) => {
-    if (!canOrder) { showToast("Impossible de modifier : service fermé", "error"); return; }
+    if (!isSoirOpen) { // 🔴 CHANGEMENT: utiliser isSoirOpen
+      showToast("Impossible de modifier : service fermé", "error"); 
+      return;
+    }
     if (isAnyDrawerOpen) return;
     const itemsInCart = cart.filter(i => i.id === plat._id);
     if (itemsInCart.length === 0) return;
@@ -568,21 +573,21 @@ export default function MenuSoir() {
 
                     <div className="card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
                       <button 
-                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) || !canOrder ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
+                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) || !isSoirOpen ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
                         onClick={() => handleAddClick(plat)}
                         style={{ width: '100%' }}
                       >
                         {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
                           <>
-                            {canOrder ? <PlusCircle size={18} style={{ marginRight: '8px' }} /> : <Clock size={18} style={{ marginRight: '8px' }} />}
-                            {canOrder
+                            {isSoirOpen ? <PlusCircle size={18} style={{ marginRight: '8px' }} /> : <Clock size={18} style={{ marginRight: '8px' }} />}
+                            {isSoirOpen
                               ? (quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier")
                               : (nextSoirInfo ? `Dispo ${nextSoirInfo}` : "Aperçu")}
                           </>
                         )}
                       </button>
 
-                      {quantityInCart > 0 && !isExpanding && canOrder && (
+                      {quantityInCart > 0 && !isExpanding && isSoirOpen && (
                         <button 
                           className="btn-edit-soir"
                           onClick={() => handleEditExistingItem(plat)}
@@ -598,7 +603,7 @@ export default function MenuSoir() {
                         </button>
                       )}
 
-                      {quantityInCart > 0 && !isExpanding && canOrder && (
+                      {quantityInCart > 0 && !isExpanding && isSoirOpen && (
                         <button 
                           className="btn-remove-quick-soir"
                           onClick={() => handleRemoveOne(plat._id)}

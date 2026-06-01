@@ -208,10 +208,12 @@ export default function Menu() {
   const { isJourOpen, nextJourInfo } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // Le menu Jour est actif soit si c'est l'heure, soit si l'utilisateur a déverrouillé manuellement
+  // 🔴 CORRECTION 1: Le menu Jour est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
   const isJourAvailable = isJourOpen || unlocked;
-  // Une fois déverrouillé, les commandes sont autorisées (livraison, réservation, emporter)
-  const canOrder = isJourOpen || unlocked;
+  
+  // 🔴 CORRECTION 2: Les commandes ne sont possibles que si le service est VRAIMENT ouvert
+  // Le déverrouillage permet seulement de VOIR la carte, pas de commander
+  const canOrder = isJourOpen; // ⚠️ PAS de "|| unlocked"
 
   const { 
     cart, 
@@ -394,8 +396,10 @@ export default function Menu() {
   };
 
   // --- ACTIONS ---
+  // 🔴 CORRECTION 3: Vérification stricte avec isJourOpen
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    if (!canOrder) {
+    // Utiliser isJourOpen au lieu de canOrder
+    if (!isJourOpen) {
       showToast(
         nextJourInfo
           ? `🍽️ Les commandes ouvrent ${nextJourInfo}. Vous pouvez parcourir la carte !`
@@ -613,7 +617,7 @@ export default function Menu() {
     );
   }
 
-  // ─── AFFICHAGE NORMAL (service disponible ou déverrouillé) ──────────────────
+  // ─── AFFICHAGE NORMAL (service disponible) ──────────────────
   return (
     <section className="menu-section-enhanced">
 
@@ -621,17 +625,17 @@ export default function Menu() {
       {isJourOpen && (
         <div className="restaurant-open-banner">
           <Clock size={18} />
-          <span>SERVICE DÉJEUNER EN COURS • Dernières commandes à 15h00</span>
+          <span>SERVICE DÉJEUNER EN COURS • 12h00 - 15h00</span>
         </div>
       )}
 
-      {/* BANNIÈRE MODE PRÉVISUALISATION (déverrouillé manuellement) */}
+      {/* BANNIÈRE MODE PRÉVISUALISATION (déverrouillé manuellement mais service fermé) */}
       {!isJourOpen && unlocked && (
         <div className="restaurant-preview-banner">
           <Eye size={18} />
           <span>
             Mode aperçu — Les commandes seront disponibles{" "}
-            {nextJourInfo ? nextJourInfo : "à l'ouverture du service"}
+            {nextJourInfo ? nextJourInfo : "à l'ouverture du service (12h00 - 15h00)"}
           </span>
         </div>
       )}
@@ -835,19 +839,19 @@ export default function Menu() {
                       
                       <div className="card-footer">
                         <div className="quantity-controls">
-                          {quantityInCart > 0 && !isExpanding && canOrder && (
+                          {quantityInCart > 0 && !isExpanding && isJourOpen && (
                             <button className="qty-btn remove" onClick={() => handleRemoveOne(itemsInCart, plat.name)}>
                               <MinusCircle size={18} />
                             </button>
                           )}
                           {quantityInCart > 0 && <span className="qty-badge">{quantityInCart}</span>}
                           <button
-                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${!canOrder ? "preview-mode" : ""}`}
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${!isJourOpen ? "preview-mode" : ""}`}
                             onClick={() => handleAddClick(plat, quantityInCart)}
                           >
                             {isExpanding ? (
                               <><Loader2 className="spin" size={16} /><span>Configuration...</span></>
-                            ) : !canOrder ? (
+                            ) : !isJourOpen ? (
                               <><Clock size={16} /><span>Aperçu</span></>
                             ) : (
                               <><PlusCircle size={18} /><span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span></>
@@ -991,7 +995,7 @@ export default function Menu() {
                             className="order-now-btn" 
                             onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
                           >
-                            {canOrder ? "Commander maintenant" : `Disponible ${nextJourInfo || "bientôt"}`}
+                            {isJourOpen ? "Commander maintenant" : `Disponible ${nextJourInfo || "bientôt"}`}
                           </button>
                         </div>
                       </div>
