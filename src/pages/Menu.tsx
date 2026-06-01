@@ -208,12 +208,8 @@ export default function Menu() {
   const { isJourOpen, nextJourInfo } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // 🔴 CORRECTION 1: Le menu Jour est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
+  // Le menu Jour est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
   const isJourAvailable = isJourOpen || unlocked;
-  
-  // 🔴 CORRECTION 2: Les commandes ne sont possibles que si le service est VRAIMENT ouvert
-  // Le déverrouillage permet seulement de VOIR la carte, pas de commander
-  const canOrder = isJourOpen; // ⚠️ PAS de "|| unlocked"
 
   const { 
     cart, 
@@ -396,9 +392,7 @@ export default function Menu() {
   };
 
   // --- ACTIONS ---
-  // 🔴 CORRECTION 3: Vérification stricte avec isJourOpen
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    // Utiliser isJourOpen au lieu de canOrder
     if (!isJourOpen) {
       showToast(
         nextJourInfo

@@ -123,9 +123,8 @@ export default function MenuSoir() {
   const { isSoirOpen, nextSoirInfo } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // 🔴 CORRECTION 1: Séparer "voir la carte" de "pouvoir commander"
-  const isSoirAvailable = isSoirOpen || unlocked; // Pour afficher la carte
-  const canOrder = isSoirOpen; // 🔴 CHANGEMENT: Commander uniquement si le service est vraiment ouvert
+  // Le menu Soir est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
+  const isSoirAvailable = isSoirOpen || unlocked;
 
   const { 
     cart, addToCart, removeFromCart, getItemQuantity,
@@ -226,9 +225,8 @@ export default function MenuSoir() {
     if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
   };
 
-  // 🔴 CORRECTION 2: Vérification stricte avec isSoirOpen
+  // Vérification stricte avec isSoirOpen
   const handleAddClick = (plat: Plat) => {
-    // 🔴 CHANGEMENT: Utiliser isSoirOpen au lieu de canOrder
     if (!isSoirOpen) {
       showToast(
         nextSoirInfo
@@ -274,9 +272,9 @@ export default function MenuSoir() {
     }
   };
 
-  // 🔴 CORRECTION 3: Vérification stricte pour l'édition
+  // Vérification stricte pour l'édition
   const handleEditExistingItem = (plat: Plat) => {
-    if (!isSoirOpen) { // 🔴 CHANGEMENT: utiliser isSoirOpen
+    if (!isSoirOpen) {
       showToast("Impossible de modifier : service fermé", "error"); 
       return;
     }
