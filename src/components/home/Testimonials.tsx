@@ -27,20 +27,45 @@ const testimonials: Testimonial[] = [
 
 export default function Testimonials() {
   return (
-    <section className="testimonials-section">
+    <section 
+      className="testimonials-section" 
+      aria-labelledby="testimonials-title"
+    >
       <div className="container">
-        <h2 className="section-title">Ce que nos clients disent</h2>
-        <div className="testimonials-grid">
+        <h2 id="testimonials-title" className="section-title">
+          Ce que nos clients disent
+        </h2>
+        <div 
+          className="testimonials-grid" 
+          role="list" 
+          aria-label="Avis de nos clients"
+        >
           {testimonials.map((item, index) => (
-            <div key={`testimonial-${index}`} className="testimonial-card">
-              <div className="stars">
+            <div 
+              key={`testimonial-${index}`} 
+              className="testimonial-card"
+              role="listitem"
+            >
+              <div 
+                className="stars" 
+                aria-label={`Note : ${item.rating} étoiles sur 5`}
+              >
                 {/* Génération dynamique des étoiles */}
                 {[...Array(item.rating)].map((_, i) => (
-                  <span key={`star-${i}`} className="star">★</span>
+                  <span 
+                    key={`star-${i}`} 
+                    className="star" 
+                    aria-hidden="true"
+                  >
+                    ★
+                  </span>
                 ))}
               </div>
-              <p className="review-text">"{item.review}"</p>
-              <h4 className="client-name">{item.name}</h4>
+              <p className="review-text">
+                "{item.review}"
+              </p>
+              {/* CHANGEMENT IMPORTANT: h4 → h3 pour respecter la hiérarchie */}
+              <h3 className="client-name">{item.name}</h3>
             </div>
           ))}
         </div>

@@ -12,27 +12,55 @@ interface HighlightsProps {
 
 export default function Highlights({ items }: HighlightsProps) {
   return (
-    <section className="highlights-section">
+    <section 
+      className="highlights-section" 
+      aria-labelledby="highlights-title"
+    >
       <div className="highlights-header">
-        <span className="highlights-badge">La Sélection</span>
-        <h2 className="highlights-main-title">Incontournables</h2>
-        <div className="highlights-ornament"></div>
+        <span 
+          className="highlights-badge" 
+          aria-label="Sélection des plats incontournables"
+        >
+          La Sélection
+        </span>
+        <h2 id="highlights-title" className="highlights-main-title">
+          Incontournables
+        </h2>
+        <div className="highlights-ornament" aria-hidden="true"></div>
       </div>
 
-      <div className="highlights-grid">
+      <div 
+        className="highlights-grid" 
+        role="list" 
+        aria-label="Liste des plats incontournables"
+      >
         {items.map((item) => (
-          <div key={item.name} className="highlight-item-container">
+          <div 
+            key={item.name} 
+            className="highlight-item-container"
+            role="listitem"
+          >
             <div className="highlight-card">
               <div className="highlight-image-wrapper">
-                <img src={item.image} alt={item.name} className="highlight-image" />
-                <div className="highlight-price-overlay">{item.price}</div>
+                <img 
+                  src={item.image} 
+                  alt={`${item.name} - ${item.price}`}
+                  className="highlight-image"
+                  loading="lazy"
+                />
+                <div 
+                  className="highlight-price-overlay" 
+                  aria-label={`Prix : ${item.price}`}
+                >
+                  {item.price}
+                </div>
               </div>
               <div className="highlight-info">
                 <h3 className="highlight-name">{item.name}</h3>
-                <div className="highlight-line"></div>
+                <div className="highlight-line" aria-hidden="true"></div>
               </div>
             </div>
-            <div className="highlight-corner-gold"></div>
+            <div className="highlight-corner-gold" aria-hidden="true"></div>
           </div>
         ))}
       </div>

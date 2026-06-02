@@ -37,7 +37,7 @@ export default function Home() {
   }, [queryClient]);
 
   return (
-    <main>
+    <main id="main-content" role="main" aria-label="Contenu principal du site Signature Restaurant">
       {/* HERO SECTION */}
       <Hero
         title="Bienvenue au Restaurant Signature"
