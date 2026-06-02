@@ -117,31 +117,101 @@
   transform: scale(1.02);
 }
 
+/* INDICATEURS - Version accessible avec zones tactiles agrandies */
 .image-indicators {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-top: 25px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  min-width: 44px;
+  min-height: 44px;
+  width: auto;
+  height: auto;
+  padding: 0 12px;
+  border-radius: 22px;
   background: rgba(255,255,255,0.3);
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Style pour l'indicateur actif */
 .indicator.active {
-  width: 24px;
-  border-radius: 4px;
   background: var(--gold);
+  min-width: 44px;
+  padding: 0 12px;
 }
 
-.indicator:hover {
+/* Focus visible pour les indicateurs */
+.indicator:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  background: rgba(255,255,255,0.5);
+}
+
+.indicator.active:focus-visible {
+  outline: 2px solid var(--ivory);
+  outline-offset: 3px;
+}
+
+/* ==================== BOUTONS DE CARROUSEL ==================== */
+.carousel-nav-buttons {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  padding: 0 10px;
+  z-index: 5;
+}
+
+.carousel-prev,
+.carousel-next {
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ZONE TACTILE ACCESSIBLE - 44x44 minimum */
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.carousel-prev:hover,
+.carousel-next:hover {
   background: var(--gold);
+  color: var(--dark);
+  border-color: var(--gold);
+  transform: scale(1.05);
+}
+
+.carousel-prev:focus-visible,
+.carousel-next:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  background: var(--gold);
+  color: var(--dark);
 }
 
 /* ==================== PARTIE DROITE ==================== */
@@ -211,7 +281,7 @@
   line-height: 1.6;
 }
 
-/* BOUTON */
+/* BOUTON CTA - Version accessible */
 .reserve-btn {
   display: inline-flex;
   align-items: center;
@@ -229,6 +299,8 @@
   position: relative;
   overflow: hidden;
   border-radius: 0;
+  /* Zone tactile accessible */
+  min-height: 56px;
 }
 
 .reserve-btn::before {
@@ -252,6 +324,15 @@
   color: var(--gold);
   transform: translateY(-3px);
   gap: 15px;
+}
+
+/* Focus visible pour le bouton */
+.reserve-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+  background-color: transparent;
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* ==================== ANIMATIONS ==================== */
@@ -308,6 +389,14 @@
   .reserve-btn {
     margin: 0 auto;
   }
+
+  .carousel-prev,
+  .carousel-next {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -332,6 +421,22 @@
   .reserve-btn {
     padding: 14px 30px;
     font-size: 0.8rem;
+    min-height: 48px;
+  }
+  
+  .indicator {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 8px;
+  }
+  
+  .carousel-prev,
+  .carousel-next {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1rem;
   }
 }
 
@@ -348,4 +453,32 @@
   .hero-divider span {
     width: 30px;
   }
+  
+  .indicator {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0 6px;
+    font-size: 0.7rem;
+  }
+  
+  .carousel-prev,
+  .carousel-next {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+}
+
+/* Classe utilitaire pour masquer visuellement (accessibilité) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

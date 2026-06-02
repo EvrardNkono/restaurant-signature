@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-nav">
-          <h4 className="footer-label">Exploration</h4>
+          <h3 className="footer-label">Exploration</h3>
           <ul className="nav-list">
             <li><a href="#menu">La Carte</a></li>
             <li><a href="#philosophie">Notre Philosophie</a></li>

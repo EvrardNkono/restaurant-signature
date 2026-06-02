@@ -1,6 +1,7 @@
 :root {
   --gold: #D4AF37;
   --gold-light: #F5E6A3;
+  --gold-dark: #B8960C;
   --terracotta: #E2725B;
   --dark: #2D2422;
   --ivory: #FCF9F5;
@@ -34,12 +35,19 @@
   align-items: center;
 }
 
-/* LOGO */
+/* LOGO - Version accessible */
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.logo:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .logo img {
@@ -60,11 +68,13 @@
   letter-spacing: 1px;
 }
 
+/* CORRECTION CONTRASTE : small passe en gris foncé */
 .logo-text small {
   font-size: 0.6rem;
-  color: var(--gold);
+  color: #5a5a5a; /* Gris foncé pour meilleur contraste (ratio 7:1) */
   letter-spacing: 3px;
   text-transform: uppercase;
+  font-weight: 500;
 }
 
 /* NAVIGATION DESKTOP */
@@ -81,10 +91,18 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: var(--transition);
+  border-radius: 4px;
+  padding: 4px 0;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
+  color: var(--terracotta);
+}
+
+.nav-links a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
   color: var(--terracotta);
 }
 
@@ -115,38 +133,68 @@
   position: relative;
   color: var(--dark);
   transition: var(--transition);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cart-link:hover {
   color: var(--gold);
 }
 
+.cart-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .cart-count {
   position: absolute;
-  top: -8px;
-  right: -10px;
+  top: -4px;
+  right: -4px;
   background: var(--terracotta);
   color: white;
   font-size: 0.6rem;
   font-weight: bold;
-  width: 18px;
-  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  width: auto;
+  height: auto;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2px 4px;
 }
 
+/* BURGER - Version accessible */
 .burger {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
   color: var(--dark);
-  padding: 5px;
+  padding: 8px;
+  border-radius: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  width: auto;
+  height: auto;
+  transition: var(--transition);
 }
 
-/* MENU MOBILE */
+.burger:hover {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.burger:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* MENU MOBILE - Version accessible */
 .mobile-menu {
   position: fixed;
   top: 0;
@@ -164,7 +212,7 @@
   right: 0;
 }
 
-/* Bouton de fermeture */
+/* Bouton de fermeture - Version accessible */
 .mobile-close {
   position: absolute;
   top: 20px;
@@ -180,11 +228,20 @@
   justify-content: center;
   transition: var(--transition);
   z-index: 10;
+  min-width: 44px;
+  min-height: 44px;
+  width: auto;
+  height: auto;
 }
 
 .mobile-close:hover {
   background: rgba(212, 175, 55, 0.3);
   transform: rotate(90deg);
+}
+
+.mobile-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .mobile-menu-inner {
@@ -203,10 +260,17 @@
   padding: 0.8rem 0;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   transition: var(--transition);
+  border-radius: 4px;
 }
 
 .mobile-menu-inner a:hover {
   color: var(--gold);
+  padding-left: 10px;
+}
+
+.mobile-menu-inner a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
   padding-left: 10px;
 }
 
@@ -232,7 +296,9 @@
   }
   
   .burger {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .logo img {
@@ -241,6 +307,10 @@
   
   .logo-text span {
     font-size: 1.1rem;
+  }
+  
+  .logo-text small {
+    font-size: 0.55rem;
   }
 }
 
@@ -260,9 +330,19 @@
   .logo-text small {
     font-size: 0.5rem;
   }
+  
+  .burger {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  .cart-link {
+    width: 36px;
+    height: 36px;
+  }
 }
 
-/* ===== MODAL ADMIN ===== */
+/* ===== MODAL ADMIN ACCESSIBLE ===== */
 .admin-modal-overlay {
   position: fixed;
   inset: 0;
@@ -300,13 +380,25 @@
   background: rgba(255,255,255,0.1);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  min-width: 44px;
+  min-height: 44px;
+  width: auto;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   cursor: pointer;
+  transition: var(--transition);
+}
+
+.admin-modal-close:hover {
+  background: rgba(212, 175, 55, 0.3);
+}
+
+.admin-modal-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .admin-modal-icon {
@@ -326,6 +418,7 @@
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 6px;
+  color: #fff;
 }
 
 .admin-modal p {
@@ -350,6 +443,7 @@
 
 .admin-modal-input:focus {
   border-color: #c8a96e;
+  outline: 2px solid rgba(200, 169, 110, 0.3);
 }
 
 .admin-modal-error {
@@ -371,7 +465,32 @@
   cursor: pointer;
   transition: background 0.2s;
   margin-top: 4px;
+  min-height: 48px;
 }
 
-.admin-modal-btn:hover { background: #d4b87a; }
-.admin-modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.admin-modal-btn:hover { 
+  background: #d4b87a; 
+}
+
+.admin-modal-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.admin-modal-btn:disabled { 
+  opacity: 0.6; 
+  cursor: not-allowed; 
+}
+
+/* Classe utilitaire pour masquer visuellement (accessibilité) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

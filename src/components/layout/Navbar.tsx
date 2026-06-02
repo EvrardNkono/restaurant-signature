@@ -177,7 +177,12 @@ export default function Navbar() {
           </div>
 
           {/* MENU MOBILE */}
-          <div id="mobile-menu" className={`mobile-menu ${open ? "open" : ""}`} aria-hidden={!open}>
+          <div 
+  id="mobile-menu" 
+  className={`mobile-menu ${open ? "open" : ""}`} 
+  aria-hidden={!open}
+  inert={!open ? true : undefined}  // ← AJOUTER CET ATTRIBUT
+>
             <button 
               className="mobile-close" 
               onClick={closeMenu}
