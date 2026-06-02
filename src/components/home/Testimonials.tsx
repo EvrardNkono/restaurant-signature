@@ -46,8 +46,10 @@ export default function Testimonials() {
               className="testimonial-card"
               role="listitem"
             >
+              {/* CORRECTION ARIA : ajout de role="img" pour éviter l'attribut interdit */}
               <div 
                 className="stars" 
+                role="img" 
                 aria-label={`Note : ${item.rating} étoiles sur 5`}
               >
                 {/* Génération dynamique des étoiles */}
@@ -60,6 +62,10 @@ export default function Testimonials() {
                     ★
                   </span>
                 ))}
+                {/* Texte caché pour les lecteurs d'écran (fallback) */}
+                <span className="visually-hidden">
+                  Note : {item.rating} étoiles sur 5
+                </span>
               </div>
               <p className="review-text">
                 "{item.review}"

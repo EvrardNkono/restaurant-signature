@@ -34,11 +34,12 @@ export default function Highlights({ items }: HighlightsProps) {
         role="list" 
         aria-label="Liste des plats incontournables"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div 
             key={item.name} 
             className="highlight-item-container"
             role="listitem"
+            aria-label={`Plat ${index + 1} : ${item.name}, ${item.price}`}
           >
             <div className="highlight-card">
               <div className="highlight-image-wrapper">

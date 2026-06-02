@@ -4,11 +4,13 @@
   text-align: center;
 }
 
+/* CORRECTION CONTRASTE : Titre plus foncé pour meilleur rapport */
 .section-title {
-  color: #2D2422; /* Ton Terracotta foncé */
-  font-family: 'Playfair Display', serif; /* Ou ta police actuelle */
+  color: #1a1a1a; /* Noir/gris très foncé - contraste élevé sur fond clair */
+  font-family: 'Playfair Display', serif;
   font-size: 2.5rem;
   margin-bottom: 40px;
+  font-weight: 600;
 }
 
 .testimonials-grid {
@@ -34,22 +36,82 @@
   transform: translateY(-10px);
 }
 
+/* CORRECTION CONTRASTE : Étoiles avec meilleure visibilité */
 .stars {
   color: #D4AF37; /* Or */
   margin-bottom: 15px;
   font-size: 1.2rem;
+  letter-spacing: 2px;
 }
 
+/* CORRECTION CONTRASTE : Texte d'avis plus foncé pour meilleure lisibilité */
 .review-text {
-  color: #555;
+  color: #333333; /* Gris foncé (était #555 - trop clair) */
   font-style: italic;
   line-height: 1.6;
   margin-bottom: 20px;
 }
 
+/* CORRECTION CONTRASTE : Nom du client */
 .client-name {
   color: #2D2422;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+/* ===== CLASSE UTILITAIRE ACCESSIBILITÉ ===== */
+/* Masque visuellement du contenu tout en le gardant accessible aux lecteurs d'écran */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ===== AMÉLIORATIONS RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .testimonials-section {
+    padding: 60px 15px;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+  
+  .testimonial-card {
+    padding: 30px 25px;
+    width: 280px;
+  }
+  
+  .review-text {
+    font-size: 0.9rem;
+  }
+  
+  .stars {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonials-section {
+    padding: 40px 15px;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .testimonial-card {
+    padding: 25px 20px;
+    width: 100%;
+    max-width: 320px;
+  }
 }

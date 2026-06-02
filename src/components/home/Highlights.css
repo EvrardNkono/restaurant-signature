@@ -14,8 +14,9 @@
   margin-bottom: 60px;
 }
 
+/* CORRECTION CONTRASTE : Badge avec couleur plus foncée */
 .highlights-badge {
-  color: #D4AF37;
+  color: #8B6914; /* Or foncé pour meilleur contraste (était #D4AF37) */
   text-transform: uppercase;
   letter-spacing: 5px;
   font-size: 0.7rem;
@@ -24,10 +25,11 @@
   margin-bottom: 10px;
 }
 
+/* CORRECTION CONTRASTE : Titre avec meilleur contraste */
 .highlights-main-title {
   font-family: 'Playfair Display', serif;
   font-size: clamp(1.8rem, 5vw, 2.5rem);
-  color: #2D2422;
+  color: #1a1a1a; /* Noir/gris très foncé (était #2D2422) */
 }
 
 /* --- GRILLE --- */
@@ -54,6 +56,11 @@
   transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.highlight-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
 .highlight-image-wrapper {
   position: relative;
   height: 280px; 
@@ -64,17 +71,24 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
 }
 
+.highlight-card:hover .highlight-image {
+  transform: scale(1.05);
+}
+
+/* CORRECTION CONTRASTE : Prix avec meilleur contraste */
 .highlight-price-overlay {
   position: absolute;
   bottom: 0;
   right: 0;
-  background-color: #2D2422;
+  background-color: #1a1a1a; /* Plus foncé (était #2D2422) */
   color: #D4AF37;
   padding: 8px 15px;
   font-family: 'Playfair Display', serif;
   font-size: 1rem;
+  font-weight: 600;
 }
 
 .highlight-info {
@@ -82,10 +96,11 @@
   text-align: center;
 }
 
+/* CORRECTION CONTRASTE : Nom du plat */
 .highlight-name {
   font-family: 'Playfair Display', serif;
   font-size: 1.2rem;
-  color: #2D2422;
+  color: #1a1a1a; /* Noir/gris très foncé (était #2D2422) */
   margin-bottom: 10px;
 }
 
@@ -137,6 +152,10 @@
     top: -10px;
     left: -10px;
   }
+  
+  .highlight-name {
+    font-size: 1.1rem;
+  }
 }
 
 /* Pour les tout petits écrans (iPhone SE, etc.) */
@@ -144,4 +163,17 @@
   .highlights-section {
     padding: 50px 30px; /* Légère réduction pour les écrans minuscules */
   }
+}
+
+/* Classe utilitaire pour masquer visuellement (accessibilité) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

@@ -182,9 +182,14 @@ export default function Chatbot() {
             disabled={isTyping}
             autoFocus
           />
-          <button type="submit" className="send-btn" disabled={!input.trim() || isTyping}>
-            <Send size={18} />
-          </button>
+          <button 
+  type="submit" 
+  className="send-btn" 
+  disabled={!input.trim()}
+  aria-label="Envoyer le message"
+>
+  <Send size={20} aria-hidden="true" />
+</button>
         </form>
       </div>
     </div>

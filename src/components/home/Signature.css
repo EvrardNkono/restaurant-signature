@@ -51,8 +51,9 @@
   flex-direction: column;
 }
 
+/* CORRECTION CONTRASTE : Badge avec couleur plus foncée */
 .signature-badge {
-  color: #D4AF37;
+  color: #8B6914; /* Or foncé pour meilleur contraste (était #D4AF37) */
   text-transform: uppercase;
   letter-spacing: 5px;
   font-size: 0.75rem;
@@ -60,10 +61,11 @@
   margin-bottom: 1.2rem;
 }
 
+/* CORRECTION CONTRASTE : Titre avec meilleur contraste */
 .signature-title {
   font-family: 'Playfair Display', serif;
   font-size: 2.8rem;
-  color: #2D2422;
+  color: #1a1a1a; /* Noir/gris très foncé (était #2D2422) */
   line-height: 1.2;
   margin-bottom: 1.5rem;
 }
@@ -75,16 +77,16 @@
   margin-bottom: 2rem;
 }
 
+/* CORRECTION CONTRASTE : Texte avec meilleur contraste */
 .signature-text {
   font-family: 'Poppins', sans-serif;
   font-size: 1.1rem;
   line-height: 1.9;
-  color: #2D2422;
-  font-style: italic;
-  opacity: 0.85;
+  color: #333333; /* Gris foncé (était #2D2422 avec opacity 0.85) */
   margin-bottom: 2.5rem;
 }
 
+/* CORRECTION : Bouton accessible */
 .signature-button {
   background: none;
   border: none;
@@ -92,11 +94,17 @@
   letter-spacing: 2px;
   font-weight: 600;
   font-size: 0.85rem;
-  color: #2D2422;
+  color: #1a1a1a; /* Plus foncé pour meilleur contraste */
   cursor: pointer;
   padding-bottom: 8px;
   position: relative;
   width: fit-content;
+  transition: color 0.3s ease;
+  /* Zone tactile accessible */
+  min-height: 48px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-radius: 4px;
 }
 
 .signature-button .button-line {
@@ -109,8 +117,19 @@
   transition: width 0.3s ease;
 }
 
+.signature-button:hover {
+  color: #D4AF37;
+}
+
 .signature-button:hover .button-line {
   width: 100%;
+}
+
+/* Focus visible pour l'accessibilité */
+.signature-button:focus-visible {
+  outline: 2px solid #D4AF37;
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 /* --- LOGIQUE D'INVERSION --- */
@@ -131,7 +150,12 @@
   .signature-inner-content {
     gap: 40px;
   }
-  .signature-title { font-size: 2.2rem; }
+  .signature-title { 
+    font-size: 2.2rem; 
+  }
+  .signature-text {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -152,4 +176,46 @@
     top: -15px;
     left: -15px; /* On réduit le décalage sur mobile */
   }
+  .signature-title {
+    font-size: 1.8rem;
+  }
+  .signature-text {
+    font-size: 0.95rem;
+  }
+  .signature-button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signature-section {
+    padding: 40px 16px;
+  }
+  .signature-image {
+    height: 280px;
+  }
+  .signature-title {
+    font-size: 1.5rem;
+  }
+  .signature-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .signature-badge {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+  }
+}
+
+/* Classe utilitaire pour masquer visuellement (accessibilité) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
