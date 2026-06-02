@@ -20,6 +20,29 @@ const BASE_URL = isLocal
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
 
+// --- FONCTION POUR FORMATER LE MESSAGE D'OUVERTURE ---
+const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
+  if (!nextInfo) return null;
+  
+  const now = new Date();
+  const lowerNextInfo = nextInfo.toLowerCase();
+  
+  // Si c'est "aujourd'hui" ou "ce soir"
+  if (lowerNextInfo.includes("aujourd'hui") || lowerNextInfo.includes("ce soir")) {
+    return `d'${nextInfo}`;
+  }
+  
+  // Si le premier caractère est une voyelle
+  const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
+  const firstChar = lowerNextInfo.charAt(0);
+  
+  if (vowels.includes(firstChar)) {
+    return `d'${nextInfo}`;
+  }
+  
+  return `de ${nextInfo}`;
+};
+
 // --- BANNIÈRE SERVICE VERROUILLÉ ---
 const ServiceLockedBanner = ({
   serviceLabel,
@@ -29,31 +52,35 @@ const ServiceLockedBanner = ({
   serviceLabel: string;
   nextInfo: string | null;
   onUnlock: () => void;
-}) => (
-  <div className="service-locked-banner-soir">
-    <div className="locked-banner-content-soir">
-      <div className="locked-icon-wrap-soir">
-        <CalendarClock size={36} className="locked-icon-soir" />
-      </div>
-      <div className="locked-text-soir">
-        <h3 className="locked-title-soir">Service {serviceLabel} non disponible</h3>
-        {nextInfo && (
-          <p className="locked-subtitle-soir">
-            Le service en salle sera disponible à partir d'{" "}
-            <strong>{nextInfo}</strong>
+}) => {
+  const formattedMessage = formatNextOpeningMessage(nextInfo);
+  
+  return (
+    <div className="service-locked-banner-soir">
+      <div className="locked-banner-content-soir">
+        <div className="locked-icon-wrap-soir">
+          <CalendarClock size={36} className="locked-icon-soir" />
+        </div>
+        <div className="locked-text-soir">
+          <h3 className="locked-title-soir">Service {serviceLabel} non disponible</h3>
+          {nextInfo && (
+            <p className="locked-subtitle-soir">
+              Le service en salle sera disponible à partir{" "}
+              <strong>{formattedMessage}</strong>
+            </p>
+          )}
+          <p className="locked-hint-soir">
+            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service, ou simplement de vous faire livrer.
           </p>
-        )}
-        <p className="locked-hint-soir">
-          Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service. ou simplement de vous faire livrer.
-        </p>
+        </div>
+        <button className="locked-cta-btn-soir" onClick={onUnlock}>
+          <span>Voir la carte &amp; Réserver</span>
+          <ArrowRight size={18} />
+        </button>
       </div>
-      <button className="locked-cta-btn-soir" onClick={onUnlock}>
-        <span>Voir la carte &amp; Réserver</span>
-        <ArrowRight size={18} />
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 // --- INTERFACES ---
 interface Category {
@@ -228,9 +255,10 @@ export default function MenuSoir() {
   // Vérification stricte avec isSoirOpen
   const handleAddClick = (plat: Plat) => {
     if (!isSoirOpen) {
+      const formattedMsg = formatNextOpeningMessage(nextSoirInfo);
       showToast(
         nextSoirInfo
-          ? `🍽️ Les commandes ouvrent ${nextSoirInfo}. Vous pouvez parcourir la carte !`
+          ? `🍽️ Les commandes ouvrent à partir ${formattedMsg}. Vous pouvez parcourir la carte !`
           : "🍽️ Service non disponible pour le moment.",
         "warning"
       );
@@ -340,6 +368,13 @@ export default function MenuSoir() {
     }
   }, [tempItem, editingCartItemId]);
 
+  // Formatage du message pour les boutons "Dispo"
+  const getButtonAvailabilityText = (): string => {
+    if (!nextSoirInfo) return "Bientôt disponible";
+    const formattedMsg = formatNextOpeningMessage(nextSoirInfo);
+    return `Dispo à partir ${formattedMsg}`;
+  };
+
   if (isLoadingMenu) {
     return (
       <div className="menu-soir-loading">
@@ -424,12 +459,12 @@ export default function MenuSoir() {
                         className="btn-add-soir"
                         style={{ width: '100%', opacity: 0.7, cursor: 'default' }}
                         onClick={() => showToast(
-                          nextSoirInfo ? `🍽️ Commandes disponibles ${nextSoirInfo}` : "🍽️ Service non disponible",
+                          nextSoirInfo ? `🍽️ Commandes disponibles à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "🍽️ Service non disponible",
                           "warning"
                         )}
                       >
                         <Clock size={16} style={{ marginRight: '8px' }} />
-                        {nextSoirInfo ? `Dispo ${nextSoirInfo}` : "Bientôt disponible"}
+                        {getButtonAvailabilityText()}
                       </button>
                     </div>
                   </div>
@@ -460,8 +495,8 @@ export default function MenuSoir() {
         <div className="restaurant-preview-banner-soir">
           <Eye size={18} />
           <span>
-            Mode aperçu — Les commandes seront disponibles{" "}
-            {nextSoirInfo ? nextSoirInfo : "à l'ouverture du service"}
+            Mode aperçu — Les commandes seront disponibles à partir{" "}
+            {nextSoirInfo ? formatNextOpeningMessage(nextSoirInfo) : "de l'ouverture du service"}
           </span>
         </div>
       )}
@@ -580,7 +615,7 @@ export default function MenuSoir() {
                             {isSoirOpen ? <PlusCircle size={18} style={{ marginRight: '8px' }} /> : <Clock size={18} style={{ marginRight: '8px' }} />}
                             {isSoirOpen
                               ? (quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier")
-                              : (nextSoirInfo ? `Dispo ${nextSoirInfo}` : "Aperçu")}
+                              : (nextSoirInfo ? getButtonAvailabilityText() : "Aperçu")}
                           </>
                         )}
                       </button>

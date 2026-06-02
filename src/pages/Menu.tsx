@@ -22,6 +22,28 @@ const BASE_URL = isLocal
 const API_URL = `${BASE_URL}/menu?public=true`;
 const SUPP_API = `${BASE_URL}/supplements?public=true`;
 
+// --- FONCTION POUR FORMATER LE MESSAGE D'OUVERTURE ---
+const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
+  if (!nextInfo) return null;
+  
+  const lowerNextInfo = nextInfo.toLowerCase();
+  
+  // Cas particuliers
+  if (lowerNextInfo.includes("aujourd'hui") || lowerNextInfo.includes("ce soir")) {
+    return `d'${nextInfo}`;
+  }
+  
+  // Si le premier caractère est une voyelle
+  const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
+  const firstChar = lowerNextInfo.charAt(0);
+  
+  if (vowels.includes(firstChar)) {
+    return `d'${nextInfo}`;
+  }
+  
+  return `de ${nextInfo}`;
+};
+
 // --- BANNIÈRE SERVICE VERROUILLÉ ---
 const ServiceLockedBanner = ({
   serviceLabel,
@@ -31,31 +53,35 @@ const ServiceLockedBanner = ({
   serviceLabel: string;
   nextInfo: string | null;
   onUnlock: () => void;
-}) => (
-  <div className="service-locked-banner">
-    <div className="locked-banner-content">
-      <div className="locked-icon-wrap">
-        <CalendarClock size={36} className="locked-icon" />
-      </div>
-      <div className="locked-text">
-        <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
-        {nextInfo && (
-          <p className="locked-subtitle">
-            Le service en salle sera disponible à partir d'{" "}
-            <strong>{nextInfo}</strong>
+}) => {
+  const formattedMessage = formatNextOpeningMessage(nextInfo);
+  
+  return (
+    <div className="service-locked-banner">
+      <div className="locked-banner-content">
+        <div className="locked-icon-wrap">
+          <CalendarClock size={36} className="locked-icon" />
+        </div>
+        <div className="locked-text">
+          <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
+          {nextInfo && (
+            <p className="locked-subtitle">
+              Le service en salle sera disponible à partir{" "}
+              <strong>{formattedMessage}</strong>
+            </p>
+          )}
+          <p className="locked-hint">
+            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service. ou simplement de vous faire livrer.
           </p>
-        )}
-        <p className="locked-hint">
-          Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service. ou simplement de vous faire livrer.
-        </p>
+        </div>
+        <button className="locked-cta-btn" onClick={onUnlock}>
+          <span>Voir la carte &amp; Réserver</span>
+          <ArrowRight size={18} />
+        </button>
       </div>
-      <button className="locked-cta-btn" onClick={onUnlock}>
-        <span>Voir la carte &amp; Réserver</span>
-        <ArrowRight size={18} />
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 // --- COMPOSANT VOYANT DE STATUT AVEC PROGRESSION ---
 const OrderStatusBadge = ({ status }: { status: string }) => {
@@ -240,6 +266,13 @@ export default function Menu() {
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const lastScrollY = useRef(0);
 
+  // Fonction pour obtenir le texte du bouton
+  const getButtonAvailabilityText = (): string => {
+    if (!nextJourInfo) return "Bientôt disponible";
+    const formattedMsg = formatNextOpeningMessage(nextJourInfo);
+    return `Dispo à partir ${formattedMsg}`;
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -394,9 +427,10 @@ export default function Menu() {
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
     if (!isJourOpen) {
+      const formattedMsg = formatNextOpeningMessage(nextJourInfo);
       showToast(
         nextJourInfo
-          ? `🍽️ Les commandes ouvrent ${nextJourInfo}. Vous pouvez parcourir la carte !`
+          ? `🍽️ Les commandes ouvrent à partir ${formattedMsg}. Vous pouvez parcourir la carte !`
           : "🍽️ Service non disponible pour le moment.",
         "warning"
       );
@@ -425,7 +459,7 @@ export default function Menu() {
       return;
     }
 
-    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
+    const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
     const hasSupps = plat.allowSupplements;
     const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
 
@@ -592,12 +626,12 @@ export default function Menu() {
                       <button
                         className="add-btn readonly-order-btn"
                         onClick={() => showToast(
-                          nextJourInfo ? `🍽️ Commandes disponibles ${nextJourInfo}` : "🍽️ Service non disponible",
+                          nextJourInfo ? `🍽️ Commandes disponibles à partir ${formatNextOpeningMessage(nextJourInfo)}` : "🍽️ Service non disponible",
                           "warning"
                         )}
                       >
                         <Clock size={16} />
-                        <span>{nextJourInfo ? `Dispo ${nextJourInfo}` : "Bientôt disponible"}</span>
+                        <span>{getButtonAvailabilityText()}</span>
                       </button>
                     </div>
                   </div>
@@ -628,8 +662,8 @@ export default function Menu() {
         <div className="restaurant-preview-banner">
           <Eye size={18} />
           <span>
-            Mode aperçu — Les commandes seront disponibles{" "}
-            {nextJourInfo ? nextJourInfo : "à l'ouverture du service (12h00 - 15h00)"}
+            Mode aperçu — Les commandes seront disponibles à partir{" "}
+            {nextJourInfo ? formatNextOpeningMessage(nextJourInfo) : "de l'ouverture du service (12h00 - 15h00)"}
           </span>
         </div>
       )}
@@ -989,7 +1023,7 @@ export default function Menu() {
                             className="order-now-btn" 
                             onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
                           >
-                            {isJourOpen ? "Commander maintenant" : `Disponible ${nextJourInfo || "bientôt"}`}
+                            {isJourOpen ? "Commander maintenant" : `Disponible ${formatNextOpeningMessage(nextJourInfo) || "bientôt"}`}
                           </button>
                         </div>
                       </div>
