@@ -24,7 +24,7 @@ const SUPP_API = `${BASE_URL}/supplements?public=true`;
 const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
   if (!nextInfo) return null;
   
-  const now = new Date();
+  
   const lowerNextInfo = nextInfo.toLowerCase();
   
   // Si c'est "aujourd'hui" ou "ce soir"
