@@ -254,7 +254,7 @@ export default function MenuSoir() {
     if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
   };
 
-  // ✅ VERSION CORRIGÉE : permet d'ajouter au panier si débloqué (même service fermé)
+  // ✅ Version finale : ajout au panier normal quand débloqué (SANS message de paiement)
   const handleAddClick = (plat: Plat) => {
     // Si service FERMÉ et NON DÉBLOQUÉ → bloquer
     if (!isSoirOpen && !unlocked) {
@@ -265,8 +265,8 @@ export default function MenuSoir() {
       return;
     }
     
-    // ✅ Service fermé mais DÉBLOQUÉ → on continue (préparation)
-    // ✅ Service ouvert → on continue (commande normale)
+    // ✅ Service fermé mais DÉBLOQUÉ → on continue (ajout au panier normal)
+    // ✅ Service ouvert → on continue (ajout au panier normal)
     
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.", "error");
@@ -299,17 +299,13 @@ export default function MenuSoir() {
       if (result === "LOCK_ERROR") {
         showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
       } else {
-        // Message différent selon le mode
-        if (!isSoirOpen && unlocked) {
-          showToast(`📝 ${plat.name} préparé (paiement disponible à l'ouverture)`, "success");
-        } else {
-          showToast(`✓ ${plat.name} ajouté au panier`, "success");
-        }
+        // Message simple sans mention de paiement
+        showToast(`✓ ${plat.name} ajouté au panier`, "success");
       }
     }
   };
 
-  // Vérification stricte pour l'édition
+  // Vérification pour l'édition
   const handleEditExistingItem = (plat: Plat) => {
     if (!isSoirOpen && !unlocked) {
       showToast("Impossible de modifier : carte verrouillée", "error"); 
@@ -351,8 +347,7 @@ export default function MenuSoir() {
     if (result === "LOCK_ERROR") {
       showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
     } else {
-      const action = (!isSoirOpen && unlocked) ? "préparé" : "ajouté au panier";
-      showToast(`✓ ${tempItem.name} ${action}`, "success");
+      showToast(`✓ ${tempItem.name} ajouté au panier`, "success");
       setTempItem(null);
     }
   };
@@ -377,8 +372,6 @@ export default function MenuSoir() {
       }
     }
   }, [tempItem, editingCartItemId]);
-
-  
 
   if (isLoadingMenu) {
     return (
@@ -497,13 +490,12 @@ export default function MenuSoir() {
         </div>
       )}
 
-      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) */}
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) - SANS mention paiement */}
       {!isSoirOpen && unlocked && (
         <div className="restaurant-preview-banner-soir">
           <Eye size={18} />
           <span>
-            🔓 Mode préparation — Vous pouvez préparer votre commande. 
-            Paiement disponible {nextSoirInfo ? `à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "à l'ouverture du service"}
+            🔓 Mode préparation — Vous pouvez préparer votre commande.
           </span>
         </div>
       )}
@@ -620,7 +612,7 @@ export default function MenuSoir() {
                         {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
                           <>
                             <PlusCircle size={18} style={{ marginRight: '8px' }} />
-                            {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : (!isSoirOpen ? "Préparer" : "Ajouter au panier")}
+                            {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
                           </>
                         )}
                       </button>
@@ -657,7 +649,7 @@ export default function MenuSoir() {
                     </div>
                   </div>
 
-                  {/* TIROIR DE PERSONNALISATION */}
+                  {/* TIROIR DE PERSONNALISATION - inchangé */}
                   <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
                     <div className="drawer-header">
                       <div className="drawer-title">
