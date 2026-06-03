@@ -26,12 +26,10 @@ const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
   
   const lowerNextInfo = nextInfo.toLowerCase();
   
-  // Si c'est "aujourd'hui" ou "ce soir"
   if (lowerNextInfo.includes("aujourd'hui") || lowerNextInfo.includes("ce soir")) {
     return `d'${nextInfo}`;
   }
   
-  // Si le premier caractère est une voyelle
   const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
   const firstChar = lowerNextInfo.charAt(0);
   
@@ -69,11 +67,11 @@ const ServiceLockedBanner = ({
             </p>
           )}
           <p className="locked-hint-soir">
-            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service, ou simplement de vous faire livrer.
+            Cliquez sur "Voir la carte & préparer" pour débloquer l'aperçu et préparer votre commande.
           </p>
         </div>
         <button className="locked-cta-btn-soir" onClick={onUnlock}>
-          <span>Voir la carte &amp; préparer ma commande</span>
+          <span>Voir la carte &amp; préparer</span>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -256,18 +254,20 @@ export default function MenuSoir() {
     if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
   };
 
-  // Vérification stricte avec isSoirOpen
+  // ✅ VERSION CORRIGÉE : permet d'ajouter au panier si débloqué (même service fermé)
   const handleAddClick = (plat: Plat) => {
-    if (!isSoirOpen) {
-      const formattedMsg = formatNextOpeningMessage(nextSoirInfo);
+    // Si service FERMÉ et NON DÉBLOQUÉ → bloquer
+    if (!isSoirOpen && !unlocked) {
       showToast(
-        nextSoirInfo
-          ? `🍽️ Les commandes ouvrent à partir ${formattedMsg}. Vous pouvez parcourir la carte !`
-          : "🍽️ Service non disponible pour le moment.",
+        "🔒 Carte verrouillée. Cliquez sur 'Voir la carte & préparer' pour débloquer.",
         "warning"
       );
       return;
     }
+    
+    // ✅ Service fermé mais DÉBLOQUÉ → on continue (préparation)
+    // ✅ Service ouvert → on continue (commande normale)
+    
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.", "error");
       return;
@@ -299,15 +299,20 @@ export default function MenuSoir() {
       if (result === "LOCK_ERROR") {
         showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
       } else {
-        showToast(`✓ ${plat.name} ajouté au panier`, "success");
+        // Message différent selon le mode
+        if (!isSoirOpen && unlocked) {
+          showToast(`📝 ${plat.name} préparé (paiement disponible à l'ouverture)`, "success");
+        } else {
+          showToast(`✓ ${plat.name} ajouté au panier`, "success");
+        }
       }
     }
   };
 
   // Vérification stricte pour l'édition
   const handleEditExistingItem = (plat: Plat) => {
-    if (!isSoirOpen) {
-      showToast("Impossible de modifier : service fermé", "error"); 
+    if (!isSoirOpen && !unlocked) {
+      showToast("Impossible de modifier : carte verrouillée", "error"); 
       return;
     }
     if (isAnyDrawerOpen) return;
@@ -346,7 +351,8 @@ export default function MenuSoir() {
     if (result === "LOCK_ERROR") {
       showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
     } else {
-      showToast(`✓ ${tempItem.name} ajouté au panier`, "success");
+      const action = (!isSoirOpen && unlocked) ? "préparé" : "ajouté au panier";
+      showToast(`✓ ${tempItem.name} ${action}`, "success");
       setTempItem(null);
     }
   };
@@ -372,7 +378,6 @@ export default function MenuSoir() {
     }
   }, [tempItem, editingCartItemId]);
 
-  // Formatage du message pour les boutons "Dispo"
   const getButtonAvailabilityText = (): string => {
     if (!nextSoirInfo) return "Bientôt disponible";
     const formattedMsg = formatNextOpeningMessage(nextSoirInfo);
@@ -392,7 +397,6 @@ export default function MenuSoir() {
   if (!isSoirAvailable) {
     return (
       <section className="menu-soir-section">
-        {/* Toast Container */}
         {toastMessage && (
           <div className={`toast-notification ${toastMessage.type}`}>
             {toastMessage.text}
@@ -411,39 +415,28 @@ export default function MenuSoir() {
           </div>
         </div>
 
-        {/* BANNIÈRE VERROUILLAGE - SEUL MOYEN DE DÉBLOQUER */}
         <ServiceLockedBanner
           serviceLabel="Dîner"
           nextInfo={nextSoirInfo}
           onUnlock={handleUnlock}
         />
 
-        {/* CARTE EN LECTURE SEULE */}
         <div className="univers-selector-container-soir">
           <div className="univers-selector-soir">
-            <button 
-              className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} 
-              onClick={() => handleUniversChange("Cuisine")}
-            >
+            <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} onClick={() => handleUniversChange("Cuisine")}>
               <Utensils size={18} /> La Table
             </button>
-            <button 
-              className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} 
-              onClick={() => handleUniversChange("Boissons")}
-            >
+            <button className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} onClick={() => handleUniversChange("Boissons")}>
               <GlassWater size={18} /> La Cave
             </button>
           </div>
         </div>
+        
         <div className="menu-filtres-soir-container">
           <div className="menu-filtres-track-soir">
             <div className="menu-filtres-list-soir">
               {currentCategories.map((cat, idx) => (
-                <button 
-                  key={idx} 
-                  className={`filter-btn-soir ${filter === cat ? "active" : ""}`} 
-                  onClick={() => setFilter(cat as string)}
-                >
+                <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat as string)}>
                   {cat as string}
                 </button>
               ))}
@@ -473,13 +466,8 @@ export default function MenuSoir() {
                     <div className="card-actions" style={{ marginTop: '15px' }}>
                       <button
                         className="btn-add-soir"
-                        style={{ width: '100%', opacity: 0.7, cursor: 'pointer' }}
-                        onClick={() => showToast(
-                          nextSoirInfo 
-                            ? `🔒 Cliquez sur "Voir la carte & préparer ma commande" pour débloquer` 
-                            : "🍽️ Service non disponible",
-                          "warning"
-                        )}
+                        style={{ width: '100%' }}
+                        onClick={() => showToast("🔒 Cliquez sur 'Voir la carte & préparer' pour débloquer", "warning")}
                       >
                         <Clock size={16} style={{ marginRight: '8px' }} />
                         Carte verrouillée
@@ -499,7 +487,6 @@ export default function MenuSoir() {
   // ─── AFFICHAGE DÉVERROUILLÉ (service ouvert OU utilisateur a cliqué) ───
   return (
     <section className="menu-soir-section">
-      {/* Toast Container */}
       {toastMessage && (
         <div className={`toast-notification ${toastMessage.type}`}>
           {toastMessage.text}
@@ -514,13 +501,13 @@ export default function MenuSoir() {
         </div>
       )}
 
-      {/* BANNIÈRE MODE APERÇU (déverrouillé manuellement mais service fermé) */}
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) */}
       {!isSoirOpen && unlocked && (
         <div className="restaurant-preview-banner-soir">
           <Eye size={18} />
           <span>
-            🔓 Mode aperçu — Vous pouvez préparer votre commande. 
-            Le paiement sera disponible {nextSoirInfo ? `à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "à l'ouverture du service"}
+            🔓 Mode préparation — Vous pouvez préparer votre commande. 
+            Paiement disponible {nextSoirInfo ? `à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "à l'ouverture du service"}
           </span>
         </div>
       )}
@@ -630,21 +617,19 @@ export default function MenuSoir() {
 
                     <div className="card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
                       <button 
-                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) || !isSoirOpen ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
+                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
                         onClick={() => handleAddClick(plat)}
                         style={{ width: '100%' }}
                       >
                         {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
                           <>
-                            {isSoirOpen ? <PlusCircle size={18} style={{ marginRight: '8px' }} /> : <Clock size={18} style={{ marginRight: '8px' }} />}
-                            {isSoirOpen
-                              ? (quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier")
-                              : (nextSoirInfo ? getButtonAvailabilityText() : "Préparer")}
+                            <PlusCircle size={18} style={{ marginRight: '8px' }} />
+                            {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : (!isSoirOpen ? "Préparer" : "Ajouter au panier")}
                           </>
                         )}
                       </button>
 
-                      {quantityInCart > 0 && !isExpanding && isSoirOpen && (
+                      {quantityInCart > 0 && !isExpanding && (
                         <button 
                           className="btn-edit-soir"
                           onClick={() => handleEditExistingItem(plat)}
@@ -656,11 +641,11 @@ export default function MenuSoir() {
                             borderRadius: '8px', color: '#D4AF37', cursor: 'pointer',
                           }}
                         >
-                          <Sparkles size={14} /><span>Modifier ma commande</span>
+                          <Sparkles size={14} /><span>Modifier</span>
                         </button>
                       )}
 
-                      {quantityInCart > 0 && !isExpanding && isSoirOpen && (
+                      {quantityInCart > 0 && !isExpanding && (
                         <button 
                           className="btn-remove-quick-soir"
                           onClick={() => handleRemoveOne(plat._id)}
@@ -689,7 +674,6 @@ export default function MenuSoir() {
                     </div>
 
                     <div className="drawer-body-scroll">
-                      {/* Offre */}
                       {tempItem?.id === plat._id && plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
                         const totalQtyAfterAdding = quantityInCart + 1;
                         const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
@@ -710,7 +694,6 @@ export default function MenuSoir() {
                         );
                       })()}
 
-                      {/* Accompagnements */}
                       {(plat.accompaniments?.filter(a => a.active).length || 0) > 0 && drawerItem && (
                         <div className="drawer-section">
                           <p className="drawer-label">Accompagnement (Gratuit)</p>
@@ -732,7 +715,6 @@ export default function MenuSoir() {
                         </div>
                       )}
 
-                      {/* Suppléments */}
                       {suppsToShow.length > 0 && drawerItem && (
                         <div className="drawer-section">
                           <p className="drawer-label">Extras (Payant)</p>
