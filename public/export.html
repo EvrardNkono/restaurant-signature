@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Signature Restaurant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .export-card {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #D4AF37, #B8960F);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            box-shadow: 0 5px 15px rgba(212,175,55,0.3);
+        }
+
+        h1 {
+            color: #D4AF37;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .features {
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+        }
+
+        .features h3 {
+            color: #D4AF37;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li {
+            color: rgba(255,255,255,0.8);
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: #D4AF37;
+            font-weight: bold;
+        }
+
+        .token-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 10px rgba(212,175,55,0.2);
+        }
+
+        .token-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+        button {
+            background: linear-gradient(135deg, #D4AF37, #B8960F);
+            border: none;
+            padding: 14px 30px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(212,175,55,0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D4AF37, #F5E6A3);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .status {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #D4AF37;
+            display: none;
+        }
+
+        .error-message {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            color: #e74c3c;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 480px) {
+            .export-card {
+                padding: 25px;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="export-card">
+        <div class="logo">S</div>
+        <h1>📦 Export Signature</h1>
+        <p class="subtitle">Téléchargez l'intégralité du catalogue</p>
+        
+        <div class="features">
+            <h3>📁 Contenu de l'archive</h3>
+            <ul>
+                <li>🖼️ Toutes les images des plats</li>
+                <li>📄 Catalogue Excel (CSV) complet</li>
+                <li>📖 Fichier README avec instructions</li>
+                <li>📊 Métadonnées JSON</li>
+            </ul>
+        </div>
+        
+        <input type="password" id="tokenInput" class="token-input" placeholder="Code d'accès" autocomplete="off">
+        
+        <button id="downloadBtn" onclick="downloadExport()">
+            <span>📦</span>
+            <span>Télécharger l'export complet</span>
+        </button>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        <div class="status" id="status">Préparation...</div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="footer">
+            Signature Restaurant - Export de données
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://signature-backend-alpha.vercel.app/api';
+        
+        async function downloadExport() {
+            const token = document.getElementById('tokenInput').value;
+            const btn = document.getElementById('downloadBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const statusDiv = document.getElementById('status');
+            const errorDiv = document.getElementById('errorMessage');
+            const progressFill = document.getElementById('progressFill');
+            
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            if (!token) {
+                errorDiv.textContent = '❌ Veuillez entrer le code d\'accès';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span><span>Préparation en cours...</span>';
+            progressContainer.style.display = 'block';
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = '🔐 Vérification du code...';
+            progressFill.style.width = '10%';
+            
+            try {
+                const checkResponse = await fetch(`${API_BASE}/public/check-token?token=${encodeURIComponent(token)}`);
+                const checkResult = await checkResponse.json();
+                
+                if (!checkResult.valid) {
+                    throw new Error('Code d\'accès invalide');
+                }
+                
+                statusDiv.textContent = '📦 Génération du fichier ZIP...';
+                progressFill.style.width = '30%';
+                
+                const response = await fetch(`${API_BASE}/public/export-complete?token=${encodeURIComponent(token)}`);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erreur lors du téléchargement');
+                }
+                
+                statusDiv.textContent = '✅ Téléchargement en cours...';
+                progressFill.style.width = '70%';
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const contentDisposition = response.headers.get('content-disposition');
+                let filename = `signature_complet_${Date.now()}.zip`;
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename=(.+)/);
+                    if (match && match[1]) filename = match[1];
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                
+                progressFill.style.width = '100%';
+                statusDiv.textContent = '✅ Téléchargement terminé !';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    statusDiv.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorDiv.textContent = `❌ ${error.message}`;
+                errorDiv.style.display = 'block';
+                statusDiv.style.display = 'none';
+                progressContainer.style.display = 'none';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>📦</span><span>Télécharger l\'export complet</span>';
+            }
+        }
+
+        document.getElementById('tokenInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                downloadExport();
+            }
+        });
+    </script>
+</body>
+</html>
