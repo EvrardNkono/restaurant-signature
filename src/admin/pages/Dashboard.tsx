@@ -5,7 +5,7 @@ import {
   ShoppingBag, DollarSign, 
   TrendingUp, Calendar, AlertCircle, Clock, CheckCircle,
   ListOrdered, Utensils, Truck, ToggleLeft, ToggleRight,
-  RefreshCw, Download, Image
+  RefreshCw, Download, Image, FileSpreadsheet, Package
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
@@ -39,9 +39,12 @@ export default function Dashboard() {
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
-  // État pour le téléchargement des images
-  const [downloadingImages, setDownloadingImages] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
+  // États pour les exports
+  const [exportingImages, setExportingImages] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
+  const [exportingComplete, setExportingComplete] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0, status: '' });
+  const [totalImagesCount, setTotalImagesCount] = useState(0);
 
   // === RÉCUPÉRATION DES COMMANDES DEPUIS L'API ===
   const fetchDashboardStats = async () => {
@@ -70,6 +73,19 @@ export default function Dashboard() {
       console.error("Erreur chargement dashboard:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Récupérer le nombre total d'images
+  const fetchImagesCount = async () => {
+    try {
+      const res = await axios.get(`${BASE_API}/export/images-list`);
+      if (res.data.success) {
+        setTotalImagesCount(res.data.count || 0);
+      }
+    } catch (err) {
+      console.error("Erreur chargement nombre d'images:", err);
+      setTotalImagesCount(0);
     }
   };
 
@@ -119,96 +135,126 @@ export default function Dashboard() {
     }
   };
 
-  // Fonction pour charger JSZip
-  const loadJSZip = (): Promise<void> => {
-    return new Promise((resolve) => {
-      if (window.JSZip) {
-        resolve();
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-      script.onload = () => resolve();
-      document.head.appendChild(script);
-    });
-  };
-
-  // Télécharger toutes les images en UN SEUL fichier ZIP
-  const downloadAllImagesAsZip = async () => {
-    setDownloadingImages(true);
-    setDownloadProgress({ current: 0, total: 0 });
+  // ==================== EXPORT DES IMAGES UNIQUEMENT ====================
+  const exportImagesOnly = async () => {
+    setExportingImages(true);
+    setDownloadProgress({ current: 0, total: 0, status: 'Préparation du téléchargement...' });
     
     try {
-      // 1. Récupérer la liste des images
-      console.log("📸 Récupération de la liste des images...");
-      const response = await axios.get(`${BASE_API}/export-images`);
-      const images = response.data.images;
+      setDownloadProgress({ current: 0, total: 0, status: 'Téléchargement des images...' });
       
-      if (!images || images.length === 0) {
-        alert("❌ Aucune image trouvée");
-        setDownloadingImages(false);
-        return;
-      }
+      const response = await axios.get(`${BASE_API}/export/images/all`, {
+        responseType: 'blob'
+      });
       
-      console.log(`✅ ${images.length} images trouvées`);
-      setDownloadProgress({ current: 0, total: images.length });
-      
-      // 2. Charger la librairie JSZip
-      await loadJSZip();
-      const zip = new window.JSZip();
-      
-      let count = 0;
-      
-      // 3. Ajouter chaque image au ZIP
-      for (const img of images) {
-        try {
-          console.log(`📥 Téléchargement: ${img.name.substring(0, 40)}...`);
-          
-          // Télécharger l'image depuis Cloudinary
-          const imgResponse = await fetch(img.url);
-          const blob = await imgResponse.blob();
-          
-          // Nettoyer le nom du fichier
-          const fileName = img.name
-            .replace(/[^a-z0-9]/gi, '_')
-            .substring(0, 50) + '.png';
-          
-          // Ajouter au ZIP
-          zip.file(fileName, blob);
-          count++;
-          
-          setDownloadProgress({ current: count, total: images.length });
-          console.log(`✅ ${count}/${images.length} - ${img.name.substring(0, 40)}`);
-        } catch(e) {
-          console.error(`❌ Erreur: ${img.name}`);
-        }
-      }
-      
-      // 4. Générer et télécharger le ZIP
-      console.log("📦 Création du fichier ZIP...");
-      const content = await zip.generateAsync({ type: "blob" });
-      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
-      link.href = URL.createObjectURL(content);
-      link.download = `signature_images_${Date.now()}.zip`;
-      link.click();
-      URL.revokeObjectURL(link.href);
+      link.href = url;
       
-      console.log(`✨ ZIP créé avec ${count}/${images.length} images !`);
-      alert(`✅ ZIP créé avec succès !\n\n📦 ${count}/${images.length} images\n📁 Fichier: signature_images_${Date.now()}.zip`);
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `signature_images_${Date.now()}.zip`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=(.+)/);
+        if (match && match[1]) filename = match[1];
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setDownloadProgress({ current: 100, total: 100, status: 'Terminé !' });
+      setTimeout(() => setDownloadProgress({ current: 0, total: 0, status: '' }), 2000);
       
     } catch (error) {
-      console.error('❌ Erreur:', error);
-      alert('❌ Erreur lors de la création du ZIP. Vérifiez la console pour plus de détails.');
+      console.error('❌ Erreur export images:', error);
+      alert('❌ Erreur lors du téléchargement des images');
     } finally {
-      setDownloadingImages(false);
-      setDownloadProgress({ current: 0, total: 0 });
+      setExportingImages(false);
+    }
+  };
+
+  // ==================== EXPORT DES DONNÉES CSV ====================
+  const exportDataOnly = async () => {
+    setExportingData(true);
+    
+    try {
+      const response = await axios.get(`${BASE_API}/export/plats-data`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `plats_catalogue_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('❌ Erreur export données:', error);
+      alert('❌ Erreur lors du téléchargement des données');
+    } finally {
+      setExportingData(false);
+    }
+  };
+
+  // ==================== EXPORT COMPLET (IMAGES + CSV) ====================
+  const exportComplete = async () => {
+    setExportingComplete(true);
+    setDownloadProgress({ current: 0, total: 0, status: 'Préparation de l\'export complet...' });
+    
+    try {
+      setDownloadProgress({ current: 10, total: 100, status: 'Génération du fichier ZIP...' });
+      
+      const response = await axios.get(`${BASE_API}/export/complete`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress({ 
+              current: percent, 
+              total: 100, 
+              status: `Téléchargement... ${percent}%` 
+            });
+          }
+        }
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = `signature_complet_${Date.now()}.zip`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=(.+)/);
+        if (match && match[1]) filename = match[1];
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setDownloadProgress({ current: 100, total: 100, status: 'Terminé !' });
+      setTimeout(() => setDownloadProgress({ current: 0, total: 0, status: '' }), 3000);
+      
+    } catch (error) {
+      console.error('❌ Erreur export complet:', error);
+      alert('❌ Erreur lors de l\'export complet. Vérifiez la console.');
+    } finally {
+      setExportingComplete(false);
     }
   };
 
   useEffect(() => {
     fetchDashboardStats();
     fetchSettings();
+    fetchImagesCount();
     const interval = setInterval(fetchDashboardStats, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -377,48 +423,106 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* SECTION EXPORT DES IMAGES - VERSION ZIP UNIQUE */}
+      {/* SECTION EXPORT COMPLET - IMAGES + DONNÉES */}
       <div className="export-section">
         <div className="delivery-config-header">
-          <Image size={20} className="delivery-icon" />
-          <h2 className="section-title-modern">Export des images</h2>
+          <Package size={20} className="delivery-icon" />
+          <h2 className="section-title-modern">Export complet</h2>
         </div>
         
         <div className="export-card">
           <div className="export-info">
             <p className="export-description">
-              Téléchargez TOUTES les images des plats en un seul fichier ZIP.
-              <br />
-              <small>📦 Un clic = un fichier ZIP contenant toutes les images ({stats.totalOrders ? '126' : '...'} images)</small>
+              📦 Exportez TOUT en un seul fichier ZIP : images + catalogue CSV + documentation
+            </p>
+            <ul className="export-list">
+              <li>🖼️ Toutes les images des plats (nommées par nom de plat)</li>
+              <li>📄 Fichier CSV avec : nom, description, prix, catégorie, univers, disponibilité</li>
+              <li>📖 Fichier README avec instructions</li>
+              <li>📊 Métadonnées JSON</li>
+            </ul>
+            <p className="export-note">
+              <small>💡 Idéal pour créer un catalogue papier ou importer dans un autre système</small>
             </p>
           </div>
           
           <button 
-            className="export-images-btn"
-            onClick={downloadAllImagesAsZip}
-            disabled={downloadingImages}
+            className="export-complete-btn"
+            onClick={exportComplete}
+            disabled={exportingComplete}
           >
-            {downloadingImages ? (
+            {exportingComplete ? (
               <>
                 <RefreshCw size={20} className="spinning" />
-                <span>Création du ZIP... {downloadProgress.current}/{downloadProgress.total} images</span>
+                <span>{downloadProgress.status || 'Préparation...'}</span>
               </>
             ) : (
               <>
                 <Download size={20} />
-                <span>📦 Télécharger TOUTES les images (ZIP unique)</span>
+                <span>📦 Télécharger TOUT (images + catalogue)</span>
               </>
             )}
           </button>
           
-          {downloadingImages && downloadProgress.total > 0 && (
+          {exportingComplete && downloadProgress.current > 0 && downloadProgress.current < 100 && (
             <div className="download-progress-bar">
               <div 
                 className="progress-fill" 
-                style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
+                style={{ width: `${downloadProgress.current}%` }}
               />
+              <span className="progress-text">{downloadProgress.current}%</span>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* SECTION EXPORTS SÉPARÉS */}
+      <div className="exports-separate-section">
+        <div className="delivery-config-header">
+          <FileSpreadsheet size={20} className="delivery-icon" />
+          <h2 className="section-title-modern">Exports séparés</h2>
+        </div>
+        
+        <div className="exports-separate-grid">
+          {/* Export images uniquement */}
+          <div className="export-card-small">
+            <div className="export-card-icon">🖼️</div>
+            <h3>Images uniquement</h3>
+            <p>Téléchargez toutes les images des plats</p>
+            <button 
+              className="export-small-btn images-btn"
+              onClick={exportImagesOnly}
+              disabled={exportingImages}
+            >
+              {exportingImages ? (
+                <RefreshCw size={16} className="spinning" />
+              ) : (
+                <Download size={16} />
+              )}
+              <span>{exportingImages ? 'Téléchargement...' : 'ZIP des images'}</span>
+            </button>
+            <small>{totalImagesCount || '...'} images disponibles</small>
+          </div>
+
+          {/* Export CSV uniquement */}
+          <div className="export-card-small">
+            <div className="export-card-icon">📊</div>
+            <h3>Catalogue CSV</h3>
+            <p>Téléchargez les données au format Excel</p>
+            <button 
+              className="export-small-btn data-btn"
+              onClick={exportDataOnly}
+              disabled={exportingData}
+            >
+              {exportingData ? (
+                <RefreshCw size={16} className="spinning" />
+              ) : (
+                <FileSpreadsheet size={16} />
+              )}
+              <span>{exportingData ? 'Génération...' : 'Télécharger CSV'}</span>
+            </button>
+            <small>Ouvrable avec Excel</small>
+          </div>
         </div>
       </div>
 
