@@ -71,11 +71,11 @@ const ServiceLockedBanner = ({
             </p>
           )}
           <p className="locked-hint">
-            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service, ou simplement de vous faire livrer.
+            Cliquez sur "Voir la carte & préparer" pour débloquer l'aperçu et préparer votre commande.
           </p>
         </div>
         <button className="locked-cta-btn" onClick={onUnlock}>
-          <span>Voir la carte &amp; préparer ma commande</span>
+          <span>Voir la carte &amp; préparer</span>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -229,6 +229,14 @@ interface Supplement {
   category?: string;
 }
 
+// Composant Lock
+const Lock = ({ size = 14 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>
+);
+
 export default function Menu() {
   // ─── HORAIRES ───────────────────────────────────────────────
   const { isJourOpen, nextJourInfo } = useRestaurantHours();
@@ -267,8 +275,6 @@ export default function Menu() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const lastScrollY = useRef(0);
-
-  
 
   // Fonction de déblocage
   const handleUnlock = useCallback(() => {
@@ -434,19 +440,21 @@ export default function Menu() {
     setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 3500);
   };
 
-  // --- ACTIONS ---
+  // --- ACTIONS CORRIGÉES ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
-    // Vérification : si le service n'est PAS ouvert, on bloque l'ajout
-    if (!isJourOpen) {
-      const formattedMsg = formatNextOpeningMessage(nextJourInfo);
+    // ✅ Si service FERMÉ et NON DÉBLOQUÉ → bloquer
+    if (!isJourOpen && !unlocked) {
       showToast(
         nextJourInfo
-          ? `🍽️ Les commandes ouvrent à partir ${formattedMsg}. Vous pouvez parcourir la carte !`
+          ? `🔒 Carte verrouillée. Cliquez sur "Voir la carte & préparer" pour débloquer.`
           : "🍽️ Service non disponible pour le moment.",
         "warning"
       );
       return;
     }
+    
+    // ✅ Service fermé mais DÉBLOQUÉ → on continue (ajout au panier)
+    // ✅ Service ouvert → on continue (ajout au panier)
     
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
@@ -640,7 +648,7 @@ export default function Menu() {
                         className="add-btn readonly-order-btn"
                         onClick={() => showToast(
                           nextJourInfo 
-                            ? `🔒 Cliquez sur "Voir la carte & préparer ma commande" pour débloquer` 
+                            ? `🔒 Cliquez sur "Voir la carte & préparer" pour débloquer` 
                             : "🍽️ Service non disponible",
                           "warning"
                         )}
@@ -672,13 +680,12 @@ export default function Menu() {
         </div>
       )}
 
-      {/* BANNIÈRE MODE APERÇU (déverrouillé manuellement mais service fermé) */}
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé manuellement mais service fermé) */}
       {!isJourOpen && unlocked && (
         <div className="restaurant-preview-banner">
           <Eye size={18} />
           <span>
-            🔓 Mode aperçu — Vous pouvez préparer votre commande. 
-            Le paiement sera disponible {nextJourInfo ? `à partir ${formatNextOpeningMessage(nextJourInfo)}` : "à l'ouverture du service (12h00 - 15h00)"}
+            🔓 Mode préparation — Vous pouvez préparer votre commande.
           </span>
         </div>
       )}
@@ -1070,11 +1077,3 @@ export default function Menu() {
     </section>
   );
 }
-
-// Composant Lock (à ajouter en haut si nécessaire)
-const Lock = ({ size = 14 }: { size?: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-  </svg>
-);
