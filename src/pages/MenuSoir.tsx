@@ -378,11 +378,7 @@ export default function MenuSoir() {
     }
   }, [tempItem, editingCartItemId]);
 
-  const getButtonAvailabilityText = (): string => {
-    if (!nextSoirInfo) return "Bientôt disponible";
-    const formattedMsg = formatNextOpeningMessage(nextSoirInfo);
-    return `Dispo à partir ${formattedMsg}`;
-  };
+  
 
   if (isLoadingMenu) {
     return (
