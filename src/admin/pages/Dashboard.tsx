@@ -5,7 +5,7 @@ import {
   ShoppingBag, DollarSign, 
   TrendingUp, Calendar, AlertCircle, Clock, CheckCircle,
   ListOrdered, Utensils, Truck, ToggleLeft, ToggleRight,
-  RefreshCw, Download, Image, FileSpreadsheet, Package
+  RefreshCw, Download, FileSpreadsheet, Package
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
