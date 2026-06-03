@@ -268,12 +268,7 @@ export default function Menu() {
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const lastScrollY = useRef(0);
 
-  // Fonction pour obtenir le texte du bouton
-  const getButtonAvailabilityText = (): string => {
-    if (!nextJourInfo) return "Bientôt disponible";
-    const formattedMsg = formatNextOpeningMessage(nextJourInfo);
-    return `Dispo à partir ${formattedMsg}`;
-  };
+  
 
   // Fonction de déblocage
   const handleUnlock = useCallback(() => {
