@@ -71,11 +71,11 @@ const ServiceLockedBanner = ({
             </p>
           )}
           <p className="locked-hint">
-            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service. ou simplement de vous faire livrer.
+            Vous pouvez parcourir la carte et préparer votre commande. Vous avez également la possibilité de réserver une table, de commander à emporter pour récupérer aux heures de service, ou simplement de vous faire livrer.
           </p>
         </div>
         <button className="locked-cta-btn" onClick={onUnlock}>
-          <span>Voir la carte &amp; Réserver</span>
+          <span>Voir la carte &amp; préparer ma commande</span>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -234,7 +234,9 @@ export default function Menu() {
   const { isJourOpen, nextJourInfo } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // Le menu Jour est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
+  // La carte est disponible si :
+  // - Soit le service est ouvert (isJourOpen = true)
+  // - Soit l'utilisateur a volontairement débloqué (unlocked = true)
   const isJourAvailable = isJourOpen || unlocked;
 
   const { 
@@ -272,6 +274,18 @@ export default function Menu() {
     const formattedMsg = formatNextOpeningMessage(nextJourInfo);
     return `Dispo à partir ${formattedMsg}`;
   };
+
+  // Fonction de déblocage
+  const handleUnlock = useCallback(() => {
+    console.log("🔓 Déverrouillage manuel de la carte");
+    setUnlocked(true);
+    setTimeout(() => {
+      const menuGrid = document.querySelector('.menu-grid-enhanced');
+      if (menuGrid) {
+        menuGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -418,6 +432,7 @@ export default function Menu() {
       background:${colors[type]};color:white;padding:12px 24px;border-radius:10px;
       font-size:0.9rem;font-weight:600;z-index:10000;
       box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      z-index:10001;
     `;
     toast.innerHTML = `<span>${message}</span>`;
     document.body.appendChild(toast);
@@ -426,6 +441,7 @@ export default function Menu() {
 
   // --- ACTIONS ---
   const handleAddClick = (plat: Plat, currentQty: number) => {
+    // Vérification : si le service n'est PAS ouvert, on bloque l'ajout
     if (!isJourOpen) {
       const formattedMsg = formatNextOpeningMessage(nextJourInfo);
       showToast(
@@ -436,10 +452,12 @@ export default function Menu() {
       );
       return;
     }
+    
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
       return;
     }
+    
     if (isAnyDrawerOpen && selectingAccId !== plat._id) {
       setSelectingAccId(null);
       setTimeout(() => handleAddClick(plat, currentQty), 300);
@@ -482,8 +500,13 @@ export default function Menu() {
   const toggleLike = (platId: string) => {
     setLikedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(platId)) { newSet.delete(platId); showToast("Retiré de vos favoris", "info"); }
-      else { newSet.add(platId); showToast("Ajouté à vos favoris", "success"); }
+      if (newSet.has(platId)) { 
+        newSet.delete(platId); 
+        showToast("Retiré de vos favoris", "info"); 
+      } else { 
+        newSet.add(platId); 
+        showToast("Ajouté à vos favoris", "success"); 
+      }
       return newSet;
     });
   };
@@ -505,7 +528,7 @@ export default function Menu() {
     );
   }
 
-  // ─── SI LE SERVICE N'EST PAS DISPONIBLE ET PAS DÉVERROUILLÉ ─────────────────
+  // ─── SI LE SERVICE N'EST PAS DISPONIBLE ET PAS DÉVERROUILLÉ → CARTE BLOQUÉE ───
   if (!isJourAvailable) {
     return (
       <section className="menu-section-enhanced">
@@ -539,19 +562,14 @@ export default function Menu() {
           </div>
         </div>
 
-        {/* BANNIÈRE VERROUILLAGE */}
+        {/* BANNIÈRE VERROUILLAGE - SEUL MOYEN DE DÉBLOQUER */}
         <ServiceLockedBanner
           serviceLabel="Déjeuner"
           nextInfo={nextJourInfo}
-          onUnlock={() => {
-            setUnlocked(true);
-            setTimeout(() => {
-              document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }}
+          onUnlock={handleUnlock}
         />
 
-        {/* ON AFFICHE QUAND MÊME LA CARTE EN MODE LECTURE SEULE */}
+        {/* LA CARTE EST AFFICHÉE MAIS EN MODE LECTURE SEULE (boutons désactivés) */}
         <div className="controls-bar-enhanced visible">
           <div className="controls-container">
             <div className="search-wrapper">
@@ -626,12 +644,14 @@ export default function Menu() {
                       <button
                         className="add-btn readonly-order-btn"
                         onClick={() => showToast(
-                          nextJourInfo ? `🍽️ Commandes disponibles à partir ${formatNextOpeningMessage(nextJourInfo)}` : "🍽️ Service non disponible",
+                          nextJourInfo 
+                            ? `🔒 Cliquez sur "Voir la carte & préparer ma commande" pour débloquer` 
+                            : "🍽️ Service non disponible",
                           "warning"
                         )}
                       >
-                        <Clock size={16} />
-                        <span>{getButtonAvailabilityText()}</span>
+                        <Lock size={14} />
+                        <span>Carte verrouillée</span>
                       </button>
                     </div>
                   </div>
@@ -645,7 +665,7 @@ export default function Menu() {
     );
   }
 
-  // ─── AFFICHAGE NORMAL (service disponible) ──────────────────
+  // ─── AFFICHAGE DÉVERROUILLÉ (service ouvert OU utilisateur a cliqué) ───
   return (
     <section className="menu-section-enhanced">
 
@@ -657,13 +677,13 @@ export default function Menu() {
         </div>
       )}
 
-      {/* BANNIÈRE MODE PRÉVISUALISATION (déverrouillé manuellement mais service fermé) */}
+      {/* BANNIÈRE MODE APERÇU (déverrouillé manuellement mais service fermé) */}
       {!isJourOpen && unlocked && (
         <div className="restaurant-preview-banner">
           <Eye size={18} />
           <span>
-            Mode aperçu — Les commandes seront disponibles à partir{" "}
-            {nextJourInfo ? formatNextOpeningMessage(nextJourInfo) : "de l'ouverture du service (12h00 - 15h00)"}
+            🔓 Mode aperçu — Vous pouvez préparer votre commande. 
+            Le paiement sera disponible {nextJourInfo ? `à partir ${formatNextOpeningMessage(nextJourInfo)}` : "à l'ouverture du service (12h00 - 15h00)"}
           </span>
         </div>
       )}
@@ -776,7 +796,7 @@ export default function Menu() {
         </div>
       )}
 
-      {/* GRILLE DES PLATS */}
+      {/* GRILLE DES PLATS - VERSION DÉBLOQUÉE AVEC COMMANDES ACTIVES */}
       <div className="menu-grid-enhanced">
         {platsFiltres.length > 0 ? (
           platsFiltres.map((plat, index) => {
@@ -880,7 +900,7 @@ export default function Menu() {
                             {isExpanding ? (
                               <><Loader2 className="spin" size={16} /><span>Configuration...</span></>
                             ) : !isJourOpen ? (
-                              <><Clock size={16} /><span>Aperçu</span></>
+                              <><Clock size={16} /><span>Préparer</span></>
                             ) : (
                               <><PlusCircle size={18} /><span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span></>
                             )}
@@ -1023,7 +1043,7 @@ export default function Menu() {
                             className="order-now-btn" 
                             onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
                           >
-                            {isJourOpen ? "Commander maintenant" : `Disponible ${formatNextOpeningMessage(nextJourInfo) || "bientôt"}`}
+                            {isJourOpen ? "Commander maintenant" : "Préparer ma commande"}
                           </button>
                         </div>
                       </div>
@@ -1055,3 +1075,11 @@ export default function Menu() {
     </section>
   );
 }
+
+// Composant Lock (à ajouter en haut si nécessaire)
+const Lock = ({ size = 14 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>
+);

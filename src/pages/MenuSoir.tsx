@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart, type CartItem, type CartSupplement } from "../context/CartContext"; 
@@ -23,7 +23,6 @@ const SUPP_API = `${BASE_URL}/supplements?public=true`;
 // --- FONCTION POUR FORMATER LE MESSAGE D'OUVERTURE ---
 const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
   if (!nextInfo) return null;
-  
   
   const lowerNextInfo = nextInfo.toLowerCase();
   
@@ -74,7 +73,7 @@ const ServiceLockedBanner = ({
           </p>
         </div>
         <button className="locked-cta-btn-soir" onClick={onUnlock}>
-          <span>Voir la carte &amp; Réserver</span>
+          <span>Voir la carte &amp; préparer ma commande</span>
           <ArrowRight size={18} />
         </button>
       </div>
@@ -167,10 +166,29 @@ export default function MenuSoir() {
   const [tempItem, setTempItem] = useState<CartItem | null>(null);
   const [editingCartItemId, setEditingCartItemId] = useState<string | null>(null);
   const [hasPendingBill, setHasPendingBill] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: string } | null>(null);
 
   const isAnyDrawerOpen = tempItem !== null || editingCartItemId !== null;
   const openDrawerPlatId = tempItem?.id ?? 
     (editingCartItemId ? cart.find(i => i.cartItemId === editingCartItemId)?.id ?? null : null);
+
+  // --- TOAST NOTIFICATION ---
+  const showToast = (message: string, type: "success" | "error" | "warning" | "info" = "error") => {
+    setToastMessage({ text: message, type });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // --- FONCTION DE DÉBLOQUAGE ---
+  const handleUnlock = useCallback(() => {
+    console.log("🔓 Déverrouillage manuel du menu du soir");
+    setUnlocked(true);
+    setTimeout(() => {
+      const menuGrid = document.querySelector('.menu-grid');
+      if (menuGrid) {
+        menuGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  }, []);
 
   // --- DATA FETCHERS ---
   const { data: allPlats, isLoading: isLoadingMenu } = useQuery<Plat[]>({
@@ -231,20 +249,6 @@ export default function MenuSoir() {
       return p.category?.name === filter;
     }), 
   [platsDuSoir, univers, filter]);
-
-  const showToast = (message: string, type: "success" | "error" | "warning" | "info" = "error") => {
-    const colors = { success: "#27ae60", error: "#e74c3c", warning: "#f39c12", info: "#3498db" };
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-      background:${colors[type]};color:#fff;padding:12px 24px;border-radius:10px;
-      font-size:0.9rem;font-weight:600;z-index:10000;
-      box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  };
 
   // --- ACTIONS ---
   const handleRemoveOne = (platId: string) => {
@@ -388,6 +392,13 @@ export default function MenuSoir() {
   if (!isSoirAvailable) {
     return (
       <section className="menu-soir-section">
+        {/* Toast Container */}
+        {toastMessage && (
+          <div className={`toast-notification ${toastMessage.type}`}>
+            {toastMessage.text}
+          </div>
+        )}
+
         <div className="menu-header-soir">
           <div className="header-overlay-dark"></div>
           <div className="header-content-wrapper">
@@ -400,25 +411,26 @@ export default function MenuSoir() {
           </div>
         </div>
 
-        {/* BANNIÈRE VERROUILLAGE */}
+        {/* BANNIÈRE VERROUILLAGE - SEUL MOYEN DE DÉBLOQUER */}
         <ServiceLockedBanner
           serviceLabel="Dîner"
           nextInfo={nextSoirInfo}
-          onUnlock={() => {
-            setUnlocked(true);
-            setTimeout(() => {
-              document.querySelector('.menu-grid')?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-          }}
+          onUnlock={handleUnlock}
         />
 
         {/* CARTE EN LECTURE SEULE */}
         <div className="univers-selector-container-soir">
           <div className="univers-selector-soir">
-            <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} onClick={() => handleUniversChange("Cuisine")}>
+            <button 
+              className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} 
+              onClick={() => handleUniversChange("Cuisine")}
+            >
               <Utensils size={18} /> La Table
             </button>
-            <button className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} onClick={() => handleUniversChange("Boissons")}>
+            <button 
+              className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} 
+              onClick={() => handleUniversChange("Boissons")}
+            >
               <GlassWater size={18} /> La Cave
             </button>
           </div>
@@ -427,7 +439,11 @@ export default function MenuSoir() {
           <div className="menu-filtres-track-soir">
             <div className="menu-filtres-list-soir">
               {currentCategories.map((cat, idx) => (
-                <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat as string)}>
+                <button 
+                  key={idx} 
+                  className={`filter-btn-soir ${filter === cat ? "active" : ""}`} 
+                  onClick={() => setFilter(cat as string)}
+                >
                   {cat as string}
                 </button>
               ))}
@@ -457,14 +473,16 @@ export default function MenuSoir() {
                     <div className="card-actions" style={{ marginTop: '15px' }}>
                       <button
                         className="btn-add-soir"
-                        style={{ width: '100%', opacity: 0.7, cursor: 'default' }}
+                        style={{ width: '100%', opacity: 0.7, cursor: 'pointer' }}
                         onClick={() => showToast(
-                          nextSoirInfo ? `🍽️ Commandes disponibles à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "🍽️ Service non disponible",
+                          nextSoirInfo 
+                            ? `🔒 Cliquez sur "Voir la carte & préparer ma commande" pour débloquer` 
+                            : "🍽️ Service non disponible",
                           "warning"
                         )}
                       >
                         <Clock size={16} style={{ marginRight: '8px' }} />
-                        {getButtonAvailabilityText()}
+                        Carte verrouillée
                       </button>
                     </div>
                   </div>
@@ -478,9 +496,15 @@ export default function MenuSoir() {
     );
   }
 
-  // ─── AFFICHAGE NORMAL ────────────────────────────────────────────────────────
+  // ─── AFFICHAGE DÉVERROUILLÉ (service ouvert OU utilisateur a cliqué) ───
   return (
     <section className="menu-soir-section">
+      {/* Toast Container */}
+      {toastMessage && (
+        <div className={`toast-notification ${toastMessage.type}`}>
+          {toastMessage.text}
+        </div>
+      )}
 
       {/* BANNIÈRE SERVICE OUVERT */}
       {isSoirOpen && (
@@ -490,13 +514,13 @@ export default function MenuSoir() {
         </div>
       )}
 
-      {/* BANNIÈRE MODE APERÇU */}
+      {/* BANNIÈRE MODE APERÇU (déverrouillé manuellement mais service fermé) */}
       {!isSoirOpen && unlocked && (
         <div className="restaurant-preview-banner-soir">
           <Eye size={18} />
           <span>
-            Mode aperçu — Les commandes seront disponibles à partir{" "}
-            {nextSoirInfo ? formatNextOpeningMessage(nextSoirInfo) : "de l'ouverture du service"}
+            🔓 Mode aperçu — Vous pouvez préparer votre commande. 
+            Le paiement sera disponible {nextSoirInfo ? `à partir ${formatNextOpeningMessage(nextSoirInfo)}` : "à l'ouverture du service"}
           </span>
         </div>
       )}
@@ -615,7 +639,7 @@ export default function MenuSoir() {
                             {isSoirOpen ? <PlusCircle size={18} style={{ marginRight: '8px' }} /> : <Clock size={18} style={{ marginRight: '8px' }} />}
                             {isSoirOpen
                               ? (quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier")
-                              : (nextSoirInfo ? getButtonAvailabilityText() : "Aperçu")}
+                              : (nextSoirInfo ? getButtonAvailabilityText() : "Préparer")}
                           </>
                         )}
                       </button>

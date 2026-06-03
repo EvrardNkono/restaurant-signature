@@ -1823,3 +1823,72 @@
     font-size: 0.85rem;
   }
 }
+
+/* Toast Notifications */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 10000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  animation: toastSlideUp 0.3s ease-out;
+  white-space: nowrap;
+  max-width: 90vw;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.toast-notification.success {
+  background-color: #27ae60;
+  color: white;
+}
+
+.toast-notification.error {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.toast-notification.warning {
+  background-color: #f39c12;
+  color: white;
+}
+
+.toast-notification.info {
+  background-color: #3498db;
+  color: white;
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Disabled button styles */
+.disabled-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Global drawer overlay */
+.global-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  backdrop-filter: blur(4px);
+}
