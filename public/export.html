@@ -103,27 +103,21 @@
             font-weight: bold;
         }
 
-        .token-input {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 15px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
+        .warning-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 12px;
-            color: white;
-            font-size: 0.9rem;
-            text-align: center;
-            transition: all 0.3s ease;
+            padding: 12px;
+            margin-bottom: 20px;
         }
 
-        .token-input:focus {
-            outline: none;
-            border-color: #D4AF37;
-            box-shadow: 0 0 10px rgba(212,175,55,0.2);
-        }
-
-        .token-input::placeholder {
-            color: rgba(255,255,255,0.3);
+        .warning-box p {
+            color: #D4AF37;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         button {
@@ -222,8 +216,10 @@
                 <li>📊 Métadonnées JSON</li>
             </ul>
         </div>
-        
-        <input type="password" id="tokenInput" class="token-input" placeholder="Code d'accès" autocomplete="off">
+
+        <div class="warning-box">
+            <p>⚠️ Lien confidentiel - Ne partagez pas cette page</p>
+        </div>
         
         <button id="downloadBtn" onclick="downloadExport()">
             <span>📦</span>
@@ -246,7 +242,6 @@
         const API_BASE = 'https://signature-backend-alpha.vercel.app/api';
         
         async function downloadExport() {
-            const token = document.getElementById('tokenInput').value;
             const btn = document.getElementById('downloadBtn');
             const progressContainer = document.getElementById('progressContainer');
             const statusDiv = document.getElementById('status');
@@ -256,35 +251,31 @@
             errorDiv.style.display = 'none';
             errorDiv.textContent = '';
             
-            if (!token) {
-                errorDiv.textContent = '❌ Veuillez entrer le code d\'accès';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
             btn.disabled = true;
             btn.innerHTML = '<span>⏳</span><span>Préparation en cours...</span>';
             progressContainer.style.display = 'block';
             statusDiv.style.display = 'block';
-            statusDiv.textContent = '🔐 Vérification du code...';
-            progressFill.style.width = '10%';
+            statusDiv.textContent = '📦 Génération du fichier ZIP...';
+            progressFill.style.width = '30%';
             
             try {
-                const checkResponse = await fetch(`${API_BASE}/public/check-token?token=${encodeURIComponent(token)}`);
-                const checkResult = await checkResponse.json();
-                
-                if (!checkResult.valid) {
-                    throw new Error('Code d\'accès invalide');
-                }
-                
-                statusDiv.textContent = '📦 Génération du fichier ZIP...';
-                progressFill.style.width = '30%';
-                
-                const response = await fetch(`${API_BASE}/public/export-complete?token=${encodeURIComponent(token)}`);
+                // Appel direct à l'endpoint existant
+                const response = await fetch(`${API_BASE}/export/complete`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/zip'
+                    }
+                });
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Erreur lors du téléchargement');
+                    let errorMsg = 'Erreur lors du téléchargement';
+                    try {
+                        const error = await response.json();
+                        errorMsg = error.error || error.message || errorMsg;
+                    } catch(e) {
+                        errorMsg = `Erreur ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMsg);
                 }
                 
                 statusDiv.textContent = '✅ Téléchargement en cours...';
@@ -296,10 +287,12 @@
                 a.href = url;
                 
                 const contentDisposition = response.headers.get('content-disposition');
-                let filename = `signature_complet_${Date.now()}.zip`;
+                let filename = `signature_restaurant_complet_${Date.now()}.zip`;
                 if (contentDisposition) {
-                    const match = contentDisposition.match(/filename=(.+)/);
-                    if (match && match[1]) filename = match[1];
+                    const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (match && match[1]) {
+                        filename = match[1].replace(/['"]/g, '');
+                    }
                 }
                 
                 a.download = filename;
@@ -329,11 +322,10 @@
             }
         }
 
-        document.getElementById('tokenInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                downloadExport();
-            }
-        });
+        // Téléchargement automatique au chargement de la page (optionnel)
+        // window.addEventListener('load', () => {
+        //     setTimeout(downloadExport, 500);
+        // });
     </script>
 </body>
 </html>
