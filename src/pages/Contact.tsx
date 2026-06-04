@@ -78,7 +78,8 @@ const Contact = () => {
               <div className="info-icon"><Phone size={18} /></div>
               <div>
                 <h4>Téléphone</h4>
-                <a href="tel:+33662038472">+33 6 62 03 84 72</a>
+                <a href="tel:+33183865812">+33 1 83 86 58 12</a>
+                <p className="phone-note">(Appel gratuit)</p>
               </div>
             </div>
 
@@ -94,16 +95,17 @@ const Contact = () => {
               <div className="info-icon"><Clock size={18} /></div>
               <div>
                 <h4>Horaires</h4>
-                <p>Mardi - Vendredi : 12h - 14h / 18h - 23h</p>
-                <p>Samedi - Dimanche : 12h - 14h / 18h - 00h</p>
-                <p>Lundi : Fermé</p>
+                <p><strong>Mardi - Vendredi :</strong> 12h00 - 15h00 / 18h00 - 23h00</p>
+                <p><strong>Samedi - Dimanche :</strong> 12h00 - 00h00 (service continu)</p>
+                <p><strong>Lundi :</strong> Fermé</p>
+                <p className="hours-note">⚠️ Dernières commandes 30 min avant fermeture</p>
               </div>
             </div>
 
             <div className="contact-socials">
               <a href="#" aria-label="Instagram">📷 Instagram</a>
               <a href="#" aria-label="Facebook">👍 Facebook</a>
-              <a href="#" aria-label="LinkedIn">💼 LinkedIn</a>
+              <a href="https://wa.me/33183865812" aria-label="WhatsApp">💬 WhatsApp</a>
             </div>
           </div>
 
