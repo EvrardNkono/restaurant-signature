@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone } from "lucide-react";
+import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone, Mail } from "lucide-react";
 import "./footer.css";
 
 export default function Footer() {
@@ -10,7 +10,7 @@ export default function Footer() {
     window.dispatchEvent(new CustomEvent('openReservation'));
   };
 
-  // Horaires d'ouverture (MISES À JOUR)
+  // Horaires d'ouverture
   const getOpeningHours = () => {
     const days = [
       { name: "Lundi", open: false, lunch: null, dinner: null },
@@ -75,7 +75,7 @@ export default function Footer() {
             <a href="#" className="social-icon-link" aria-label="Facebook">
               <Facebook size={22} strokeWidth={0.75} />
             </a>
-            <a href="https://wa.me/33662038472" className="social-icon-link" aria-label="WhatsApp">
+            <a href="https://wa.me/33183865812" className="social-icon-link" aria-label="WhatsApp">
               <MessageCircle size={22} strokeWidth={0.75} />
             </a>
           </div>
@@ -124,7 +124,14 @@ export default function Footer() {
           </div>
           <div className="contact-item">
             <Phone size={18} className="gold-text" strokeWidth={1} />
-            <a href="tel:+33662038472" className="contact-link">+33 6 62 03 84 72</a>
+            <a href="tel:+33183865812" className="contact-link">+33 1 83 86 58 12</a>
+          </div>
+          {/* Ajout de l'email */}
+          <div className="contact-item">
+            <Mail size={18} className="gold-text" strokeWidth={1} />
+            <a href="mailto:restaurantsignature@outlook.fr" className="contact-link">
+              restaurantsignature@outlook.fr
+            </a>
           </div>
         </div>
       </div>
