@@ -76,10 +76,11 @@ export default function Dashboard() {
     }
   };
 
-  // Récupérer le nombre total d'images
+  // Récupérer le nombre total d'images - CORRIGÉ
   const fetchImagesCount = async () => {
     try {
-      const res = await axios.get(`${BASE_API}/export/images-list`);
+      // ✅ CORRECTION : changer images-list en images/list
+      const res = await axios.get(`${BASE_API}/export/images/list`);
       if (res.data.success) {
         setTotalImagesCount(res.data.count || 0);
       }
@@ -501,7 +502,7 @@ export default function Dashboard() {
               )}
               <span>{exportingImages ? 'Téléchargement...' : 'ZIP des images'}</span>
             </button>
-            <small>{totalImagesCount || '...'} images disponibles</small>
+            <small>{totalImagesCount || '0'} images disponibles</small>
           </div>
 
           {/* Export CSV uniquement */}
