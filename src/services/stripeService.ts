@@ -1,7 +1,7 @@
 // services/stripeService.ts
 import { loadStripe } from "@stripe/stripe-js";
 
-const STRIPE_PUBLIC_KEY = "pk_test_51SmwlcLQhJAitc3fh2djFWNSaw07tRmTl4xuc53iatQ8rWvhMLpXIWVkxRtLB43OlsuEr2HOfyFSPcZFf6Am59kL00x2YXTlCf";
+const STRIPE_PUBLIC_KEY = "pk_live_51SmwjdLX894CyGddImrWXcE6bBO79CSM9s1HOjottVw0jg7H5MDTuU1YKu1D0YadMpAktUzjFulaE4xupOylzEzU00usXSDGwJ";
 const stripePromise = loadStripe(STRIPE_PUBLIC_KEY);
 
 export const handleCheckout = async (orderData: {
