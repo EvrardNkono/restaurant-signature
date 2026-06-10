@@ -1057,3 +1057,75 @@
 .orders-grid {
   overflow: visible !important;
 }
+
+/* FORCE LA HAUTEUR MINIMALE DES CARTES SUR TOUS LES ÉCRANS */
+.order-card {
+  min-height: 450px !important;  /* Force une hauteur suffisante */
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.card-body {
+  flex: 1 0 auto !important;  /* Pousse le footer vers le bas */
+  min-height: 200px !important;
+}
+
+.card-footer {
+  margin-top: auto !important;  /* Colle le footer en bas */
+  flex-shrink: 0 !important;
+}
+
+/* Pour desktop spécifiquement */
+@media (min-width: 769px) {
+  .order-card {
+    min-height: 480px !important;
+  }
+  
+  .card-body {
+    min-height: 280px !important;
+  }
+}
+
+/* FIX POUR LE BREAKPOINT CRITIQUE 768-992px */
+@media (min-width: 768px) and (max-width: 1792px) {
+  .orders-grid {
+    grid-template-columns: 1fr !important; /* Force les cartes en colonne */
+    gap: 20px;
+  }
+  
+  .order-card {
+    min-width: 300px;
+    max-width: 100%;
+  }
+  
+  .card-footer {
+    position: relative !important;
+    bottom: auto !important;
+    margin-top: 10px !important;
+  }
+  
+  .action-row {
+    flex-wrap: wrap !important;
+  }
+  
+  .action-btn {
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
+  }
+}
+
+/* Force toutes les cartes à avoir une largeur minimale */
+.order-card {
+  min-width: 280px;
+}
+
+.action-btn {
+  white-space: nowrap;
+}
+
+/* Empêche le footer de rétrécir */
+.card-footer {
+  flex-shrink: 0;
+  min-height: 100px;
+}
