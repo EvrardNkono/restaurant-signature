@@ -1047,3 +1047,16 @@
     min-width: 120px !important;
   }
 }
+
+/* FORCE L'OPACITÉ DES BOUTONS */
+.action-btn {
+  opacity: 1 !important;
+}
+
+/* Force aussi sur toutes les résolutions > 768px */
+@media (min-width: 769px) {
+  .action-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
