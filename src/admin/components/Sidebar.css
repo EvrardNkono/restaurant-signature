@@ -3,7 +3,7 @@
 .admin-sidebar {
   width: 260px;
   height: 100vh;
-  background-color: #1A1514; /* Noir encore plus profond que le terracotta */
+  background-color: #1A1514;
   color: #FFFFFF;
   display: flex;
   flex-direction: column;
@@ -12,6 +12,7 @@
   top: 0;
   border-right: 1px solid #D4AF37;
   z-index: 1000;
+  overflow: hidden; /* ← EMPÊCHE LE DÉBORDEMENT SUR LE CONTENU */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -22,6 +23,7 @@
   align-items: center;
   gap: 15px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  flex-shrink: 0;
 }
 
 .brand-seal {
@@ -35,6 +37,7 @@
   font-family: 'Playfair Display', serif;
   color: #D4AF37;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .sidebar-brand span {
@@ -42,12 +45,16 @@
   letter-spacing: 2px;
   font-size: 0.9rem;
   color: #FCF9F5;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 /* Navigation */
 .sidebar-nav {
   flex-grow: 1;
   padding: 30px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .nav-item {
@@ -61,11 +68,19 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .nav-item svg {
   width: 20px;
+  flex-shrink: 0; /* L'icône ne rétrécit jamais */
   transition: 0.3s;
+}
+
+.nav-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-item:hover {
@@ -99,6 +114,9 @@
   font-size: 0.75rem;
   letter-spacing: 1px;
   transition: 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .logout-btn:hover {
@@ -106,16 +124,49 @@
   color: white;
 }
 
-/* --- RESPONSIVE MOBILE --- */
-@media (max-width: 768px) {
+/* ── TABLETTE 993px → 992px : sidebar en mode icônes ───────── */
+/* AdminLayout.css réduit la sidebar à 80px ici,
+   on masque le texte pour éviter tout débordement           */
+@media (max-width: 992px) {
   .admin-sidebar {
-    width: 70px; /* Réduction à une barre d'icônes sur tablette */
+    width: 80px;
+    overflow: hidden;
   }
 
-  .sidebar-brand span, 
-  .nav-item span, 
+  .sidebar-brand {
+    padding: 20px;
+    justify-content: center;
+  }
+
+  .sidebar-brand span,
+  .nav-item span,
   .logout-btn span {
-    display: none; /* Cache le texte pour ne garder que les icônes */
+    display: none; /* Plus de texte visible = plus de débordement */
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 18px 0;
+  }
+
+  .logout-btn {
+    margin: 12px;
+    padding: 12px;
+    justify-content: center;
+  }
+}
+
+/* ── MOBILE ≤ 768px : barre d'icônes latérale 70px ─────────── */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 70px;
+    overflow: hidden;
+  }
+
+  .sidebar-brand span,
+  .nav-item span,
+  .logout-btn span {
+    display: none;
   }
 
   .sidebar-brand {
@@ -127,38 +178,40 @@
     justify-content: center;
     padding: 20px 0;
   }
-
-  /* Pour le contenu principal (Layout) */
-  /* Note: Il faudra mettre margin-left: 70px sur le .admin-main-content en mobile */
 }
 
+/* ── TRÈS PETIT MOBILE ≤ 480px : barre en bas ───────────────── */
 @media (max-width: 480px) {
   .admin-sidebar {
     width: 100%;
     height: 60px;
     flex-direction: row;
     bottom: 0;
-    top: auto; /* Se place en bas de l'écran comme une barre d'app mobile */
+    top: auto;
     border-right: none;
     border-top: 1px solid #D4AF37;
+    overflow: hidden;
   }
 
   .sidebar-brand {
-    display: none; /* Cache le logo sur tout petit écran */
+    display: none;
   }
 
   .sidebar-nav {
     display: flex;
+    flex-direction: row;
     padding: 0;
     justify-content: space-around;
     align-items: center;
     width: 100%;
+    overflow: hidden;
   }
 
   .nav-item {
     padding: 0;
     height: 100%;
     flex: 1;
+    justify-content: center;
   }
 
   .nav-item.active {
@@ -167,6 +220,6 @@
   }
 
   .logout-btn {
-    display: none; /* On cache la déconnexion dans la barre de navigation mobile */
+    display: none;
   }
 }
