@@ -29,13 +29,18 @@ interface TableGroup {
 
 /* ── Helpers ──────────────────────────────────────────────── */
 const STATUS_LABEL: Record<string, string> = {
-  pending:  "En attente",
-  cooking:  "En cuisine",
-  done:     "Prêt / Servi",
-  archived: "Archivée",
+  pending:         "En attente",
+  pending_payment: "En attente",
+  cooking:         "En cuisine",
+  done:            "Prêt / Servi",
+  archived:        "Archivée",
 };
 
 const getStatusLabel = (s: string) => STATUS_LABEL[s] ?? "En attente";
+
+/* pending_payment est traité comme pending côté affichage et actions */
+const normalizeStatus = (s: string) =>
+  s === "pending_payment" ? "pending" : s;
 
 const getStatusClass = (s: string) => {
   const map: Record<string, string> = {
@@ -44,7 +49,7 @@ const getStatusClass = (s: string) => {
     done:    "s-done",
     archived:"s-archived",
   };
-  return map[s] ?? "s-pending";
+  return map[normalizeStatus(s)] ?? "s-pending";
 };
 
 /* ─────────────────────────────────────────────────────────── */
@@ -106,7 +111,7 @@ export default function Orders() {
       }
 
       const revenue = filtered
-        .filter(o => o.status === "done" || o.status === "archived")
+        .filter(o => normalizeStatus(o.status) === "done" || o.status === "archived")
         .reduce((acc, o) => acc + parseFloat(o.total || 0), 0);
 
       setFilteredOrders(filtered);
@@ -441,6 +446,7 @@ export default function Orders() {
   const OrderCard = ({ order }: { order: any }) => {
     const isUpdating = updatingIds.has(order._id);
     const isOpenTab  = order.details?.paymentStatus === "open_tab";
+    const ns         = normalizeStatus(order.status);
     const sc         = getStatusClass(order.status);
 
     return (
@@ -507,7 +513,7 @@ export default function Orders() {
           </span>
 
           <div className="action-row">
-            {order.status === "pending" && (
+            {ns === "pending" && (
               <button
                 className="action-btn a-cooking"
                 disabled={isUpdating}
@@ -517,7 +523,7 @@ export default function Orders() {
                 En cuisine
               </button>
             )}
-            {order.status === "cooking" && (
+            {ns === "cooking" && (
               <button
                 className="action-btn a-done"
                 disabled={isUpdating}
@@ -527,7 +533,7 @@ export default function Orders() {
                 Terminer
               </button>
             )}
-            {order.status === "done" && (
+            {ns === "done" && (
               <button
                 className="action-btn a-archive"
                 disabled={isUpdating}
@@ -560,9 +566,9 @@ export default function Orders() {
     const isExpanded = expandedTables.has(group.tableNumber);
     const isSending  = sendingBillIds.has(group.tableNumber);
     const isClosing  = closingTabIds.has(group.tableNumber);
-    const pendingCnt = group.orders.filter(o => o.status === "pending").length;
-    const cookingCnt = group.orders.filter(o => o.status === "cooking").length;
-    const doneCnt    = group.orders.filter(o => o.status === "done").length;
+    const pendingCnt = group.orders.filter(o => normalizeStatus(o.status) === "pending").length;
+    const cookingCnt = group.orders.filter(o => normalizeStatus(o.status) === "cooking").length;
+    const doneCnt    = group.orders.filter(o => normalizeStatus(o.status) === "done").length;
 
     const toggle = () =>
       setExpandedTables(prev => {
@@ -736,21 +742,21 @@ export default function Orders() {
         <div className="stat-card">
           <div className="stat-icon-wrap orange"><AlertCircle size={20} /></div>
           <div>
-            <span className="stat-value">{filteredOrders.filter(o => o.status === "pending").length}</span>
+            <span className="stat-value">{filteredOrders.filter(o => normalizeStatus(o.status) === "pending").length}</span>
             <span className="stat-label">En attente</span>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-wrap blue"><Clock size={20} /></div>
           <div>
-            <span className="stat-value">{filteredOrders.filter(o => o.status === "cooking").length}</span>
+            <span className="stat-value">{filteredOrders.filter(o => normalizeStatus(o.status) === "cooking").length}</span>
             <span className="stat-label">En cuisine</span>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon-wrap green"><CheckCircle size={20} /></div>
           <div>
-            <span className="stat-value">{filteredOrders.filter(o => o.status === "done").length}</span>
+            <span className="stat-value">{filteredOrders.filter(o => normalizeStatus(o.status) === "done").length}</span>
             <span className="stat-label">Prêts / Servis</span>
           </div>
         </div>
