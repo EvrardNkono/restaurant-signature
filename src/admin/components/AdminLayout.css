@@ -185,3 +185,50 @@
     display: none; /* Cache le texte admin sur très petit mobile */
   }
 }
+
+/* ============================================================
+   FIX - ESPACE BLANC ENTRE 768px ET 992px
+   ============================================================ */
+
+/* Corrige la transition brutale entre les breakpoints */
+@media (min-width: 769px) and (max-width: 992px) {
+  /* Assure que la sidebar reste à 80px sans transformation */
+  .sidebar {
+    width: 80px !important;
+    transform: none !important;
+    position: fixed !important;
+  }
+  
+  /* Fixe la marge du contenu principal */
+  .admin-main-content {
+    margin-left: 80px !important;
+    width: calc(100% - 80px) !important;
+  }
+  
+  /* Assure que le conteneur des pages prend toute la largeur */
+  .admin-page-container {
+    width: 100% !important;
+    padding: 20px !important;
+    overflow-x: visible !important;
+  }
+  
+  /* Force l'affichage correct de la grille des commandes */
+  .orders-page {
+    width: 100% !important;
+  }
+  
+  .orders-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Transition plus douce pour la sidebar */
+.sidebar,
+.admin-main-content {
+  transition: all 0.3s ease;
+}
+
+/* Empêche les sauts brusques de contenu */
+.admin-page-container {
+  transition: padding 0.3s ease;
+}
