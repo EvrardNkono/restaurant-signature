@@ -24,7 +24,7 @@
   margin-left: 260px; /* Desktop */
   min-height: 100vh;
   width: calc(100% - 260px);
-  overflow-x: hidden; /* ← EMPÊCHE LE DÉBORDEMENT */
+ 
 }
 
 .admin-topbar {
@@ -60,7 +60,7 @@
   padding: 24px;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden; /* ← EMPÊCHE LE DÉBORDEMENT */
+  
   box-sizing: border-box;
 }
 
