@@ -370,6 +370,8 @@
   overflow: visible;
   position: relative;
   transition: var(--transition);
+
+  min-height: 500px !important;
 }
 
 .order-card:hover {
@@ -446,7 +448,8 @@
 /* Card body */
 .card-body {
   padding: 12px 16px;
-  flex: 1;
+  flex: 1 0 auto !important;
+  min-height: 200px !important;
 }
 
 /* Origin row */
@@ -575,6 +578,10 @@
   position: relative;
   z-index: 2;
   flex-shrink: 0;
+
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
+  min-height: 130px !important;
 }
 
 .status-pill {
@@ -1018,114 +1025,25 @@
   .orders-header { flex-direction: column; align-items: flex-start; }
 }
 
-
-/* FIX CRITIQUE - Force la visibilité des boutons d'action */
-.order-card {
-  overflow: visible !important;
-  position: relative;
-  z-index: 1;
-}
-
-.card-footer {
-  position: relative !important;
-  z-index: 100 !important;
-  background: #201614 !important;
-  margin-top: auto;
-  pointer-events: auto !important;
-}
-
-.action-row {
-  pointer-events: auto !important;
-}
-
-.action-btn {
-  pointer-events: auto !important;
-  position: relative !important;
-  z-index: 101 !important;
-}
-
-/* Assure que rien ne peut recouvrir le footer */
-.order-card > *:not(.card-footer) {
-  position: relative;
-  z-index: 1;
-}
-
-/* Supprime tout overflow cachant */
-.admin-page-container,
-.admin-main-content,
-.orders-page,
-.orders-grid {
-  overflow: visible !important;
-}
-
-/* FORCE LA HAUTEUR MINIMALE DES CARTES SUR TOUS LES ÉCRANS */
-.order-card {
-  min-height: 450px !important;  /* Force une hauteur suffisante */
-  height: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.card-body {
-  flex: 1 0 auto !important;  /* Pousse le footer vers le bas */
-  min-height: 200px !important;
-}
-
-.card-footer {
-  margin-top: auto !important;  /* Colle le footer en bas */
-  flex-shrink: 0 !important;
-}
-
-/* Pour desktop spécifiquement */
+/* Pour toutes les largeurs > 768px, force la grille en colonne */
 @media (min-width: 769px) {
-  .order-card {
-    min-height: 480px !important;
-  }
-  
-  .card-body {
-    min-height: 280px !important;
-  }
-}
-
-/* FIX POUR LE BREAKPOINT CRITIQUE 768-992px */
-@media (min-width: 768px) and (max-width: 1792px) {
   .orders-grid {
-    grid-template-columns: 1fr !important; /* Force les cartes en colonne */
-    gap: 20px;
+    grid-template-columns: 1fr !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
   }
   
   .order-card {
-    min-width: 300px;
-    max-width: 100%;
-  }
-  
-  .card-footer {
-    position: relative !important;
-    bottom: auto !important;
-    margin-top: 10px !important;
+    min-height: 520px !important;
   }
   
   .action-row {
     flex-wrap: wrap !important;
+    gap: 8px !important;
   }
   
   .action-btn {
-    flex: 1 1 auto !important;
+    flex: 1 0 auto !important;
     min-width: 120px !important;
   }
-}
-
-/* Force toutes les cartes à avoir une largeur minimale */
-.order-card {
-  min-width: 280px;
-}
-
-.action-btn {
-  white-space: nowrap;
-}
-
-/* Empêche le footer de rétrécir */
-.card-footer {
-  flex-shrink: 0;
-  min-height: 100px;
 }
