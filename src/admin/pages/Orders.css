@@ -1017,3 +1017,43 @@
   .stats-grid { grid-template-columns: 1fr; }
   .orders-header { flex-direction: column; align-items: flex-start; }
 }
+
+
+/* FIX CRITIQUE - Force la visibilité des boutons d'action */
+.order-card {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
+}
+
+.card-footer {
+  position: relative !important;
+  z-index: 100 !important;
+  background: #201614 !important;
+  margin-top: auto;
+  pointer-events: auto !important;
+}
+
+.action-row {
+  pointer-events: auto !important;
+}
+
+.action-btn {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+/* Assure que rien ne peut recouvrir le footer */
+.order-card > *:not(.card-footer) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Supprime tout overflow cachant */
+.admin-page-container,
+.admin-main-content,
+.orders-page,
+.orders-grid {
+  overflow: visible !important;
+}
