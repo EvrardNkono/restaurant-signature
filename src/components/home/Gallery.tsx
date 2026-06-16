@@ -5,41 +5,32 @@ import {
 } from 'lucide-react';
 import './Gallery.css';
 
+// 📸 CHEMIN CORRIGÉ - Les espaces sont encodés ou remplacés
 const galleryImages = [
   { 
-    src: "/Images/resto (1).webp", 
+    src: "/Images/resto%20(1).webp",  // ✅ %20 pour l'espace
     alt: "Salle principale du restaurant Signature",
-    category: "Salle",
-    title: "Élégance & Confort",
-    description: "Une salle raffinée où chaque détail est pensé pour votre bien-être"
+    category: "Salle"
   },
   { 
-    src: "/Images/resto (2).webp", 
+    src: "/Images/resto%20(2).webp",  // ✅ %20 pour l'espace
     alt: "Bar et comptoir Signature",
-    category: "Bar",
-    title: "Art de la Mixologie",
-    description: "Notre bar, écrin de créativité et de saveurs d'exception"
+    category: "Bar"
   },
   { 
-    src: "/Images/resto (3).webp", 
+    src: "/Images/resto%20(3).webp",  // ✅ %20 pour l'espace
     alt: "Terrasse extérieure",
-    category: "Terrasse",
-    title: "Dîner en Plein Air",
-    description: "Une terrasse intimiste pour savourer l'instant présent"
+    category: "Terrasse"
   },
   { 
-    src: "/Images/resto (4).webp", 
+    src: "/Images/resto%20(4).webp",  // ✅ %20 pour l'espace
     alt: "Cuisine ouverte Signature",
-    category: "Cuisine",
-    title: "Le Théâtre des Sens",
-    description: "Notre cuisine ouverte, où la magie opère sous vos yeux"
+    category: "Cuisine"
   },
   { 
-    src: "/Images/resto (5).webp", 
+    src: "/Images/resto%20(5).webp",  // ✅ %20 pour l'espace
     alt: "Détails et décoration",
-    category: "Détails",
-    title: "L'Art du Détail",
-    description: "Chaque élément raconte l'histoire de la Maison Signature"
+    category: "Détails"
   },
 ];
 
@@ -50,6 +41,7 @@ export default function Gallery() {
   const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
   const galleryRef = useRef<HTMLDivElement>(null);
   const [visibleImages, setVisibleImages] = useState<number[]>([]);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // Effet d'entrée des images au scroll
   useEffect(() => {
@@ -101,6 +93,11 @@ export default function Gallery() {
     });
   };
 
+  const handleImageError = (index: number) => {
+    setImageErrors(prev => new Set(prev).add(index));
+    console.error(`❌ Image non trouvée: ${galleryImages[index].src}`);
+  };
+
   // Raccourci clavier
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,7 +135,7 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* GRILLE DES PHOTOS - 3 COLONNES */}
+      {/* GRILLE DES PHOTOS */}
       <div className="gallery-grid-enhanced">
         {galleryImages.map((image, index) => (
           <div
@@ -153,12 +150,20 @@ export default function Gallery() {
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <div className="gallery-item-inner">
-              <img
-                src={image.src}
-                alt={image.alt}
-                className="gallery-image-enhanced"
-                loading="lazy"
-              />
+              {!imageErrors.has(index) ? (
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  className="gallery-image-enhanced"
+                  loading="lazy"
+                  onError={() => handleImageError(index)}
+                />
+              ) : (
+                <div className="gallery-image-fallback">
+                  <Camera size={48} />
+                  <span>Image {index + 1}</span>
+                </div>
+              )}
               
               {/* CATÉGORIE EN SURIMPOSITION */}
               <div className="gallery-category-tag">
@@ -169,7 +174,7 @@ export default function Gallery() {
               <div className="gallery-overlay-enhanced">
                 <div className="overlay-content">
                   <div className="overlay-header">
-                    <h3 className="overlay-title">{image.title}</h3>
+                    <h3 className="overlay-title">{image.category}</h3>
                     <button 
                       className="overlay-like-btn"
                       onClick={(e) => toggleLike(index, e)}
@@ -181,7 +186,7 @@ export default function Gallery() {
                       />
                     </button>
                   </div>
-                  <p className="overlay-description">{image.description}</p>
+                  <p className="overlay-description">{image.alt}</p>
                   <div className="overlay-actions">
                     <span className="overlay-view">
                       <Maximize2 size={14} />
@@ -203,17 +208,15 @@ export default function Gallery() {
         ))}
       </div>
 
-      {/* LIGHTBOX (MODAL) */}
+      {/* LIGHTBOX */}
       {selectedIndex !== null && (
         <div className="lightbox-enhanced" onClick={closeLightbox}>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             
-            {/* BOUTON FERMER */}
             <button className="lightbox-close" onClick={closeLightbox}>
               <X size={28} />
             </button>
 
-            {/* NAVIGATION */}
             <button 
               className="lightbox-nav prev" 
               onClick={() => navigateLightbox(-1)}
@@ -229,21 +232,27 @@ export default function Gallery() {
               <ChevronRight size={36} />
             </button>
 
-            {/* IMAGE */}
             <div className="lightbox-image-container">
-              <img
-                src={galleryImages[selectedIndex].src}
-                alt={galleryImages[selectedIndex].alt}
-                className={`lightbox-image ${isAnimating ? 'animating' : ''}`}
-              />
+              {!imageErrors.has(selectedIndex) ? (
+                <img
+                  src={galleryImages[selectedIndex].src}
+                  alt={galleryImages[selectedIndex].alt}
+                  className={`lightbox-image ${isAnimating ? 'animating' : ''}`}
+                  onError={() => handleImageError(selectedIndex)}
+                />
+              ) : (
+                <div className="lightbox-fallback">
+                  <Camera size={64} />
+                  <span>Image non disponible</span>
+                </div>
+              )}
             </div>
 
-            {/* INFOS */}
             <div className="lightbox-info">
               <div className="lightbox-info-inner">
                 <div className="lightbox-category">{galleryImages[selectedIndex].category}</div>
-                <h3 className="lightbox-title">{galleryImages[selectedIndex].title}</h3>
-                <p className="lightbox-description">{galleryImages[selectedIndex].description}</p>
+                <h3 className="lightbox-title">{galleryImages[selectedIndex].category}</h3>
+                <p className="lightbox-description">{galleryImages[selectedIndex].alt}</p>
                 <div className="lightbox-meta">
                   <span className="lightbox-counter">
                     {selectedIndex + 1} / {galleryImages.length}
@@ -266,7 +275,6 @@ export default function Gallery() {
               </div>
             </div>
 
-            {/* INDICATEURS DE PROGRESSION */}
             <div className="lightbox-progress">
               {galleryImages.map((_, idx) => (
                 <div 
