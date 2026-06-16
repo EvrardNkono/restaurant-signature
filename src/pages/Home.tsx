@@ -4,7 +4,8 @@ import Hero from "../components/home/Hero";
 import Signature from "../components/home/Signature";
 import SignatureCarousel from "../components/home/SignatureCarousel";
 import Highlights from "../components/home/Highlights";
-import Testimonials from "../components/home/Testimonials"; 
+import Testimonials from "../components/home/Testimonials";
+import Gallery from "../components/home/Gallery"; // 👈 NOUVEAU COMPOSANT
 import CtaFinal from "../components/home/CtaFinal";
 
 // --- FONCTION DE RÉCUPÉRATION GLOBALE ---
@@ -38,6 +39,7 @@ export default function Home() {
 
   return (
     <main id="main-content" role="main" aria-label="Contenu principal du site Signature Restaurant">
+      
       {/* HERO SECTION */}
       <Hero
         title="Bienvenue au Restaurant Signature"
@@ -54,6 +56,9 @@ export default function Home() {
 
       {/* CAROUSEL VISUEL */}
       <SignatureCarousel />
+
+      {/* 📸 GALERIE PHOTOS DU RESTAURANT */}
+      <Gallery />
 
       {/* PLATS PHARES (HIGHLIGHTS) */}
       <Highlights
