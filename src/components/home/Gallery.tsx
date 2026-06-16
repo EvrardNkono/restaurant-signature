@@ -1,65 +1,77 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, 
-  Maximize2, Heart, Camera, Star
+  Maximize2, Heart, Camera, Star, 
+  Play, Pause, Sparkles, Clock
 } from 'lucide-react';
 import './Gallery.css';
 
-// 📸 CHEMIN CORRIGÉ - Les espaces sont encodés ou remplacés
 const galleryImages = [
   { 
-    src: "/Images/resto%20(1).webp",  // ✅ %20 pour l'espace
-    alt: "Salle principale du restaurant Signature",
-    category: "Salle"
+    src: "/Images/resto1.webp",
+    category: "Salle",
+    description: "Élégance intemporelle"
   },
   { 
-    src: "/Images/resto%20(2).webp",  // ✅ %20 pour l'espace
-    alt: "Bar et comptoir Signature",
-    category: "Bar"
+    src: "/Images/resto2.webp",
+    category: "Bar",
+    description: "Art de vivre"
   },
   { 
-    src: "/Images/resto%20(3).webp",  // ✅ %20 pour l'espace
-    alt: "Terrasse extérieure",
-    category: "Terrasse"
+    src: "/Images/resto3.webp",
+    category: "Terrasse",
+    description: "Douceur méditerranéenne"
   },
   { 
-    src: "/Images/resto%20(4).webp",  // ✅ %20 pour l'espace
-    alt: "Cuisine ouverte Signature",
-    category: "Cuisine"
+    src: "/Images/resto4.webp",
+    category: "Cuisine",
+    description: "Création en mouvement"
   },
   { 
-    src: "/Images/resto%20(5).webp",  // ✅ %20 pour l'espace
-    alt: "Détails et décoration",
-    category: "Détails"
+    src: "/Images/resto5.webp",
+    category: "Ambiance",
+    description: "Lumières et émotions"
   },
 ];
 
 export default function Gallery() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
-  const galleryRef = useRef<HTMLDivElement>(null);
-  const [visibleImages, setVisibleImages] = useState<number[]>([]);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null); // ✅ FIX ICI
 
-  // Effet d'entrée des images au scroll
+  // Auto-play du carousel de la galerie
+  useEffect(() => {
+    if (isAutoPlay && !selectedIndex) {
+      autoPlayRef.current = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % galleryImages.length);
+      }, 4000);
+    }
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [isAutoPlay, selectedIndex]);
+
+  // Intersection Observer pour l'animation d'entrée
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = parseInt(entry.target.getAttribute('data-index') || '0');
-            setVisibleImages(prev => 
-              prev.includes(index) ? prev : [...prev, index]
-            );
+            setVisibleImages(prev => new Set(prev).add(index));
           }
         });
       },
-      { threshold: 0.2, rootMargin: '50px' }
+      { threshold: 0.15, rootMargin: '50px' }
     );
 
-    const items = document.querySelectorAll('.gallery-item-enhanced');
+    const items = document.querySelectorAll('.gallery-item-premium');
     items.forEach(item => observer.observe(item));
 
     return () => observer.disconnect();
@@ -68,11 +80,13 @@ export default function Gallery() {
   const openLightbox = (index: number) => {
     setSelectedIndex(index);
     document.body.style.overflow = 'hidden';
+    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
   };
 
   const closeLightbox = () => {
     setSelectedIndex(null);
     document.body.style.overflow = 'auto';
+    setIsAutoPlay(true);
   };
 
   const navigateLightbox = (direction: number) => {
@@ -98,7 +112,7 @@ export default function Gallery() {
     console.error(`❌ Image non trouvée: ${galleryImages[index].src}`);
   };
 
-  // Raccourci clavier
+  // Raccourcis clavier
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedIndex === null) return;
@@ -111,175 +125,239 @@ export default function Gallery() {
   }, [selectedIndex]);
 
   return (
-    <section className="gallery-section-enhanced" ref={galleryRef} aria-label="Galerie photo du restaurant Signature">
+    <section className="gallery-section-premium" ref={galleryRef}>
       
-      {/* EN-TÊTE DE LA GALERIE */}
-      <div className="gallery-header-enhanced">
-        <div className="gallery-header-content">
-          <div className="gallery-badge">
-            <Camera size={16} />
+      {/* DÉCORATION DE FOND */}
+      <div className="gallery-bg-decoration">
+        <div className="gallery-glow-1"></div>
+        <div className="gallery-glow-2"></div>
+      </div>
+
+      {/* EN-TÊTE */}
+      <div className="gallery-header-premium">
+        <div className="gallery-header-inner">
+          <div className="gallery-badge-premium">
+            <Camera size={14} />
             <span>Galerie</span>
+            <Sparkles size={12} className="badge-sparkle" />
           </div>
-          <h2 className="gallery-title">
-            L'Ambiance <span className="gold-text">Signature</span>
+          <h2 className="gallery-title-premium">
+            <span className="title-line">Notre</span>
+            <span className="title-highlight">Univers</span>
           </h2>
-          <div className="gallery-divider">
-            <span className="divider-line"></span>
-            <Star size={20} className="divider-icon" />
-            <span className="divider-line"></span>
+          <div className="gallery-divider-premium">
+            <span className="divider-bar"></span>
+            <Star size={18} className="divider-star" />
+            <span className="divider-bar"></span>
           </div>
-          <p className="gallery-subtitle">
-            Découvrez l'univers raffiné de notre restaurant,<br />
-            où chaque espace raconte une histoire de goût et d'élégance.
+          <p className="gallery-subtitle-premium">
+            Un voyage visuel au cœur de l'excellence
           </p>
         </div>
       </div>
 
-      {/* GRILLE DES PHOTOS */}
-      <div className="gallery-grid-enhanced">
-        {galleryImages.map((image, index) => (
-          <div
-            key={index}
-            data-index={index}
-            className={`gallery-item-enhanced 
-              ${visibleImages.includes(index) ? 'visible' : ''} 
-              ${hoveredIndex === index ? 'hovered' : ''}`}
-            style={{ animationDelay: `${index * 0.08}s` }}
-            onClick={() => openLightbox(index)}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
+      {/* GRILLE PRINCIPALE */}
+      <div className="gallery-grid-premium">
+        {/* Grande image principale */}
+        <div className="gallery-main-premium">
+          <div 
+            className="gallery-main-image"
+            onClick={() => openLightbox(currentIndex)}
           >
-            <div className="gallery-item-inner">
-              {!imageErrors.has(index) ? (
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="gallery-image-enhanced"
-                  loading="lazy"
-                  onError={() => handleImageError(index)}
-                />
-              ) : (
-                <div className="gallery-image-fallback">
-                  <Camera size={48} />
-                  <span>Image {index + 1}</span>
-                </div>
-              )}
-              
-              {/* CATÉGORIE EN SURIMPOSITION */}
-              <div className="gallery-category-tag">
-                <span>{image.category}</span>
+            {!imageErrors.has(currentIndex) ? (
+              <img
+                src={galleryImages[currentIndex].src}
+                alt={galleryImages[currentIndex].category}
+                className="gallery-main-img"
+                onError={() => handleImageError(currentIndex)}
+              />
+            ) : (
+              <div className="gallery-fallback">
+                <Camera size={48} />
+                <span>Image</span>
               </div>
-
-              {/* OVERLAY AU HOVER */}
-              <div className="gallery-overlay-enhanced">
-                <div className="overlay-content">
-                  <div className="overlay-header">
-                    <h3 className="overlay-title">{image.category}</h3>
-                    <button 
-                      className="overlay-like-btn"
-                      onClick={(e) => toggleLike(index, e)}
-                    >
-                      <Heart 
-                        size={18} 
-                        fill={likedImages.has(index) ? '#E74C3C' : 'none'}
-                        color={likedImages.has(index) ? '#E74C3C' : 'white'}
-                      />
-                    </button>
-                  </div>
-                  <p className="overlay-description">{image.alt}</p>
-                  <div className="overlay-actions">
-                    <span className="overlay-view">
-                      <Maximize2 size={14} />
-                      Voir
-                    </span>
-                    <span className="overlay-number">{index + 1}/{galleryImages.length}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* BADGE DE COMPTEUR (Mobile) */}
-              <div className="gallery-mobile-badge">
-                <span>{index + 1}</span>
-                <span>/</span>
-                <span>{galleryImages.length}</span>
+            )}
+            <div className="gallery-main-overlay">
+              <div className="main-overlay-content">
+                <span className="main-category">{galleryImages[currentIndex].category}</span>
+                <p className="main-description">{galleryImages[currentIndex].description}</p>
+                <button className="main-view-btn">
+                  <Maximize2 size={16} />
+                  <span>Explorer</span>
+                </button>
               </div>
             </div>
+            <div className="gallery-main-badge">
+              <span>{currentIndex + 1}</span>
+              <span>/</span>
+              <span>{galleryImages.length}</span>
+            </div>
           </div>
-        ))}
+          
+          {/* Contrôles du carousel */}
+          <div className="gallery-controls">
+            <button 
+              className="control-btn"
+              onClick={() => setCurrentIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button 
+              className="control-btn autoplay"
+              onClick={() => setIsAutoPlay(!isAutoPlay)}
+            >
+              {isAutoPlay ? <Pause size={16} /> : <Play size={16} />}
+            </button>
+            <button 
+              className="control-btn"
+              onClick={() => setCurrentIndex((prev) => (prev + 1) % galleryImages.length)}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+
+          {/* Indicateurs */}
+          <div className="gallery-indicators">
+            {galleryImages.map((_, idx) => (
+              <div
+                key={idx}
+                className={`indicator-dot ${idx === currentIndex ? 'active' : ''}`}
+                onClick={() => setCurrentIndex(idx)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Miniatures latérales */}
+        <div className="gallery-thumbs-premium">
+          {galleryImages.map((image, index) => (
+            <div
+              key={index}
+              data-index={index}
+              className={`gallery-thumb-item ${visibleImages.has(index) ? 'visible' : ''} ${index === currentIndex ? 'active' : ''}`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => setCurrentIndex(index)}
+            >
+              <div className="thumb-image-wrapper">
+                {!imageErrors.has(index) ? (
+                  <img
+                    src={image.src}
+                    alt={image.category}
+                    className="thumb-image"
+                    onError={() => handleImageError(index)}
+                  />
+                ) : (
+                  <div className="thumb-fallback">
+                    <Camera size={20} />
+                  </div>
+                )}
+                <div className="thumb-overlay">
+                  <span className="thumb-category">{image.category}</span>
+                </div>
+              </div>
+              <button 
+                className="thumb-like"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleLike(index, e);
+                }}
+              >
+                <Heart 
+                  size={14} 
+                  fill={likedImages.has(index) ? '#E74C3C' : 'none'}
+                  color={likedImages.has(index) ? '#E74C3C' : 'rgba(255,255,255,0.6)'}
+                />
+              </button>
+              {index === currentIndex && (
+                <div className="thumb-active-indicator">
+                  <span className="active-line"></span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* LIGHTBOX */}
+      {/* LIGHTBOX DE LUXE */}
       {selectedIndex !== null && (
-        <div className="lightbox-enhanced" onClick={closeLightbox}>
-          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+        <div className="lightbox-premium" onClick={closeLightbox}>
+          <div className="lightbox-premium-content" onClick={(e) => e.stopPropagation()}>
             
-            <button className="lightbox-close" onClick={closeLightbox}>
-              <X size={28} />
-            </button>
+            {/* Header Lightbox */}
+            <div className="lightbox-premium-header">
+              <div className="lightbox-premium-info">
+                <span className="lightbox-premium-category">
+                  {galleryImages[selectedIndex].category}
+                </span>
+                <span className="lightbox-premium-counter">
+                  {selectedIndex + 1} / {galleryImages.length}
+                </span>
+              </div>
+              <div className="lightbox-premium-actions">
+                <button 
+                  className="lightbox-premium-btn like"
+                  onClick={(e) => toggleLike(selectedIndex, e)}
+                >
+                  <Heart 
+                    size={20} 
+                    fill={likedImages.has(selectedIndex) ? '#E74C3C' : 'none'}
+                    color={likedImages.has(selectedIndex) ? '#E74C3C' : 'white'}
+                  />
+                </button>
+                <button className="lightbox-premium-btn close" onClick={closeLightbox}>
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
 
-            <button 
-              className="lightbox-nav prev" 
-              onClick={() => navigateLightbox(-1)}
-              aria-label="Image précédente"
-            >
-              <ChevronLeft size={36} />
-            </button>
-            <button 
-              className="lightbox-nav next" 
-              onClick={() => navigateLightbox(1)}
-              aria-label="Image suivante"
-            >
-              <ChevronRight size={36} />
-            </button>
-
-            <div className="lightbox-image-container">
+            {/* Image */}
+            <div className="lightbox-premium-image">
               {!imageErrors.has(selectedIndex) ? (
                 <img
                   src={galleryImages[selectedIndex].src}
-                  alt={galleryImages[selectedIndex].alt}
-                  className={`lightbox-image ${isAnimating ? 'animating' : ''}`}
+                  alt={galleryImages[selectedIndex].category}
+                  className={`lightbox-premium-img ${isAnimating ? 'animating' : ''}`}
                   onError={() => handleImageError(selectedIndex)}
                 />
               ) : (
-                <div className="lightbox-fallback">
+                <div className="lightbox-fallback-premium">
                   <Camera size={64} />
                   <span>Image non disponible</span>
                 </div>
               )}
             </div>
 
-            <div className="lightbox-info">
-              <div className="lightbox-info-inner">
-                <div className="lightbox-category">{galleryImages[selectedIndex].category}</div>
-                <h3 className="lightbox-title">{galleryImages[selectedIndex].category}</h3>
-                <p className="lightbox-description">{galleryImages[selectedIndex].alt}</p>
-                <div className="lightbox-meta">
-                  <span className="lightbox-counter">
-                    {selectedIndex + 1} / {galleryImages.length}
-                  </span>
-                  <button 
-                    className="lightbox-like"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(selectedIndex, e);
-                    }}
-                  >
-                    <Heart 
-                      size={18} 
-                      fill={likedImages.has(selectedIndex) ? '#E74C3C' : 'none'}
-                      color={likedImages.has(selectedIndex) ? '#E74C3C' : 'white'}
-                    />
-                    {likedImages.has(selectedIndex) ? 'Favori' : 'Ajouter aux favoris'}
-                  </button>
-                </div>
+            {/* Description */}
+            <div className="lightbox-premium-footer">
+              <p className="lightbox-premium-desc">
+                {galleryImages[selectedIndex].description}
+              </p>
+              <div className="lightbox-premium-meta">
+                <Clock size={14} />
+                <span>Signature Restaurant</span>
               </div>
             </div>
 
-            <div className="lightbox-progress">
+            {/* Navigation */}
+            <button 
+              className="lightbox-premium-nav prev"
+              onClick={() => navigateLightbox(-1)}
+            >
+              <ChevronLeft size={32} />
+            </button>
+            <button 
+              className="lightbox-premium-nav next"
+              onClick={() => navigateLightbox(1)}
+            >
+              <ChevronRight size={32} />
+            </button>
+
+            {/* Progress */}
+            <div className="lightbox-premium-progress">
               {galleryImages.map((_, idx) => (
-                <div 
-                  key={idx} 
-                  className={`progress-dot ${idx === selectedIndex ? 'active' : ''}`}
+                <div
+                  key={idx}
+                  className={`progress-premium-bar ${idx === selectedIndex ? 'active' : ''}`}
                   onClick={() => setSelectedIndex(idx)}
                 />
               ))}
