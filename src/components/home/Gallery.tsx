@@ -8,27 +8,27 @@ import './Gallery.css';
 
 const galleryImages = [
   { 
-    src: "/Images/resto1.webp",
+    src: "/images/resto1.webp",
     category: "Salle",
     description: "Élégance intemporelle"
   },
   { 
-    src: "/Images/resto2.webp",
+    src: "/images/resto2.webp",
     category: "Bar",
     description: "Art de vivre"
   },
   { 
-    src: "/Images/resto3.webp",
+    src: "/images/resto3.webp",
     category: "Terrasse",
     description: "Douceur méditerranéenne"
   },
   { 
-    src: "/Images/resto4.webp",
+    src: "/images/resto4.webp",
     category: "Cuisine",
     description: "Création en mouvement"
   },
   { 
-    src: "/Images/resto5.webp",
+    src: "/images/resto5.webp",
     category: "Ambiance",
     description: "Lumières et émotions"
   },
