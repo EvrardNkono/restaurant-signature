@@ -6,33 +6,22 @@ import {
 } from 'lucide-react';
 import './Gallery.css';
 
-const galleryImages = [
-  { 
-    src: "/images/resto1.webp",
-    category: "Salle",
-    description: "Élégance intemporelle"
-  },
-  { 
-    src: "/images/resto2.webp",
-    category: "Bar",
-    description: "Art de vivre"
-  },
-  { 
-    src: "/images/resto3.webp",
-    category: "Terrasse",
-    description: "Douceur méditerranéenne"
-  },
-  { 
-    src: "/images/resto4.webp",
-    category: "Cuisine",
-    description: "Création en mouvement"
-  },
-  { 
-    src: "/images/resto5.webp",
-    category: "Ambiance",
-    description: "Lumières et émotions"
-  },
-];
+// ✅ Fonction pour générer automatiquement la liste des images
+const generateGalleryImages = () => {
+  const images = [];
+  const totalImages = 5; // Nombre total d'images dans le dossier
+  
+  for (let i = 1; i <= totalImages; i++) {
+    images.push({
+      src: `/images/resto${i}.webp`,
+      category: `Photo ${i}`,
+      description: `Ambiance Signature ${i}`
+    });
+  }
+  return images;
+};
+
+const galleryImages = generateGalleryImages();
 
 export default function Gallery() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -42,12 +31,13 @@ export default function Gallery() {
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const galleryRef = useRef<HTMLDivElement>(null);
-  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null); // ✅ FIX ICI
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Auto-play du carousel de la galerie
+  // Auto-play du carousel
   useEffect(() => {
-    if (isAutoPlay && !selectedIndex) {
+    if (isAutoPlay && !selectedIndex && galleryImages.length > 0) {
       autoPlayRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % galleryImages.length);
       }, 4000);
@@ -57,7 +47,7 @@ export default function Gallery() {
     };
   }, [isAutoPlay, selectedIndex]);
 
-  // Intersection Observer pour l'animation d'entrée
+  // Observer pour l'animation d'entrée
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -71,10 +61,25 @@ export default function Gallery() {
       { threshold: 0.15, rootMargin: '50px' }
     );
 
-    const items = document.querySelectorAll('.gallery-item-premium');
+    const items = document.querySelectorAll('.gallery-thumb-item');
     items.forEach(item => observer.observe(item));
 
     return () => observer.disconnect();
+  }, []);
+
+  // Préchargement des images
+  useEffect(() => {
+    galleryImages.forEach((img, index) => {
+      const image = new Image();
+      image.onload = () => {
+        setLoadedImages(prev => new Set(prev).add(index));
+        console.log(`✅ Image ${index + 1} chargée: ${img.src}`);
+      };
+      image.onerror = () => {
+        handleImageError(index);
+      };
+      image.src = img.src;
+    });
   }, []);
 
   const openLightbox = (index: number) => {
@@ -90,7 +95,7 @@ export default function Gallery() {
   };
 
   const navigateLightbox = (direction: number) => {
-    if (selectedIndex === null || isAnimating) return;
+    if (selectedIndex === null || isAnimating || galleryImages.length === 0) return;
     setIsAnimating(true);
     const newIndex = (selectedIndex + direction + galleryImages.length) % galleryImages.length;
     setSelectedIndex(newIndex);
@@ -109,7 +114,7 @@ export default function Gallery() {
 
   const handleImageError = (index: number) => {
     setImageErrors(prev => new Set(prev).add(index));
-    console.error(`❌ Image non trouvée: ${galleryImages[index].src}`);
+    console.error(`❌ Image non trouvée: ${galleryImages[index]?.src || `Image ${index + 1}`}`);
   };
 
   // Raccourcis clavier
@@ -123,6 +128,19 @@ export default function Gallery() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIndex]);
+
+  // Si aucune image n'est disponible
+  if (galleryImages.length === 0) {
+    return (
+      <section className="gallery-section-premium">
+        <div className="gallery-empty">
+          <Camera size={64} />
+          <h3>Aucune image disponible</h3>
+          <p>Vérifiez que les images sont dans le dossier /public/images/</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="gallery-section-premium" ref={galleryRef}>
@@ -164,7 +182,7 @@ export default function Gallery() {
             className="gallery-main-image"
             onClick={() => openLightbox(currentIndex)}
           >
-            {!imageErrors.has(currentIndex) ? (
+            {!imageErrors.has(currentIndex) && loadedImages.has(currentIndex) ? (
               <img
                 src={galleryImages[currentIndex].src}
                 alt={galleryImages[currentIndex].category}
@@ -173,8 +191,9 @@ export default function Gallery() {
               />
             ) : (
               <div className="gallery-fallback">
+                <div className="fallback-spinner"></div>
                 <Camera size={48} />
-                <span>Image</span>
+                <span>Chargement...</span>
               </div>
             )}
             <div className="gallery-main-overlay">
@@ -221,7 +240,7 @@ export default function Gallery() {
             {galleryImages.map((_, idx) => (
               <div
                 key={idx}
-                className={`indicator-dot ${idx === currentIndex ? 'active' : ''}`}
+                className={`indicator-dot ${idx === currentIndex ? 'active' : ''} ${loadedImages.has(idx) ? 'loaded' : ''}`}
                 onClick={() => setCurrentIndex(idx)}
               />
             ))}
@@ -239,12 +258,13 @@ export default function Gallery() {
               onClick={() => setCurrentIndex(index)}
             >
               <div className="thumb-image-wrapper">
-                {!imageErrors.has(index) ? (
+                {!imageErrors.has(index) && loadedImages.has(index) ? (
                   <img
                     src={image.src}
                     alt={image.category}
                     className="thumb-image"
                     onError={() => handleImageError(index)}
+                    loading="lazy"
                   />
                 ) : (
                   <div className="thumb-fallback">
@@ -312,7 +332,7 @@ export default function Gallery() {
 
             {/* Image */}
             <div className="lightbox-premium-image">
-              {!imageErrors.has(selectedIndex) ? (
+              {!imageErrors.has(selectedIndex) && loadedImages.has(selectedIndex) ? (
                 <img
                   src={galleryImages[selectedIndex].src}
                   alt={galleryImages[selectedIndex].category}
@@ -321,8 +341,9 @@ export default function Gallery() {
                 />
               ) : (
                 <div className="lightbox-fallback-premium">
+                  <div className="fallback-spinner"></div>
                   <Camera size={64} />
-                  <span>Image non disponible</span>
+                  <span>Chargement...</span>
                 </div>
               )}
             </div>
