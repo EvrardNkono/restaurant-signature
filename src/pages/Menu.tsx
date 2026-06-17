@@ -239,7 +239,7 @@ const Lock = ({ size = 14 }: { size?: number }) => (
 
 export default function Menu() {
   // ─── HORAIRES ───────────────────────────────────────────────
-  const { isJourOpen, nextJourInfo } = useRestaurantHours();
+  const { isJourOpen, nextJourInfo, currentPeriod } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
   // La carte est disponible si :
@@ -565,9 +565,9 @@ export default function Menu() {
           </div>
         </div>
 
-        {/* BANNIÈRE VERROUILLAGE - SEUL MOYEN DE DÉBLOQUER */}
+        {/* BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
         <ServiceLockedBanner
-          serviceLabel="Déjeuner"
+          serviceLabel={currentPeriod === "SOIR" ? "du Soir" : "Déjeuner"}
           nextInfo={nextJourInfo}
           onUnlock={handleUnlock}
         />
@@ -672,11 +672,25 @@ export default function Menu() {
   return (
     <section className="menu-section-enhanced">
 
-      {/* BANNIÈRE SERVICE OUVERT */}
+      {/* ✅ BANNIÈRE SERVICE OUVERT - dynamique avec weekend */}
       {isJourOpen && (
         <div className="restaurant-open-banner">
           <Clock size={18} />
-          <span>SERVICE DÉJEUNER EN COURS • 12h00 - 15h00</span>
+          <span>
+            {(() => {
+              const day = new Date().getDay();
+              // Weekend (Samedi ou Dimanche) : SERVICE EN CONTINU
+              if (day === 0 || day === 6) {
+                return "SERVICE EN CONTINU • 12h00 - 23h00";
+              }
+              // Soir en semaine
+              if (currentPeriod === "SOIR") {
+                return "SERVICE DU SOIR EN COURS • 18h00 - 23h00";
+              }
+              // Jour en semaine
+              return "SERVICE DÉJEUNER EN COURS • 12h00 - 15h00";
+            })()}
+          </span>
         </div>
       )}
 

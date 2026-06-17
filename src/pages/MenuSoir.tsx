@@ -144,7 +144,8 @@ const scrollToDrawer = (id: string) => {
 
 export default function MenuSoir() {
   // ─── HORAIRES ───────────────────────────────────────────────
-  const { isSoirOpen, nextSoirInfo } = useRestaurantHours();
+  // ✅ Récupération de currentPeriod pour l'affichage dynamique
+  const { isSoirOpen, nextSoirInfo, currentPeriod } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
   // Le menu Soir est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
@@ -254,7 +255,6 @@ export default function MenuSoir() {
     if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
   };
 
-  // ✅ Version finale : ajout au panier normal quand débloqué (SANS message de paiement)
   const handleAddClick = (plat: Plat) => {
     // Si service FERMÉ et NON DÉBLOQUÉ → bloquer
     if (!isSoirOpen && !unlocked) {
@@ -264,9 +264,6 @@ export default function MenuSoir() {
       );
       return;
     }
-    
-    // ✅ Service fermé mais DÉBLOQUÉ → on continue (ajout au panier normal)
-    // ✅ Service ouvert → on continue (ajout au panier normal)
     
     if (hasPendingBill) {
       showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.", "error");
@@ -299,13 +296,11 @@ export default function MenuSoir() {
       if (result === "LOCK_ERROR") {
         showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
       } else {
-        // Message simple sans mention de paiement
         showToast(`✓ ${plat.name} ajouté au panier`, "success");
       }
     }
   };
 
-  // Vérification pour l'édition
   const handleEditExistingItem = (plat: Plat) => {
     if (!isSoirOpen && !unlocked) {
       showToast("Impossible de modifier : carte verrouillée", "error"); 
@@ -404,8 +399,9 @@ export default function MenuSoir() {
           </div>
         </div>
 
+        {/* ✅ BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
         <ServiceLockedBanner
-          serviceLabel="Dîner"
+          serviceLabel={currentPeriod === "JOUR" ? "du Soir" : "Dîner"}
           nextInfo={nextSoirInfo}
           onUnlock={handleUnlock}
         />
@@ -482,15 +478,20 @@ export default function MenuSoir() {
         </div>
       )}
 
-      {/* BANNIÈRE SERVICE OUVERT */}
+      {/* ✅ BANNIÈRE SERVICE OUVERT - dynamique */}
       {isSoirOpen && (
         <div className="restaurant-open-banner">
           <Clock size={18} />
-          <span>SERVICE SOIR EN COURS • Dernières commandes à 23h00</span>
+          <span>
+            {currentPeriod === "SOIR" 
+              ? "SERVICE DU SOIR EN COURS • 18h00 - 23h00"
+              : "SERVICE EN CONTINU • 12h00 - 23h00"
+            }
+          </span>
         </div>
       )}
 
-      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) - SANS mention paiement */}
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) */}
       {!isSoirOpen && unlocked && (
         <div className="restaurant-preview-banner-soir">
           <Eye size={18} />
@@ -649,7 +650,7 @@ export default function MenuSoir() {
                     </div>
                   </div>
 
-                  {/* TIROIR DE PERSONNALISATION - inchangé */}
+                  {/* TIROIR DE PERSONNALISATION */}
                   <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
                     <div className="drawer-header">
                       <div className="drawer-title">
