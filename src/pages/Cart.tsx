@@ -84,7 +84,7 @@ export default function Cart() {
   };
 
   // Le paiement en salle n'est possible que si le restaurant est OUVERT
-  const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in" && isJourOpen;
+ const isOpenTab = orderMode === "on_site" && consumeMode === "dine_in" && isJourOpen && !payNow;
 
   // ─── Récupérer la disponibilité des livraisons depuis l'API ───
   const fetchDeliverySettings = async () => {
@@ -677,27 +677,67 @@ export default function Cart() {
                       )}
 
                       {consumeMode === "dine_in" && isJourOpen && (
-                        <div className="form-fade-in">
-                          <div className="table-selector-box">
-                            <div className="table-header-select">
-                              <Smartphone size={18} color="#D4AF37" />
-                              <label>Numéro de table :</label>
-                            </div>
-                            <select className="luxury-select" value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}>
-                              <option value="">-- Sélectionnez votre table --</option>
-                              {tables.map(t => <option key={t._id} value={t.number}>Table n°{t.number}</option>)}
-                            </select>
-                          </div>
+  <div className="form-fade-in">
+    {/* ✅ Choix de paiement aussi en salle */}
+    <p className="form-instruction">Règlement :</p>
+    <div className="selection-grid small">
+      <button
+        className={`select-btn ${payNow ? "active" : ""}`}
+        onClick={() => setPayNow(true)}
+      >
+        💳 Payer en ligne maintenant
+      </button>
+      <button
+        className={`select-btn ${!payNow ? "active" : ""}`}
+        onClick={() => setPayNow(false)}
+      >
+        🍽️ Addition en fin de repas
+      </button>
+    </div>
 
-                          <div className="open-tab-info-banner">
-                            <UtensilsCrossed size={18} color="#D4AF37" />
-                            <div>
-                              <strong>Commande sur table ouverte</strong>
-                              <p>Vous pouvez commander autant de fois que vous le souhaitez. L'addition sera présentée en fin de repas, à votre demande ou par votre serveur.</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+    {/* Sélecteur de table — visible dans les deux cas */}
+    <div className="table-selector-box">
+      <div className="table-header-select">
+        <Smartphone size={18} color="#D4AF37" />
+        <label>Numéro de table :</label>
+      </div>
+      <select
+        className="luxury-select"
+        value={selectedTable}
+        onChange={(e) => setSelectedTable(e.target.value)}
+      >
+        <option value="">-- Sélectionnez votre table --</option>
+        {tables.map(t => (
+          <option key={t._id} value={t.number}>Table n°{t.number}</option>
+        ))}
+      </select>
+    </div>
+
+    {/* Bannière open tab uniquement si "Addition en fin de repas" */}
+    {!payNow && (
+      <div className="open-tab-info-banner">
+        <UtensilsCrossed size={18} color="#D4AF37" />
+        <div>
+          <strong>Commande sur table ouverte</strong>
+          <p>Vous pouvez commander autant de fois que vous le souhaitez. L'addition sera présentée en fin de repas.</p>
+        </div>
+      </div>
+    )}
+
+    {/* Champ email si paiement en ligne */}
+    {payNow && amountToPay > 0 && (
+      <div className="input-group full">
+        <label>Email * (pour le reçu)</label>
+        <input
+          type="email"
+          placeholder="votre@email.com"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+        />
+      </div>
+    )}
+  </div>
+)}
 
                       {consumeMode === "take_away" && (
                         <div className="form-fade-in">
