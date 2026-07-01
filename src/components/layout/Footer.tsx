@@ -37,6 +37,40 @@ export default function Footer() {
     return "Aujourd'hui : Fermé";
   };
 
+  // Détection du mobile
+  const isMobile = () => {
+    return /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  };
+
+  // Gestion du clic pour TikTok
+  const handleTikTokClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    e.preventDefault();
+
+    // Si on est sur mobile
+    if (isMobile()) {
+      // Méthode 1: Essayer d'ouvrir l'app TikTok directement
+      window.location.href = 'tiktok://user?@restaurant_signature';
+      
+      // Méthode 2: Fallback vers le site web après 800ms si l'app ne s'ouvre pas
+      setTimeout(() => {
+        window.open(url, '_blank');
+      }, 800);
+    } else {
+      // Sur desktop, ouverture classique
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Gestion du clic pour les autres réseaux
+  const handleSocialClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { name: string; url: string }) => {
+    if (link.name === 'TikTok') {
+      handleTikTokClick(e, link.url);
+    } else {
+      // Instagram et Facebook : ouverture classique
+      window.open(link.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <footer className="footer">
       <div className="footer-top-ornament">
@@ -56,7 +90,7 @@ export default function Footer() {
           </p>
 
           {/* ============================================================ */}
-          {/* RÉSEAUX SOCIAUX - SANS WHATSAPP */}
+          {/* RÉSEAUX SOCIAUX - SANS WHATSAPP AVEC TIKTOK MOBILE */}
           {/* ============================================================ */}
           <div className="footer-socials">
             <a 
@@ -65,6 +99,10 @@ export default function Footer() {
               aria-label="Instagram"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open('https://www.instagram.com/restaurantsignature77/', '_blank', 'noopener,noreferrer');
+              }}
             >
               <img 
                 src="/images/instagram.png" 
@@ -78,6 +116,10 @@ export default function Footer() {
               aria-label="Facebook"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open('https://www.facebook.com/profile.php?id=61587208464187', '_blank', 'noopener,noreferrer');
+              }}
             >
               <img 
                 src="/images/facebook.png" 
@@ -91,6 +133,7 @@ export default function Footer() {
               aria-label="TikTok"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => handleTikTokClick(e, 'https://www.tiktok.com/@restaurant_signature')}
             >
               <img 
                 src="/images/tiktok.png" 

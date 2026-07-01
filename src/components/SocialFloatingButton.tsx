@@ -49,6 +49,42 @@ export default function SocialFloatingButton() {
     setIsOpen(!isOpen);
   };
 
+  // Détection du mobile
+  const isMobile = () => {
+    return /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  };
+
+  // Gestion du clic pour TikTok
+  const handleTikTokClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    e.preventDefault();
+    setIsOpen(false);
+
+    // Si on est sur mobile
+    if (isMobile()) {
+      // Méthode 1: Essayer d'ouvrir l'app TikTok directement
+      window.location.href = 'tiktok://user?@restaurant_signature';
+      
+      // Méthode 2: Fallback vers le site web après 800ms si l'app ne s'ouvre pas
+      setTimeout(() => {
+        window.open(url, '_blank');
+      }, 800);
+    } else {
+      // Sur desktop, ouverture classique
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Gestion du clic pour les autres réseaux
+  const handleSocialClick = (e: React.MouseEvent<HTMLAnchorElement>, link: SocialLink) => {
+    if (link.name === 'TikTok') {
+      handleTikTokClick(e, link.url);
+    } else {
+      // Instagram et Facebook : ouverture classique
+      setIsOpen(false);
+      window.open(link.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="social-floating-container" ref={menuRef}>
       {/* Overlay sombre */}
@@ -80,7 +116,7 @@ export default function SocialFloatingButton() {
               animationDelay: `${index * 0.08}s`,
               '--social-color': link.color 
             } as React.CSSProperties}
-            onClick={() => setIsOpen(false)}
+            onClick={(e) => handleSocialClick(e, link)}
           >
             <div className="social-menu-item-inner">
               <img src={link.icon} alt={link.name} className="social-menu-icon" />
