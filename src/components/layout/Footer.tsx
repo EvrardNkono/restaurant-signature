@@ -46,29 +46,26 @@ export default function Footer() {
   const handleTikTokClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     e.preventDefault();
 
-    // Si on est sur mobile
     if (isMobile()) {
-      // Méthode 1: Essayer d'ouvrir l'app TikTok directement
       window.location.href = 'tiktok://user?@restaurant_signature';
-      
-      // Méthode 2: Fallback vers le site web après 800ms si l'app ne s'ouvre pas
       setTimeout(() => {
         window.open(url, '_blank');
       }, 800);
     } else {
-      // Sur desktop, ouverture classique
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
-  // Gestion du clic pour les autres réseaux
-  const handleSocialClick = (e: React.MouseEvent<HTMLAnchorElement>, link: { name: string; url: string }) => {
-    if (link.name === 'TikTok') {
-      handleTikTokClick(e, link.url);
-    } else {
-      // Instagram et Facebook : ouverture classique
-      window.open(link.url, '_blank', 'noopener,noreferrer');
-    }
+  // Gestion du clic pour Instagram
+  const handleInstagramClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.open('https://www.instagram.com/restaurantsignature77/', '_blank', 'noopener,noreferrer');
+  };
+
+  // Gestion du clic pour Facebook
+  const handleFacebookClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.open('https://www.facebook.com/profile.php?id=61587208464187', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -99,10 +96,7 @@ export default function Footer() {
               aria-label="Instagram"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open('https://www.instagram.com/restaurantsignature77/', '_blank', 'noopener,noreferrer');
-              }}
+              onClick={handleInstagramClick}
             >
               <img 
                 src="/images/instagram.png" 
@@ -116,10 +110,7 @@ export default function Footer() {
               aria-label="Facebook"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => {
-                e.preventDefault();
-                window.open('https://www.facebook.com/profile.php?id=61587208464187', '_blank', 'noopener,noreferrer');
-              }}
+              onClick={handleFacebookClick}
             >
               <img 
                 src="/images/facebook.png" 
