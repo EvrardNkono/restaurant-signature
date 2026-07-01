@@ -18,9 +18,6 @@ import FloatingOrder from "./components/home/FloatingOrder";
 import { CartProvider } from "./context/CartContext";
 import InstallButton from './components/InstallButton';
 
-// NOUVEAU : Import du Social Floating Button
-import SocialFloatingButton from './components/SocialFloatingButton';
-
 // Imports Administration
 import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
@@ -65,9 +62,6 @@ export default function AppRouter() {
                   <FloatingOrder />
                   {/* Bouton d'installation PWA ajouté ici */}
                   <InstallButton />
-
-                  {/* 🆕 SOCIAL FLOATING BUTTON - TOUJOURS VISIBLE */}
-                  <SocialFloatingButton />
 
                   <main>
                     <Routes>
