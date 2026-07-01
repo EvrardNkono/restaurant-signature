@@ -92,30 +92,88 @@
   margin-bottom: 45px;
 }
 
+/* ============================================= */
+/* === RÉSEAUX SOCIAUX - ICÔNES GRANDES ET VISIBLES === */
+/* ============================================= */
 .footer-socials {
   display: flex;
-  gap: 15px;
+  gap: 18px;
+  align-items: center;
 }
 
 .social-icon-link {
   color: #FCF9F5;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  width: 50px;
-  height: 50px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(212, 175, 55, 0.25);
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  text-decoration: none;
 }
 
+/* Style pour les icônes SVG (Lucide + TikTok) */
+.social-icon {
+  width: 34px !important;
+  height: 34px !important;
+  stroke-width: 1.5 !important;
+  transition: all 0.4s ease;
+}
+
+/* Style si vous utilisez des images PNG */
+.social-icon-img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  transition: all 0.4s ease;
+  filter: brightness(0.9);
+}
+
+/* Effet au survol */
 .social-icon-link:hover {
   background: #D4AF37;
   color: #2D2422;
-  transform: translateY(-8px) rotate(8deg);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25);
+  border-color: #D4AF37;
 }
+
+.social-icon-link:hover .social-icon {
+  color: #2D2422;
+  stroke-width: 1.8 !important;
+}
+
+.social-icon-link:hover .social-icon-img {
+  filter: brightness(1) invert(0);
+}
+
+/* Effet "flash" au survol */
+.social-icon-link::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: -1;
+}
+
+.social-icon-link {
+  position: relative;
+  z-index: 1;
+}
+
+.social-icon-link:hover::after {
+  opacity: 1;
+}
+
+/* ============================================= */
+/* === FIN RÉSEAUX SOCIAUX === */
+/* ============================================= */
 
 /* --- NAVIGATION --- */
 .footer-label {
@@ -161,7 +219,6 @@
   padding-left: 10px;
 }
 
-/* Privatisation */
 .nav-link-highlight {
   opacity: 0.9 !important;
   font-style: italic;
@@ -170,7 +227,6 @@
   border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-/* Réservations */
 .nav-link-cta {
   opacity: 1 !important;
   background: rgba(212, 175, 55, 0.1);
@@ -272,8 +328,7 @@
     margin: 0 auto 35px; 
   }
   
-  .footer-socials, 
-  .contact-item { 
+  .footer-socials { 
     justify-content: center; 
   }
   
@@ -286,5 +341,31 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+}
+
+/* --- PETITS ÉCRANS --- */
+@media (max-width: 480px) {
+  .footer {
+    padding: 80px 5% 40px;
+  }
+
+  .social-icon-link {
+    width: 52px;
+    height: 52px;
+  }
+
+  .social-icon {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .social-icon-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .footer-socials {
+    gap: 12px;
   }
 }

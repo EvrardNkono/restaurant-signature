@@ -1,16 +1,14 @@
 import React from 'react';
-import { Instagram, Facebook, MessageCircle, MapPin, Clock, Phone, Mail } from "lucide-react";
+import { MapPin, Clock, Phone, Mail } from "lucide-react";
 import "./footer.css";
 
 export default function Footer() {
   
-  // Fonction pour ouvrir le popup flottant à distance
   const handleReservationClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     window.dispatchEvent(new CustomEvent('openReservation'));
   };
 
-  // Horaires d'ouverture
   const getOpeningHours = () => {
     const days = [
       { name: "Lundi", open: false, lunch: null, dinner: null },
@@ -29,24 +27,13 @@ export default function Footer() {
   const todayIndex = today === 0 ? 6 : today - 1;
   const todaySchedule = openingHours[todayIndex];
 
-  // Fonction pour formater l'affichage des horaires du jour
   const getTodayHoursText = () => {
     if (!todaySchedule.open) return "Aujourd'hui : Fermé";
-    
-    const lunchText = todaySchedule.lunch 
-      ? `${todaySchedule.lunch.start} - ${todaySchedule.lunch.end}` 
-      : "";
-    const dinnerText = todaySchedule.dinner 
-      ? `${todaySchedule.dinner.start} - ${todaySchedule.dinner.end}` 
-      : "";
-    
-    if (lunchText && dinnerText) {
-      return `Aujourd'hui : ${lunchText} / ${dinnerText}`;
-    } else if (lunchText) {
-      return `Aujourd'hui : ${lunchText}`;
-    } else if (dinnerText) {
-      return `Aujourd'hui : ${dinnerText}`;
-    }
+    const lunchText = todaySchedule.lunch ? `${todaySchedule.lunch.start} - ${todaySchedule.lunch.end}` : "";
+    const dinnerText = todaySchedule.dinner ? `${todaySchedule.dinner.start} - ${todaySchedule.dinner.end}` : "";
+    if (lunchText && dinnerText) return `Aujourd'hui : ${lunchText} / ${dinnerText}`;
+    if (lunchText) return `Aujourd'hui : ${lunchText}`;
+    if (dinnerText) return `Aujourd'hui : ${dinnerText}`;
     return "Aujourd'hui : Fermé";
   };
 
@@ -68,15 +55,48 @@ export default function Footer() {
             du terroir avec la délicatesse d'un savoir-faire contemporain.
           </p>
 
+          {/* ============================================================ */}
+          {/* RÉSEAUX SOCIAUX - SANS WHATSAPP */}
+          {/* ============================================================ */}
           <div className="footer-socials">
-            <a href="#" className="social-icon-link" aria-label="Instagram">
-              <Instagram size={22} strokeWidth={0.75} />
+            <a 
+              href="https://www.instagram.com/restaurantsignature77/" 
+              className="social-icon-link" 
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="/images/instagram.png" 
+                alt="Instagram" 
+                className="social-icon-img" 
+              />
             </a>
-            <a href="#" className="social-icon-link" aria-label="Facebook">
-              <Facebook size={22} strokeWidth={0.75} />
+            <a 
+              href="https://www.facebook.com/profile.php?id=61587208464187" 
+              className="social-icon-link" 
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="/images/facebook.png" 
+                alt="Facebook" 
+                className="social-icon-img" 
+              />
             </a>
-            <a href="https://wa.me/33183865812" className="social-icon-link" aria-label="WhatsApp">
-              <MessageCircle size={22} strokeWidth={0.75} />
+            <a 
+              href="https://www.tiktok.com/@restaurant_signature" 
+              className="social-icon-link" 
+              aria-label="TikTok"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="/images/tiktok.png" 
+                alt="TikTok" 
+                className="social-icon-img" 
+              />
             </a>
           </div>
         </div>
@@ -86,17 +106,9 @@ export default function Footer() {
           <ul className="nav-list">
             <li><a href="#menu">La Carte</a></li>
             <li><a href="#philosophie">Notre Philosophie</a></li>
+            <li><a href="#privatisation" className="nav-link-highlight">Privatisation</a></li>
             <li>
-              <a href="#privatisation" className="nav-link-highlight">
-                Privatisation
-              </a>
-            </li>
-            <li>
-              <a 
-                href="#reservations" 
-                className="nav-link-cta"
-                onClick={handleReservationClick}
-              >
+              <a href="#reservations" className="nav-link-cta" onClick={handleReservationClick}>
                 Réservations
               </a>
             </li>
@@ -126,7 +138,6 @@ export default function Footer() {
             <Phone size={18} className="gold-text" strokeWidth={1} />
             <a href="tel:+33183865812" className="contact-link">+33 1 83 86 58 12</a>
           </div>
-          {/* Ajout de l'email */}
           <div className="contact-item">
             <Mail size={18} className="gold-text" strokeWidth={1} />
             <a href="mailto:restaurantsignature@outlook.fr" className="contact-link">
