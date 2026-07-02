@@ -29,7 +29,7 @@ export default function SocialFloatingButton() {
       name: 'TikTok',
       url: 'https://www.tiktok.com/@restaurant_signature',
       icon: '/images/tiktok.png',
-      color: '#000000'
+      color: '#efe5e5'
     }
   ];
 
@@ -54,20 +54,21 @@ export default function SocialFloatingButton() {
     return /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
   };
 
-  // Gestion du clic pour TikTok
+  // Gestion du clic pour TikTok - VERSION CORRIGÉE
   const handleTikTokClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     e.preventDefault();
     setIsOpen(false);
 
     // Si on est sur mobile
     if (isMobile()) {
-      // Méthode 1: Essayer d'ouvrir l'app TikTok directement
+      // Essayer d'ouvrir l'app TikTok directement
       window.location.href = 'tiktok://user?@restaurant_signature';
       
-      // Méthode 2: Fallback vers le site web après 800ms si l'app ne s'ouvre pas
+      // Fallback: rediriger vers le site web après 1500ms
+      // Utiliser window.location.href au lieu de window.open() pour éviter les popup blockers
       setTimeout(() => {
-        window.open(url, '_blank');
-      }, 800);
+        window.location.href = url;
+      }, 1500);
     } else {
       // Sur desktop, ouverture classique
       window.open(url, '_blank', 'noopener,noreferrer');
@@ -79,7 +80,7 @@ export default function SocialFloatingButton() {
     if (link.name === 'TikTok') {
       handleTikTokClick(e, link.url);
     } else {
-      // Instagram et Facebook : ouverture classique
+      e.preventDefault();
       setIsOpen(false);
       window.open(link.url, '_blank', 'noopener,noreferrer');
     }
@@ -90,7 +91,7 @@ export default function SocialFloatingButton() {
       {/* Overlay sombre */}
       {isOpen && <div className="social-overlay" onClick={() => setIsOpen(false)} />}
 
-      {/* Bouton principal - IMAGE BRUTE SANS CERCLE */}
+      {/* Bouton principal */}
       <button 
         className={`social-main-btn ${isOpen ? 'active' : ''}`}
         onClick={toggleMenu}
