@@ -129,6 +129,30 @@
   gap: 1rem;
 }
 
+/* BOUTON AVIS GOOGLE - Desktop (icône circulaire, même logique que .cart-link) */
+.google-review-link {
+  position: relative;
+  color: var(--dark);
+  transition: var(--transition);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.google-review-link:hover {
+  background: rgba(212, 175, 55, 0.18);
+  transform: translateY(-2px);
+}
+
+.google-review-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .cart-link {
   position: relative;
   color: var(--dark);
@@ -289,6 +313,33 @@
   color: var(--gold);
 }
 
+/* BOUTON AVIS GOOGLE - Mobile (bandeau doré, cohérent avec le style du menu mobile) */
+.mobile-google-review {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin-top: 0.5rem;
+  padding: 0.9rem 1.2rem !important;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 30px !important;
+  color: var(--gold-light) !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  letter-spacing: 0.5px !important;
+}
+
+.mobile-google-review:hover {
+  background: rgba(212, 175, 55, 0.22);
+  color: var(--gold) !important;
+  padding-left: 1.2rem !important;
+}
+
+.mobile-google-review:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 968px) {
   .nav-links, .nav-phone {
@@ -336,7 +387,8 @@
     min-height: 40px;
   }
   
-  .cart-link {
+  .cart-link,
+  .google-review-link {
     width: 36px;
     height: 36px;
   }
