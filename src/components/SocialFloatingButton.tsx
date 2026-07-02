@@ -54,9 +54,10 @@ export default function SocialFloatingButton() {
     return /Android|iPhone|iPad|iPod|BlackBerry|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
   };
 
-  // Gestion du clic pour TikTok - VERSION CORRIGÉE
+  // Gestion du clic pour TikTok
   const handleTikTokClick = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsOpen(false);
 
     // Si on est sur mobile
@@ -65,7 +66,6 @@ export default function SocialFloatingButton() {
       window.location.href = 'tiktok://user?@restaurant_signature';
       
       // Fallback: rediriger vers le site web après 1500ms
-      // Utiliser window.location.href au lieu de window.open() pour éviter les popup blockers
       setTimeout(() => {
         window.location.href = url;
       }, 1500);
@@ -77,11 +77,13 @@ export default function SocialFloatingButton() {
 
   // Gestion du clic pour les autres réseaux
   const handleSocialClick = (e: React.MouseEvent<HTMLAnchorElement>, link: SocialLink) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(false);
+
     if (link.name === 'TikTok') {
       handleTikTokClick(e, link.url);
     } else {
-      e.preventDefault();
-      setIsOpen(false);
       window.open(link.url, '_blank', 'noopener,noreferrer');
     }
   };
