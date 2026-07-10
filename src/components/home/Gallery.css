@@ -1,337 +1,314 @@
 /* ============================================
    GALLERY — Restaurant Signature
-   Palette : obsidienne / ivoire / laiton vieilli
+   Concept : planche contact / bobine de film
    ============================================ */
 
-.gallery-section {
-  --gs-obsidian: #14120f;
-  --gs-obsidian-soft: #1d1a16;
-  --gs-ivory: #f4efe6;
-  --gs-brass: #b08d52;
-  --gs-brass-dim: rgba(176, 141, 82, 0.35);
-  --gs-stone: #a39a8c;
+.reel-section {
+  --rl-void: #17130e;
+  --rl-void-soft: #211a13;
+  --rl-paper: #efe6d6;
+  --rl-terracotta: #c1603a;
+  --rl-terracotta-deep: #8f4326;
+  --rl-ash: #9c8c78;
 
   position: relative;
-  background: var(--gs-obsidian);
-  padding: 96px 6vw 112px;
-  overflow: hidden;
+  background: var(--rl-void);
+  padding: 100px 6vw 96px;
 }
 
 /* ---------- En-tête ---------- */
-.gallery-heading {
+.reel-head {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 56px;
+  align-items: flex-start;
+  max-width: 1160px;
+  margin: 0 auto 36px;
 }
 
-.gallery-eyebrow {
-  font-family: 'Jost', 'Inter', sans-serif;
+.reel-eyebrow {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
   font-size: 11px;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--gs-brass);
-  margin-bottom: 14px;
+  color: var(--rl-terracotta);
 }
 
-.gallery-title {
-  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+.reel-title {
+  font-family: 'Fraunces', 'Georgia', serif;
   font-weight: 500;
-  font-size: clamp(28px, 4vw, 42px);
-  letter-spacing: 0.01em;
-  color: var(--gs-ivory);
-  margin: 0 0 18px;
+  font-style: italic;
+  font-size: clamp(30px, 4.2vw, 46px);
+  color: var(--rl-paper);
+  margin: 10px 0 16px;
+  letter-spacing: 0.005em;
 }
 
-.gallery-rule {
-  width: 44px;
-  height: 1px;
-  background: var(--gs-brass);
-  opacity: 0.6;
+.reel-rule {
+  width: 56px;
+  height: 2px;
+  background: var(--rl-terracotta);
 }
 
-/* ---------- Mise en page ---------- */
-.gallery-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 132px;
-  gap: 20px;
-  max-width: 1120px;
+/* ---------- Rails à perforations (façon pellicule) ---------- */
+.reel-sprockets {
+  max-width: 1160px;
   margin: 0 auto;
+  height: 12px;
+  border-radius: 1px;
+  background:
+    radial-gradient(circle, var(--rl-void) 3px, transparent 3.4px) 4px center / 24px 100% repeat-x,
+    var(--rl-terracotta);
 }
 
-/* ---------- Image principale ---------- */
-.gallery-focus {
+/* ---------- Bande de clichés ---------- */
+.reel-strip {
+  max-width: 1160px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: var(--rl-terracotta-deep);
+  padding: 2px;
+}
+
+.reel-frame {
   position: relative;
+  aspect-ratio: 3 / 4;
+  border: none;
+  padding: 0;
   margin: 0;
-  aspect-ratio: 16 / 10;
-  border-radius: 4px;
+  cursor: pointer;
+  background: var(--rl-void-soft);
   overflow: hidden;
-  cursor: zoom-in;
-  background: var(--gs-obsidian-soft);
-  border: 1px solid rgba(176, 141, 82, 0.18);
+  color: var(--rl-terracotta);
 }
 
-.gallery-focus-img {
+.frame-number {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 2;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--rl-paper);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+.frame-image-wrap {
+  position: absolute;
+  inset: 0;
+  display: block;
+  filter: saturate(0.86) contrast(1.03);
+  transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.frame-image-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  image-rendering: -webkit-optimize-contrast;
-  backface-visibility: hidden;
 }
 
-.gallery-focus:hover .gallery-focus-img {
-  transform: scale(1.035);
-}
-
-.gallery-focus-veil {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(20, 18, 15, 0) 55%, rgba(20, 18, 15, 0.82) 100%);
-  pointer-events: none;
-}
-
-.gallery-focus-caption {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 16px;
+.frame-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-family: 'Jost', 'Inter', sans-serif;
+  justify-content: center;
+  color: var(--rl-ash);
 }
 
-.gallery-focus-index {
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--gs-ivory);
-  opacity: 0.85;
+.frame-placeholder.large {
+  min-height: 40vh;
 }
 
-.gallery-focus-label {
-  font-size: 11px;
-  letter-spacing: 0.2em;
+.reel-frame:hover .frame-image-wrap,
+.reel-frame:focus-visible .frame-image-wrap {
+  filter: saturate(1) contrast(1);
+  transform: scale(1.045);
+}
+
+/* Marque façon crayon-gras du monteur, révélée au survol */
+.frame-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 62%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(-7deg) scale(0.9);
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
+}
+
+.reel-frame:hover .frame-mark,
+.reel-frame:focus-visible .frame-mark {
+  opacity: 0.9;
+  transform: translate(-50%, -50%) rotate(-7deg) scale(1);
+}
+
+.frame-caption {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 2;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gs-brass);
+  color: var(--rl-terracotta);
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.gallery-focus:hover .gallery-focus-label {
+.reel-frame:hover .frame-caption,
+.reel-frame:focus-visible .frame-caption {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ---------- Filmstrip de vignettes ---------- */
-.gallery-filmstrip {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.reel-frame:focus-visible {
+  outline: 2px solid var(--rl-terracotta);
+  outline-offset: -2px;
 }
 
-.gallery-thumb {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  border: 1px solid rgba(176, 141, 82, 0.18);
-  border-radius: 3px;
-  overflow: hidden;
-  padding: 0;
-  background: var(--gs-obsidian-soft);
-  cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.35s ease, border-color 0.35s ease;
-}
-
-.gallery-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-.gallery-thumb-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: var(--gs-stone);
-}
-
-.gallery-thumb-index {
-  position: absolute;
-  bottom: 6px;
-  right: 8px;
-  font-family: 'Jost', 'Inter', sans-serif;
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  color: var(--gs-ivory);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-}
-
-.gallery-thumb:hover {
-  opacity: 0.85;
-}
-
-.gallery-thumb.is-active {
-  opacity: 1;
-  border-color: var(--gs-brass);
-}
-
-/* ---------- Placeholder de chargement ---------- */
-.gallery-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gs-stone);
-}
-
-.gallery-placeholder.large {
-  min-height: 40vh;
-}
-
-/* ---------- Lightbox ---------- */
-.gallery-lightbox {
+/* ---------- Visionneuse ---------- */
+.reel-lightbox {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(10, 9, 7, 0.96);
+  background: rgba(12, 9, 6, 0.97);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
-  animation: gs-fade-in 0.25s ease;
+  padding: 24px;
+  animation: rl-fade-in 0.25s ease;
 }
 
-@keyframes gs-fade-in {
+@keyframes rl-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.gallery-lightbox-stage {
+.reel-lb-print {
   position: relative;
-  max-width: min(88vw, 1040px);
-  max-height: 84vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: var(--rl-paper);
+  padding: 18px 18px 30px;
+  max-width: min(84vw, 900px);
+  max-height: 82vh;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6);
 }
 
-.gallery-lightbox-img {
+.reel-lb-framenum {
+  position: absolute;
+  bottom: 8px;
+  right: 16px;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--rl-terracotta-deep);
+}
+
+.reel-lb-img {
+  display: block;
   max-width: 100%;
-  max-height: 78vh;
+  max-height: 68vh;
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: 2px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
-  transition: opacity 0.25s ease;
 }
 
-.gallery-lightbox-img.is-transitioning {
-  opacity: 0.4;
-}
-
-.gallery-lightbox-footer {
-  margin-top: 16px;
-  font-family: 'Jost', 'Inter', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--gs-brass);
-}
-
-.gallery-lightbox-close {
+.reel-lb-close {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 22px;
+  right: 22px;
   background: none;
-  border: 1px solid rgba(244, 239, 230, 0.25);
+  border: 1px solid rgba(239, 230, 214, 0.3);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gs-ivory);
+  color: var(--rl-paper);
   cursor: pointer;
   transition: border-color 0.25s ease, color 0.25s ease;
 }
 
-.gallery-lightbox-close:hover {
-  border-color: var(--gs-brass);
-  color: var(--gs-brass);
+.reel-lb-close:hover {
+  border-color: var(--rl-terracotta);
+  color: var(--rl-terracotta);
 }
 
-.gallery-lightbox-nav {
+.reel-lb-nav {
   background: none;
-  border: 1px solid rgba(244, 239, 230, 0.2);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gs-ivory);
+  border: none;
+  color: var(--rl-paper);
+  opacity: 0.75;
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color 0.25s ease, color 0.25s ease;
-  margin: 0 24px;
+  margin: 0 22px;
+  transition: opacity 0.25s ease, color 0.25s ease, transform 0.25s ease;
 }
 
-.gallery-lightbox-nav:hover {
-  border-color: var(--gs-brass);
-  color: var(--gs-brass);
+.reel-lb-nav:hover {
+  opacity: 1;
+  color: var(--rl-terracotta);
+  transform: scale(1.08);
+}
+
+.reel-lb-rail {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.reel-lb-tick {
+  width: 20px;
+  height: 3px;
+  border: none;
+  background: rgba(239, 230, 214, 0.28);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.25s ease, width 0.25s ease;
+}
+
+.reel-lb-tick.is-active {
+  background: var(--rl-terracotta);
+  width: 30px;
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
-  .gallery-section {
-    padding: 64px 6vw 80px;
+  .reel-section {
+    padding: 72px 6vw 72px;
   }
 
-  .gallery-layout {
-    grid-template-columns: 1fr;
+  .reel-strip {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .gallery-focus {
-    aspect-ratio: 4 / 3;
+  .reel-lb-nav {
+    margin: 0 8px;
   }
 
-  .gallery-filmstrip {
-    flex-direction: row;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .gallery-filmstrip::-webkit-scrollbar {
-    display: none;
-  }
-
-  .gallery-thumb {
-    flex: 0 0 76px;
-    aspect-ratio: 1 / 1;
-  }
-
-  .gallery-lightbox-nav {
-    width: 38px;
-    height: 38px;
-    margin: 0 10px;
+  .reel-lb-print {
+    padding: 12px 12px 26px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gallery-focus-img,
-  .gallery-focus-label,
-  .gallery-lightbox-img {
+  .frame-image-wrap,
+  .frame-mark,
+  .frame-caption,
+  .reel-lb-nav {
     transition: none;
   }
 }

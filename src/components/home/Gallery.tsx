@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
 import './Gallery.css';
 
@@ -7,19 +7,17 @@ const TOTAL_IMAGES = 4;
 
 const galleryImages = Array.from({ length: TOTAL_IMAGES }, (_, i) => ({
   src: `/images/resto${i + 1}.webp`,
-  index: i + 1,
-  alt: `Restaurant Signature — photo ${i + 1}`,
+  alt: `Restaurant Signature — cliché ${i + 1}`,
 }));
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
 export default function Gallery() {
-  const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [erroredImages, setErroredImages] = useState<Set<number>>(new Set());
-  const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Préchargement des images
+  // Préchargement
   useEffect(() => {
     galleryImages.forEach((img, idx) => {
       const image = new Image();
@@ -40,19 +38,11 @@ export default function Gallery() {
   }, []);
 
   const navigate = useCallback((direction: number) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    if (lightboxIndex !== null) {
-      setLightboxIndex(prev =>
-        prev === null ? 0 : (prev + direction + TOTAL_IMAGES) % TOTAL_IMAGES
-      );
-    } else {
-      setActiveIndex(prev => (prev + direction + TOTAL_IMAGES) % TOTAL_IMAGES);
-    }
-    setTimeout(() => setIsTransitioning(false), 260);
-  }, [isTransitioning, lightboxIndex]);
+    setLightboxIndex(prev =>
+      prev === null ? 0 : (prev + direction + TOTAL_IMAGES) % TOTAL_IMAGES
+    );
+  }, []);
 
-  // Raccourcis clavier
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (lightboxIndex === null) return;
@@ -64,111 +54,101 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightboxIndex, navigate, closeLightbox]);
 
-  const displayIndex = lightboxIndex ?? activeIndex;
-  const current = galleryImages[displayIndex];
-
   return (
-    <section className="gallery-section" ref={sectionRef}>
-      <div className="gallery-heading">
-        <span className="gallery-eyebrow">Galerie</span>
-        <h2 className="gallery-title">L'atmosphère Signature</h2>
-        <span className="gallery-rule" />
-      </div>
+    <section className="reel-section">
+      <header className="reel-head">
+        <span className="reel-eyebrow">Bobine N° 04 — Galerie</span>
+        <h2 className="reel-title">Instants&nbsp;Signature</h2>
+        <span className="reel-rule" />
+      </header>
 
-      <div className="gallery-layout">
-        {/* Image principale */}
-        <figure
-          className="gallery-focus"
-          onClick={() => openLightbox(activeIndex)}
-        >
-          {!erroredImages.has(activeIndex) && loadedImages.has(activeIndex) ? (
-            <img
-              key={activeIndex}
-              src={galleryImages[activeIndex].src}
-              alt={galleryImages[activeIndex].alt}
-              className="gallery-focus-img"
-            />
-          ) : (
-            <div className="gallery-placeholder">
-              <Camera size={28} strokeWidth={1.25} />
-            </div>
-          )}
-          <span className="gallery-focus-veil" />
-          <figcaption className="gallery-focus-caption">
-            <span className="gallery-focus-index">
-              {String(activeIndex + 1).padStart(2, '0')} / {String(TOTAL_IMAGES).padStart(2, '0')}
-            </span>
-            <span className="gallery-focus-label">Agrandir</span>
-          </figcaption>
-        </figure>
+      <div className="reel-sprockets" aria-hidden="true" />
 
-        {/* Bande de vignettes */}
-        <div className="gallery-filmstrip">
-          {galleryImages.map((image, idx) => (
-            <button
-              key={image.index}
-              className={`gallery-thumb ${idx === activeIndex ? 'is-active' : ''}`}
-              onClick={() => setActiveIndex(idx)}
-              aria-label={`Voir la photo ${idx + 1}`}
-              aria-current={idx === activeIndex}
-            >
+      <div className="reel-strip">
+        {galleryImages.map((image, idx) => (
+          <button
+            key={idx}
+            className="reel-frame"
+            onClick={() => openLightbox(idx)}
+            aria-label={`Agrandir le cliché ${idx + 1}`}
+          >
+            <span className="frame-number">{pad(idx + 1)}</span>
+
+            <span className="frame-image-wrap">
               {!erroredImages.has(idx) && loadedImages.has(idx) ? (
                 <img src={image.src} alt={image.alt} loading="lazy" />
               ) : (
-                <span className="gallery-thumb-placeholder">
-                  <Camera size={16} strokeWidth={1.25} />
+                <span className="frame-placeholder">
+                  <Camera size={22} strokeWidth={1.1} />
                 </span>
               )}
-              <span className="gallery-thumb-index">
-                {String(idx + 1).padStart(2, '0')}
-              </span>
-            </button>
-          ))}
-        </div>
+            </span>
+
+            <svg className="frame-mark" viewBox="0 0 100 100" aria-hidden="true">
+              <path
+                d="M50 8 C74 6, 93 24, 92 49 C91 75, 72 93, 48 92 C24 91, 7 71, 8 47 C9 24, 27 9, 50 8 Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              />
+            </svg>
+
+            <span className="frame-caption">Voir en grand</span>
+          </button>
+        ))}
       </div>
 
-      {/* Lightbox */}
+      <div className="reel-sprockets" aria-hidden="true" />
+
+      {/* Visionneuse */}
       {lightboxIndex !== null && (
-        <div className="gallery-lightbox" onClick={closeLightbox}>
-          <button className="gallery-lightbox-close" onClick={closeLightbox} aria-label="Fermer">
+        <div className="reel-lightbox" onClick={closeLightbox}>
+          <button className="reel-lb-close" onClick={closeLightbox} aria-label="Fermer">
             <X size={20} strokeWidth={1.25} />
           </button>
 
           <button
-            className="gallery-lightbox-nav prev"
+            className="reel-lb-nav prev"
             onClick={(e) => { e.stopPropagation(); navigate(-1); }}
-            aria-label="Photo précédente"
+            aria-label="Cliché précédent"
           >
-            <ChevronLeft size={22} strokeWidth={1.25} />
+            <ChevronLeft size={26} strokeWidth={1.1} />
           </button>
 
-          <div className="gallery-lightbox-stage" onClick={(e) => e.stopPropagation()}>
-            {!erroredImages.has(displayIndex) && loadedImages.has(displayIndex) ? (
+          <div className="reel-lb-print" onClick={(e) => e.stopPropagation()}>
+            <span className="reel-lb-framenum">{pad(lightboxIndex + 1)}</span>
+            {!erroredImages.has(lightboxIndex) && loadedImages.has(lightboxIndex) ? (
               <img
-                key={displayIndex}
-                src={current.src}
-                alt={current.alt}
-                className={`gallery-lightbox-img ${isTransitioning ? 'is-transitioning' : ''}`}
+                key={lightboxIndex}
+                src={galleryImages[lightboxIndex].src}
+                alt={galleryImages[lightboxIndex].alt}
+                className="reel-lb-img"
               />
             ) : (
-              <div className="gallery-placeholder large">
-                <Camera size={40} strokeWidth={1.25} />
+              <div className="frame-placeholder large">
+                <Camera size={36} strokeWidth={1.1} />
               </div>
             )}
-            <div className="gallery-lightbox-footer">
-              <span className="gallery-lightbox-index">
-                {String(displayIndex + 1).padStart(2, '0')} — {String(TOTAL_IMAGES).padStart(2, '0')}
-              </span>
-            </div>
           </div>
 
           <button
-            className="gallery-lightbox-nav next"
+            className="reel-lb-nav next"
             onClick={(e) => { e.stopPropagation(); navigate(1); }}
-            aria-label="Photo suivante"
+            aria-label="Cliché suivant"
           >
-            <ChevronRight size={22} strokeWidth={1.25} />
+            <ChevronRight size={26} strokeWidth={1.1} />
           </button>
+
+          <div className="reel-lb-rail" onClick={(e) => e.stopPropagation()}>
+            {galleryImages.map((_, idx) => (
+              <button
+                key={idx}
+                className={`reel-lb-tick ${idx === lightboxIndex ? 'is-active' : ''}`}
+                onClick={() => setLightboxIndex(idx)}
+                aria-label={`Aller au cliché ${idx + 1}`}
+              />
+            ))}
+          </div>
         </div>
       )}
     </section>
