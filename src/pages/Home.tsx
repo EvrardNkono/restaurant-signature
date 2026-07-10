@@ -66,17 +66,17 @@ export default function Home() {
           {
             name: "Poisson Braisé Signature",
             image: "/images/poisson-braise.jpg",
-            price: "18€",
+            price: "",
           },
           {
             name: "Cocktail Maison Infusé",
             image: "/images/cocktail.jpeg",
-            price: "9€",
+            price: "",
           },
           {
             name: "Poulet Braisé Fondant",
             image: "/images/poulet-braise3.png",
-            price: "12€",
+            price: "",
           },
         ]}
       />
