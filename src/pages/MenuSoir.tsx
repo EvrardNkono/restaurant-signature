@@ -5,7 +5,7 @@ import { useCart, type CartItem, type CartSupplement } from "../context/CartCont
 import { 
   Loader2, X, Utensils, GlassWater, 
   Check, PlusCircle, Sparkles, MinusCircle, Trash2,
-  Clock, CreditCard, Eye, ArrowRight, CalendarClock,
+  Clock, CreditCard, Eye, ArrowRight, CalendarClock, PenTool,
 } from "lucide-react"; 
 import "./menuSoir.css";
 import BillPopup from "../components/BillPopup";
@@ -72,7 +72,9 @@ const ServiceLockedBanner = ({
         </div>
         <button className="locked-cta-btn-soir" onClick={onUnlock}>
           <span>Voir la carte &amp; préparer</span>
-          <ArrowRight size={18} />
+          <span className="locked-cta-circle-soir">
+            <ArrowRight size={16} />
+          </span>
         </button>
       </div>
     </div>
@@ -141,6 +143,32 @@ const scrollToDrawer = (id: string) => {
     if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 100);
 };
+
+// --- EN-TÊTE "SCEAU" (inspiré du Hero) ---
+const MenuSoirHeader = () => (
+  <div className="menu-header-soir">
+    <div className="header-overlay-dark"></div>
+    <div className="header-content-wrapper">
+      <div className="header-text-shield-soir">
+        <div className="header-seal-wrap">
+          <div className="header-seal-glow" aria-hidden="true"></div>
+          <div className="header-seal-gold" aria-hidden="true">
+            <span>S</span>
+          </div>
+        </div>
+        <span className="menu-badge-gold">L'Expérience Nocturne</span>
+        <h2 className="menu-main-title-soir">
+          Menu Du <span className="foil-word-soir">Soir</span>
+        </h2>
+        <div className="header-signature-line" aria-hidden="true">
+          <span className="signature-rule-soir"></span>
+          <PenTool size={14} className="signature-mark-soir" />
+          <span className="signature-rule-soir"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default function MenuSoir() {
   // ─── HORAIRES ───────────────────────────────────────────────
@@ -387,17 +415,7 @@ export default function MenuSoir() {
           </div>
         )}
 
-        <div className="menu-header-soir">
-          <div className="header-overlay-dark"></div>
-          <div className="header-content-wrapper">
-            <div className="header-text-shield-soir">
-              <div className="header-seal-gold">S</div>
-              <span className="menu-badge-gold">L'Expérience Nocturne</span>
-              <h2 className="menu-main-title-soir">Menu Du Soir</h2>
-              <div className="header-ornament-line"></div>
-            </div>
-          </div>
-        </div>
+        <MenuSoirHeader />
 
         {/* ✅ BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
         <ServiceLockedBanner
@@ -503,17 +521,7 @@ export default function MenuSoir() {
 
       {isAnyDrawerOpen && <div className="global-drawer-overlay" onClick={handleCloseDrawer} />}
 
-      <div className="menu-header-soir">
-        <div className="header-overlay-dark"></div>
-        <div className="header-content-wrapper">
-          <div className="header-text-shield-soir">
-            <div className="header-seal-gold">S</div>
-            <span className="menu-badge-gold">L'Expérience Nocturne</span>
-            <h2 className="menu-main-title-soir">Menu Du Soir</h2>
-            <div className="header-ornament-line"></div>
-          </div>
-        </div>
-      </div>
+      <MenuSoirHeader />
 
       <div className="univers-selector-container-soir">
         <div className="univers-selector-soir">
