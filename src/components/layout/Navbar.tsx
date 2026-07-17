@@ -131,16 +131,18 @@ export default function Navbar() {
         <div className="navbar-container">
 
           {/* LOGO — 5 clics pour accéder à l'admin */}
-          <div 
-            className="logo" 
-            onClick={handleLogoClick} 
+          <div
+            className="logo"
+            onClick={handleLogoClick}
             onKeyDown={handleLogoKeyDown}
-            role="button" 
+            role="button"
             tabIndex={0}
             aria-label="Signature Restaurant - retour à l'accueil (5 clics pour accès admin)"
             style={{ cursor: 'pointer' }}
           >
-            <img src="/images/icone11.png" alt="Signature Restaurant" />
+            <span className="logo-badge">
+              <img src="/images/icone11.png" alt="Signature Restaurant" />
+            </span>
             <div className="logo-text">
               <span>Signature</span>
               <small>Restaurant</small>
@@ -178,8 +180,8 @@ export default function Navbar() {
             >
               <GoogleIcon size={20} />
             </a>
-            <Link 
-              to="/panier" 
+            <Link
+              to="/panier"
               className="cart-link"
               aria-label={`Voir mon panier${totalItems > 0 ? `, ${totalItems} article${totalItems > 1 ? 's' : ''}` : ''}`}
             >
@@ -190,8 +192,11 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <button 
-              className={`burger ${open ? "open" : ""}`} 
+            <Link to="/contact" className="nav-cta">
+              Réserver
+            </Link>
+            <button
+              className={`burger ${open ? "open" : ""}`}
               onClick={() => setOpen(!open)}
               aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={open}
@@ -202,29 +207,70 @@ export default function Navbar() {
           </div>
 
           {/* MENU MOBILE */}
-          <div 
-  id="mobile-menu" 
-  className={`mobile-menu ${open ? "open" : ""}`} 
-  aria-hidden={!open}
-  inert={!open ? true : undefined}  // ← AJOUTER CET ATTRIBUT
->
-            <button 
-              className="mobile-close" 
-              onClick={closeMenu}
-              aria-label="Fermer le menu"
-            >
-              <X size={24} aria-hidden="true" />
-            </button>
+          <div
+            id="mobile-menu"
+            className={`mobile-menu ${open ? "open" : ""}`}
+            aria-hidden={!open}
+            inert={!open ? true : undefined}
+          >
+            {/* En-tête du menu mobile : logo + fermeture */}
+            <div className="mobile-menu-header">
+              <div className="mobile-menu-logo">
+                <span className="logo-badge">
+                  <img src="/images/icone11.png" alt="Signature Restaurant" />
+                </span>
+                <span>Signature Restaurant</span>
+              </div>
+              <button
+                className="mobile-close"
+                onClick={closeMenu}
+                aria-label="Fermer le menu"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* Actions rapides : Panier / Avis Google */}
+            <div className="mobile-quick-actions">
+              <Link
+                to="/panier"
+                onClick={closeMenu}
+                className="mobile-action-primary"
+                aria-label={`Voir mon panier${totalItems > 0 ? `, ${totalItems} article${totalItems > 1 ? 's' : ''}` : ''}`}
+              >
+                <ShoppingBag size={16} aria-hidden="true" />
+                Panier{totalItems > 0 ? ` (${totalItems})` : ''}
+              </Link>
+              <a
+                href={GOOGLE_REVIEW_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mobile-action-secondary"
+              >
+                <GoogleIcon size={16} />
+                Avis Google
+              </a>
+            </div>
+
             <div className="mobile-menu-inner" role="navigation" aria-label="Menu mobile">
               {navLinks.map((link) => (
-                <Link key={link.to} to={link.to} onClick={closeMenu}>
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={closeMenu}
+                  className={`mobile-link-main ${location.pathname === link.to ? "active" : ""}`}
+                >
                   {link.label}
                 </Link>
               ))}
+
+              <hr className="mobile-menu-divider" />
+
               <div className="mobile-phone" aria-label="Téléphone du restaurant">
                 <Phone size={14} aria-hidden="true" />
                 <span>+33 6 62 03 84 72</span>
               </div>
+
               <a
                 href={GOOGLE_REVIEW_URL}
                 target="_blank"
@@ -234,6 +280,12 @@ export default function Navbar() {
                 <GoogleIcon size={18} />
                 <span>Laissez-nous un avis sur Google</span>
               </a>
+
+              <Link to="/contact" onClick={closeMenu} className="mobile-cta">
+                Réserver une table
+              </Link>
+
+              <p className="mobile-footer-tag">Signature Restaurant</p>
             </div>
           </div>
 
@@ -242,16 +294,16 @@ export default function Navbar() {
 
       {/* ===== MODAL MOT DE PASSE ADMIN ===== */}
       {showAdminModal && (
-        <div 
-          className="admin-modal-overlay" 
+        <div
+          className="admin-modal-overlay"
           onClick={closeAdminModal}
           role="dialog"
           aria-modal="true"
           aria-labelledby="admin-modal-title"
         >
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="admin-modal-close" 
+            <button
+              className="admin-modal-close"
               onClick={closeAdminModal}
               aria-label="Fermer la fenêtre de connexion admin"
             >

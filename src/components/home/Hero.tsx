@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { ChefHat, Sparkles, ArrowRight, Star } from "lucide-react";
+import { ChefHat, PenTool, ArrowRight } from "lucide-react";
 import "./Hero.css";
 
 const defaultImages = [
@@ -10,8 +10,8 @@ const defaultImages = [
 ];
 
 const isLocal = window.location.hostname === "localhost";
-const API_URL = isLocal 
-  ? "http://localhost:5000/api/banner" 
+const API_URL = isLocal
+  ? "http://localhost:5000/api/banner"
   : "https://signature-backend-alpha.vercel.app/api/banner";
 
 interface HeroProps {
@@ -68,30 +68,33 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
   };
 
   return (
-    <section className="hero" aria-label="Section héro avec carrousel d'images">
-      <div className="hero-container">
-        {/* PARTIE GAUCHE - CARROUSEL IMAGES */}
-        <div className="hero-left" aria-label="Carrousel des plats signatures">
-          <div className="image-badge" aria-label="Badge plat signature">
-            <ChefHat size={16} aria-hidden="true" />
-            <span>Plat Signature</span>
+    <section className="hero-v2" aria-label="Section héro avec carrousel d'images">
+      <div className="hero-v2-container">
+
+        {/* PARTIE GAUCHE - LE SCEAU (carrousel photo) */}
+        <div className="hero-v2-visual" aria-label="Carrousel des plats signatures">
+          <div className="seal-glow" aria-hidden="true"></div>
+
+          <div className="seal" role="group" aria-label={`Image ${current + 1} sur ${heroImages.length}`}>
+            <div className="seal-photo">
+              <img
+                src={heroImages[current]}
+                alt={`Plat signature du restaurant - Image ${current + 1}`}
+                key={current}
+                loading="eager"
+              />
+            </div>
+            <div className="seal-ribbon" aria-hidden="true">
+              <span>Plat Signature</span>
+            </div>
           </div>
-          
-          <div className="image-circle" role="group" aria-label={`Image ${current + 1} sur ${heroImages.length}`}>
-            <img 
-              src={heroImages[current]} 
-              alt={`Plat signature du restaurant - Image ${current + 1}`}
-              key={current}
-              loading="eager"
-            />
-          </div>
-          
+
           {/* INDICATEURS DE CARROUSEL AVEC NOMS ACCESSIBLES */}
-          <div className="image-indicators" role="tablist" aria-label="Navigation du carrousel">
+          <div className="seal-indicators" role="tablist" aria-label="Navigation du carrousel">
             {heroImages.map((_, idx) => (
-              <button 
-                key={idx} 
-                className={`indicator ${current === idx ? "active" : ""}`}
+              <button
+                key={idx}
+                className={`seal-dot ${current === idx ? "active" : ""}`}
                 onClick={() => setCurrent(idx)}
                 onKeyDown={(e) => handleIndicatorKeyDown(e, idx)}
                 aria-label={`Aller à l'image ${idx + 1}${current === idx ? ' (image actuelle)' : ''}`}
@@ -103,18 +106,18 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
             ))}
           </div>
 
-          {/* BOUTONS DE NAVIGATION PRÉCÉDENT/SUIVANT (optionnel mais recommandé) */}
+          {/* BOUTONS DE NAVIGATION PRÉCÉDENT/SUIVANT */}
           {heroImages.length > 1 && (
-            <div className="carousel-nav-buttons" aria-label="Navigation du carrousel">
-              <button 
-                className="carousel-prev" 
+            <div className="seal-nav" aria-label="Navigation du carrousel">
+              <button
+                className="seal-nav-btn seal-prev"
                 onClick={goToPreviousImage}
                 aria-label="Image précédente"
               >
                 ←
               </button>
-              <button 
-                className="carousel-next" 
+              <button
+                className="seal-nav-btn seal-next"
                 onClick={goToNextImage}
                 aria-label="Image suivante"
               >
@@ -125,37 +128,40 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
         </div>
 
         {/* PARTIE DROITE - TEXTE */}
-        <div className="hero-right">
-          <div className="hero-sup-title" aria-label="Sous-titre décoratif">
-            <Sparkles size={12} aria-hidden="true" />
-            <span>L'Excellence à table</span>
+        <div className="hero-v2-content">
+          <div className="hero-v2-eyebrow" aria-label="Sous-titre décoratif">
+            <ChefHat size={14} aria-hidden="true" />
+            <span>Le Sceau du Chef</span>
           </div>
-          
-          <h1 aria-label={title}>
-            {title.split(" ").map((word, i) => 
+
+          <h1 className="hero-v2-heading" aria-label={title}>
+            {title.split(" ").map((word, i) =>
               word.toLowerCase() === "signature" ? (
-                <span key={i} className="gold-word" aria-label="mot Signature en couleur or">{word} </span>
+                <span key={i} className="foil-word" aria-label="mot Signature en couleur or">{word} </span>
               ) : (
                 <span key={i}>{word} </span>
               )
             )}
           </h1>
-          
-          <div className="hero-divider" aria-hidden="true">
-            <span></span>
-            <Star size={14} fill="#D4AF37" color="#D4AF37" aria-hidden="true" />
-            <span></span>
+
+          {/* LIGNE DE SIGNATURE */}
+          <div className="hero-v2-signature-line" aria-hidden="true">
+            <span className="signature-rule"></span>
+            <PenTool size={16} className="signature-mark" aria-hidden="true" />
+            <span className="signature-rule"></span>
           </div>
-          
-          <p aria-label={subtitle}>{subtitle}</p>
-          
-          <button 
-            className="reserve-btn" 
+
+          <p className="hero-v2-lede" aria-label={subtitle}>{subtitle}</p>
+
+          <button
+            className="hero-v2-cta"
             onClick={handleCtaClick}
             aria-label={`${ctaText} - ouvrir le formulaire de réservation`}
           >
             <span>{ctaText}</span>
-            <ArrowRight size={16} aria-hidden="true" />
+            <span className="cta-circle" aria-hidden="true">
+              <ArrowRight size={16} />
+            </span>
           </button>
         </div>
       </div>

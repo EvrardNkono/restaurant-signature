@@ -1,59 +1,56 @@
-.hero {
+.hero-v2 {
+  --espresso: #17110D;
+  --espresso-2: #241A14;
+  --foil-light: #F6E7B0;
+  --foil-mid: #D4AF37;
+  --foil-dark: #9C7A1F;
+  --hairline: rgba(212, 175, 55, 0.35);
+
   position: relative;
-  min-height: 80vh;
+  min-height: 88vh;
   width: 100%;
   margin-top: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 100px 5%;
-  background: linear-gradient(rgba(45, 36, 34, 0.7), rgba(45, 36, 34, 0.7)), 
-              url('/images/hero.jpg') center/cover no-repeat;
+  padding: 110px 5%;
+  background:
+    radial-gradient(circle at 14% 22%, rgba(212, 175, 55, 0.09), transparent 45%),
+    radial-gradient(circle at 86% 82%, rgba(212, 175, 55, 0.07), transparent 42%),
+    linear-gradient(160deg, var(--espresso-2), var(--espresso));
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   overflow: hidden;
 }
 
-/* Éléments décoratifs */
-.hero-ornament {
+/* Texture fine en fond, façon reliure/cuir */
+.hero-v2::before {
+  content: '';
   position: absolute;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
-  border-radius: 50%;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 14px
+  );
   pointer-events: none;
 }
 
-.hero-ornament-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -100px;
-}
-
-.hero-ornament-2 {
-  width: 200px;
-  height: 200px;
-  bottom: 50px;
-  left: -80px;
-}
-
-.hero-ornament-3 {
-  width: 150px;
-  height: 150px;
-  top: 30%;
-  left: 20%;
-  opacity: 0.4;
-}
-
-.hero-container {
+.hero-v2-container {
+  position: relative;
   max-width: 1200px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 60px;
+  gap: 70px;
   z-index: 2;
 }
 
-/* ==================== PARTIE GAUCHE ==================== */
-.hero-left {
+/* ==================== PARTIE GAUCHE — LE SCEAU ==================== */
+.hero-v2-visual {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -61,109 +58,159 @@
   position: relative;
 }
 
-.image-badge {
+.seal-glow {
   position: absolute;
-  top: -20px;
-  left: 40px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #D4AF37, #B8960F);
-  padding: 6px 16px;
-  border-radius: 50px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #2D2422;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  top: 50%;
+  left: 50%;
+  width: 480px;
+  height: 480px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.14) 0%, transparent 68%);
+  pointer-events: none;
+  animation: glowPulse 6s ease-in-out infinite;
 }
 
-.image-circle {
+.seal {
+  position: relative;
   width: 380px;
   height: 380px;
-  border: 1px solid var(--gold);
-  padding: 15px;
-  border-radius: 50%;
-  position: relative;
-  transition: all 0.5s ease;
-  animation: float 6s ease-in-out infinite;
+  animation: stampIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.image-circle::before {
+/* Anneau extérieur pointillé, façon tampon officiel */
+.seal::before {
   content: '';
   position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 100px;
-  height: 100px;
-  border: 1px solid var(--terracotta);
+  inset: 0;
   border-radius: 50%;
-  opacity: 0.5;
+  border: 1.5px dashed var(--foil-mid);
+  opacity: 0.55;
+  animation: spin 50s linear infinite;
 }
 
-.image-circle img {
+/* Anneau intérieur fin */
+.seal::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--foil-light);
+  opacity: 0.6;
+}
+
+.seal-photo {
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 5px solid transparent;
+  background:
+    linear-gradient(var(--espresso), var(--espresso)) padding-box,
+    linear-gradient(135deg, var(--foil-light), var(--foil-mid) 45%, var(--foil-dark)) border-box;
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.3),
+    0 20px 45px rgba(0, 0, 0, 0.45);
+}
+
+.seal-photo img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
-  filter: saturate(1.1);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  filter: saturate(1.05);
   transition: transform 0.6s ease;
 }
 
-.image-circle:hover img {
-  transform: scale(1.02);
+.seal:hover .seal-photo img {
+  transform: scale(1.03);
 }
 
-/* INDICATEURS - Version accessible avec zones tactiles agrandies */
-.image-indicators {
+/* Ruban doré en travers du sceau */
+.seal-ribbon {
+  position: absolute;
+  left: 50%;
+  bottom: 10%;
+  transform: translateX(-50%) rotate(-6deg);
+  background: linear-gradient(135deg, var(--foil-light), var(--foil-mid));
+  color: var(--espresso);
+  padding: 9px 28px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  z-index: 3;
+}
+
+.seal-ribbon::before,
+.seal-ribbon::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.seal-ribbon::before {
+  left: 0;
+  border-width: 7px 7px 0 0;
+  border-color: var(--foil-dark) transparent transparent transparent;
+}
+
+.seal-ribbon::after {
+  right: 0;
+  border-width: 7px 0 0 7px;
+  border-color: var(--foil-dark) transparent transparent transparent;
+}
+
+/* INDICATEURS - petites touches or, zones tactiles agrandies */
+.seal-indicators {
   display: flex;
-  gap: 12px;
-  margin-top: 25px;
+  gap: 6px;
+  margin-top: 28px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-.indicator {
-  min-width: 44px;
-  min-height: 44px;
-  width: auto;
-  height: auto;
-  padding: 0 12px;
-  border-radius: 22px;
-  background: rgba(255,255,255,0.3);
+.seal-dot {
+  min-width: 36px;
+  min-height: 36px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
   border: none;
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
 }
 
-/* Style pour l'indicateur actif */
-.indicator.active {
-  background: var(--gold);
-  min-width: 44px;
-  padding: 0 12px;
+.seal-dot::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease;
 }
 
-/* Focus visible pour les indicateurs */
-.indicator:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 3px;
-  background: rgba(255,255,255,0.5);
+.seal-dot.active::after {
+  width: 22px;
+  background: var(--foil-mid);
 }
 
-.indicator.active:focus-visible {
-  outline: 2px solid var(--ivory);
-  outline-offset: 3px;
+.seal-dot:focus-visible {
+  outline: 2px solid var(--foil-mid);
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 
 /* ==================== BOUTONS DE CARROUSEL ==================== */
-.carousel-nav-buttons {
+.seal-nav {
   position: absolute;
   top: 50%;
   left: 0;
@@ -172,25 +219,23 @@
   display: flex;
   justify-content: space-between;
   pointer-events: none;
-  padding: 0 10px;
+  padding: 0 4px;
   z-index: 5;
 }
 
-.carousel-prev,
-.carousel-next {
+.seal-nav-btn {
   pointer-events: auto;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(23, 17, 13, 0.55);
   backdrop-filter: blur(4px);
-  color: white;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--foil-light);
+  border: 1px solid var(--hairline);
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* ZONE TACTILE ACCESSIBLE - 44x44 minimum */
   min-width: 44px;
   min-height: 44px;
   width: 44px;
@@ -198,200 +243,230 @@
   border-radius: 50%;
 }
 
-.carousel-prev:hover,
-.carousel-next:hover {
-  background: var(--gold);
-  color: var(--dark);
-  border-color: var(--gold);
+.seal-nav-btn:hover {
+  background: var(--foil-mid);
+  color: var(--espresso);
+  border-color: var(--foil-mid);
   transform: scale(1.05);
 }
 
-.carousel-prev:focus-visible,
-.carousel-next:focus-visible {
-  outline: 2px solid var(--gold);
+.seal-nav-btn:focus-visible {
+  outline: 2px solid var(--foil-mid);
   outline-offset: 3px;
-  background: var(--gold);
-  color: var(--dark);
+  background: var(--foil-mid);
+  color: var(--espresso);
 }
 
 /* ==================== PARTIE DROITE ==================== */
-.hero-right {
+.hero-v2-content {
   flex: 1;
   text-align: left;
 }
 
-.hero-sup-title {
+.hero-v2-eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(212, 175, 55, 0.15);
-  backdrop-filter: blur(4px);
-  padding: 6px 16px;
-  border-radius: 50px;
-  margin-bottom: 20px;
+  gap: 10px;
+  padding: 6px 4px;
+  margin-bottom: 22px;
+  font-family: 'Poppins', sans-serif;
   font-size: 0.7rem;
-  letter-spacing: 2px;
+  font-weight: 600;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--foil-light);
 }
 
-.hero-right h1 {
+.hero-v2-eyebrow svg {
+  color: var(--foil-mid);
+}
+
+.hero-v2-heading {
   font-family: 'Playfair Display', serif;
   font-size: clamp(2.5rem, 5vw, 4rem);
-  color: var(--ivory);
+  color: var(--foil-light);
   line-height: 1.1;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.6rem;
 }
 
-.gold-word {
-  background: linear-gradient(135deg, #D4AF37, #F5E6A3, #D4AF37);
+.foil-word {
+  background: linear-gradient(135deg, var(--foil-light), var(--foil-mid) 45%, var(--foil-dark));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   font-style: italic;
 }
 
-.hero-divider {
+/* Ligne de signature — clin d'œil au nom du restaurant */
+.hero-v2-signature-line {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 25px;
+  gap: 14px;
+  margin-bottom: 26px;
 }
 
-.hero-divider span {
-  width: 50px;
+.signature-rule {
+  flex: 1;
+  max-width: 90px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, var(--hairline), transparent);
 }
 
-.hero-divider svg {
-  color: var(--gold);
+.signature-mark {
+  color: var(--foil-mid);
+  transform: rotate(-40deg);
+  flex-shrink: 0;
 }
 
-.hero-right p {
+.hero-v2-lede {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 300;
-  color: var(--ivory);
-  max-width: 500px;
+  color: var(--foil-light);
+  max-width: 480px;
   margin-bottom: 2.5rem;
-  opacity: 0.9;
-  letter-spacing: 0.5px;
-  line-height: 1.6;
+  opacity: 0.75;
+  letter-spacing: 0.3px;
+  line-height: 1.7;
 }
 
-/* BOUTON CTA - Version accessible */
-.reserve-btn {
+/* BOUTON CTA — cachet doré */
+.hero-v2-cta {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 18px 40px;
-  font-size: 0.9rem;
+  gap: 18px;
+  background: transparent;
+  border: 1.5px solid var(--foil-mid);
+  border-radius: 100px;
+  padding: 6px 6px 6px 30px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--ivory);
-  background-color: var(--terracotta);
-  border: 1px solid var(--terracotta);
+  text-transform: uppercase;
+  color: var(--foil-light);
   cursor: pointer;
   transition: all 0.4s ease;
-  position: relative;
-  overflow: hidden;
-  border-radius: 0;
-  /* Zone tactile accessible */
   min-height: 56px;
 }
 
-.reserve-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: left 0.5s ease;
+.cta-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--foil-mid);
+  color: var(--espresso);
+  transition: all 0.4s ease;
+  flex-shrink: 0;
 }
 
-.reserve-btn:hover::before {
-  left: 100%;
+.hero-v2-cta:hover {
+  border-color: var(--foil-light);
+  background: rgba(212, 175, 55, 0.08);
+  gap: 22px;
 }
 
-.reserve-btn:hover {
-  background-color: transparent;
-  border-color: var(--gold);
-  color: var(--gold);
-  transform: translateY(-3px);
-  gap: 15px;
+.hero-v2-cta:hover .cta-circle {
+  background: var(--foil-light);
+  transform: translateX(2px);
 }
 
-/* Focus visible pour le bouton */
-.reserve-btn:focus-visible {
-  outline: 2px solid var(--gold);
+.hero-v2-cta:focus-visible {
+  outline: 2px solid var(--foil-mid);
   outline-offset: 4px;
-  background-color: transparent;
-  border-color: var(--gold);
-  color: var(--gold);
 }
 
 /* ==================== ANIMATIONS ==================== */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
+@keyframes stampIn {
+  0% { opacity: 0; transform: scale(1.18) rotate(6deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal {
+    animation: none;
+  }
+  .seal::before {
+    animation: none;
+  }
+  .seal-glow {
+    animation: none;
+  }
+  .seal-photo img,
+  .hero-v2-cta,
+  .cta-circle,
+  .seal-dot,
+  .seal-nav-btn {
+    transition: none;
+  }
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 992px) {
-  .hero {
+  .hero-v2 {
     height: auto;
     min-height: auto;
-    padding: 80px 20px 40px;
+    padding: 90px 20px 50px;
   }
 
-  .hero-container {
+  .hero-v2-container {
     flex-direction: column;
-    gap: 40px;
+    gap: 44px;
     text-align: center;
   }
 
-  .hero-left {
+  .hero-v2-visual {
     order: 2;
   }
 
-  .hero-right {
+  .hero-v2-content {
     order: 1;
     text-align: center;
   }
 
-  .image-circle {
+  .hero-v2-eyebrow {
+    justify-content: center;
+  }
+
+  .seal {
     width: 260px;
     height: 260px;
   }
 
-  .image-badge {
-    left: 50%;
-    transform: translateX(-50%);
-    top: -15px;
+  .seal-glow {
+    width: 340px;
+    height: 340px;
   }
 
-  .hero-right p {
+  .hero-v2-lede {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
   }
 
-  .hero-divider {
+  .hero-v2-signature-line {
     justify-content: center;
   }
 
-  .reserve-btn {
+  .hero-v2-cta {
     margin: 0 auto;
   }
 
-  .carousel-prev,
-  .carousel-next {
+  .seal-nav-btn {
     width: 40px;
     height: 40px;
     min-width: 40px;
@@ -400,38 +475,56 @@
 }
 
 @media (max-width: 768px) {
-  .hero {
-    padding: 70px 15px 40px;
+  .hero-v2 {
+    padding: 80px 15px 45px;
   }
-  
-  .image-circle {
+
+  .seal {
     width: 220px;
     height: 220px;
-    padding: 10px;
   }
-  
-  .hero-right h1 {
+
+  .seal-glow {
+    width: 280px;
+    height: 280px;
+  }
+
+  .seal-photo {
+    inset: 16px;
+  }
+
+  .seal-ribbon {
+    font-size: 0.6rem;
+    padding: 7px 20px;
+  }
+
+  .hero-v2-heading {
     font-size: 1.8rem;
   }
-  
-  .hero-right p {
+
+  .hero-v2-lede {
     font-size: 0.95rem;
   }
-  
-  .reserve-btn {
-    padding: 14px 30px;
-    font-size: 0.8rem;
+
+  .hero-v2-cta {
+    padding: 5px 5px 5px 24px;
+    font-size: 0.75rem;
     min-height: 48px;
   }
-  
-  .indicator {
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0 8px;
+
+  .cta-circle {
+    width: 36px;
+    height: 36px;
   }
-  
-  .carousel-prev,
-  .carousel-next {
+
+  .seal-dot {
+    min-width: 32px;
+    min-height: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .seal-nav-btn {
     width: 36px;
     height: 36px;
     min-width: 36px;
@@ -441,28 +534,32 @@
 }
 
 @media (max-width: 480px) {
-  .image-circle {
+  .seal {
     width: 180px;
     height: 180px;
   }
-  
-  .hero-right h1 {
+
+  .seal-glow {
+    width: 220px;
+    height: 220px;
+  }
+
+  .hero-v2-heading {
     font-size: 1.5rem;
   }
-  
-  .hero-divider span {
-    width: 30px;
+
+  .signature-rule {
+    max-width: 50px;
   }
-  
-  .indicator {
-    min-width: 32px;
-    min-height: 32px;
-    padding: 0 6px;
-    font-size: 0.7rem;
+
+  .seal-dot {
+    min-width: 28px;
+    min-height: 28px;
+    width: 28px;
+    height: 28px;
   }
-  
-  .carousel-prev,
-  .carousel-next {
+
+  .seal-nav-btn {
     width: 32px;
     height: 32px;
     min-width: 32px;
