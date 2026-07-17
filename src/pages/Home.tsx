@@ -5,7 +5,7 @@ import Signature from "../components/home/Signature";
 import SignatureCarousel from "../components/home/SignatureCarousel";
 import Highlights from "../components/home/Highlights";
 import Testimonials from "../components/home/Testimonials";
-import Gallery from "../components/home/Gallery"; // 👈 NOUVEAU COMPOSANT
+import Gallery from "../components/home/Gallery";
 import CtaFinal from "../components/home/CtaFinal";
 
 // --- FONCTION DE RÉCUPÉRATION GLOBALE ---
@@ -47,11 +47,13 @@ export default function Home() {
         ctaText="Commander"
       />
 
-      {/* NOTRE SIGNATURE */}
+      {/* NOTRE SIGNATURE - AVEC EMPILEMENT DES DEUX IMAGES */}
       <Signature
         title="Notre Signature"
         text="Ici, la cuisine est une expression. Nous mêlons produits de caractère, créativité contemporaine et gourmandise assumée pour offrir une expérience culinaire sincère, élégante et mémorable."
-        image="/images/signature-illustration.png"
+        image="/images/signature-illustration.png"      // ← Image principale (grande)
+        imageSecondary="/images/menu-jour.jpg"         // ← Image secondaire superposée
+        reverse={false}  // false = image à gauche, texte à droite
       />
 
       {/* CAROUSEL VISUEL */}
