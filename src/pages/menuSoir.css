@@ -1,24 +1,32 @@
 /* ==================== MENU SOIR - VERSION SOMBRE ==================== */
 
 :root {
-  --gold-primary: #D4AF37;
-  --gold-dark: #B8960F;
-  --gold-light: #F5E6A3;
-  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F5E6A3 50%, #D4AF37 100%);
+  /* PALETTE "SCEAU DU CHEF" — alignée sur le Hero (espresso / foil) */
+  --espresso: #17110D;
+  --espresso-2: #241A14;
+  --foil-light: #F6E7B0;
+  --foil-mid: #D4AF37;
+  --foil-dark: #9C7A1F;
+  --hairline: rgba(212, 175, 55, 0.35);
+
+  --gold-primary: var(--foil-mid);
+  --gold-dark: var(--foil-dark);
+  --gold-light: var(--foil-light);
+  --gold-gradient: linear-gradient(135deg, var(--foil-light) 0%, var(--foil-mid) 50%, var(--foil-dark) 100%);
   --terracotta: #8E443D;
   --terracotta-light: #B86B4A;
   
-  /* VERSIONS SOMBRES POUR LE SOIR */
-  --dark-bg: #0A0A0A;
-  --card-bg: #1A1A1A;
-  --card-bg-2: #141414;
-  --surface: #1F1F1F;
-  --surface-2: #2A2A2A;
+  /* VERSIONS SOMBRES POUR LE SOIR — teinte espresso plutôt que noir pur */
+  --dark-bg: var(--espresso);
+  --card-bg: var(--espresso-2);
+  --card-bg-2: #1C140F;
+  --surface: #2A2016;
+  --surface-2: #352A1C;
   
   --text-light: #FCF9F5;
   --text-dark: #FFFFFF;
-  --text-muted: #A0A0A0;
-  --text-dim: #6B6B6B;
+  --text-muted: #B3A488;
+  --text-dim: #7A6C56;
   
   --shadow-sm: 0 4px 20px rgba(0,0,0,0.3);
   --shadow-md: 0 8px 40px rgba(0,0,0,0.4);
@@ -169,11 +177,11 @@
 .header-text-shield-soir {
   position: relative;
   z-index: 2;
-  background: rgba(10, 10, 10, 0.85);
+  background: rgba(23, 17, 13, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 50px 60px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid var(--hairline);
   text-align: center;
   box-shadow: 0 20px 40px rgba(0,0,0,0.5);
   animation: fadeInUp 0.8s ease-out;
@@ -184,18 +192,69 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── SCEAU DU CHEF (repris du Hero) ── */
+.header-seal-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+}
+
+.header-seal-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, transparent 68%);
+  pointer-events: none;
+  animation: glowPulseSoir 6s ease-in-out infinite;
+}
+
+@keyframes glowPulseSoir {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 .header-seal-gold {
-  width: 60px; height: 60px;
-  border: 2px solid var(--gold-primary);
+  position: relative;
+  width: 76px; height: 76px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 15px;
-  color: var(--gold-primary);
-  font-weight: 700; font-size: 1.6rem;
+  color: var(--foil-light);
+  font-family: 'Playfair Display', serif;
+  font-weight: 700; font-size: 1.7rem;
+  background:
+    linear-gradient(var(--espresso), var(--espresso)) padding-box,
+    linear-gradient(135deg, var(--foil-light), var(--foil-mid) 45%, var(--foil-dark)) border-box;
+  border: 2px solid transparent;
+  animation: stampInSoir 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.header-seal-gold::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--foil-mid);
+  opacity: 0.55;
+  animation: spinSoirRing 50s linear infinite;
+}
+
+@keyframes stampInSoir {
+  0% { opacity: 0; transform: scale(1.18) rotate(6deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes spinSoirRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .menu-badge-gold {
-  color: var(--gold-primary);
+  color: var(--foil-mid);
   text-transform: uppercase;
   letter-spacing: 5px;
   font-size: 0.8rem;
@@ -212,10 +271,39 @@
   text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
+.foil-word-soir {
+  background: linear-gradient(135deg, var(--foil-light), var(--foil-mid) 45%, var(--foil-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-style: italic;
+}
+
 .header-ornament-line {
   width: 100px; height: 2px;
   background: var(--gold-primary);
   margin: 20px auto 0;
+}
+
+/* ── LIGNE DE SIGNATURE (repris du Hero) ── */
+.header-signature-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.signature-rule-soir {
+  flex: 1;
+  max-width: 90px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hairline), transparent);
+}
+
+.signature-mark-soir {
+  color: var(--foil-mid);
+  transform: rotate(-40deg);
+  flex-shrink: 0;
 }
 
 .hero-scroll-indicator {
@@ -390,17 +478,32 @@
 /* ==================== CARTES ==================== */
 .menu-card-outer.soir-variant {
   position: relative;
-  padding: 8px;
-  background: linear-gradient(135deg, var(--gold-primary) 0%, #b8860b 50%, #8B6914 100%);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--foil-light), var(--foil-mid) 45%, var(--foil-dark));
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   perspective: 1500px;
   height: 580px;
 }
 
+.menu-card-outer.soir-variant::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.16) 0%, transparent 70%);
+  transition: opacity 0.4s ease;
+}
+
 .menu-card-outer.soir-variant:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+
+.menu-card-outer.soir-variant:hover::before {
+  opacity: 1;
 }
 
 .menu-card-outer.is-expanded {
@@ -636,9 +739,10 @@
 .btn-add-soir {
   width: 100%;
   padding: 12px;
-  background: var(--gold-primary);
+  background: var(--gold-gradient);
   border: none;
-  color: #0A0A0A;
+  border-radius: 100px;
+  color: var(--espresso);
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
   font-size: 0.8rem;
@@ -653,8 +757,9 @@
 }
 
 .btn-add-soir:hover {
-  background: var(--gold-light);
+  filter: brightness(1.08);
   transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
 }
 
 .btn-add-soir.btn-disabled {
@@ -1681,8 +1786,8 @@
   flex-direction: column;
   align-items: center;
   gap: 1.2rem;
-  background: linear-gradient(135deg, #0d0d0d 0%, #1a1409 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(135deg, var(--espresso) 0%, var(--espresso-2) 100%);
+  border: 1px solid var(--hairline);
   border-radius: 16px;
   padding: 2.5rem 2rem;
   text-align: center;
@@ -1741,25 +1846,45 @@
 .locked-cta-btn-soir {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 32px;
-  background: linear-gradient(135deg, #D4AF37 0%, #8B6914 100%);
-  color: #0d0d0d;
-  border: none;
-  border-radius: 50px;
-  font-size: 0.95rem;
+  gap: 18px;
+  background: transparent;
+  border: 1.5px solid var(--foil-mid);
+  border-radius: 100px;
+  padding: 6px 6px 6px 30px;
+  min-height: 56px;
+  color: var(--foil-light);
+  font-family: 'Poppins', 'Outfit', sans-serif;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 24px rgba(212,175,55,0.3);
+  transition: all 0.4s ease;
   margin-top: 0.5rem;
 }
 
+.locked-cta-circle-soir {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--foil-mid);
+  color: var(--espresso);
+  transition: all 0.4s ease;
+  flex-shrink: 0;
+}
+
 .locked-cta-btn-soir:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(212,175,55,0.45);
+  border-color: var(--foil-light);
+  background: rgba(212, 175, 55, 0.08);
+  gap: 22px;
+}
+
+.locked-cta-btn-soir:hover .locked-cta-circle-soir {
+  background: var(--foil-light);
+  transform: translateX(2px);
 }
 
 .restaurant-preview-banner-soir {
