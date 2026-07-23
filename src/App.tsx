@@ -21,6 +21,10 @@ import InstallButton from './components/InstallButton';
 // NOUVEAU : Import du Social Floating Button
 import SocialFloatingButton from './components/SocialFloatingButton';
 
+// 🆕 IMPORTS BLOG
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+
 // Imports Administration
 import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
@@ -75,6 +79,9 @@ export default function AppRouter() {
                       <Route path="/carte" element={<CarteRestaurant />} />
                       <Route path="/menu" element={<Menu />} />
                       <Route path="/menu-soir" element={<MenuSoir />} />
+                      <Route path="/blog" element={<Blog />} />
+                      {/* 🆕 ROUTE POUR LE DÉTAIL D'UN ARTICLE */}
+                      <Route path="/blog/:slug" element={<BlogPost />} />
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />

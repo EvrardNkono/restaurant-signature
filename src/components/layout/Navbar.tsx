@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { ShoppingBag, Menu, X, Phone, Lock } from "lucide-react";
+import { ShoppingBag, Menu, X, Phone, Lock, Newspaper } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import "../../styles/navbar.css";
 
@@ -38,16 +38,14 @@ export default function Navbar() {
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogoClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // empêche la navigation au logo pendant les clics
+    e.preventDefault();
 
     const newCount = logoClicks + 1;
     setLogoClicks(newCount);
 
-    // Reset le compteur après 2 secondes d'inactivité
     if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
     clickTimerRef.current = setTimeout(() => {
       setLogoClicks(0);
-      // Si pas arrivé à 5, naviguer normalement vers /
       navigate('/');
     }, 2000);
 
@@ -121,6 +119,7 @@ export default function Navbar() {
     { to: "/carte", label: "Notre Carte" },
     { to: "/menu", label: "Menu Jour" },
     { to: "/menu-soir", label: "Menu Soir" },
+    { to: "/blog", label: "Blog", icon: <Newspaper size={16} /> }, // Nouveau lien Blog
     { to: "/a-propos", label: "À propos" },
     { to: "/contact", label: "Contact" },
   ];
@@ -157,6 +156,7 @@ export default function Navbar() {
                 to={link.to}
                 className={location.pathname === link.to ? "active" : ""}
               >
+                {link.icon && <span className="nav-icon">{link.icon}</span>}
                 {link.label}
               </Link>
             ))}
@@ -260,6 +260,7 @@ export default function Navbar() {
                   onClick={closeMenu}
                   className={`mobile-link-main ${location.pathname === link.to ? "active" : ""}`}
                 >
+                  {link.icon && <span className="mobile-link-icon">{link.icon}</span>}
                   {link.label}
                 </Link>
               ))}
