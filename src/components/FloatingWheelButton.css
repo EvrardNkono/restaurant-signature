@@ -1,0 +1,577 @@
+/* ============================================================
+   FLOATING WHEEL BUTTON - VERSION EXPLOSIVE
+   ============================================================ */
+
+.floating-wheel-explosive {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  animation: explosiveAppear 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes explosiveAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.3) rotate(-10deg);
+  }
+  60% {
+    transform: translateX(-50%) scale(1.1) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1) rotate(0deg);
+  }
+}
+
+/* ─── RAYONS LUMINEUX ─── */
+.explosive-light-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(212, 175, 55, 0.3), transparent);
+  transform-origin: center;
+  animation: rayRotate 4s linear infinite;
+}
+
+.ray-1 { transform: translate(-50%, -50%) rotate(0deg); }
+.ray-2 { transform: translate(-50%, -50%) rotate(30deg); }
+.ray-3 { transform: translate(-50%, -50%) rotate(60deg); }
+.ray-4 { transform: translate(-50%, -50%) rotate(90deg); }
+.ray-5 { transform: translate(-50%, -50%) rotate(120deg); }
+.ray-6 { transform: translate(-50%, -50%) rotate(150deg); }
+
+@keyframes rayRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ─── ANNEAU ORBITAL ─── */
+.explosive-orbital-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.orbital-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 10px;
+  color: #D4AF37;
+  animation: orbitalSpin 3s linear infinite;
+  opacity: 0.6;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+@keyframes orbitalSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg) translateX(150px) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg) translateX(150px) rotate(-360deg); }
+}
+
+/* ─── BOUTON PRINCIPAL ─── */
+.explosive-btn {
+  position: relative;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 30px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  outline: none;
+  z-index: 2;
+}
+
+.explosive-btn.hovered {
+  transform: scale(1.05) translateY(-5px);
+}
+
+.explosive-btn.glowing {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3)); }
+  50% { filter: drop-shadow(0 0 60px rgba(212, 175, 55, 0.6)); }
+}
+
+/* ─── FOND 3D ─── */
+.btn-3d-background {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.btn-3d-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #1a1a1a, #2D2422);
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  transition: all 0.3s ease;
+}
+
+.layer-2 {
+  transform: translateZ(10px) scale(0.98);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), transparent);
+  border-color: rgba(212, 175, 55, 0.1);
+}
+
+.layer-3 {
+  transform: translateZ(20px) scale(0.96);
+  background: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.03), transparent);
+}
+
+.explosive-btn.hovered .layer-1 {
+  border-color: #D4AF37;
+  box-shadow: 
+    inset 0 0 40px rgba(212, 175, 55, 0.05),
+    0 0 80px rgba(212, 175, 55, 0.1);
+}
+
+/* ─── FLAMMES ─── */
+.btn-flame-effects {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.flame {
+  position: absolute;
+  bottom: -10px;
+  width: 30px;
+  height: 60px;
+  background: linear-gradient(to top, rgba(212, 175, 55, 0.3), transparent);
+  border-radius: 50%;
+  filter: blur(10px);
+  animation: flameRise 1.5s ease-in-out infinite;
+}
+
+.flame-1 { left: 15%; animation-delay: 0s; }
+.flame-2 { left: 45%; animation-delay: 0.5s; height: 80px; }
+.flame-3 { right: 15%; animation-delay: 1s; }
+
+@keyframes flameRise {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-30px) scale(1.2); opacity: 1; }
+}
+
+/* ─── CONTENU ─── */
+.btn-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 30px 18px 20px;
+  z-index: 2;
+}
+
+/* ─── ICÔNE EXPLOSIVE ─── */
+.btn-icon-explosive {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D4AF37, #F5E6A3, #D4AF37);
+  background-size: 200% 200%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: iconExplosive 3s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+}
+
+@keyframes iconExplosive {
+  0%, 100% { background-position: 0% 50%; transform: scale(1) rotate(0deg); }
+  50% { background-position: 100% 50%; transform: scale(1.05) rotate(5deg); }
+}
+
+.icon-gift {
+  color: #1a1a1a;
+  position: relative;
+  z-index: 2;
+  animation: giftWiggle 2s ease-in-out infinite;
+}
+
+@keyframes giftWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+.icon-explosion {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: explosionRing 2s ease-out infinite;
+}
+
+@keyframes explosionRing {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.icon-sparkle-ring {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: sparkleRing 2s ease-in-out infinite;
+}
+
+@keyframes sparkleRing {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+}
+
+.icon-zap {
+  color: white;
+}
+
+/* ─── TEXTE ─── */
+.btn-text-explosive {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.text-main {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #F5E6A3;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  display: block;
+}
+
+.text-main.gold {
+  background: linear-gradient(135deg, #D4AF37, #F5E6A3, #D4AF37);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 1.6rem;
+  animation: textShimmer 3s ease-in-out infinite;
+}
+
+@keyframes textShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.text-sub {
+  font-size: 0.65rem;
+  color: #888;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-weight: 700;
+  animation: subPulse 2s ease-in-out infinite;
+}
+
+@keyframes subPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; color: #D4AF37; }
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #FF6B6B, #FFD93D, #FF6B6B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: emojiShimmer 2s ease-in-out infinite;
+}
+
+@keyframes emojiShimmer {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* ─── BADGE ─── */
+.btn-badge-explosive {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px 6px 10px;
+  background: linear-gradient(135deg, #FF6B6B, #E74C3C);
+  border-radius: 30px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(231, 76, 60, 0.5);
+  z-index: 5;
+  animation: badgeExplosive 1.5s ease-in-out infinite;
+}
+
+@keyframes badgeExplosive {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.05) rotate(-3deg); }
+}
+
+.badge-explosion {
+  position: absolute;
+  inset: -3px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: badgeRing 1.5s ease-out infinite;
+}
+
+@keyframes badgeRing {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+
+/* ─── EFFET DE SURVOL ─── */
+.btn-hover-effect {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  overflow: hidden;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.explosive-btn.hovered .btn-hover-effect {
+  opacity: 1;
+}
+
+.hover-wave {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(212, 175, 55, 0.1), transparent);
+  animation: hoverWave 1.5s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+
+@keyframes hoverWave {
+  0% { transform: scale(0.5) translateY(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.5) translateY(-50%); opacity: 0; }
+}
+
+/* ─── COMPTEUR ─── */
+.btn-counter {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 12px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  z-index: 5;
+}
+
+.counter-number {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #D4AF37;
+  animation: counterPulse 2s ease-in-out infinite;
+}
+
+.counter-label {
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes counterPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); color: #F5E6A3; }
+}
+
+/* ─── TEXTS FLOTTANTS ─── */
+.floating-texts {
+  position: absolute;
+  inset: -60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.float-text {
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.5;
+  animation: floatAround 4s ease-in-out infinite;
+}
+
+.float-text.t1 { top: -20px; left: 10%; animation-delay: 0s; }
+.float-text.t2 { top: -30px; right: 15%; animation-delay: 1s; }
+.float-text.t3 { bottom: -20px; left: 20%; animation-delay: 2s; }
+.float-text.t4 { bottom: -30px; right: 20%; animation-delay: 3s; }
+
+@keyframes floatAround {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .floating-wheel-explosive {
+    bottom: 20px;
+    max-width: 90%;
+  }
+
+  .btn-content {
+    padding: 14px 20px 14px 14px;
+    gap: 12px;
+  }
+
+  .btn-icon-explosive {
+    width: 48px;
+    height: 48px;
+  }
+
+  .btn-icon-explosive .icon-gift {
+    width: 24px;
+    height: 24px;
+  }
+
+  .text-main {
+    font-size: 1rem;
+  }
+
+  .text-main.gold {
+    font-size: 1.2rem;
+  }
+
+  .text-sub {
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .btn-badge-explosive {
+    padding: 4px 10px 4px 6px;
+    font-size: 0.45rem;
+    top: -8px;
+    right: -4px;
+  }
+
+  .explosive-light-rays,
+  .explosive-orbital-ring,
+  .btn-flame-effects,
+  .floating-texts {
+    display: none;
+  }
+
+  .btn-counter {
+    bottom: -6px;
+    padding: 1px 8px;
+  }
+
+  .counter-number {
+    font-size: 0.7rem;
+  }
+
+  .counter-label {
+    font-size: 0.4rem;
+  }
+
+  .icon-sparkle-ring {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-wheel-explosive {
+    bottom: 12px;
+    max-width: 95%;
+  }
+
+  .btn-content {
+    padding: 10px 14px 10px 10px;
+    gap: 8px;
+  }
+
+  .btn-icon-explosive {
+    width: 40px;
+    height: 40px;
+  }
+
+  .btn-icon-explosive .icon-gift {
+    width: 20px;
+    height: 20px;
+  }
+
+  .text-main {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+
+  .text-main.gold {
+    font-size: 0.9rem;
+  }
+
+  .text-sub {
+    font-size: 0.4rem;
+    display: none;
+  }
+
+  .btn-badge-explosive {
+    padding: 2px 6px 2px 4px;
+    font-size: 0.35rem;
+    top: -6px;
+    right: -2px;
+  }
+
+  .btn-counter {
+    bottom: -4px;
+    padding: 1px 6px;
+  }
+
+  .counter-number {
+    font-size: 0.6rem;
+  }
+
+  .counter-label {
+    font-size: 0.35rem;
+  }
+}

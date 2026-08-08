@@ -25,6 +25,12 @@ import SocialFloatingButton from './components/SocialFloatingButton';
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
+// 🎡 IMPORTS JEU DE LA ROUE
+import FloatingWheelButton from "./components/FloatingWheelButton";
+import WheelGame from "./components/WheelGame";
+import { useState, useEffect } from "react";
+import { getWheelSettings } from "./services/wheelService";
+
 // Imports Administration
 import AdminLayout from "./admin/components/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
@@ -35,7 +41,8 @@ import SocialHub from "./admin/pages/SocialHub";
 import CategoryManager from "./admin/pages/CategoryManager"; 
 import AccompanimentManager from "./admin/pages/AccompanimentManager"; 
 import SupplementManager from "./admin/pages/SupplementAdmin";
-import TableManager from "./admin/pages/TableManager"; 
+import TableManager from "./admin/pages/TableManager";
+import WheelSettings from "./admin/pages/WheelSettings"; // 🎡 Page admin du jeu
 
 // 2. Création du client de cache
 const queryClient = new QueryClient({
@@ -52,6 +59,77 @@ if (window.location.protocol === 'http:' && window.location.hostname !== 'localh
 }
 
 export default function AppRouter() {
+  const [showWheel, setShowWheel] = useState(false);
+  const [isWheelActive, setIsWheelActive] = useState(true);
+
+  // Charger l'état du jeu
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getWheelSettings();
+        setIsWheelActive(settings.isActive);
+      } catch (error) {
+        console.error('Erreur chargement settings wheel:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleWin = (reward: any) => {
+    // 🎉 Action quand l'utilisateur gagne
+    console.log('🎉 Gagné:', reward.label);
+    
+    // ✅ Notification plus élégante que alert()
+    // Tu peux remplacer par une toast notification
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #1a1a1a, #2D2422);
+      border: 2px solid #D4AF37;
+      border-radius: 20px;
+      padding: 2rem 3rem;
+      color: #F5E6A3;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      text-align: center;
+      z-index: 99999;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 80px rgba(212,175,55,0.1);
+      animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    `;
+    toast.innerHTML = `
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+      <div style="font-size: 1.2rem; font-weight: 700; color: #D4AF37;">Félicitations !</div>
+      <div style="font-size: 1rem; color: #aaa; margin-top: 0.5rem;">Vous avez gagné :</div>
+      <div style="font-size: 1.8rem; margin-top: 0.3rem;">${reward.label}</div>
+      <div style="font-size: 0.8rem; color: #888; margin-top: 0.5rem;">${reward.description}</div>
+      <button style="
+        margin-top: 1.5rem;
+        padding: 0.6rem 2rem;
+        background: linear-gradient(135deg, #D4AF37, #B8962E);
+        border: none;
+        border-radius: 50px;
+        color: #1a1a1a;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      " onclick="this.parentElement.remove()">
+        ✨ Super !
+      </button>
+    `;
+    document.body.appendChild(toast);
+    
+    // Supprimer après 10s si l'utilisateur ne clique pas
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        toast.remove();
+      }
+    }, 10000);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
@@ -67,11 +145,20 @@ export default function AppRouter() {
                   <AdPopup />
                   <Navbar />
                   <FloatingOrder />
-                  {/* Bouton d'installation PWA ajouté ici */}
                   <InstallButton />
-
-                  {/* 🆕 SOCIAL FLOATING BUTTON - TOUJOURS VISIBLE */}
                   <SocialFloatingButton />
+
+                  {/* 🎡 BOUTON FLOATING DU JEU DE LA ROUE */}
+                  {isWheelActive && (
+                    <FloatingWheelButton onClick={() => setShowWheel(true)} />
+                  )}
+
+                  <WheelGame 
+  isOpen={showWheel}
+  onClose={() => setShowWheel(false)}
+  onWin={handleWin}
+  isTestMode={true}
+/>
 
                   <main>
                     <Routes>
@@ -80,7 +167,6 @@ export default function AppRouter() {
                       <Route path="/menu" element={<Menu />} />
                       <Route path="/menu-soir" element={<MenuSoir />} />
                       <Route path="/blog" element={<Blog />} />
-                      {/* 🆕 ROUTE POUR LE DÉTAIL D'UN ARTICLE */}
                       <Route path="/blog/:slug" element={<BlogPost />} />
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
@@ -105,6 +191,7 @@ export default function AppRouter() {
               <Route path="orders" element={<Orders />} />
               <Route path="appearance" element={<Appearance />} />
               <Route path="social" element={<SocialHub />} />
+              <Route path="wheel" element={<WheelSettings />} /> {/* 🎡 Page admin du jeu */}
             </Route>
           </Routes>
         </Router>

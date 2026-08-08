@@ -7,8 +7,9 @@ import {
   Zap, 
   Tags, 
   ListPlus,
-  PlusSquare, // Icône pour les Suppléments
-  Smartphone 
+  PlusSquare,
+  Smartphone,
+  Gift // ← AJOUT pour le jeu de la roue
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
@@ -24,7 +25,7 @@ export default function Sidebar() {
       path: "/admin/supplements", 
       icon: <PlusSquare />, 
       label: "Suppléments" 
-    }, // Nouveau : Gestion des extras payants
+    },
     { 
       path: "/admin/accompaniments", 
       icon: <ListPlus />, 
@@ -34,6 +35,12 @@ export default function Sidebar() {
     { path: "/admin/appearance", icon: <ImageIcon />, label: "Apparence & Pub" }, 
     { path: "/admin/social", icon: <Zap size={22} />, label: "Social Broadcaster" }, 
     { path: "/admin/orders", icon: <ShoppingBag />, label: "Commandes" },
+    // 🎡 NOUVEAU - Jeu de la Roue
+    { 
+      path: "/admin/wheel", 
+      icon: <Gift size={22} />, 
+      label: "🎡 Jeu de la Roue" 
+    },
   ];
 
   return (
