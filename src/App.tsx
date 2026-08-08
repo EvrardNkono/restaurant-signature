@@ -157,7 +157,7 @@ export default function AppRouter() {
   isOpen={showWheel}
   onClose={() => setShowWheel(false)}
   onWin={handleWin}
-  isTestMode={true}
+  isTestMode={false}
 />
 
                   <main>
