@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { MOCK_POSTS, MOCK_CATEGORIES } from "../data/blogData";
 import type { BlogPost, BlogCategory } from "../data/blogData";
-import "./blog.css";
+import "./blog2.css";
 
 // --- COMPOSANT DE BANNIÈRE HERO ---
 const BlogHeroBanner = () => {
