@@ -1,13 +1,15 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useCart, type CartItem, type CartSupplement } from "../context/CartContext"; 
+import { useCart } from "../context/CartContext";
 import { 
   Loader2, X, Utensils, GlassWater, 
-  Check, PlusCircle, Sparkles, MinusCircle, Trash2,
-  Clock, CreditCard, Eye, ArrowRight, CalendarClock, PenTool,
-} from "lucide-react"; 
-import "./menuSoir.css";
+  Check, PlusCircle, Sparkles, MinusCircle,
+  Clock, CreditCard, Gift, Flame,
+  Star, Eye, Award, Search, ArrowRight,
+  Heart, Zap, ChefHat, Tv, CalendarClock,
+} from "lucide-react";
+import "./menu.css";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
@@ -26,10 +28,12 @@ const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
   
   const lowerNextInfo = nextInfo.toLowerCase();
   
+  // Cas particuliers
   if (lowerNextInfo.includes("aujourd'hui") || lowerNextInfo.includes("ce soir")) {
     return `d'${nextInfo}`;
   }
   
+  // Si le premier caractère est une voyelle
   const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
   const firstChar = lowerNextInfo.charAt(0);
   
@@ -53,32 +57,128 @@ const ServiceLockedBanner = ({
   const formattedMessage = formatNextOpeningMessage(nextInfo);
   
   return (
-    <div className="service-locked-banner-soir">
-      <div className="locked-banner-content-soir">
-        <div className="locked-icon-wrap-soir">
-          <CalendarClock size={36} className="locked-icon-soir" />
+    <div className="service-locked-banner">
+      <div className="locked-banner-content">
+        <div className="locked-icon-wrap">
+          <CalendarClock size={36} className="locked-icon" />
         </div>
-        <div className="locked-text-soir">
-          <h3 className="locked-title-soir">Service {serviceLabel} non disponible</h3>
+        <div className="locked-text">
+          <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
           {nextInfo && (
-            <p className="locked-subtitle-soir">
+            <p className="locked-subtitle">
               Le service en salle sera disponible à partir{" "}
               <strong>{formattedMessage}</strong>
             </p>
           )}
-          <p className="locked-hint-soir">
+          <p className="locked-hint">
             Cliquez sur "Voir la carte & préparer" pour débloquer l'aperçu et préparer votre commande.
           </p>
         </div>
-        <button className="locked-cta-btn-soir" onClick={onUnlock}>
+        <button className="locked-cta-btn" onClick={onUnlock}>
           <span>Voir la carte &amp; préparer</span>
-          <span className="locked-cta-circle-soir">
-            <ArrowRight size={16} />
-          </span>
+          <ArrowRight size={18} />
         </button>
       </div>
     </div>
   );
+};
+
+// --- COMPOSANT VOYANT DE STATUT AVEC PROGRESSION ---
+const OrderStatusBadge = ({ status }: { status: string }) => {
+  const statusConfig: Record<string, { label: string, color: string, icon: any, gradient: string, progress?: number }> = {
+    in_cart: { 
+      label: "À régler", 
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
+      icon: <CreditCard size={12} />,
+      progress: 0
+    },
+    pending: { 
+      label: "En attente", 
+      color: "#F39C12",
+      gradient: "linear-gradient(135deg, #F39C12, #E67E22)",
+      icon: <Clock size={12} />,
+      progress: 25
+    },
+    cooking: { 
+      label: "En cuisine", 
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
+      icon: <Flame size={12} />,
+      progress: 50
+    },
+    done: { 
+      label: "Prêt", 
+      color: "#27AE60",
+      gradient: "linear-gradient(135deg, #27AE60, #1E8449)",
+      icon: <Sparkles size={12} />,
+      progress: 100
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <div className="order-status-badge-premium" style={{ background: config.gradient }}>
+      <div className="status-icon">{config.icon}</div>
+      <span>{config.label}</span>
+      {config.progress !== undefined && config.progress < 100 && (
+        <div className="status-progress">
+          <div className="status-progress-bar" style={{ width: `${config.progress}%` }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- COMPOSANT OFFRE SPÉCIALE AMÉLIORÉ ---
+const OfferBadge = ({ quantity, requiredQuantity }: { quantity: number; requiredQuantity: number }) => (
+  <div className="offer-badge-enhanced">
+    <Gift size={10} />
+    <span>+{Math.floor(quantity / requiredQuantity)} offerte(s)</span>
+  </div>
+);
+
+// --- COMPOSANT NOTE GASTRONOMIQUE AVEC ANIMATION ---
+const GastronomicNote = ({ note, size = 10 }: { note: number; size?: number }) => (
+  <div className="gastro-note-enhanced">
+    {[...Array(5)].map((_, i) => (
+      <Star 
+        key={i} 
+        size={size} 
+        className={`gastro-star ${i < note ? "filled" : "empty"}`}
+        fill={i < note ? "#D4AF37" : "none"}
+      />
+    ))}
+    <span className="gastro-note-value">{note}.0</span>
+  </div>
+);
+
+// --- COMPOSANT TIMER DE PRÉPARATION ---
+const PreparationTimer = ({ minutes }: { minutes: number }) => (
+  <div className="prep-timer-premium">
+    <Clock size={12} />
+    <span>{minutes} min</span>
+  </div>
+);
+
+// --- FONCTION SCROLL AMÉLIORÉE ---
+const scrollToDrawer = (id: string) => {
+  setTimeout(() => {
+    const element = document.getElementById(`drawer-${id}`);
+    if (element) {
+      const card = element.closest('.menu-card-enhanced');
+      if (card) {
+        const cardRect = card.getBoundingClientRect();
+        const scrollTarget = window.scrollY + cardRect.top - 100;
+        window.scrollTo({ top: scrollTarget + 120, behavior: 'smooth' });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      element.classList.add('drawer-highlight');
+      setTimeout(() => element.classList.remove('drawer-highlight'), 1000);
+    }
+  }, 150);
 };
 
 // --- INTERFACES ---
@@ -95,13 +195,6 @@ interface Accompaniment {
   active: boolean;
 }
 
-interface Supplement {
-  _id: string;
-  name: string;
-  price: number;
-  active: boolean;
-}
-
 interface Plat {
   _id: string;
   name: string;
@@ -109,124 +202,159 @@ interface Plat {
   category: Category;
   description: string;
   image: string;
+  showInMenuJour: boolean;
   showInMenuSoir: boolean;
   hasAccompaniment: boolean;
-  allowSupplements: boolean; 
   accompaniments: Accompaniment[]; 
-  supplements: Supplement[];
+  allowSupplements: boolean;
   offer?: {
     enabled: boolean;
     requiredQuantity: number;
     offerPrice: number;
   };
+  gastronomicNote?: number;
+  preparationTime?: number;
+  calories?: number;
+  spicy?: boolean;
+  vegetarian?: boolean;
+  vegan?: boolean;
+  glutenFree?: boolean;
 }
 
-// --- COMPOSANT VOYANT DE STATUT ---
-const OrderStatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { label: string, color: string, icon: any, pulse?: boolean }> = {
-    in_cart: { label: "À régler", color: "#e74c3c", icon: <CreditCard size={12} />, pulse: true },
-    pending: { label: "En attente", color: "#7f8c8d", icon: <Clock size={12} />, pulse: true },
-    cooking: { label: "En cuisine", color: "#f39c12", icon: <Utensils size={12} />, pulse: true },
-    done: { label: "Prêt", color: "#2ecc71", icon: <Sparkles size={12} /> },
-  };
-  const config = statusConfig[status] || { label: "Reçu", color: "#34495e", icon: <Check size={12} /> };
-  return (
-    <div className={`order-status-tag ${config.pulse ? "pulse-active" : ""}`} style={{ backgroundColor: config.color }}>
-      {config.icon}<span>{config.label}</span>
-    </div>
-  );
-};
+interface Supplement {
+  _id: string;
+  name: string;
+  price: number;
+  active: boolean;
+  category?: string;
+}
 
-const scrollToDrawer = (id: string) => {
-  setTimeout(() => {
-    const element = document.getElementById(`drawer-${id}`);
-    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 100);
-};
-
-// --- EN-TÊTE "SCEAU" (inspiré du Hero) ---
-const MenuSoirHeader = () => (
-  <div className="menu-header-soir">
-    <div className="header-overlay-dark"></div>
-    <div className="header-content-wrapper">
-      <div className="header-text-shield-soir">
-        <div className="header-seal-wrap">
-          <div className="header-seal-glow" aria-hidden="true"></div>
-          <div className="header-seal-gold" aria-hidden="true">
-            <span>S</span>
-          </div>
-        </div>
-        <span className="menu-badge-gold">L'Expérience Nocturne</span>
-        <h2 className="menu-main-title-soir">
-          Menu Du <span className="foil-word-soir">Soir</span>
-        </h2>
-        <div className="header-signature-line" aria-hidden="true">
-          <span className="signature-rule-soir"></span>
-          <PenTool size={14} className="signature-mark-soir" />
-          <span className="signature-rule-soir"></span>
-        </div>
-      </div>
-    </div>
-  </div>
+// Composant Lock
+const Lock = ({ size = 14 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>
 );
 
-export default function MenuSoir() {
+export default function Menu() {
   // ─── HORAIRES ───────────────────────────────────────────────
-  // ✅ Récupération de currentPeriod pour l'affichage dynamique
-  const { isSoirOpen, nextSoirInfo, currentPeriod } = useRestaurantHours();
+  const { isJourOpen, nextJourInfo, currentPeriod } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
 
-  // Le menu Soir est visible soit si c'est l'heure, soit si l'utilisateur a déverrouillé
-  const isSoirAvailable = isSoirOpen || unlocked;
+  // La carte est disponible si :
+  // - Soit le service est ouvert (isJourOpen = true)
+  // - Soit l'utilisateur a volontairement débloqué (unlocked = true)
+  const isJourAvailable = isJourOpen || unlocked;
 
   const { 
-    cart, addToCart, removeFromCart, getItemQuantity,
-    addSupplementToLine, removeSupplementFromLine, updateLineAccompaniment,
+    cart, 
+    addToCart, 
+    addSupplementToLine, 
+    removeSupplementFromLine, 
+    removeFromCart, 
+    updateLineAccompaniment,
+    getItemQuantity
   } = useCart();
 
   const clientId = localStorage.getItem("signature_client_id");
 
+  const [period] = useState<"JOUR" | "SOIR">("JOUR"); 
   const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
   const [filter, setFilter] = useState<string>("Tous");
   const [flippedId, setFlippedId] = useState<string | null>(null);
+  const [selectingAccId, setSelectingAccId] = useState<string | null>(null);
   const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
-  const [tempItem, setTempItem] = useState<CartItem | null>(null);
-  const [editingCartItemId, setEditingCartItemId] = useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [quickViewId, setQuickViewId] = useState<string | null>(null);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [hasPendingBill, setHasPendingBill] = useState(false);
-  const [toastMessage, setToastMessage] = useState<{ text: string; type: string } | null>(null);
 
-  const isAnyDrawerOpen = tempItem !== null || editingCartItemId !== null;
-  const openDrawerPlatId = tempItem?.id ?? 
-    (editingCartItemId ? cart.find(i => i.cartItemId === editingCartItemId)?.id ?? null : null);
+  const isAnyDrawerOpen = selectingAccId !== null;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
+  const lastScrollY = useRef(0);
 
-  // --- TOAST NOTIFICATION ---
-  const showToast = (message: string, type: "success" | "error" | "warning" | "info" = "error") => {
-    setToastMessage({ text: message, type });
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
-  // --- FONCTION DE DÉBLOQUAGE ---
+  // Fonction de déblocage
   const handleUnlock = useCallback(() => {
-    console.log("🔓 Déverrouillage manuel du menu du soir");
+    console.log("🔓 Déverrouillage manuel de la carte");
     setUnlocked(true);
     setTimeout(() => {
-      const menuGrid = document.querySelector('.menu-grid');
+      const menuGrid = document.querySelector('.menu-grid-enhanced');
       if (menuGrid) {
         menuGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 150);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setScrollDirection("down");
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection("up");
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isAnyDrawerOpen && isMobile) {
+        const drawer = document.querySelector('.customization-drawer-enhanced.open');
+        const target = e.target as HTMLElement;
+        if (drawer && !drawer.contains(target) && !target.closest('.add-btn')) {
+          setSelectingAccId(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isAnyDrawerOpen, isMobile]);
+
+  const triggerBounceHint = useCallback(() => {
+    const drawerContent = document.querySelector('.customization-drawer-enhanced.open .drawer-content-enhanced');
+    if (drawerContent) {
+      drawerContent.classList.remove('hint-active');
+      void (drawerContent as HTMLElement).offsetWidth; 
+      drawerContent.classList.add('hint-active');
+      setTimeout(() => drawerContent.classList.remove('hint-active'), 800);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectingAccId) {
+      const timer = setTimeout(() => triggerBounceHint(), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [selectingAccId, triggerBounceHint]);
+
   // --- DATA FETCHERS ---
   const { data: allPlats, isLoading: isLoadingMenu } = useQuery<Plat[]>({
     queryKey: ['full-catalog'],
-    queryFn: async () => { const r = await axios.get(API_URL); return r.data.data; },
-    staleTime: 1000 * 60 * 5, 
+    queryFn: async () => {
+      const response = await axios.get(API_URL);
+      return response.data.data;
+    },
+    staleTime: 1000 * 60 * 30, 
   });
 
   const { data: supplementsList, isLoading: isLoadingSupps } = useQuery<Supplement[]>({
     queryKey: ['menu-supplements'],
-    queryFn: async () => { const r = await axios.get(SUPP_API); return r.data.data; },
+    queryFn: async () => {
+      const response = await axios.get(SUPP_API);
+      return response.data.data;
+    },
     staleTime: 1000 * 60 * 30,
   });
 
@@ -234,246 +362,299 @@ export default function MenuSoir() {
     queryKey: ["active-orders", clientId],
     queryFn: async () => {
       if (!clientId) return [];
-      const r = await axios.get(`${BASE_URL}/orders/track/${clientId}`);
-      return r.data.orders || [];
+      const response = await axios.get(`${BASE_URL}/orders/track/${clientId}`);
+      return response.data.orders || [];
     },
-    refetchInterval: 10000,
+    refetchInterval: 10000, 
     enabled: !!clientId
   });
 
-  useEffect(() => { if (clientId) refetchOrders(); }, [clientId, cart.length, refetchOrders]);
-
-  const seenArchivedIds = useState<Set<string>>(() => new Set())[0];
   useEffect(() => {
-    if (!activeOrders.length) return;
-    const newlyArchived = activeOrders.find((order: any) => {
+    if (clientId) refetchOrders();
+  }, [clientId, cart.length, refetchOrders]);
+
+  useEffect(() => {
+    const now = Date.now();
+    const justArchivedOrder = activeOrders.find((order: any) => {
       if (order.status !== "archived") return false;
-      return !seenArchivedIds.has(order._id);
+      const archivedDate = new Date(order.updatedAt || order.createdAt).getTime();
+      return (now - archivedDate) < 5000;
     });
-    if (newlyArchived) {
-      seenArchivedIds.add(newlyArchived._id);
-      if (cart.length > 0) {
-        cart.forEach((item: any) => removeFromCart(item.cartItemId));
-        showToast("✓ Commande terminée, merci !", "success");
-      }
+    if (justArchivedOrder && cart.length > 0) {
+      cart.forEach((item: any) => { removeFromCart(item.cartItemId); });
+      showToast("✓ Commande terminée, merci !", "success");
     }
   }, [activeOrders]);
 
   // --- FILTRAGE ---
-  const platsDuSoir = useMemo(() => allPlats?.filter(p => p.showInMenuSoir === true) || [], [allPlats]);
+  const platsDeLaPeriode = useMemo(() => {
+    if (!allPlats) return [];
+    return period === "JOUR" 
+      ? allPlats.filter(p => p.showInMenuJour) 
+      : allPlats.filter(p => p.showInMenuSoir);
+  }, [allPlats, period]);
+
+  const supplementsDisponibles = useMemo(() => 
+    (supplementsList?.filter(s => s.active) || []).sort((a, b) => a.name.localeCompare(b.name)), 
+  [supplementsList]);
 
   const currentCategories = useMemo(() => [
     "Tous",
-    ...new Set(
-      platsDuSoir.filter(p => p.category?.univers === univers).map(p => p.category?.name).filter(Boolean)
-    )
-  ], [platsDuSoir, univers]);
+    ...Array.from(new Set(
+      platsDeLaPeriode
+        .filter(p => p.category?.univers === univers)
+        .map(p => p.category?.name)
+        .filter(Boolean)
+    ))
+  ], [platsDeLaPeriode, univers]);
 
-  const platsFiltres = useMemo(() => 
-    platsDuSoir.filter(p => {
-      if (p.category?.univers !== univers) return false;
+  const platsFiltres = useMemo(() => {
+    let filtered = platsDeLaPeriode.filter(p => {
+      const matchUnivers = p.category?.univers === univers;
+      if (!matchUnivers) return false;
       if (filter === "Tous") return true;
       return p.category?.name === filter;
-    }), 
-  [platsDuSoir, univers, filter]);
+    });
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(term) || 
+        p.description.toLowerCase().includes(term)
+      );
+    }
+    return filtered;
+  }, [platsDeLaPeriode, univers, filter, searchTerm]);
 
-  // --- ACTIONS ---
-  const handleRemoveOne = (platId: string) => {
-    const itemsInCart = cart.filter(i => i.id === platId);
-    if (itemsInCart.length > 0) removeFromCart(itemsInCart[itemsInCart.length - 1].cartItemId);
+  const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
+    const colors = { success: "#27ae60", error: "#e74c3c", info: "#3498db", warning: "#f39c12" };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:${colors[type]};color:white;padding:12px 24px;border-radius:10px;
+      font-size:0.9rem;font-weight:600;z-index:10000;
+      box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      z-index:10001;
+    `;
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 3500);
   };
 
-  const handleAddClick = (plat: Plat) => {
-    // Si service FERMÉ et NON DÉBLOQUÉ → bloquer
-    if (!isSoirOpen && !unlocked) {
+  // --- ACTIONS CORRIGÉES ---
+  const handleAddClick = (plat: Plat, currentQty: number) => {
+    // ✅ Si service FERMÉ et NON DÉBLOQUÉ → bloquer
+    if (!isJourOpen && !unlocked) {
       showToast(
-        "🔒 Carte verrouillée. Cliquez sur 'Voir la carte & préparer' pour débloquer.",
+        nextJourInfo
+          ? `🔒 Carte verrouillée. Cliquez sur "Voir la carte & préparer" pour débloquer.`
+          : "🍽️ Service non disponible pour le moment.",
         "warning"
       );
       return;
     }
     
+    // ✅ Service fermé mais DÉBLOQUÉ → on continue (ajout au panier)
+    // ✅ Service ouvert → on continue (ajout au panier)
+    
     if (hasPendingBill) {
-      showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau.", "error");
+      showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
       return;
     }
-    if (isAnyDrawerOpen) {
-      showToast("Veuillez d'abord terminer la configuration en cours.", "warning");
+    
+    if (isAnyDrawerOpen && selectingAccId !== plat._id) {
+      setSelectingAccId(null);
+      setTimeout(() => handleAddClick(plat, currentQty), 300);
       return;
     }
 
-    const activeAccs = plat.accompaniments?.filter(a => a.active) || [];
-    const canHaveSupps = plat.allowSupplements || (plat.supplements && plat.supplements.length > 0);
-    const countInCart = getItemQuantity(plat._id); 
-    const willReachOffer = plat.offer?.enabled && (countInCart + 1) >= plat.offer.requiredQuantity;
+    const result = addToCart(
+      { 
+        id: plat._id, name: plat.name, price: plat.price, image: plat.image,
+        type: period, supplements: [], offer: plat.offer 
+      }, 
+      period
+    );
 
-    const newItem: CartItem = {
-      cartItemId: `${plat._id}-${Date.now()}`,
-      id: plat._id, name: plat.name, price: plat.price, quantity: 1,
-      image: plat.image,
-      chosenAccompaniment: (activeAccs.length > 0) ? "Standard" : "Aucun",
-      supplements: [], status: "pending", type: "SOIR", offer: plat.offer 
-    };
+    if (result === "LOCK_ERROR") {
+      showToast("Votre panier contient déjà des produits d'un autre service", "error");
+      return;
+    }
 
-    if (activeAccs.length > 0 || canHaveSupps || willReachOffer) {
-      setTempItem(newItem);
-      setEditingCartItemId(null);
+    const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+    const hasSupps = plat.allowSupplements;
+    const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
+
+    if (activeAccs.length > 0 || hasSupps || willHaveOffer) {
+      setSelectingAccId(plat._id);
       scrollToDrawer(plat._id);
     } else {
-      const result = addToCart(newItem, "SOIR");
-      if (result === "LOCK_ERROR") {
-        showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
-      } else {
-        showToast(`✓ ${plat.name} ajouté au panier`, "success");
+      showToast(`✓ ${plat.name} ajouté au panier`, "success");
+    }
+  };
+
+  const handleRemoveOne = (itemsInCart: any[], platName: string) => {
+    if (itemsInCart.length > 0) {
+      const lastItem = itemsInCart[itemsInCart.length - 1];
+      removeFromCart(lastItem.cartItemId);
+      showToast(`✓ ${platName} retiré du panier`, "info");
+    }
+  };
+
+  const toggleLike = (platId: string) => {
+    setLikedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platId)) { 
+        newSet.delete(platId); 
+        showToast("Retiré de vos favoris", "info"); 
+      } else { 
+        newSet.add(platId); 
+        showToast("Ajouté à vos favoris", "success"); 
       }
-    }
+      return newSet;
+    });
   };
-
-  const handleEditExistingItem = (plat: Plat) => {
-    if (!isSoirOpen && !unlocked) {
-      showToast("Impossible de modifier : carte verrouillée", "error"); 
-      return;
-    }
-    if (isAnyDrawerOpen) return;
-    const itemsInCart = cart.filter(i => i.id === plat._id);
-    if (itemsInCart.length === 0) return;
-    setEditingCartItemId(itemsInCart[itemsInCart.length - 1].cartItemId);
-    setTempItem(null);
-    scrollToDrawer(plat._id);
-  };
-
-  const handleUpdateTempAcc = (accName: string) => {
-    if (!tempItem) return;
-    setTempItem({ ...tempItem, chosenAccompaniment: accName });
-  };
-
-  const handleAddTempSupp = (supp: { id: string, name: string, price: number }) => {
-    if (!tempItem) return;
-    const newSupp: CartSupplement = { id: supp.id, name: supp.name, price: supp.price, status: "pending" };
-    setTempItem({ ...tempItem, supplements: [...(tempItem.supplements || []), newSupp] });
-    setAddedSuppId(supp.id);
-    setTimeout(() => setAddedSuppId(null), 800);
-  };
-
-  const handleRemoveTempSupp = (suppId: string) => {
-    if (!tempItem?.supplements) return;
-    const supps = [...tempItem.supplements];
-    for (let i = supps.length - 1; i >= 0; i--) {
-      if (supps[i].id === suppId) { supps.splice(i, 1); break; }
-    }
-    setTempItem({ ...tempItem, supplements: supps });
-  };
-
-  const handleConfirmAddition = () => {
-    if (!tempItem) return;
-    const result = addToCart(tempItem, "SOIR");
-    if (result === "LOCK_ERROR") {
-      showToast("Votre panier contient déjà des produits d'un autre service (MIDI).", "error");
-    } else {
-      showToast(`✓ ${tempItem.name} ajouté au panier`, "success");
-      setTempItem(null);
-    }
-  };
-
-  const handleCloseDrawer = () => { setTempItem(null); setEditingCartItemId(null); };
-
-  const handleUniversChange = (newUnivers: "Cuisine" | "Boissons") => {
-    if (isAnyDrawerOpen) return;
-    setUnivers(newUnivers);
-    setFilter("Tous");
-  };
-
-  useEffect(() => {
-    if (tempItem || editingCartItemId) {
-      const scrollContainer = document.querySelector('.drawer-body-scroll');
-      if (scrollContainer) {
-        const timer = setTimeout(() => {
-          scrollContainer.classList.add('hint-active');
-          setTimeout(() => scrollContainer.classList.remove('hint-active'), 2000);
-        }, 600);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [tempItem, editingCartItemId]);
 
   if (isLoadingMenu) {
     return (
-      <div className="menu-soir-loading">
-        <Loader2 className="animate-spin" size={40} color="#d4af37" />
-        <p>Mise en place de l'expérience nocturne...</p>
+      <div className="menu-loading-enhanced">
+        <div className="loading-spiral">
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-logo">S</div>
+        </div>
+        <p className="loading-text">Signature prépare sa carte gastronomique...</p>
+        <div className="loading-progress-bar">
+          <div className="loading-progress-fill"></div>
+        </div>
       </div>
     );
   }
 
-  // ─── SI SERVICE INDISPONIBLE ET PAS DÉVERROUILLÉ ─────────────────────────
-  if (!isSoirAvailable) {
+  // ─── SI LE SERVICE N'EST PAS DISPONIBLE ET PAS DÉVERROUILLÉ → CARTE BLOQUÉE ───
+  if (!isJourAvailable) {
     return (
-      <section className="menu-soir-section">
-        {toastMessage && (
-          <div className={`toast-notification ${toastMessage.type}`}>
-            {toastMessage.text}
-          </div>
-        )}
-
-        <MenuSoirHeader />
-
-        {/* ✅ BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
-        <ServiceLockedBanner
-          serviceLabel={currentPeriod === "JOUR" ? "du Soir" : "Dîner"}
-          nextInfo={nextSoirInfo}
-          onUnlock={handleUnlock}
-        />
-
-        <div className="univers-selector-container-soir">
-          <div className="univers-selector-soir">
-            <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} onClick={() => handleUniversChange("Cuisine")}>
-              <Utensils size={18} /> La Table
-            </button>
-            <button className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""}`} onClick={() => handleUniversChange("Boissons")}>
-              <GlassWater size={18} /> La Cave
-            </button>
-          </div>
-        </div>
-        
-        <div className="menu-filtres-soir-container">
-          <div className="menu-filtres-track-soir">
-            <div className="menu-filtres-list-soir">
-              {currentCategories.map((cat, idx) => (
-                <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat as string)}>
-                  {cat as string}
-                </button>
+      <section className="menu-section-enhanced">
+        {/* HERO SECTION */}
+        <div className="menu-hero-cinematic">
+          <div className="hero-video-backdrop">
+            <div className="hero-gradient-overlay"></div>
+            <div className="hero-particles-container">
+              {[...Array(30)].map((_, i) => (
+                <div key={i} className="hero-particle" style={{ 
+                  '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
+                  '--duration': `${5 + Math.random() * 10}s`
+                } as React.CSSProperties} />
               ))}
             </div>
           </div>
+          <div className="hero-content-cinematic">
+            <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
+            <h1 className="hero-title-cinematic">
+              L'Art de la<span className="gold-gradient"> Table Signature</span>
+            </h1>
+            <div className="hero-separator-cinematic">
+              <div className="separator-line gold"></div>
+              <ChefHat size={28} className="separator-icon" />
+              <div className="separator-line gold"></div>
+            </div>
+            <p className="hero-description-cinematic">
+              Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+              Découvrez l'excellence gastronomique réinventée
+            </p>
+          </div>
         </div>
 
-        <div className="menu-grid">
-          {platsFiltres.map(plat => (
-            <div key={plat._id} className="menu-card-outer soir-variant readonly-card">
-              <div className="menu-card-inner">
-                <div className="card-face-soir card-front-soir">
-                  <div className="menu-image-container">
-                    {plat.offer?.enabled && (
-                      <div className="luxury-offer-ribbon">
-                        <Sparkles size={10} className="ribbon-icon" />
-                        <span>Offre dès {plat.offer.requiredQuantity}</span>
-                      </div>
-                    )}
-                    {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-soir">Signature</div>}
-                    <div className="price-tag-evening"><span>{plat.price.toFixed(2)}€</span></div>
+        {/* BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
+        <ServiceLockedBanner
+          serviceLabel={currentPeriod === "SOIR" ? "du Soir" : "Déjeuner"}
+          nextInfo={nextJourInfo}
+          onUnlock={handleUnlock}
+        />
+
+        {/* LA CARTE EST AFFICHÉE MAIS EN MODE LECTURE SEULE (boutons désactivés) */}
+        <div className="controls-bar-enhanced visible">
+          <div className="controls-container">
+            <div className="search-wrapper">
+              <Search className="search-icon" size={18} />
+              <input 
+                type="text" placeholder="Rechercher un plat, une saveur..."
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input-enhanced"
+              />
+              {searchTerm && (
+                <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
+              )}
+            </div>
+            <div className="univers-tabs">
+              <button className={`univers-tab ${univers === "Cuisine" ? "active" : ""}`} onClick={() => setUnivers("Cuisine")}>
+                <Utensils size={18} /><span>Cuisine</span>
+              </button>
+              <button className={`univers-tab ${univers === "Boissons" ? "active" : ""}`} onClick={() => setUnivers("Boissons")}>
+                <GlassWater size={18} /><span>Boissons</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="categories-bar-enhanced">
+          <div className="categories-scroll">
+            {currentCategories.map((cat, idx) => (
+              <button key={idx} className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat)}>
+                <span className="chip-text">{cat}</span>
+                {filter === cat && <div className="chip-active-indicator" />}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Carte en lecture seule (commandes désactivées) */}
+        <div className="menu-grid-enhanced menu-readonly">
+          {platsFiltres.map((plat, index) => (
+            <div key={plat._id} className="menu-card-enhanced readonly" style={{ animationDelay: `${index * 0.03}s` }}>
+              <div className="card-perspective">
+                <div className="card-front-enhanced">
+                  <div className="card-media">
+                    <div className="media-wrapper">
+                      {plat.image ? (
+                        <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
+                      ) : (
+                        <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
+                      )}
+                      <div className="media-overlay"></div>
+                    </div>
+                    <div className="price-chip">
+                      <span className="price-symbol">€</span>
+                      <span className="price-amount">{plat.price.toFixed(2)}</span>
+                    </div>
+                    <div className="card-badges">
+                      {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                      {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                      {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
+                    </div>
                   </div>
-                  <div className="details-container-soir">
-                    <h3>{plat.name}</h3>
-                    <div className="gold-separator"></div>
-                    <p className="description-preview-soir">{plat.description}</p>
-                    <div className="card-actions" style={{ marginTop: '15px' }}>
+                  <div className="card-content">
+                    <div className="card-header">
+                      <div className="category-tag">{plat.category?.name}</div>
+                      {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
+                    </div>
+                    <h3 className="plat-title">{plat.name}</h3>
+                    <div className="title-underline"></div>
+                    <p className="plat-description">
+                      {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
+                    </p>
+                    {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
+                    <div className="card-footer">
                       <button
-                        className="btn-add-soir"
-                        style={{ width: '100%' }}
-                        onClick={() => showToast("🔒 Cliquez sur 'Voir la carte & préparer' pour débloquer", "warning")}
+                        className="add-btn readonly-order-btn"
+                        onClick={() => showToast(
+                          nextJourInfo 
+                            ? `🔒 Cliquez sur "Voir la carte & préparer" pour débloquer` 
+                            : "🍽️ Service non disponible",
+                          "warning"
+                        )}
                       >
-                        <Clock size={16} style={{ marginRight: '8px' }} />
-                        Carte verrouillée
+                        <Lock size={14} />
+                        <span>Carte verrouillée</span>
                       </button>
                     </div>
                   </div>
@@ -489,29 +670,33 @@ export default function MenuSoir() {
 
   // ─── AFFICHAGE DÉVERROUILLÉ (service ouvert OU utilisateur a cliqué) ───
   return (
-    <section className="menu-soir-section">
-      {toastMessage && (
-        <div className={`toast-notification ${toastMessage.type}`}>
-          {toastMessage.text}
-        </div>
-      )}
+    <section className="menu-section-enhanced">
 
-      {/* ✅ BANNIÈRE SERVICE OUVERT - dynamique */}
-      {isSoirOpen && (
+      {/* ✅ BANNIÈRE SERVICE OUVERT - dynamique avec weekend */}
+      {isJourOpen && (
         <div className="restaurant-open-banner">
           <Clock size={18} />
           <span>
-            {currentPeriod === "SOIR" 
-              ? "SERVICE DU SOIR EN COURS • 18h00 - 23h00"
-              : "SERVICE EN CONTINU • 12h00 - 23h00"
-            }
+            {(() => {
+              const day = new Date().getDay();
+              // Weekend (Samedi ou Dimanche) : SERVICE EN CONTINU
+              if (day === 0 || day === 6) {
+                return "SERVICE EN CONTINU • 12h00 - 23h00";
+              }
+              // Soir en semaine
+              if (currentPeriod === "SOIR") {
+                return "SERVICE DU SOIR EN COURS • 18h00 - 23h00";
+              }
+              // Jour en semaine
+              return "SERVICE DÉJEUNER EN COURS • 12h00 - 15h00";
+            })()}
           </span>
         </div>
       )}
 
-      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé mais service fermé) */}
-      {!isSoirOpen && unlocked && (
-        <div className="restaurant-preview-banner-soir">
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé manuellement mais service fermé) */}
+      {!isJourOpen && unlocked && (
+        <div className="restaurant-preview-banner">
           <Eye size={18} />
           <span>
             🔓 Mode préparation — Vous pouvez préparer votre commande.
@@ -519,278 +704,387 @@ export default function MenuSoir() {
         </div>
       )}
 
-      {isAnyDrawerOpen && <div className="global-drawer-overlay" onClick={handleCloseDrawer} />}
+      {isAnyDrawerOpen && (
+        <div 
+          className={isMobile ? "drawer-overlay-mobile" : "drawer-overlay-premium"} 
+          onClick={() => setSelectingAccId(null)} 
+        />
+      )}
 
-      <MenuSoirHeader />
-
-      <div className="univers-selector-container-soir">
-        <div className="univers-selector-soir">
-          <button 
-            className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} 
-            onClick={() => handleUniversChange("Cuisine")}
-          >
-            <Utensils size={18} /> La Table
-          </button>
-          <button 
-            className={`univers-btn-soir ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} 
-            onClick={() => handleUniversChange("Boissons")}
-          >
-            <GlassWater size={18} /> La Cave
-          </button>
+      {/* HERO SECTION */}
+      <div className="menu-hero-cinematic">
+        <div className="hero-video-backdrop">
+          <div className="hero-gradient-overlay"></div>
+          <div className="hero-particles-container">
+            {[...Array(30)].map((_, i) => (
+              <div key={i} className="hero-particle" style={{ 
+                '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
+                '--duration': `${5 + Math.random() * 10}s`
+              } as React.CSSProperties} />
+            ))}
+          </div>
+        </div>
+        <div className="hero-content-cinematic">
+          <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
+          <h1 className="hero-title-cinematic">
+            L'Art de la<span className="gold-gradient"> Table Signature</span>
+          </h1>
+          <div className="hero-separator-cinematic">
+            <div className="separator-line gold"></div>
+            <ChefHat size={28} className="separator-icon" />
+            <div className="separator-line gold"></div>
+          </div>
+          <p className="hero-description-cinematic">
+            Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+            Découvrez l'excellence gastronomique réinventée
+          </p>
+          <div className="hero-stats-cinematic">
+            <div className="hero-stat"><span className="stat-number">15+</span><span className="stat-label">Plats Signature</span></div>
+            <div className="hero-stat"><span className="stat-number">100%</span><span className="stat-label">Produits Frais</span></div>
+            <div className="hero-stat"><span className="stat-number">⭐ 4.9</span><span className="stat-label">Notes Clients</span></div>
+          </div>
+          <div className="hero-cta-cinematic">
+            <button className="cta-primary" onClick={() => {
+              document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              <span>Découvrir la carte</span><ArrowRight size={18} />
+            </button>
+            <button className="cta-secondary"><span>Réservation</span><Tv size={16} /></button>
+          </div>
+        </div>
+        <div className="hero-scroll-indicator">
+          <div className="scroll-mouse"><div className="scroll-wheel"></div></div>
+          <span>Scroll</span>
         </div>
       </div>
 
-      <div className="menu-filtres-soir-container">
-        <div className="menu-filtres-track-soir">
-          <div className="menu-filtres-list-soir">
-            {currentCategories.map((cat, idx) => (
-              <button 
-                key={idx} 
-                className={`filter-btn-soir ${filter === cat ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} 
-                onClick={() => !isAnyDrawerOpen && setFilter(cat as string)}
-              >
-                {cat as string}
-              </button>
-            ))}
+      {/* BARRE DE CONTRÔLE STICKY */}
+      <div className={`controls-bar-enhanced ${scrollDirection === "up" ? "visible" : "hidden"}`}>
+        <div className="controls-container">
+          <div className="search-wrapper">
+            <Search className="search-icon" size={18} />
+            <input 
+              type="text" placeholder="Rechercher un plat, une saveur..."
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input-enhanced"
+            />
+            {searchTerm && (
+              <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
+            )}
+          </div>
+          <div className="univers-tabs">
+            <button 
+              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
+            >
+              <Utensils size={18} /><span>Cuisine</span>
+            </button>
+            <button 
+              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
+            >
+              <GlassWater size={18} /><span>Boissons</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="menu-grid">
-        {platsFiltres.map(plat => {
-          const itemsInCart = cart.filter((i: CartItem) => i.id === plat._id);
-          const isFlipped = flippedId === plat._id;
-          const isExpanding = openDrawerPlatId === plat._id;
-          const quantityInCart = getItemQuantity(plat._id);
-          
-          const orderMatch = activeOrders.find((order: any) => 
-            order.items.some((item: any) => item.productId === plat._id)
-          );
-          let currentStatus = null;
-          if (orderMatch) {
-            const status = orderMatch.status;
-            const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
-            const now = Date.now();
-            if (status === "archived") { currentStatus = null; }
-            else if (status === "done" && (now - lastUpdate > 10 * 60 * 1000)) { currentStatus = null; }
-            else { currentStatus = status; }
-          } 
-          if (!currentStatus && itemsInCart.length > 0) currentStatus = "in_cart";
+      {/* CATÉGORIES */}
+      <div className="categories-bar-enhanced">
+        <div className="categories-scroll">
+          {currentCategories.map((cat, idx) => (
+            <button 
+              key={idx} 
+              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
+              onClick={() => setFilter(cat)}
+            >
+              <span className="chip-text">{cat}</span>
+              {filter === cat && <div className="chip-active-indicator" />}
+            </button>
+          ))}
+        </div>
+      </div>
 
-          const suppsToShow = plat.allowSupplements 
-            ? (supplementsList?.filter(s => s.active) || []) 
-            : (plat.supplements?.filter(s => s.active) || []);
+      {searchTerm && (
+        <div className="search-results-enhanced">
+          <div className="results-info"><Sparkles size={14} /><span>{platsFiltres.length} résultat(s)</span></div>
+          <button className="clear-search" onClick={() => setSearchTerm("")}><X size={14} />Effacer</button>
+        </div>
+      )}
 
-          const editingItem = editingCartItemId ? cart.find(i => i.cartItemId === editingCartItemId) ?? null : null;
-          const drawerItem = tempItem?.id === plat._id ? tempItem : editingItem;
+      {/* GRILLE DES PLATS - VERSION DÉBLOQUÉE AVEC COMMANDES ACTIVES */}
+      <div className="menu-grid-enhanced">
+        {platsFiltres.length > 0 ? (
+          platsFiltres.map((plat, index) => {
+            const quantityInCart = getItemQuantity(plat._id);
+            const itemsInCart = cart.filter((i) => i.id === plat._id);
+            const lastItemAdded = itemsInCart[itemsInCart.length - 1];
+            const isFlipped = flippedId === plat._id;
+            const isExpanding = selectingAccId === plat._id;
+            const isHovered = hoveredCard === plat._id;
+            const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+            const isLiked = likedItems.has(plat._id);
 
-          return (
-            <div key={plat._id} className={`menu-card-outer soir-variant ${isExpanding ? "is-expanded" : ""}`}>
-              <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
-                
-                <div className="card-face-soir card-front-soir">
-                  <div className="menu-image-container">
-                    {currentStatus && <OrderStatusBadge status={currentStatus} />}
-                    {plat.offer?.enabled && (
-                      <div className="luxury-offer-ribbon">
-                        <Sparkles size={10} className="ribbon-icon" />
-                        <span>Offre dès {plat.offer.requiredQuantity}</span>
-                      </div>
-                    )}
-                    {plat.image ? <img src={plat.image} alt={plat.name} className="menu-img" /> : <div className="placeholder-soir">Signature</div>}
-                    <div className="price-tag-evening"><span>{plat.price.toFixed(2)}€</span></div>
-                  </div>
+            let orderMatch = activeOrders.find((order: any) =>
+              order.items.some((item: any) => item.productId === plat._id)
+            );
+            let currentStatus = null;
+            if (orderMatch) {
+              const status = orderMatch.status;
+              const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
+              const now = Date.now();
+              if (status !== "archived" && !(status === "done" && now - lastUpdate > 600000)) {
+                currentStatus = status;
+              }
+            }
+            if (!orderMatch && quantityInCart > 0) currentStatus = "in_cart";
 
-                  <div className="details-container-soir">
-                    <h3>{plat.name}</h3>
-                    <div className="gold-separator"></div>
-                    <p className="description-preview-soir">{plat.description}</p>
-                    <button 
-                      className="view-details-btn-soir" 
-                      onClick={() => !isAnyDrawerOpen && setFlippedId(plat._id)}
-                    >
-                      Voir plus...
-                    </button>
-
-                    <div className="card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
-                      <button 
-                        className={`btn-add-soir ${(isAnyDrawerOpen && !isExpanding) ? "btn-disabled" : ""} ${isExpanding ? "btn-configuring" : ""}`} 
-                        onClick={() => handleAddClick(plat)}
-                        style={{ width: '100%' }}
-                      >
-                        {isExpanding && tempItem?.id === plat._id ? "Configuration..." : (
-                          <>
-                            <PlusCircle size={18} style={{ marginRight: '8px' }} />
-                            {quantityInCart > 0 ? `Ajouter (${quantityInCart})` : "Ajouter au panier"}
-                          </>
+            return (
+              <div 
+                key={plat._id} 
+                className={`menu-card-enhanced ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
+                onMouseEnter={() => setHoveredCard(plat._id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
+                <div className={`card-perspective ${isFlipped ? "flipped" : ""}`}>
+                  
+                  {/* FACE AVANT */}
+                  <div className="card-front-enhanced">
+                    <div className="card-media">
+                      {currentStatus && <OrderStatusBadge status={currentStatus} />}
+                      <div className="card-badges">
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (
+                          <OfferBadge quantity={quantityInCart} requiredQuantity={plat.offer.requiredQuantity} />
                         )}
-                      </button>
-
-                      {quantityInCart > 0 && !isExpanding && (
-                        <button 
-                          className="btn-edit-soir"
-                          onClick={() => handleEditExistingItem(plat)}
-                          style={{
-                            width: '100%', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', gap: '8px', padding: '10px',
-                            fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase',
-                            background: 'rgba(212,175,55,0.12)', border: '1px solid rgba(212,175,55,0.4)',
-                            borderRadius: '8px', color: '#D4AF37', cursor: 'pointer',
-                          }}
-                        >
-                          <Sparkles size={14} /><span>Modifier</span>
-                        </button>
-                      )}
-
-                      {quantityInCart > 0 && !isExpanding && (
-                        <button 
-                          className="btn-remove-quick-soir"
-                          onClick={() => handleRemoveOne(plat._id)}
-                          style={{
-                            width: '100%', display: 'flex', alignItems: 'center',
-                            justifyContent: 'center', gap: '8px', padding: '10px',
-                            fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase'
-                          }}
-                        >
-                          <MinusCircle size={18} /><span>Retirer un article</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* TIROIR DE PERSONNALISATION */}
-                  <div id={`drawer-${plat._id}`} className={`acc-selection-drawer ${isExpanding ? "open" : ""}`}>
-                    <div className="drawer-header">
-                      <div className="drawer-title">
-                        <Sparkles size={14} color="#d4af37" />
-                        <span>{editingCartItemId && editingItem?.id === plat._id ? "Modifier votre commande" : "Personnalisation"}</span>
+                        {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                        {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                        {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
                       </div>
-                      <button className="btn-cancel-config" onClick={handleCloseDrawer}>
-                        <Trash2 size={16} /> <span>{editingCartItemId ? "Fermer" : "Annuler"}</span>
-                      </button>
+                      <div className="media-wrapper">
+                        {plat.image ? (
+                          <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
+                        ) : (
+                          <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
+                        )}
+                        <div className="media-overlay"></div>
+                      </div>
+                      <div className="price-chip">
+                        <span className="price-symbol">€</span>
+                        <span className="price-amount">{plat.price.toFixed(2)}</span>
+                      </div>
+                      <div className="card-actions-floating">
+                        <button 
+                          className={`action-btn like-btn ${isLiked ? "active" : ""}`}
+                          onClick={() => toggleLike(plat._id)}
+                        >
+                          <Heart size={16} fill={isLiked ? "#E74C3C" : "none"} />
+                        </button>
+                        <button 
+                          className="action-btn view-btn"
+                          onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="drawer-body-scroll">
-                      {tempItem?.id === plat._id && plat.offer?.enabled && (quantityInCart + 1) >= plat.offer.requiredQuantity && (() => {
-                        const totalQtyAfterAdding = quantityInCart + 1;
-                        const nbLots = Math.floor(totalQtyAfterAdding / plat.offer.requiredQuantity);
-                        const reste = totalQtyAfterAdding % plat.offer.requiredQuantity;
-                        const prixTotal = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
-                        const prixNormal = totalQtyAfterAdding * plat.price;
-                        const economie = prixNormal - prixTotal;
-                        return (
-                          <div className="drawer-section offer-activation-zone">
-                            <div className="offer-congrats"><Sparkles size={18} className="ribbon-icon" /><span>Offre Signature Activée !</span></div>
-                            <p className="offer-details">Vos <strong>{totalQtyAfterAdding} {plat.name}</strong> passent à <strong>{prixTotal.toFixed(2)}€</strong></p>
-                            {economie > 0 && (
-                              <p className="offer-subtext" style={{ color: '#4ade80', fontWeight: 'bold', marginTop: '5px' }}>
-                                Vous économisez immédiatement {economie.toFixed(2)}€
-                              </p>
+                    <div className="card-content">
+                      <div className="card-header">
+                        <div className="category-tag">{plat.category?.name}</div>
+                        {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
+                      </div>
+                      <h3 className="plat-title">{plat.name}</h3>
+                      <div className="title-underline"></div>
+                      <p className="plat-description">
+                        {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
+                      </p>
+                      {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
+                      
+                      <div className="card-footer">
+                        <div className="quantity-controls">
+                          {quantityInCart > 0 && !isExpanding && isJourOpen && (
+                            <button className="qty-btn remove" onClick={() => handleRemoveOne(itemsInCart, plat.name)}>
+                              <MinusCircle size={18} />
+                            </button>
+                          )}
+                          {quantityInCart > 0 && <span className="qty-badge">{quantityInCart}</span>}
+                          <button
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${!isJourOpen ? "preview-mode" : ""}`}
+                            onClick={() => handleAddClick(plat, quantityInCart)}
+                          >
+                            {isExpanding ? (
+                              <><Loader2 className="spin" size={16} /><span>Configuration...</span></>
+                            ) : !isJourOpen ? (
+                              <><Clock size={16} /><span>Préparer</span></>
+                            ) : (
+                              <><PlusCircle size={18} /><span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span></>
                             )}
-                          </div>
-                        );
-                      })()}
-
-                      {(plat.accompaniments?.filter(a => a.active).length || 0) > 0 && drawerItem && (
-                        <div className="drawer-section">
-                          <p className="drawer-label">Accompagnement (Gratuit)</p>
-                          <div className="acc-options-grid">
-                            {["Aucun", "Standard", ...plat.accompaniments.filter(a => a.active).map(a => a.name)].map(accName => (
-                              <button
-                                key={accName}
-                                className={`acc-mini-choice ${drawerItem.chosenAccompaniment === accName ? "selected" : ""}`}
-                                onClick={() => {
-                                  if (tempItem?.id === plat._id) handleUpdateTempAcc(accName);
-                                  else if (editingCartItemId) updateLineAccompaniment(editingCartItemId, accName);
-                                }}
-                              >
-                                {accName}
-                                {drawerItem.chosenAccompaniment === accName && <Check size={12} />}
-                              </button>
-                            ))}
-                          </div>
+                          </button>
                         </div>
-                      )}
+                        <button className="details-link" onClick={() => setFlippedId(plat._id)}>
+                          <span>Détails</span><ArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
 
-                      {suppsToShow.length > 0 && drawerItem && (
-                        <div className="drawer-section">
-                          <p className="drawer-label">Extras (Payant)</p>
-                          <div className="supps-list-container">
-                            {isLoadingSupps ? <Loader2 className="animate-spin" /> : suppsToShow.map(supp => {
-                              const count = drawerItem.supplements?.filter(s => s.id === supp._id).length || 0;
-                              return (
-                                <div key={supp._id} className="supp-card-mini">
-                                  <div className="supp-mini-info">
-                                    <span className="supp-mini-name">{supp.name}</span>
-                                    <span className="supp-mini-price">+{supp.price.toFixed(2)}€</span>
-                                  </div>
-                                  <div className="supp-actions-wrapper">
-                                    {count > 0 && (
-                                      <button className="supp-mini-remove" onClick={() => {
-                                        if (tempItem?.id === plat._id) handleRemoveTempSupp(supp._id);
-                                        else if (editingCartItemId) removeSupplementFromLine(editingCartItemId, supp._id);
-                                      }}>
-                                        <MinusCircle size={20} />
-                                      </button>
-                                    )}
-                                    {count > 0 && <span className="supp-count-badge">{count}</span>}
-                                    <button 
-                                      className={`supp-mini-add ${addedSuppId === supp._id ? "success" : ""}`} 
-                                      onClick={() => {
-                                        if (tempItem?.id === plat._id) {
-                                          handleAddTempSupp({ id: supp._id, name: supp.name, price: supp.price });
-                                        } else if (editingCartItemId) {
-                                          addSupplementToLine(editingCartItemId, { id: supp._id, name: supp.name, price: supp.price });
-                                          setAddedSuppId(supp._id);
-                                          setTimeout(() => setAddedSuppId(null), 800);
-                                        }
-                                      }}
-                                    >
-                                      {addedSuppId === supp._id ? <Check size={20} /> : <PlusCircle size={20} />}
-                                    </button>
-                                  </div>
+                    {/* TIROIR DE PERSONNALISATION */}
+                    <div id={`drawer-${plat._id}`} className={`customization-drawer-enhanced ${isExpanding ? "open" : ""}`}>
+                      <div className="drawer-handle-bar"></div>
+                      <div className="drawer-header-enhanced">
+                        <div className="drawer-title">
+                          <Sparkles size={16} color="#D4AF37" />
+                          <span>Personnalisez votre expérience</span>
+                        </div>
+                        <button className="drawer-close" onClick={() => setSelectingAccId(null)}><X size={18} /></button>
+                      </div>
+
+                      <div className="drawer-content-enhanced">
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
+                          const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
+                          const reste = quantityInCart % plat.offer.requiredQuantity;
+                          const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                          const economie = (plat.price * quantityInCart) - prixPromo;
+                          return (
+                            <div className="offer-card">
+                              <div className="offer-icon"><Gift size={20} /></div>
+                              <div className="offer-info">
+                                <div className="offer-title">Offre Signature Activée !</div>
+                                <div className="offer-price">
+                                  {quantityInCart} × {plat.name}
+                                  <span className="offer-savings">Économie : {economie.toFixed(2)}€</span>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                              </div>
+                            </div>
+                          );
+                        })()}
 
-                      {tempItem?.id === plat._id && (
-                        <button type="button" className="btn-confirm-drawer" onClick={handleConfirmAddition}>
-                          <Check size={20} /> Terminer et ajouter
+                        {activeAccs.length > 0 && lastItemAdded && (
+                          <div className="drawer-section">
+                            <label className="section-title"><Utensils size={14} />Accompagnement</label>
+                            <div className="options-grid">
+                              {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
+                                <button
+                                  key={accName}
+                                  className={`option ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
+                                  onClick={() => { updateLineAccompaniment(lastItemAdded.cartItemId, accName); triggerBounceHint(); }}
+                                >
+                                  {accName}
+                                  {lastItemAdded.chosenAccompaniment === accName && <Check size={12} />}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {plat.allowSupplements && lastItemAdded && (
+                          <div className="drawer-section">
+                            <label className="section-title"><PlusCircle size={14} />Extras & Suppléments</label>
+                            <div className="supplements-list">
+                              {isLoadingSupps ? (
+                                <div className="supp-loader"><Loader2 className="spin" size={24} /></div>
+                              ) : (
+                                supplementsDisponibles.map(supp => {
+                                  const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
+                                  return (
+                                    <div key={supp._id} className="supplement-item">
+                                      <div className="supp-info">
+                                        <span className="supp-name">{supp.name}</span>
+                                        <span className="supp-price">+{supp.price}€</span>
+                                      </div>
+                                      <div className="supp-quantity">
+                                        {count > 0 && (
+                                          <button className="supp-qty-btn" onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
+                                            <MinusCircle size={16} />
+                                          </button>
+                                        )}
+                                        {count > 0 && <span className="supp-count">{count}</span>}
+                                        <button 
+                                          className="supp-qty-btn add"
+                                          onClick={() => {
+                                            addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
+                                            setAddedSuppId(supp._id);
+                                            triggerBounceHint();
+                                            setTimeout(() => setAddedSuppId(null), 600);
+                                          }}
+                                        >
+                                          <PlusCircle size={16} className={addedSuppId === supp._id ? "added-animation" : ""} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <button className="drawer-confirm" onClick={() => setSelectingAccId(null)}>
+                          <Check size={18} /><span>Valider ma sélection</span>
                         </button>
-                      )}
-                      {editingCartItemId && editingItem?.id === plat._id && (
-                        <button type="button" className="btn-confirm-drawer" onClick={handleCloseDrawer}>
-                          <Check size={20} /> Valider les modifications
-                        </button>
-                      )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* FACE ARRIÈRE */}
-                <div className="card-face-soir card-back-soir">
-                  <button className="close-back-btn-soir" onClick={() => setFlippedId(null)}><X size={20} /></button>
-                  <div className="back-content-soir">
-                    <div className="back-header-soir">
-                      <div className="back-circle-img-soir">
-                        {plat.image ? <img src={plat.image} alt={plat.name} /> : <div className="circle-placeholder-soir">S</div>}
-                      </div>
-                      <div className="back-title-group">
-                        <h4>{plat.name}</h4>
-                        <span className="back-price-soir">{plat.price.toFixed(2)}€</span>
+                  {/* FACE ARRIÈRE */}
+                  <div className="card-back-enhanced">
+                    <button className="back-close" onClick={() => setFlippedId(null)}><X size={18} /></button>
+                    <div className="back-scroll">
+                      <div className="back-image"><img src={plat.image} alt={plat.name} /></div>
+                      <div className="back-details">
+                        <div className="back-category">{plat.category?.name}</div>
+                        <h2 className="back-title">{plat.name}</h2>
+                        <div className="back-price-large">{plat.price.toFixed(2)}€</div>
+                        <div className="back-info-grid">
+                          {plat.gastronomicNote && (
+                            <div className="info-item"><Star size={14} /><span>Note : {plat.gastronomicNote}/5</span></div>
+                          )}
+                          {plat.preparationTime && (
+                            <div className="info-item"><Clock size={14} /><span>Préparation : {plat.preparationTime} min</span></div>
+                          )}
+                          {plat.calories && (
+                            <div className="info-item"><Zap size={14} /><span>Calories : {plat.calories} kcal</span></div>
+                          )}
+                        </div>
+                        <div className="back-divider"></div>
+                        <p className="back-description-full">{plat.description}</p>
+                        <div className="back-tags">
+                          {plat.spicy && <span className="tag spicy">🌶️ Épicé</span>}
+                          {plat.vegetarian && <span className="tag veg">🌱 Végétarien</span>}
+                          {plat.vegan && <span className="tag vegan">🌿 Vegan</span>}
+                          {plat.glutenFree && <span className="tag gluten">🚫 Sans gluten</span>}
+                        </div>
+                        <div className="back-actions">
+                          <button 
+                            className="order-now-btn" 
+                            onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
+                          >
+                            {isJourOpen ? "Commander maintenant" : "Préparer ma commande"}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="gold-separator-small"></div>
-                    <div className="back-body-soir"><p className="full-description-soir">{plat.description}</p></div>
                   </div>
                 </div>
               </div>
+            );
+          })
+        ) : (
+          <div className="empty-state-enhanced">
+            <div className="empty-animation">
+              <Utensils size={64} strokeWidth={1} />
+              <div className="empty-sparkles">
+                <Sparkles className="sparkle-1" size={24} />
+                <Sparkles className="sparkle-2" size={16} />
+              </div>
             </div>
-          );
-        })}
+            <h3>Aucun résultat trouvé</h3>
+            <p>Nous n'avons pas trouvé de plat correspondant à votre recherche</p>
+            <button className="reset-filters" onClick={() => { setFilter("Tous"); setSearchTerm(""); }}>
+              Réinitialiser les filtres
+            </button>
+          </div>
+        )}
       </div>
 
       <BillPopup onBillPending={setHasPendingBill} />
