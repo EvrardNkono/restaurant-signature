@@ -1,115 +1,114 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useId } from "react";
 import { X, Gift, Sparkles, RotateCcw, ChevronDown, Calendar } from "lucide-react";
 import "./WheelGame.css";
 
-// ==================== CONFIGURATION DES RÉCOMPENSES ====================
+// ============================================================
+// CONFIGURATION DES RÉCOMPENSES
+// ============================================================
 interface Reward {
   id: string;
   label: string;
   emoji: string;
   color: string;
-  probability: number;
+  probability: number; // poids relatif à l'intérieur de son palier (tier)
   description: string;
   tier: "common" | "rare" | "legendary";
 }
 
 const REWARDS: Reward[] = [
-  // ===== COMMUNES =====
-  {
-    id: "canette-1",
-    label: "Canette de jus",
-    emoji: "🥤",
-    color: "#4FC3F7",
-    probability: 30,
-    description: "Une canette de jus frais offerte",
-    tier: "common"
-  },
-  {
-    id: "accompagnement-1",
-    label: "Accompagnement offert",
-    emoji: "🍚",
-    color: "#81C784",
-    probability: 25,
-    description: "Un accompagnement au choix offert",
-    tier: "common"
-  },
-  {
-    id: "supplement-1",
-    label: "Supplément offert",
-    emoji: "🧂",
-    color: "#FFD54F",
-    probability: 20,
-    description: "Un supplément au choix offert",
-    tier: "common"
-  },
-  {
-    id: "ailes-1",
-    label: "Ailes de poulet",
-    emoji: "🍗",
-    color: "#FF8A65",
-    probability: 15,
-    description: "6 ailes de poulet offertes",
-    tier: "common"
-  },
-  
-  // ===== RARES =====
-  {
-    id: "mafe-1",
-    label: "Mafé Poulet",
-    emoji: "🍛",
-    color: "#FF6B35",
-    probability: 1,
-    description: "Un délicieux Mafé Poulet offert",
-    tier: "rare"
-  },
-  {
-    id: "yassa-1",
-    label: "Yassa Poulet",
-    emoji: "🍋",
-    color: "#66BB6A",
-    probability: 1,
-    description: "Un Yassa Poulet parfumé offert",
-    tier: "rare"
-  },
-  {
-    id: "tchiep-1",
-    label: "Tchiep Poulet",
-    emoji: "🍲",
-    color: "#AB47BC",
-    probability: 1,
-    description: "Un Tchiep Poulet traditionnel offert",
-    tier: "rare"
-  },
-  {
-    id: "brochette-1",
-    label: "Brochettes viande",
-    emoji: "🥩",
-    color: "#EF5350",
-    probability: 1,
-    description: "4 brochettes de viande offertes",
-    tier: "rare"
-  },
-  {
-    id: "tilapia-1",
-    label: "Tilapia frit",
-    emoji: "🐟",
-    color: "#42A5F5",
-    probability: 1,
-    description: "Un Tilapia frit croustillant offert",
-    tier: "rare"
-  },
-  
-  // ===== LÉGENDAIRE =====
-  {
-    id: "reduction-20",
-    label: "-20€ sur la note",
-    emoji: "💰",
-    color: "#FFD700",
-    probability: 0.1,
-    description: "20€ de réduction sur votre addition",
-    tier: "legendary"
-  }
+  { id: "canette-1", label: "Canette de jus", emoji: "🥤", color: "#4FC3F7", probability: 30, description: "Une canette de jus frais offerte", tier: "common" },
+  { id: "accompagnement-1", label: "Accompagnement offert", emoji: "🍚", color: "#81C784", probability: 25, description: "Un accompagnement au choix offert", tier: "common" },
+  { id: "supplement-1", label: "Supplément offert", emoji: "🧂", color: "#FFD54F", probability: 20, description: "Un supplément au choix offert", tier: "common" },
+  { id: "ailes-1", label: "Ailes de poulet", emoji: "🍗", color: "#FF8A65", probability: 15, description: "6 ailes de poulet offertes", tier: "common" },
+  { id: "mafe-1", label: "Mafé Poulet", emoji: "🍛", color: "#FF6B35", probability: 1, description: "Un délicieux Mafé Poulet offert", tier: "rare" },
+  { id: "yassa-1", label: "Yassa Poulet", emoji: "🍋", color: "#66BB6A", probability: 1, description: "Un Yassa Poulet parfumé offert", tier: "rare" },
+  { id: "tchiep-1", label: "Tchiep Poulet", emoji: "🍲", color: "#AB47BC", probability: 1, description: "Un Tchiep Poulet traditionnel offert", tier: "rare" },
+  { id: "brochette-1", label: "Brochettes viande", emoji: "🥩", color: "#EF5350", probability: 1, description: "4 brochettes de viande offertes", tier: "rare" },
+  { id: "tilapia-1", label: "Tilapia frit", emoji: "🐟", color: "#42A5F5", probability: 1, description: "Un Tilapia frit croustillant offert", tier: "rare" },
+  { id: "reduction-20", label: "-20€ sur la note", emoji: "💰", color: "#FFD700", probability: 1, description: "20€ de réduction sur votre addition", tier: "legendary" },
 ];
+
+const NUM_SEGMENTS = REWARDS.length;
+const SEGMENT_ANGLE = 360 / NUM_SEGMENTS;
+const CENTER = 150;
+const RADIUS = 140;
+
+// Paliers de la mécanique de tirage (pity system lisible)
+const WARMUP_SPINS = 20; // avant ce seuil : que du commun
+const LEGENDARY_UNLOCK = 50; // avant ce seuil : pas de légendaire possible
+const RARE_CHANCE = 0.05; // 5% une fois le palier "warmup" passé
+const LEGENDARY_CHANCE = 0.001; // 0.1% une fois le palier légendaire passé
+
+// ==================== HELPERS GÉOMÉTRIE (calculés une seule fois, pas par frame) ====================
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function describeSegmentPath(index: number) {
+  const start = index * SEGMENT_ANGLE;
+  const end = start + SEGMENT_ANGLE;
+  const p1 = polarToCartesian(CENTER, CENTER, RADIUS, start);
+  const p2 = polarToCartesian(CENTER, CENTER, RADIUS, end);
+  const largeArc = SEGMENT_ANGLE > 180 ? 1 : 0;
+  return `M ${CENTER} ${CENTER} L ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} Z`;
+}
+
+// ==================== TIRAGE PONDÉRÉ ====================
+function pickWeighted(pool: Reward[]): Reward {
+  const total = pool.reduce((sum, r) => sum + r.probability, 0);
+  let roll = Math.random() * total;
+  for (const reward of pool) {
+    if (roll < reward.probability) return reward;
+    roll -= reward.probability;
+  }
+  return pool[pool.length - 1];
+}
+
+const COMMON_POOL = REWARDS.filter((r) => r.tier === "common");
+const RARE_POOL = REWARDS.filter((r) => r.tier === "rare");
+const LEGENDARY_POOL = REWARDS.filter((r) => r.tier === "legendary");
+
+function getRandomReward(spinCount: number, isTestMode: boolean): Reward {
+  if (isTestMode) {
+    const roll = Math.random();
+    if (roll < 0.05) return pickWeighted(LEGENDARY_POOL);
+    if (roll < 0.2) return pickWeighted(RARE_POOL);
+    return pickWeighted(COMMON_POOL);
+  }
+
+  if (spinCount < WARMUP_SPINS) return pickWeighted(COMMON_POOL);
+
+  const roll = Math.random();
+  if (spinCount >= LEGENDARY_UNLOCK && roll < LEGENDARY_CHANCE) return pickWeighted(LEGENDARY_POOL);
+  if (roll < RARE_CHANCE) return pickWeighted(RARE_POOL);
+  return pickWeighted(COMMON_POOL);
+}
+
+// ==================== CONFETTIS (CSS pur, pas de boucle JS) ====================
+interface ConfettiPiece {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  drift: number;
+  size: number;
+  color: string;
+}
+
+const CONFETTI_COLORS = ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#FF6BFF", "#D4AF37", "#F5E6A3"];
+
+function makeConfetti(count: number): ConfettiPiece[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.4,
+    duration: 2.4 + Math.random() * 1.4,
+    drift: (Math.random() - 0.5) * 80,
+    size: 5 + Math.random() * 5,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+  }));
+}
 
 // ==================== COMPOSANT PRINCIPAL ====================
 interface WheelGameProps {
@@ -120,438 +119,195 @@ interface WheelGameProps {
 }
 
 export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }: WheelGameProps) {
-  const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
-  const [confetti, setConfetti] = useState<{ x: number; y: number; color: string; size: number; velocity: number; angle: number }[]>([]);
-  const [hasAutoScrolled, setHasAutoScrolled] = useState(false);
+  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
   const [canSpin, setCanSpin] = useState(true);
   const [nextSpinDate, setNextSpinDate] = useState<string | null>(null);
   const [spinCount, setSpinCount] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // ==================== VÉRIFICATION DU TOUR MENSUEL ====================
-  const checkMonthlySpin = useCallback(() => {
+  const resultHeadingId = useId();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const wheelRef = useRef<SVGGElement>(null);
+  const confettiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRewardRef = useRef<Reward | null>(null);
+
+  // ==================== PRÉFÉRENCE "MOUVEMENT RÉDUIT" ====================
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(query.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    query.addEventListener("change", handler);
+    return () => query.removeEventListener("change", handler);
+  }, []);
+
+  // ==================== VÉRIFICATION DU TOUR DISPONIBLE ====================
+  const checkAvailability = useCallback(() => {
     if (isTestMode) {
       setCanSpin(true);
-      return true;
+      return;
     }
 
-    const lastSpin = localStorage.getItem('wheel_last_spin');
+    const lastSpin = localStorage.getItem("wheel_last_spin");
     const today = new Date().toDateString();
-    
+    const count = parseInt(localStorage.getItem("wheel_spin_count") || "0", 10);
+    setSpinCount(count);
+
     if (lastSpin === today) {
       setCanSpin(false);
       const nextDate = new Date();
       nextDate.setDate(nextDate.getDate() + 1);
-      setNextSpinDate(nextDate.toLocaleDateString('fr-FR', { 
-        day: 'numeric', 
-        month: 'long',
-        year: 'numeric' 
-      }));
-      return false;
+      setNextSpinDate(nextDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }));
+    } else {
+      setCanSpin(true);
     }
-    
-    const count = parseInt(localStorage.getItem('wheel_spin_count') || '0');
-    setSpinCount(count);
-    
-    return true;
   }, [isTestMode]);
 
-  // ==================== SÉLECTION DU GAIN ====================
-  const getRandomReward = useCallback((): Reward => {
-    const commonRewards = REWARDS.filter(r => r.tier === "common");
-    const rareRewards = REWARDS.filter(r => r.tier === "rare");
-    const legendaryRewards = REWARDS.filter(r => r.tier === "legendary");
-    
-    const spinCount = parseInt(localStorage.getItem('wheel_spin_count') || '0');
-    const newSpinCount = spinCount + 1;
-    
-    if (isTestMode) {
-      const random = Math.random() * 100;
-      if (random < 5) {
-        return legendaryRewards[Math.floor(Math.random() * legendaryRewards.length)];
-      }
-      if (random < 15) {
-        return rareRewards[Math.floor(Math.random() * rareRewards.length)];
-      }
-      return commonRewards[Math.floor(Math.random() * commonRewards.length)];
-    }
-    
-    localStorage.setItem('wheel_spin_count', String(newSpinCount));
-    setSpinCount(newSpinCount);
-    
-    if (newSpinCount < 50) {
-      if (newSpinCount < 20) {
-        return commonRewards[Math.floor(Math.random() * commonRewards.length)];
-      } else {
-        const rareChance = Math.random() * 100;
-        if (rareChance < 5) {
-          return rareRewards[Math.floor(Math.random() * rareRewards.length)];
-        }
-        return commonRewards[Math.floor(Math.random() * commonRewards.length)];
-      }
-    }
-    
-    const random = Math.random() * 100;
-    
-    if (random < 0.1 && newSpinCount > 50) {
-      return legendaryRewards[Math.floor(Math.random() * legendaryRewards.length)];
-    }
-    
-    if (random < 2) {
-      return rareRewards[Math.floor(Math.random() * rareRewards.length)];
-    }
-    
-    return commonRewards[Math.floor(Math.random() * commonRewards.length)];
-  }, [isTestMode]);
-
-  // ==================== AUTO-SCROLL ====================
   useEffect(() => {
-    if (isOpen) {
-      const canPlay = checkMonthlySpin();
-      setCanSpin(canPlay);
-      
-      if (!hasAutoScrolled) {
-        setHasAutoScrolled(true);
-        setTimeout(() => {
-          const modal = modalRef.current;
-          if (modal) {
-            modal.scrollTo({
-              top: modal.scrollHeight,
-              behavior: 'smooth'
-            });
-            setTimeout(() => {
-              modal.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-              });
-            }, 1500);
-          }
-        }, 500);
-      }
-    }
-  }, [isOpen, checkMonthlySpin, hasAutoScrolled]);
+    if (isOpen) checkAvailability();
+  }, [isOpen, checkAvailability]);
 
-  // ==================== DESSIN DE LA ROUE ====================
-  const drawWheel = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) / 2 - 20;
-    const numSegments = REWARDS.length;
-    const anglePerSegment = (2 * Math.PI) / numSegments;
+  // ==================== FERMER AVEC ÉCHAP ====================
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen, onClose]);
 
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.shadowColor = 'rgba(0,0,0,0.3)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 5;
-
-    REWARDS.forEach((reward, index) => {
-      const startAngle = (index * anglePerSegment) + rotation;
-      const endAngle = startAngle + anglePerSegment;
-
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-      ctx.closePath();
-
-      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-      gradient.addColorStop(0, reward.color);
-      gradient.addColorStop(1, reward.color);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(startAngle + anglePerSegment / 2);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      ctx.font = '28px sans-serif';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 10;
-      ctx.fillText(reward.emoji, radius * 0.7, -12);
-
-      ctx.font = '8px sans-serif';
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 8;
-      const tierLabel = reward.tier === 'legendary' ? '⭐' : reward.tier === 'rare' ? '✦' : '';
-      ctx.fillText(tierLabel, radius * 0.7, 30);
-      ctx.shadowBlur = 0;
-
-      ctx.restore();
-    });
-
-    ctx.shadowColor = 'rgba(212,175,55,0.5)';
-    ctx.shadowBlur = 40;
-    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 55);
-    gradient.addColorStop(0, '#FFE082');
-    gradient.addColorStop(0.5, '#D4AF37');
-    gradient.addColorStop(1, '#8B6914');
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 15px "Playfair Display", serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0,0,0,0.1)';
-    ctx.shadowBlur = 5;
-    ctx.fillText('Signature', centerX, centerY - 6);
-    ctx.font = '8px sans-serif';
-    ctx.fillText('✨ Tourne ✨', centerX, centerY + 16);
-    ctx.shadowBlur = 0;
-  }, [rotation]);
-
-  // ==================== CONFETTIS ====================
-  const generateConfetti = () => {
-    const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF6BFF', '#D4AF37', '#F5E6A3'];
-    const newConfetti = [];
-    for (let i = 0; i < 80; i++) {
-      newConfetti.push({
-        x: Math.random() * 100,
-        y: Math.random() * 100 - 20,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        size: 4 + Math.random() * 6,
-        velocity: 2 + Math.random() * 4,
-        angle: Math.random() * 360
-      });
-    }
-    setConfetti(newConfetti);
-  };
+  // ==================== SEGMENTS DE LA ROUE (calculés une seule fois) ====================
+  const segments = useMemo(
+    () =>
+      REWARDS.map((reward, index) => {
+        const midAngle = index * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+        const labelPos = polarToCartesian(CENTER, CENTER, RADIUS * 0.68, midAngle);
+        return {
+          reward,
+          path: describeSegmentPath(index),
+          midAngle,
+          labelPos,
+        };
+      }),
+    []
+  );
 
   // ==================== LANCER LA ROUE ====================
   const spinWheel = useCallback(() => {
     if (isSpinning || hasSpun || !canSpin) return;
 
     if (!isTestMode) {
-      const today = new Date().toDateString();
-      localStorage.setItem('wheel_last_spin', today);
+      localStorage.setItem("wheel_last_spin", new Date().toDateString());
     }
+
+    const newSpinCount = spinCount + 1;
+    if (!isTestMode) {
+      localStorage.setItem("wheel_spin_count", String(newSpinCount));
+    }
+    setSpinCount(newSpinCount);
+
+    const reward = getRandomReward(newSpinCount, isTestMode);
+    pendingRewardRef.current = reward;
+
+    const rewardIndex = REWARDS.findIndex((r) => r.id === reward.id);
+    const targetMidAngle = rewardIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+    // Le pointeur est fixe en haut : on veut que targetMidAngle atterrisse à 0° (haut) après rotation.
+    const desiredFinalMod = ((-targetMidAngle % 360) + 360) % 360;
+    const currentMod = ((rotation % 360) + 360) % 360;
+    const diff = ((desiredFinalMod - currentMod + 360) % 360);
+    const extraSpins = prefersReducedMotion ? 1 : 5 + Math.floor(Math.random() * 4);
+    const newRotation = rotation + extraSpins * 360 + diff;
 
     setIsSpinning(true);
     setSelectedReward(null);
     setShowResult(false);
     setConfetti([]);
+    setRotation(newRotation);
+  }, [isSpinning, hasSpun, canSpin, isTestMode, spinCount, rotation, prefersReducedMotion]);
 
-    const reward = getRandomReward();
+  // ==================== FIN DE ROTATION (déclenché par le navigateur, pas par du JS par frame) ====================
+  const handleTransitionEnd = useCallback(() => {
+    if (!isSpinning) return;
+    const reward = pendingRewardRef.current;
+    setIsSpinning(false);
+    setHasSpun(true);
+    if (!reward) return;
     setSelectedReward(reward);
+    setShowResult(true);
 
-    const numSegments = REWARDS.length;
-    const rewardIndex = REWARDS.findIndex(r => r.id === reward.id);
-    const anglePerSegment = (2 * Math.PI) / numSegments;
-    
-    const targetAngle = -Math.PI / 2 - (rewardIndex * anglePerSegment) - anglePerSegment / 2;
-    
-    const spins = 5 + Math.floor(Math.random() * 5);
-    const totalRotation = (spins * 2 * Math.PI) + targetAngle;
-    
-    const startRotation = rotation;
-    const endRotation = startRotation + totalRotation;
-    const duration = 4500 + Math.random() * 1000;
-    const startTime = Date.now();
+    if (reward.tier === "rare" || reward.tier === "legendary") {
+      setConfetti(makeConfetti(reward.tier === "legendary" ? 60 : 36));
+      if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
+      confettiTimeoutRef.current = setTimeout(() => setConfetti([]), 3600);
+    }
 
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-      const easedProgress = easeOut(progress);
-      
-      const currentRotation = startRotation + (endRotation - startRotation) * easedProgress;
-      setRotation(currentRotation);
+    if (onWin) onWin(reward);
+  }, [isSpinning, onWin]);
 
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      } else {
-        setRotation(endRotation);
-        setIsSpinning(false);
-        setShowResult(true);
-        setHasSpun(true);
-        
-        if (reward.tier === 'rare' || reward.tier === 'legendary') {
-          generateConfetti();
-        }
-        
-        if (onWin) onWin(reward);
-      }
-    };
+  useEffect(() => () => {
+    if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
+  }, []);
 
-    animate();
-  }, [isSpinning, hasSpun, canSpin, rotation, getRandomReward, onWin, isTestMode]);
-
-  // ==================== RÉINITIALISER ====================
+  // ==================== RÉINITIALISER (mode test uniquement) ====================
   const resetGame = () => {
     setHasSpun(false);
     setSelectedReward(null);
     setShowResult(false);
-    setRotation(0);
     setConfetti([]);
-    setHasAutoScrolled(false);
-    
-    if (isTestMode) {
-      setCanSpin(true);
-    } else {
-      checkMonthlySpin();
-    }
+    checkAvailability();
   };
 
-  // ==================== RENDER CANVAS ====================
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.parentElement?.getBoundingClientRect();
-    const size = Math.min(rect?.width || 500, 500);
-    canvas.width = size;
-    canvas.height = size;
-
-    drawWheel(ctx, size, size);
-  }, [rotation, drawWheel]);
-
-  // ==================== REDIMENSIONNEMENT ====================
-  useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      const size = Math.min(rect?.width || 500, 500);
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      if (ctx) drawWheel(ctx, size, size);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [drawWheel]);
-
-  // ==================== ANIMATION CONFETTIS ====================
-  useEffect(() => {
-    if (confetti.length === 0) return;
-
-    const canvas = document.getElementById('confetti-canvas') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.parentElement?.getBoundingClientRect();
-    canvas.width = rect?.width || 560;
-    canvas.height = rect?.height || 500;
-
-    let frameId: number;
-
-    const animateConfetti = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      confetti.forEach((c) => {
-        c.y += c.velocity;
-        c.x += Math.sin(c.angle * Math.PI / 180) * 0.5;
-        c.angle += 2;
-
-        if (c.y > canvas.height + 20) {
-          c.y = -10;
-          c.x = Math.random() * 100;
-        }
-
-        ctx.save();
-        ctx.translate(c.x * canvas.width / 100, c.y);
-        ctx.rotate(c.angle * Math.PI / 180);
-        ctx.fillStyle = c.color;
-        ctx.shadowColor = 'rgba(0,0,0,0.1)';
-        ctx.shadowBlur = 5;
-        ctx.fillRect(-c.size/2, -c.size/2, c.size, c.size * 1.5);
-        ctx.restore();
-      });
-
-      frameId = requestAnimationFrame(animateConfetti);
-    };
-
-    animateConfetti();
-
-    return () => {
-      if (frameId) cancelAnimationFrame(frameId);
-    };
-  }, [confetti]);
-
-  // ==================== NETTOYAGE ====================
-  useEffect(() => {
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, []);
-
-  // ==================== RENDU ====================
   if (!isOpen) return null;
+
+  const statusLabel = !canSpin ? "⏳ Attente" : hasSpun ? "✅ Joué" : "🎯 Prêt";
+  const statusColor = hasSpun ? "#9a9a9a" : canSpin ? "#4ade80" : "#f87171";
 
   return (
     <div className="wheel-game-overlay" onClick={onClose}>
-      <div className="wheel-game-modal" ref={modalRef} onClick={(e) => e.stopPropagation()}>
-        {/* CONFETTIS */}
-        {showResult && confetti.length > 0 && (
-          <canvas id="confetti-canvas" className="confetti-canvas" />
-        )}
-
+      <div
+        className="wheel-game-modal"
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wheel-game-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* HEADER */}
         <div className="wheel-game-header">
-          <div className="header-icon">
-            <Gift size={24} color="#D4AF37" />
+          <div className="header-icon" aria-hidden="true">
+            <Gift size={22} color="#D4AF37" />
           </div>
-          <h2>🎯 Tentez votre chance !</h2>
-          <button className="close-btn" onClick={onClose}>
+          <h2 id="wheel-game-title">Tentez votre chance</h2>
+          <button className="close-btn" onClick={onClose} aria-label="Fermer">
             <X size={20} />
           </button>
         </div>
 
-        {/* BADGE MODE TEST */}
         {isTestMode && (
           <div className="test-mode-badge">
-            <span>🧪 MODE TEST</span>
-            <span className="test-hint">Tours illimités - Rareté réduite</span>
+            <span>🧪 Mode test</span>
+            <span className="test-hint">Tours illimités · rareté augmentée</span>
           </div>
         )}
 
-        {/* BANNIÈRE D'ATTENTE */}
         {!canSpin && !isTestMode && (
           <div className="waiting-banner">
-            <Calendar size={18} />
-            <span>Prochain tour disponible le <strong>{nextSpinDate}</strong></span>
+            <Calendar size={16} />
+            <span>
+              Prochain tour disponible le <strong>{nextSpinDate}</strong>
+            </span>
           </div>
         )}
 
-        {/* INDICATEUR DE SCROLL */}
         {!hasSpun && !showResult && canSpin && (
-          <div className="scroll-indicator">
-            <div className="scroll-hint">
-              <ChevronDown size={20} className="scroll-chevron" />
-              <span>Découvrez les récompenses</span>
-              <ChevronDown size={20} className="scroll-chevron" />
-            </div>
+          <div className="scroll-indicator" aria-hidden="true">
+            <ChevronDown size={16} className="scroll-chevron" />
+            <span>Découvrez les récompenses</span>
           </div>
         )}
 
@@ -559,39 +315,116 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
         <div className="wheel-stats">
           <div className="stat-item">
             <span className="stat-label">Statut</span>
-            <span className="stat-value" style={{ fontSize: '1rem', color: hasSpun ? '#888' : canSpin ? '#4ade80' : '#f87171' }}>
-              {!canSpin ? '⏳ Attente' : hasSpun ? '✅ Joué' : '🎯 Prêt'}
+            <span className="stat-value" style={{ fontSize: "0.95rem", color: statusColor }}>
+              {statusLabel}
             </span>
           </div>
-          <div className="stat-divider"></div>
-          <div className="stat-item">
-            <span className="stat-label">Tour</span>
-            <span className="stat-value">{hasSpun ? '0' : '1'}</span>
-          </div>
-          <div className="stat-divider"></div>
+          <div className="stat-divider" />
           <div className="stat-item">
             <span className="stat-label">Tentatives</span>
-            <span className="stat-value" style={{ fontSize: '1rem' }}>{spinCount}</span>
+            <span className="stat-value">{spinCount}</span>
           </div>
         </div>
 
-        {/* ROUE */}
+        {/* ROUE SVG */}
         <div className="wheel-container">
           <div className="wheel-wrapper">
-            <canvas ref={canvasRef} className="wheel-canvas" />
-            <div className="wheel-pointer">
-              <div className="pointer-triangle"></div>
-              <div className="pointer-dot"></div>
+            <div className="wheel-pointer" aria-hidden="true">
+              <div className="pointer-triangle" />
+              <div className="pointer-dot" />
             </div>
-            <div className="wheel-center-decoration">
-              <Sparkles size={20} color="#D4AF37" />
-            </div>
+
+            <svg
+              viewBox="0 0 300 300"
+              className="wheel-svg"
+              role="img"
+              aria-label="Roue de récompenses"
+            >
+              <defs>
+                <radialGradient id="hubGradient" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#FFE082" />
+                  <stop offset="55%" stopColor="#D4AF37" />
+                  <stop offset="100%" stopColor="#8B6914" />
+                </radialGradient>
+              </defs>
+
+              <g
+                ref={wheelRef}
+                className="wheel-rotor"
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transitionDuration: isSpinning ? (prefersReducedMotion ? "0.6s" : `${4.6 + (rotation % 3) * 0.1}s`) : "0s",
+                }}
+                onTransitionEnd={handleTransitionEnd}
+              >
+                {segments.map(({ reward, path, midAngle, labelPos }) => (
+                  <g key={reward.id}>
+                    <path d={path} fill={reward.color} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
+                    <text
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y})`}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize="22"
+                      className="wheel-emoji"
+                    >
+                      {reward.emoji}
+                    </text>
+                    {reward.tier !== "common" && (
+                      <text
+                        x={labelPos.x}
+                        y={labelPos.y + 18}
+                        transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y + 18})`}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize="9"
+                        fill="#fff"
+                        className="wheel-tier-mark"
+                      >
+                        {reward.tier === "legendary" ? "⭐" : "✦"}
+                      </text>
+                    )}
+                  </g>
+                ))}
+              </g>
+
+              <circle cx={CENTER} cy={CENTER} r="48" fill="url(#hubGradient)" stroke="rgba(255,255,255,0.25)" strokeWidth="2" />
+              <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="hub-title">
+                Signature
+              </text>
+              <text x={CENTER} y={CENTER + 14} textAnchor="middle" className="hub-subtitle">
+                ✨ Tourne ✨
+              </text>
+            </svg>
+
+            {/* CONFETTIS CSS */}
+            {confetti.length > 0 && (
+              <div className="confetti-layer" aria-hidden="true">
+                {confetti.map((c) => (
+                  <span
+                    key={c.id}
+                    className="confetti-piece"
+                    style={{
+                      left: `${c.left}%`,
+                      width: c.size,
+                      height: c.size * 1.5,
+                      backgroundColor: c.color,
+                      animationDelay: `${c.delay}s`,
+                      animationDuration: `${c.duration}s`,
+                      // @ts-ignore custom property for drift
+                      "--drift": `${c.drift}px`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* BOUTON LANCER */}
-        <button 
-          className={`spin-btn ${isSpinning ? 'spinning' : ''} ${(hasSpun || !canSpin) ? 'disabled' : ''}`}
+        <button
+          className={`spin-btn ${isSpinning ? "spinning" : ""} ${hasSpun || !canSpin ? "disabled" : ""}`}
           onClick={spinWheel}
           disabled={isSpinning || hasSpun || !canSpin}
         >
@@ -601,16 +434,11 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
               <span>Attendez le prochain tour</span>
             </>
           ) : isSpinning ? (
-            <>
-              <span className="spinner-dot"></span>
-              <span className="spinner-dot"></span>
-              <span className="spinner-dot"></span>
-              <span>En cours...</span>
-            </>
+            <span>La roue tourne…</span>
           ) : hasSpun ? (
             <>
               <RotateCcw size={18} />
-              <span>{isTestMode ? '🔁 Rejouer' : 'Tour terminé'}</span>
+              <span>{isTestMode ? "Rejouer" : "Tour terminé"}</span>
             </>
           ) : (
             <>
@@ -621,65 +449,65 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
         </button>
 
         {/* RÉSULTAT */}
-        {showResult && selectedReward && (
-          <div className={`wheel-result ${selectedReward.tier === 'legendary' ? 'legendary-result' : ''}`}>
-            <div className={`result-card tier-${selectedReward.tier}`} style={{ borderColor: selectedReward.color }}>
-              <div className="result-icon" style={{ background: selectedReward.color }}>
-                {selectedReward.emoji}
-              </div>
-              <div className="result-content">
-                <h4>🎉 {selectedReward.label}</h4>
-                <p>{selectedReward.description}</p>
-                <div className="result-badge">
-                  {selectedReward.tier === 'legendary' && '👑 '}
-                  {selectedReward.tier === 'rare' && '⭐ '}
-                  <Sparkles size={12} />
-                  <span>Gagné !</span>
+        <div aria-live="polite">
+          {showResult && selectedReward && (
+            <div className={`wheel-result ${selectedReward.tier === "legendary" ? "legendary-result" : ""}`}>
+              <div className={`result-card tier-${selectedReward.tier}`} style={{ borderColor: selectedReward.color }}>
+                <div className="result-icon" style={{ background: selectedReward.color }} aria-hidden="true">
+                  {selectedReward.emoji}
+                </div>
+                <div className="result-content">
+                  <h4 id={resultHeadingId}>Gagné : {selectedReward.label}</h4>
+                  <p>{selectedReward.description}</p>
+                  <div className="result-badge">
+                    {selectedReward.tier === "legendary" && "👑 "}
+                    {selectedReward.tier === "rare" && "⭐ "}
+                    <Sparkles size={12} />
+                    <span>Récompense débloquée</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* BOUTON RÉINITIALISER */}
-        {hasSpun && (
+        {isTestMode && hasSpun && (
           <button className="reset-btn" onClick={resetGame}>
             <RotateCcw size={16} />
-            <span>{isTestMode ? '🔄 Nouveau test' : 'Rejouer'}</span>
+            <span>Nouveau test</span>
           </button>
         )}
 
-        {/* ========== RÉCOMPENSES - SANS POURCENTAGES ========== */}
+        {/* LISTE DES RÉCOMPENSES */}
         <div className="rewards-list">
           <div className="rewards-header">
-            <h4>🎁 Récompenses possibles</h4>
+            <h4>Récompenses possibles</h4>
             <span className="rewards-badge">
               <Sparkles size={12} />
               {REWARDS.length} gains
             </span>
           </div>
           <div className="rewards-grid">
-            {/* Récompenses communes */}
-            <div className="reward-group-label">🔥 Courantes</div>
-            {REWARDS.filter(r => r.tier === "common").map((reward) => (
+            <div className="reward-group-label">Courantes</div>
+            {COMMON_POOL.map((reward) => (
               <div key={reward.id} className="reward-item">
-                <span className="reward-emoji">{reward.emoji}</span>
+                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
               </div>
             ))}
-            
-            <div className="reward-group-label">⭐ Rares</div>
-            {REWARDS.filter(r => r.tier === "rare").map((reward) => (
+
+            <div className="reward-group-label">Rares</div>
+            {RARE_POOL.map((reward) => (
               <div key={reward.id} className="reward-item rare">
-                <span className="reward-emoji">{reward.emoji}</span>
+                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
               </div>
             ))}
-            
-            <div className="reward-group-label">💎 Légendaire</div>
-            {REWARDS.filter(r => r.tier === "legendary").map((reward) => (
+
+            <div className="reward-group-label">Légendaire</div>
+            {LEGENDARY_POOL.map((reward) => (
               <div key={reward.id} className="reward-item legendary">
-                <span className="reward-emoji">{reward.emoji}</span>
+                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
               </div>
             ))}
