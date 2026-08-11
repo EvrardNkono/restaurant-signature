@@ -581,3 +581,112 @@
   .confetti-piece { animation-duration: 0.01s !important; opacity: 0 !important; }
   .spin-btn:hover:not(:disabled) { transform: none; }
 }
+
+/* ─── GATE POST-SPIN ─── */
+.review-gate.post-spin {
+  padding: 1.5rem 0.5rem;
+  background: rgba(212, 175, 55, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  margin: 0.5rem 0 1rem;
+}
+
+.review-gate.post-spin .review-gate-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 0.5rem;
+}
+
+.review-gate.post-spin h3 {
+  font-size: 1.2rem;
+  color: #ffd700;
+  margin-top: 0.2rem;
+  text-align: center;
+}
+
+.review-gate.post-spin .review-gate-cta-line {
+  font-size: 1rem !important;
+  color: #f5e6a3 !important;
+  text-align: center;
+}
+
+.reward-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 2px dashed rgba(212, 175, 55, 0.2);
+  min-width: 80px;
+}
+
+.reward-preview-emoji {
+  font-size: 2.5rem;
+  opacity: 0.6;
+}
+
+.reward-preview-label {
+  font-size: 0.8rem;
+  color: #888;
+  letter-spacing: 2px;
+}
+
+.review-confirm-btn {
+  padding: 0.7rem 1.4rem;
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 12px;
+  color: #d4af37;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.review-confirm-btn:hover:not(.disabled) {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.review-confirm-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #777;
+}
+
+.review-gate-hint {
+  font-size: 0.7rem;
+  color: #777;
+  margin-top: 0.2rem;
+  text-align: center;
+}
+
+.review-gate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.8rem 1.4rem;
+  background: #fff;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin: 0.5rem 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-gate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}

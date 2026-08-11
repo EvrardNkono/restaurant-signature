@@ -2,11 +2,15 @@ import { useState, useEffect, useMemo, useCallback, useRef, useId } from "react"
 import { X, Gift, Sparkles, RotateCcw, ChevronDown, Calendar, ExternalLink } from "lucide-react";
 import "./WheelGame.css";
 
-// Même lien que dans la Navbar — à garder synchronisé si le Place ID change.
+// ==================== CONSTANTES ====================
 const GOOGLE_REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJC5K8D1L75UcRLFLJMr2OF14";
 const REVIEW_CONFIRMED_KEY = "wheel_review_confirmed";
+const PENDING_REWARD_KEY = "wheel_pending_reward";
+const PENDING_REWARD_EXPIRY_KEY = "wheel_pending_reward_expiry";
+const SPIN_COUNT_KEY = "wheel_spin_count";
+const LAST_SPIN_KEY = "wheel_last_spin";
 
-// Icône Google officielle (4 couleurs), en SVG inline.
+// Icône Google officielle
 function GoogleIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
@@ -18,15 +22,13 @@ function GoogleIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-// ============================================================
-// CONFIGURATION DES RÉCOMPENSES
-// ============================================================
+// ==================== CONFIGURATION DES RÉCOMPENSES ====================
 interface Reward {
   id: string;
   label: string;
   emoji: string;
   color: string;
-  probability: number; // poids relatif à l'intérieur de son palier (tier)
+  probability: number;
   description: string;
   tier: "common" | "rare" | "legendary";
 }
@@ -49,13 +51,13 @@ const SEGMENT_ANGLE = 360 / NUM_SEGMENTS;
 const CENTER = 150;
 const RADIUS = 140;
 
-// Paliers de la mécanique de tirage (pity system lisible)
-const WARMUP_SPINS = 20; // avant ce seuil : que du commun
-const LEGENDARY_UNLOCK = 50; // avant ce seuil : pas de légendaire possible
-const RARE_CHANCE = 0.05; // 5% une fois le palier "warmup" passé
-const LEGENDARY_CHANCE = 0.001; // 0.1% une fois le palier légendaire passé
+// Paliers
+const WARMUP_SPINS = 20;
+const LEGENDARY_UNLOCK = 50;
+const RARE_CHANCE = 0.05;
+const LEGENDARY_CHANCE = 0.001;
 
-// ==================== HELPERS GÉOMÉTRIE (calculés une seule fois, pas par frame) ====================
+// ==================== HELPERS GÉOMÉTRIE ====================
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
   return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
@@ -101,7 +103,7 @@ function getRandomReward(spinCount: number, isTestMode: boolean): Reward {
   return pickWeighted(COMMON_POOL);
 }
 
-// ==================== CONFETTIS (CSS pur, pas de boucle JS) ====================
+// ==================== CONFETTIS ====================
 interface ConfettiPiece {
   id: number;
   left: number;
@@ -126,7 +128,7 @@ function makeConfetti(count: number): ConfettiPiece[] {
   }));
 }
 
-// ==================== COMPOSANT PRINCIPAL ====================
+// ==================== PROPS ====================
 interface WheelGameProps {
   isOpen: boolean;
   onClose: () => void;
@@ -134,6 +136,7 @@ interface WheelGameProps {
   isTestMode?: boolean;
 }
 
+// ==================== COMPOSANT PRINCIPAL ====================
 export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }: WheelGameProps) {
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -146,15 +149,21 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
   const [spinCount, setSpinCount] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
-  // ==================== PALIER "AVIS GOOGLE" ====================
-  const [reviewConfirmed, setReviewConfirmed] = useState(false);
+  // États pour le flux
   const [hasOpenedReviewLink, setHasOpenedReviewLink] = useState(false);
+  const [pendingReward, setPendingReward] = useState<Reward | null>(null);
+  const [pendingRewardExpiry, setPendingRewardExpiry] = useState<number | null>(null);
+  const [rewardRevealed, setRewardRevealed] = useState(false);
+  const [showReviewGateAfterSpin, setShowReviewGateAfterSpin] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [isRewardExpired, setIsRewardExpired] = useState(false);
 
   const resultHeadingId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<SVGGElement>(null);
   const confettiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingRewardRef = useRef<Reward | null>(null);
+  const scrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // ==================== PRÉFÉRENCE "MOUVEMENT RÉDUIT" ====================
   useEffect(() => {
@@ -165,6 +174,37 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     return () => query.removeEventListener("change", handler);
   }, []);
 
+  // ==================== VÉRIFIER LES RÉCOMPENSES EN ATTENTE ====================
+  const checkPendingReward = useCallback(() => {
+    const storedReward = localStorage.getItem(PENDING_REWARD_KEY);
+    const storedExpiry = localStorage.getItem(PENDING_REWARD_EXPIRY_KEY);
+    
+    if (storedReward && storedExpiry) {
+      const expiry = parseInt(storedExpiry, 10);
+      const now = Date.now();
+      
+      if (now < expiry) {
+        const reward = JSON.parse(storedReward);
+        setPendingReward(reward);
+        setPendingRewardExpiry(expiry);
+        setShowReviewGateAfterSpin(true);
+        setRewardRevealed(false);
+        setIsRewardExpired(false);
+        setTimeRemaining(Math.floor((expiry - now) / 1000));
+        return true;
+      } else {
+        localStorage.removeItem(PENDING_REWARD_KEY);
+        localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
+        setPendingReward(null);
+        setPendingRewardExpiry(null);
+        setShowReviewGateAfterSpin(false);
+        setRewardRevealed(false);
+        setIsRewardExpired(true);
+      }
+    }
+    return false;
+  }, []);
+
   // ==================== VÉRIFICATION DU TOUR DISPONIBLE ====================
   const checkAvailability = useCallback(() => {
     if (isTestMode) {
@@ -172,9 +212,15 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
       return;
     }
 
-    const lastSpin = localStorage.getItem("wheel_last_spin");
+    const hasPending = checkPendingReward();
+    if (hasPending) {
+      setCanSpin(false);
+      return;
+    }
+
+    const lastSpin = localStorage.getItem(LAST_SPIN_KEY);
     const today = new Date().toDateString();
-    const count = parseInt(localStorage.getItem("wheel_spin_count") || "0", 10);
+    const count = parseInt(localStorage.getItem(SPIN_COUNT_KEY) || "0", 10);
     setSpinCount(count);
 
     if (lastSpin === today) {
@@ -185,36 +231,172 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     } else {
       setCanSpin(true);
     }
-  }, [isTestMode]);
+  }, [isTestMode, checkPendingReward]);
 
   useEffect(() => {
     if (isOpen) checkAvailability();
   }, [isOpen, checkAvailability]);
 
+  // ==================== TIMER POUR LE TEMPS RESTANT ====================
   useEffect(() => {
-    if (isOpen && !isTestMode) {
-      setReviewConfirmed(localStorage.getItem(REVIEW_CONFIRMED_KEY) === "true");
-    }
-    if (isOpen && isTestMode) {
-      setReviewConfirmed(true); // pas de blocage en mode test
-    }
-  }, [isOpen, isTestMode]);
+    if (!pendingReward || !pendingRewardExpiry || rewardRevealed) return;
 
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.floor((pendingRewardExpiry - now) / 1000));
+      setTimeRemaining(remaining);
+      
+      if (remaining <= 0) {
+        clearInterval(interval);
+        localStorage.removeItem(PENDING_REWARD_KEY);
+        localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
+        setPendingReward(null);
+        setPendingRewardExpiry(null);
+        setShowReviewGateAfterSpin(false);
+        setRewardRevealed(false);
+        setIsRewardExpired(true);
+        checkAvailability();
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [pendingReward, pendingRewardExpiry, rewardRevealed, checkAvailability]);
+
+  // ==================== LANCER LA ROUE ====================
+  const spinWheel = useCallback(() => {
+    if (isSpinning || hasSpun || !canSpin) return;
+
+    if (!isTestMode) {
+      localStorage.setItem(LAST_SPIN_KEY, new Date().toDateString());
+    }
+
+    const newSpinCount = spinCount + 1;
+    if (!isTestMode) {
+      localStorage.setItem(SPIN_COUNT_KEY, String(newSpinCount));
+    }
+    setSpinCount(newSpinCount);
+
+    const reward = getRandomReward(newSpinCount, isTestMode);
+    pendingRewardRef.current = reward;
+
+    const rewardIndex = REWARDS.findIndex((r) => r.id === reward.id);
+    const targetMidAngle = rewardIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+    const desiredFinalMod = ((-targetMidAngle % 360) + 360) % 360;
+    const currentMod = ((rotation % 360) + 360) % 360;
+    const diff = ((desiredFinalMod - currentMod + 360) % 360);
+    const extraSpins = prefersReducedMotion ? 1 : 5 + Math.floor(Math.random() * 4);
+    const newRotation = rotation + extraSpins * 360 + diff;
+
+    setIsSpinning(true);
+    setSelectedReward(null);
+    setShowResult(false);
+    setConfetti([]);
+    setShowReviewGateAfterSpin(false);
+    setRewardRevealed(false);
+    setIsRewardExpired(false);
+    setRotation(newRotation);
+  }, [isSpinning, hasSpun, canSpin, isTestMode, spinCount, rotation, prefersReducedMotion]);
+
+  // ==================== FIN DE ROTATION ====================
+  const handleTransitionEnd = useCallback(() => {
+    if (!isSpinning) return;
+    const reward = pendingRewardRef.current;
+    setIsSpinning(false);
+    setHasSpun(true);
+    if (!reward) return;
+    
+    if (!isTestMode) {
+      const expiry = Date.now() + 3600000;
+      localStorage.setItem(PENDING_REWARD_KEY, JSON.stringify(reward));
+      localStorage.setItem(PENDING_REWARD_EXPIRY_KEY, String(expiry));
+      setPendingReward(reward);
+      setPendingRewardExpiry(expiry);
+      setTimeRemaining(3600);
+      setShowReviewGateAfterSpin(true);
+      setRewardRevealed(false);
+      setIsRewardExpired(false);
+      setSelectedReward(null);
+    } else {
+      setSelectedReward(reward);
+      setShowResult(true);
+      if (onWin) onWin(reward);
+    }
+  }, [isSpinning, isTestMode, onWin]);
+
+  // ==================== RÉVÉLER LA RÉCOMPENSE ====================
+  const revealReward = useCallback(() => {
+    if (pendingReward) {
+      setSelectedReward(pendingReward);
+      setShowResult(true);
+      setRewardRevealed(true);
+      setShowReviewGateAfterSpin(false);
+      
+      if (onWin) onWin(pendingReward);
+      
+      if (pendingReward.tier === "rare" || pendingReward.tier === "legendary") {
+        setConfetti(makeConfetti(pendingReward.tier === "legendary" ? 60 : 36));
+        if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
+        confettiTimeoutRef.current = setTimeout(() => setConfetti([]), 3600);
+      }
+    }
+  }, [pendingReward, onWin]);
+
+  // ==================== RÉINITIALISER ====================
+  const resetGame = useCallback(() => {
+    setHasSpun(false);
+    setSelectedReward(null);
+    setShowResult(false);
+    setConfetti([]);
+    setShowReviewGateAfterSpin(false);
+    setRewardRevealed(false);
+    setIsRewardExpired(false);
+    localStorage.removeItem(PENDING_REWARD_KEY);
+    localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
+    setPendingReward(null);
+    setPendingRewardExpiry(null);
+    checkAvailability();
+  }, [checkAvailability]);
+
+  // ==================== FORMATER LE TEMPS ====================
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // ==================== OUVRIR LE LIEN AVIS ====================
   const openReviewLink = () => {
     window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
     setHasOpenedReviewLink(true);
   };
 
-  const confirmReview = () => {
-    localStorage.setItem(REVIEW_CONFIRMED_KEY, "true");
-    setReviewConfirmed(true);
-  };
+  // ==================== FERMER AVEC ÉCHAP ====================
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen, onClose]);
 
-  // ==================== INDICATION DE SCROLL (à chaque ouverture) ====================
-  // Léger scroll vers le bas puis retour en haut, pour montrer qu'il y a du contenu
-  // à découvrir plus bas dans la modale.
-  const scrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // ==================== SEGMENTS DE LA ROUE ====================
+  const segments = useMemo(
+    () =>
+      REWARDS.map((reward, index) => {
+        const midAngle = index * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+        const labelPos = polarToCartesian(CENTER, CENTER, RADIUS * 0.68, midAngle);
+        return {
+          reward,
+          path: describeSegmentPath(index),
+          midAngle,
+          labelPos,
+        };
+      }),
+    []
+  );
 
+  // ==================== EFFET DE SCROLL ====================
   useEffect(() => {
     scrollTimersRef.current.forEach(clearTimeout);
     scrollTimersRef.current = [];
@@ -239,102 +421,91 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     };
   }, [isOpen, prefersReducedMotion]);
 
-  // ==================== FERMER AVEC ÉCHAP ====================
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
-
-  // ==================== SEGMENTS DE LA ROUE (calculés une seule fois) ====================
-  const segments = useMemo(
-    () =>
-      REWARDS.map((reward, index) => {
-        const midAngle = index * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-        const labelPos = polarToCartesian(CENTER, CENTER, RADIUS * 0.68, midAngle);
-        return {
-          reward,
-          path: describeSegmentPath(index),
-          midAngle,
-          labelPos,
-        };
-      }),
-    []
-  );
-
-  // ==================== LANCER LA ROUE ====================
-  const spinWheel = useCallback(() => {
-    if (isSpinning || hasSpun || !canSpin) return;
-
-    if (!isTestMode) {
-      localStorage.setItem("wheel_last_spin", new Date().toDateString());
-    }
-
-    const newSpinCount = spinCount + 1;
-    if (!isTestMode) {
-      localStorage.setItem("wheel_spin_count", String(newSpinCount));
-    }
-    setSpinCount(newSpinCount);
-
-    const reward = getRandomReward(newSpinCount, isTestMode);
-    pendingRewardRef.current = reward;
-
-    const rewardIndex = REWARDS.findIndex((r) => r.id === reward.id);
-    const targetMidAngle = rewardIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-    // Le pointeur est fixe en haut : on veut que targetMidAngle atterrisse à 0° (haut) après rotation.
-    const desiredFinalMod = ((-targetMidAngle % 360) + 360) % 360;
-    const currentMod = ((rotation % 360) + 360) % 360;
-    const diff = ((desiredFinalMod - currentMod + 360) % 360);
-    const extraSpins = prefersReducedMotion ? 1 : 5 + Math.floor(Math.random() * 4);
-    const newRotation = rotation + extraSpins * 360 + diff;
-
-    setIsSpinning(true);
-    setSelectedReward(null);
-    setShowResult(false);
-    setConfetti([]);
-    setRotation(newRotation);
-  }, [isSpinning, hasSpun, canSpin, isTestMode, spinCount, rotation, prefersReducedMotion]);
-
-  // ==================== FIN DE ROTATION (déclenché par le navigateur, pas par du JS par frame) ====================
-  const handleTransitionEnd = useCallback(() => {
-    if (!isSpinning) return;
-    const reward = pendingRewardRef.current;
-    setIsSpinning(false);
-    setHasSpun(true);
-    if (!reward) return;
-    setSelectedReward(reward);
-    setShowResult(true);
-
-    if (reward.tier === "rare" || reward.tier === "legendary") {
-      setConfetti(makeConfetti(reward.tier === "legendary" ? 60 : 36));
-      if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
-      confettiTimeoutRef.current = setTimeout(() => setConfetti([]), 3600);
-    }
-
-    if (onWin) onWin(reward);
-  }, [isSpinning, onWin]);
-
+  // ==================== NETTOYAGE CONFETTIS ====================
   useEffect(() => () => {
     if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
   }, []);
-
-  // ==================== RÉINITIALISER (mode test uniquement) ====================
-  const resetGame = () => {
-    setHasSpun(false);
-    setSelectedReward(null);
-    setShowResult(false);
-    setConfetti([]);
-    checkAvailability();
-  };
 
   if (!isOpen) return null;
 
   const statusLabel = !canSpin ? "⏳ Attente" : hasSpun ? "✅ Joué" : "🎯 Prêt";
   const statusColor = hasSpun ? "#9a9a9a" : canSpin ? "#4ade80" : "#f87171";
 
+  // ==================== RENDU DU GATE POST-SPIN ====================
+  const renderPostSpinReviewGate = () => {
+    if (!showReviewGateAfterSpin || !pendingReward || rewardRevealed) return null;
+
+    return (
+      <div className="review-gate post-spin">
+        <div className="review-gate-icon" aria-hidden="true">
+          <span style={{ fontSize: '2.5rem' }}>❓</span>
+        </div>
+        <h3>🎉 Vous avez gagné quelque chose !</h3>
+        <p className="review-gate-cta-line">
+          Laissez un avis Google pour découvrir votre récompense
+        </p>
+        <div className="reward-preview">
+          <span className="reward-preview-emoji">❓</span>
+          <span className="reward-preview-label">???</span>
+        </div>
+        <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '0.5rem' }}>
+          ⏱️ {formatTime(timeRemaining)} restant avant expiration
+        </p>
+        <button className="review-gate-btn" onClick={openReviewLink}>
+          <GoogleIcon size={18} />
+          <span>Laisser un avis Google</span>
+          <ExternalLink size={14} />
+        </button>
+        <button
+          className={`review-confirm-btn ${!hasOpenedReviewLink ? "disabled" : ""}`}
+          onClick={() => {
+            if (hasOpenedReviewLink) {
+              localStorage.setItem(REVIEW_CONFIRMED_KEY, "true");
+              revealReward();
+            }
+          }}
+          disabled={!hasOpenedReviewLink}
+        >
+          {hasOpenedReviewLink ? "✅ J'ai laissé mon avis, révéler !" : "🔑 Ouvrez d'abord le lien ci-dessus"}
+        </button>
+        {!hasOpenedReviewLink && (
+          <p className="review-gate-hint">
+            🔑 Ouvrez d'abord le lien ci-dessus pour débloquer ce bouton.
+          </p>
+        )}
+      </div>
+    );
+  };
+
+  // ==================== RENDU DU RÉSULTAT ====================
+  const renderResult = () => {
+    if (!showResult || !selectedReward) return null;
+
+    return (
+      <div className={`wheel-result ${selectedReward.tier === "legendary" ? "legendary-result" : ""}`}>
+        <div className={`result-card tier-${selectedReward.tier}`} style={{ borderColor: selectedReward.color }}>
+          <div className="result-icon" style={{ background: selectedReward.color }} aria-hidden="true">
+            {selectedReward.emoji}
+          </div>
+          <div className="result-content">
+            <h4 id={resultHeadingId}>🎊 Gagné : {selectedReward.label}</h4>
+            <p>{selectedReward.description}</p>
+            <div className="result-badge">
+              {selectedReward.tier === "legendary" && "👑 "}
+              {selectedReward.tier === "rare" && "⭐ "}
+              <Sparkles size={12} />
+              <span>Récompense débloquée</span>
+            </div>
+          </div>
+        </div>
+        <p className="claim-reminder">
+          📌 Merci pour votre avis ! Votre récompense est valable 1 heure.
+        </p>
+      </div>
+    );
+  };
+
+  // ==================== RENDU PRINCIPAL ====================
   return (
     <div className="wheel-game-overlay" onClick={onClose}>
       <div
@@ -363,257 +534,216 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
           </div>
         )}
 
-        {!reviewConfirmed ? (
-          <div className="review-gate">
-            <div className="review-gate-icon" aria-hidden="true">
-              <GoogleIcon size={36} />
-            </div>
-            <h3>Un avis Google avant de jouer</h3>
-            <p className="review-gate-cta-line">🌟 Laissez un avis avant de tourner la roue !</p>
-            <p>
-              Cette roue est notre façon de vous remercier. Laissez-nous d'abord un petit avis sur
-              Google, ça nous aide énormément — puis revenez ici pour tourner la roue.
-            </p>
-            <button className="review-gate-btn" onClick={openReviewLink}>
-              <GoogleIcon size={18} />
-              <span>Laisser un avis Google</span>
-              <ExternalLink size={14} />
-            </button>
-            <button
-              className={`review-confirm-btn ${!hasOpenedReviewLink ? "disabled" : ""}`}
-              onClick={confirmReview}
-              disabled={!hasOpenedReviewLink}
-            >
-              J'ai laissé mon avis, débloquer la roue
-            </button>
-            {!hasOpenedReviewLink && (
-              <p className="review-gate-hint">Ouvrez d'abord le lien ci-dessus pour débloquer ce bouton.</p>
+        {/* GATE POST-SPIN */}
+        {renderPostSpinReviewGate()}
+
+        {/* Message d'expiration */}
+        {isRewardExpired && !showReviewGateAfterSpin && (
+          <div className="waiting-banner" style={{ borderColor: '#f87171', color: '#f87171' }}>
+            <span>⏰</span>
+            <span>Votre récompense a expiré. Vous pouvez rejouer demain.</span>
+          </div>
+        )}
+
+        {/* Contenu principal */}
+        {!showReviewGateAfterSpin && (
+          <>
+            {!canSpin && !isTestMode && !pendingReward && (
+              <div className="waiting-banner">
+                <Calendar size={16} />
+                <span>
+                  Prochain tour disponible le <strong>{nextSpinDate}</strong>
+                </span>
+              </div>
             )}
-          </div>
-        ) : !canSpin && !isTestMode && (
-          <div className="waiting-banner">
-            <Calendar size={16} />
-            <span>
-              Prochain tour disponible le <strong>{nextSpinDate}</strong>
-            </span>
-          </div>
-        )}
 
-        {reviewConfirmed && (
-        <>
-        {!hasSpun && !showResult && canSpin && (
-          <div className="scroll-indicator" aria-hidden="true">
-            <ChevronDown size={16} className="scroll-chevron" />
-            <span>Découvrez les récompenses</span>
-          </div>
-        )}
+            {!hasSpun && !showResult && canSpin && (
+              <div className="scroll-indicator" aria-hidden="true">
+                <ChevronDown size={16} className="scroll-chevron" />
+                <span>Découvrez les récompenses</span>
+              </div>
+            )}
 
-        {/* STATS */}
-        <div className="wheel-stats">
-          <div className="stat-item">
-            <span className="stat-label">Statut</span>
-            <span className="stat-value" style={{ fontSize: "0.95rem", color: statusColor }}>
-              {statusLabel}
-            </span>
-          </div>
-          <div className="stat-divider" />
-          <div className="stat-item">
-            <span className="stat-label">Tentatives</span>
-            <span className="stat-value">{spinCount}</span>
-          </div>
-        </div>
-
-        {/* ROUE SVG */}
-        <div className="wheel-container">
-          <div className="wheel-wrapper">
-            <div className="wheel-pointer" aria-hidden="true">
-              <div className="pointer-triangle" />
-              <div className="pointer-dot" />
+            {/* STATS */}
+            <div className="wheel-stats">
+              <div className="stat-item">
+                <span className="stat-label">Statut</span>
+                <span className="stat-value" style={{ fontSize: "0.95rem", color: statusColor }}>
+                  {statusLabel}
+                </span>
+              </div>
+              <div className="stat-divider" />
+              <div className="stat-item">
+                <span className="stat-label">Tentatives</span>
+                <span className="stat-value">{spinCount}</span>
+              </div>
             </div>
 
-            <svg
-              viewBox="0 0 300 300"
-              className="wheel-svg"
-              role="img"
-              aria-label="Roue de récompenses"
-            >
-              <defs>
-                <radialGradient id="hubGradient" cx="35%" cy="30%" r="70%">
-                  <stop offset="0%" stopColor="#FFE082" />
-                  <stop offset="55%" stopColor="#D4AF37" />
-                  <stop offset="100%" stopColor="#8B6914" />
-                </radialGradient>
-              </defs>
+            {/* ROUE */}
+            <div className="wheel-container">
+              <div className="wheel-wrapper">
+                <div className="wheel-pointer" aria-hidden="true">
+                  <div className="pointer-triangle" />
+                  <div className="pointer-dot" />
+                </div>
 
-              <g
-                ref={wheelRef}
-                className="wheel-rotor"
-                style={{
-                  transform: `rotate(${rotation}deg)`,
-                  transitionDuration: isSpinning ? (prefersReducedMotion ? "0.6s" : `${4.6 + (rotation % 3) * 0.1}s`) : "0s",
-                }}
-                onTransitionEnd={handleTransitionEnd}
-              >
-                {segments.map(({ reward, path, midAngle, labelPos }) => (
-                  <g key={reward.id}>
-                    <path d={path} fill={reward.color} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
-                    <text
-                      x={labelPos.x}
-                      y={labelPos.y}
-                      transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y})`}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize="22"
-                      className="wheel-emoji"
-                    >
-                      {reward.emoji}
-                    </text>
-                    {reward.tier !== "common" && (
-                      <text
-                        x={labelPos.x}
-                        y={labelPos.y + 18}
-                        transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y + 18})`}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontSize="9"
-                        fill="#fff"
-                        className="wheel-tier-mark"
-                      >
-                        {reward.tier === "legendary" ? "⭐" : "✦"}
-                      </text>
-                    )}
-                  </g>
-                ))}
-              </g>
+                <svg viewBox="0 0 300 300" className="wheel-svg" role="img" aria-label="Roue de récompenses">
+                  <defs>
+                    <radialGradient id="hubGradient" cx="35%" cy="30%" r="70%">
+                      <stop offset="0%" stopColor="#FFE082" />
+                      <stop offset="55%" stopColor="#D4AF37" />
+                      <stop offset="100%" stopColor="#8B6914" />
+                    </radialGradient>
+                  </defs>
 
-              <circle cx={CENTER} cy={CENTER} r="48" fill="url(#hubGradient)" stroke="rgba(255,255,255,0.25)" strokeWidth="2" />
-              <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="hub-title">
-                Signature
-              </text>
-              <text x={CENTER} y={CENTER + 14} textAnchor="middle" className="hub-subtitle">
-                ✨ Tourne ✨
-              </text>
-            </svg>
-
-            {/* CONFETTIS CSS */}
-            {confetti.length > 0 && (
-              <div className="confetti-layer" aria-hidden="true">
-                {confetti.map((c) => (
-                  <span
-                    key={c.id}
-                    className="confetti-piece"
+                  <g
+                    ref={wheelRef}
+                    className="wheel-rotor"
                     style={{
-                      left: `${c.left}%`,
-                      width: c.size,
-                      height: c.size * 1.5,
-                      backgroundColor: c.color,
-                      animationDelay: `${c.delay}s`,
-                      animationDuration: `${c.duration}s`,
-                      // @ts-ignore custom property for drift
-                      "--drift": `${c.drift}px`,
+                      transform: `rotate(${rotation}deg)`,
+                      transitionDuration: isSpinning ? (prefersReducedMotion ? "0.6s" : `${4.6 + (rotation % 3) * 0.1}s`) : "0s",
                     }}
-                  />
+                    onTransitionEnd={handleTransitionEnd}
+                  >
+                    {segments.map(({ reward, path, midAngle, labelPos }) => (
+                      <g key={reward.id}>
+                        <path d={path} fill={reward.color} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
+                        <text
+                          x={labelPos.x}
+                          y={labelPos.y}
+                          transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y})`}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fontSize="22"
+                          className="wheel-emoji"
+                        >
+                          {reward.emoji}
+                        </text>
+                        {reward.tier !== "common" && (
+                          <text
+                            x={labelPos.x}
+                            y={labelPos.y + 18}
+                            transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y + 18})`}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize="9"
+                            fill="#fff"
+                            className="wheel-tier-mark"
+                          >
+                            {reward.tier === "legendary" ? "⭐" : "✦"}
+                          </text>
+                        )}
+                      </g>
+                    ))}
+                  </g>
+
+                  <circle cx={CENTER} cy={CENTER} r="48" fill="url(#hubGradient)" stroke="rgba(255,255,255,0.25)" strokeWidth="2" />
+                  <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="hub-title">
+                    Signature
+                  </text>
+                  <text x={CENTER} y={CENTER + 14} textAnchor="middle" className="hub-subtitle">
+                    ✨ Tourne ✨
+                  </text>
+                </svg>
+
+                {/* CONFETTIS */}
+                {confetti.length > 0 && (
+                  <div className="confetti-layer" aria-hidden="true">
+                    {confetti.map((c) => (
+                      <span
+                        key={c.id}
+                        className="confetti-piece"
+                        style={{
+                          left: `${c.left}%`,
+                          width: c.size,
+                          height: c.size * 1.5,
+                          backgroundColor: c.color,
+                          animationDelay: `${c.delay}s`,
+                          animationDuration: `${c.duration}s`,
+                          // @ts-ignore
+                          "--drift": `${c.drift}px`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* BOUTON LANCER */}
+            <button
+              className={`spin-btn ${isSpinning ? "spinning" : ""} ${hasSpun || !canSpin ? "disabled" : ""}`}
+              onClick={spinWheel}
+              disabled={isSpinning || hasSpun || !canSpin}
+            >
+              {!canSpin && !isTestMode ? (
+                <>
+                  <Calendar size={18} />
+                  <span>Attendez le prochain tour</span>
+                </>
+              ) : isSpinning ? (
+                <span>La roue tourne…</span>
+              ) : hasSpun ? (
+                <>
+                  <RotateCcw size={18} />
+                  <span>{isTestMode ? "Rejouer" : "Tour terminé"}</span>
+                </>
+              ) : (
+                <>
+                  <Gift size={18} />
+                  <span>Faire tourner</span>
+                </>
+              )}
+            </button>
+
+            {/* RÉSULTAT */}
+            <div aria-live="polite">
+              {renderResult()}
+            </div>
+
+            {isTestMode && hasSpun && (
+              <button className="reset-btn" onClick={resetGame}>
+                <RotateCcw size={16} />
+                <span>Nouveau test</span>
+              </button>
+            )}
+
+            {/* LISTE DES RÉCOMPENSES */}
+            <div className="rewards-list">
+              <div className="rewards-header">
+                <h4>Récompenses possibles</h4>
+                <span className="rewards-badge">
+                  <Sparkles size={12} />
+                  {REWARDS.length} gains
+                </span>
+              </div>
+              <div className="rewards-grid">
+                <div className="reward-group-label">Courantes</div>
+                {COMMON_POOL.map((reward) => (
+                  <div key={reward.id} className="reward-item">
+                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
+                    <span className="reward-name">{reward.label}</span>
+                  </div>
+                ))}
+
+                <div className="reward-group-label">Rares</div>
+                {RARE_POOL.map((reward) => (
+                  <div key={reward.id} className="reward-item rare">
+                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
+                    <span className="reward-name">{reward.label}</span>
+                  </div>
+                ))}
+
+                <div className="reward-group-label">Légendaire</div>
+                {LEGENDARY_POOL.map((reward) => (
+                  <div key={reward.id} className="reward-item legendary">
+                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
+                    <span className="reward-name">{reward.label}</span>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* BOUTON LANCER */}
-        <button
-          className={`spin-btn ${isSpinning ? "spinning" : ""} ${hasSpun || !canSpin ? "disabled" : ""}`}
-          onClick={spinWheel}
-          disabled={isSpinning || hasSpun || !canSpin}
-        >
-          {!canSpin && !isTestMode ? (
-            <>
-              <Calendar size={18} />
-              <span>Attendez le prochain tour</span>
-            </>
-          ) : isSpinning ? (
-            <span>La roue tourne…</span>
-          ) : hasSpun ? (
-            <>
-              <RotateCcw size={18} />
-              <span>{isTestMode ? "Rejouer" : "Tour terminé"}</span>
-            </>
-          ) : (
-            <>
-              <Gift size={18} />
-              <span>Faire tourner</span>
-            </>
-          )}
-        </button>
-
-        {/* RÉSULTAT */}
-        <div aria-live="polite">
-          {showResult && selectedReward && (
-            <div className={`wheel-result ${selectedReward.tier === "legendary" ? "legendary-result" : ""}`}>
-              <div className={`result-card tier-${selectedReward.tier}`} style={{ borderColor: selectedReward.color }}>
-                <div className="result-icon" style={{ background: selectedReward.color }} aria-hidden="true">
-                  {selectedReward.emoji}
-                </div>
-                <div className="result-content">
-                  <h4 id={resultHeadingId}>Gagné : {selectedReward.label}</h4>
-                  <p>{selectedReward.description}</p>
-                  <div className="result-badge">
-                    {selectedReward.tier === "legendary" && "👑 "}
-                    {selectedReward.tier === "rare" && "⭐ "}
-                    <Sparkles size={12} />
-                    <span>Récompense débloquée</span>
-                  </div>
-                </div>
-              </div>
-              <p className="claim-reminder">
-                📌 Assurez-vous d'avoir laissé votre avis pour réclamer votre récompense, cher client !
-              </p>
             </div>
-          )}
-        </div>
-
-        {isTestMode && hasSpun && (
-          <button className="reset-btn" onClick={resetGame}>
-            <RotateCcw size={16} />
-            <span>Nouveau test</span>
-          </button>
-        )}
-
-        {/* LISTE DES RÉCOMPENSES */}
-        <div className="rewards-list">
-          <div className="rewards-header">
-            <h4>Récompenses possibles</h4>
-            <span className="rewards-badge">
-              <Sparkles size={12} />
-              {REWARDS.length} gains
-            </span>
-          </div>
-          <div className="rewards-grid">
-            <div className="reward-group-label">Courantes</div>
-            {COMMON_POOL.map((reward) => (
-              <div key={reward.id} className="reward-item">
-                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                <span className="reward-name">{reward.label}</span>
-              </div>
-            ))}
-
-            <div className="reward-group-label">Rares</div>
-            {RARE_POOL.map((reward) => (
-              <div key={reward.id} className="reward-item rare">
-                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                <span className="reward-name">{reward.label}</span>
-              </div>
-            ))}
-
-            <div className="reward-group-label">Légendaire</div>
-            {LEGENDARY_POOL.map((reward) => (
-              <div key={reward.id} className="reward-item legendary">
-                <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                <span className="reward-name">{reward.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        </>
+          </>
         )}
       </div>
     </div>
