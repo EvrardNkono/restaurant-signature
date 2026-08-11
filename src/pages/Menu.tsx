@@ -1,3 +1,6 @@
+
+// menu.tsx - Version refondue avec design moderne
+
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -8,6 +11,7 @@ import {
   Clock, CreditCard, Gift, Flame,
   Star, Eye, Award, Search, ArrowRight,
   Heart, Zap, ChefHat, Tv, CalendarClock,
+  
 } from "lucide-react";
 import "./menu.css";
 import BillPopup from "../components/BillPopup";
