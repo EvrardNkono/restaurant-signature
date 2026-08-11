@@ -1,6 +1,22 @@
 import { useState, useEffect, useMemo, useCallback, useRef, useId } from "react";
-import { X, Gift, Sparkles, RotateCcw, ChevronDown, Calendar } from "lucide-react";
+import { X, Gift, Sparkles, RotateCcw, ChevronDown, Calendar, ExternalLink } from "lucide-react";
 import "./WheelGame.css";
+
+// Même lien que dans la Navbar — à garder synchronisé si le Place ID change.
+const GOOGLE_REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJC5K8D1L75UcRLFLJMr2OF14";
+const REVIEW_CONFIRMED_KEY = "wheel_review_confirmed";
+
+// Icône Google officielle (4 couleurs), en SVG inline.
+function GoogleIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  );
+}
 
 // ============================================================
 // CONFIGURATION DES RÉCOMPENSES
@@ -130,6 +146,10 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
   const [spinCount, setSpinCount] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
+  // ==================== PALIER "AVIS GOOGLE" ====================
+  const [reviewConfirmed, setReviewConfirmed] = useState(false);
+  const [hasOpenedReviewLink, setHasOpenedReviewLink] = useState(false);
+
   const resultHeadingId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<SVGGElement>(null);
@@ -170,6 +190,54 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
   useEffect(() => {
     if (isOpen) checkAvailability();
   }, [isOpen, checkAvailability]);
+
+  useEffect(() => {
+    if (isOpen && !isTestMode) {
+      setReviewConfirmed(localStorage.getItem(REVIEW_CONFIRMED_KEY) === "true");
+    }
+    if (isOpen && isTestMode) {
+      setReviewConfirmed(true); // pas de blocage en mode test
+    }
+  }, [isOpen, isTestMode]);
+
+  const openReviewLink = () => {
+    window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
+    setHasOpenedReviewLink(true);
+  };
+
+  const confirmReview = () => {
+    localStorage.setItem(REVIEW_CONFIRMED_KEY, "true");
+    setReviewConfirmed(true);
+  };
+
+  // ==================== INDICATION DE SCROLL (à chaque ouverture) ====================
+  // Léger scroll vers le bas puis retour en haut, pour montrer qu'il y a du contenu
+  // à découvrir plus bas dans la modale.
+  const scrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    scrollTimersRef.current.forEach(clearTimeout);
+    scrollTimersRef.current = [];
+
+    if (!isOpen || prefersReducedMotion) return;
+
+    const t1 = setTimeout(() => {
+      const modal = modalRef.current;
+      if (!modal) return;
+      modal.scrollTo({ top: 130, behavior: "smooth" });
+
+      const t2 = setTimeout(() => {
+        modal.scrollTo({ top: 0, behavior: "smooth" });
+      }, 750);
+      scrollTimersRef.current.push(t2);
+    }, 450);
+    scrollTimersRef.current.push(t1);
+
+    return () => {
+      scrollTimersRef.current.forEach(clearTimeout);
+      scrollTimersRef.current = [];
+    };
+  }, [isOpen, prefersReducedMotion]);
 
   // ==================== FERMER AVEC ÉCHAP ====================
   useEffect(() => {
@@ -295,7 +363,34 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
           </div>
         )}
 
-        {!canSpin && !isTestMode && (
+        {!reviewConfirmed ? (
+          <div className="review-gate">
+            <div className="review-gate-icon" aria-hidden="true">
+              <GoogleIcon size={36} />
+            </div>
+            <h3>Un avis Google avant de jouer</h3>
+            <p className="review-gate-cta-line">🌟 Laissez un avis avant de tourner la roue !</p>
+            <p>
+              Cette roue est notre façon de vous remercier. Laissez-nous d'abord un petit avis sur
+              Google, ça nous aide énormément — puis revenez ici pour tourner la roue.
+            </p>
+            <button className="review-gate-btn" onClick={openReviewLink}>
+              <GoogleIcon size={18} />
+              <span>Laisser un avis Google</span>
+              <ExternalLink size={14} />
+            </button>
+            <button
+              className={`review-confirm-btn ${!hasOpenedReviewLink ? "disabled" : ""}`}
+              onClick={confirmReview}
+              disabled={!hasOpenedReviewLink}
+            >
+              J'ai laissé mon avis, débloquer la roue
+            </button>
+            {!hasOpenedReviewLink && (
+              <p className="review-gate-hint">Ouvrez d'abord le lien ci-dessus pour débloquer ce bouton.</p>
+            )}
+          </div>
+        ) : !canSpin && !isTestMode && (
           <div className="waiting-banner">
             <Calendar size={16} />
             <span>
@@ -304,6 +399,8 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
           </div>
         )}
 
+        {reviewConfirmed && (
+        <>
         {!hasSpun && !showResult && canSpin && (
           <div className="scroll-indicator" aria-hidden="true">
             <ChevronDown size={16} className="scroll-chevron" />
@@ -467,6 +564,9 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
                   </div>
                 </div>
               </div>
+              <p className="claim-reminder">
+                📌 Assurez-vous d'avoir laissé votre avis pour réclamer votre récompense, cher client !
+              </p>
             </div>
           )}
         </div>
@@ -513,6 +613,8 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
             ))}
           </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

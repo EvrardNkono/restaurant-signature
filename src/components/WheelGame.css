@@ -106,6 +106,96 @@
   outline-offset: 2px;
 }
 
+/* ─── PALIER "AVIS GOOGLE" ─── */
+.review-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 1.5rem 0.5rem 1rem;
+}
+
+.review-gate-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.3rem;
+}
+
+.review-gate h3 {
+  font-family: "Playfair Display", serif;
+  color: #f5e6a3;
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.review-gate p {
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 340px;
+  margin: 0;
+}
+
+.review-gate-cta-line {
+  color: #d4af37 !important;
+  font-weight: 700;
+  font-size: 0.9rem !important;
+}
+
+.review-gate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.8rem 1.4rem;
+  background: #fff;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.review-gate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+.review-confirm-btn {
+  padding: 0.7rem 1.4rem;
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 12px;
+  color: #d4af37;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.review-confirm-btn:hover:not(.disabled) {
+  background: rgba(212, 175, 55, 0.1);
+}
+.review-confirm-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #777;
+}
+
+.review-gate-hint {
+  font-size: 0.7rem;
+  color: #777;
+  margin-top: -0.2rem;
+}
+
 /* ─── BANDEAUX ─── */
 .waiting-banner {
   display: flex;
@@ -337,6 +427,18 @@
 }
 .result-card.tier-legendary {
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(212, 175, 55, 0.05));
+}
+
+.claim-reminder {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.9rem;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  color: #f5e6a3;
+  font-size: 0.78rem;
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* ─── BOUTON RÉINITIALISER (mode test) ─── */
