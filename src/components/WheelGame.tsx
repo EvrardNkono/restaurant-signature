@@ -14,7 +14,7 @@ interface Reward {
 }
 
 const REWARDS: Reward[] = [
-  // ===== COMMUNES (probabilité élevée) =====
+  // ===== COMMUNES =====
   {
     id: "canette-1",
     label: "Canette de jus",
@@ -52,7 +52,7 @@ const REWARDS: Reward[] = [
     tier: "common"
   },
   
-  // ===== RARES (1% - strictement contrôlé) =====
+  // ===== RARES =====
   {
     id: "mafe-1",
     label: "Mafé Poulet",
@@ -99,7 +99,7 @@ const REWARDS: Reward[] = [
     tier: "rare"
   },
   
-  // ===== LÉGENDAIRE (0.1% - ultra rare) =====
+  // ===== LÉGENDAIRE =====
   {
     id: "reduction-20",
     label: "-20€ sur la note",
@@ -116,7 +116,7 @@ interface WheelGameProps {
   isOpen: boolean;
   onClose: () => void;
   onWin?: (reward: Reward) => void;
-  isTestMode?: boolean; // ✅ NOUVEAU : mode test
+  isTestMode?: boolean;
 }
 
 export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }: WheelGameProps) {
@@ -136,7 +136,6 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
 
   // ==================== VÉRIFICATION DU TOUR MENSUEL ====================
   const checkMonthlySpin = useCallback(() => {
-    // ✅ EN MODE TEST : toujours autorisé
     if (isTestMode) {
       setCanSpin(true);
       return true;
@@ -163,7 +162,7 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     return true;
   }, [isTestMode]);
 
-  // ==================== SÉLECTION DU GAIN AVEC RARETÉ GARANTIE ====================
+  // ==================== SÉLECTION DU GAIN ====================
   const getRandomReward = useCallback((): Reward => {
     const commonRewards = REWARDS.filter(r => r.tier === "common");
     const rareRewards = REWARDS.filter(r => r.tier === "rare");
@@ -172,24 +171,17 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     const spinCount = parseInt(localStorage.getItem('wheel_spin_count') || '0');
     const newSpinCount = spinCount + 1;
     
-    // ✅ EN MODE TEST : probabilités boostées pour tester
     if (isTestMode) {
       const random = Math.random() * 100;
-      
-      // 5% de chance légendaire en test (au lieu de 0.1%)
       if (random < 5) {
         return legendaryRewards[Math.floor(Math.random() * legendaryRewards.length)];
       }
-      
-      // 15% de chance rare en test (au lieu de 1-2%)
       if (random < 15) {
         return rareRewards[Math.floor(Math.random() * rareRewards.length)];
       }
-      
       return commonRewards[Math.floor(Math.random() * commonRewards.length)];
     }
     
-    // 🔒 MODE PRODUCTION : rareté garantie
     localStorage.setItem('wheel_spin_count', String(newSpinCount));
     setSpinCount(newSpinCount);
     
@@ -218,7 +210,7 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     return commonRewards[Math.floor(Math.random() * commonRewards.length)];
   }, [isTestMode]);
 
-  // ==================== AUTO-SCROLL À L'OUVERTURE ====================
+  // ==================== AUTO-SCROLL ====================
   useEffect(() => {
     if (isOpen) {
       const canPlay = checkMonthlySpin();
@@ -351,7 +343,6 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
   const spinWheel = useCallback(() => {
     if (isSpinning || hasSpun || !canSpin) return;
 
-    // ✅ EN MODE TEST : on n'enregistre pas le spin
     if (!isTestMode) {
       const today = new Date().toDateString();
       localStorage.setItem('wheel_last_spin', today);
@@ -417,7 +408,6 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
     setConfetti([]);
     setHasAutoScrolled(false);
     
-    // ✅ EN MODE TEST : on recharge la vérification
     if (isTestMode) {
       setCanSpin(true);
     } else {
@@ -538,7 +528,7 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
           </button>
         </div>
 
-        {/* ✅ BADGE MODE TEST */}
+        {/* BADGE MODE TEST */}
         {isTestMode && (
           <div className="test-mode-badge">
             <span>🧪 MODE TEST</span>
@@ -659,7 +649,7 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
           </button>
         )}
 
-        {/* ========== RÉCOMPENSES - TOUJOURS VISIBLES ========== */}
+        {/* ========== RÉCOMPENSES - SANS POURCENTAGES ========== */}
         <div className="rewards-list">
           <div className="rewards-header">
             <h4>🎁 Récompenses possibles</h4>
@@ -675,25 +665,22 @@ export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }
               <div key={reward.id} className="reward-item">
                 <span className="reward-emoji">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
-                <span className="reward-prob">{reward.probability}%</span>
               </div>
             ))}
             
-            <div className="reward-group-label">⭐ Rares (1%)</div>
+            <div className="reward-group-label">⭐ Rares</div>
             {REWARDS.filter(r => r.tier === "rare").map((reward) => (
               <div key={reward.id} className="reward-item rare">
                 <span className="reward-emoji">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
-                <span className="reward-prob">{reward.probability}%</span>
               </div>
             ))}
             
-            <div className="reward-group-label">💎 Légendaire (0.1%)</div>
+            <div className="reward-group-label">💎 Légendaire</div>
             {REWARDS.filter(r => r.tier === "legendary").map((reward) => (
               <div key={reward.id} className="reward-item legendary">
                 <span className="reward-emoji">{reward.emoji}</span>
                 <span className="reward-name">{reward.label}</span>
-                <span className="reward-prob">{reward.probability}%</span>
               </div>
             ))}
           </div>

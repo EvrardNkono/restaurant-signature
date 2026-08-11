@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { 
   Gift, Save, RefreshCw,
   Sparkles, Crown, Zap, Award, 
-   PartyPopper, X
+  PartyPopper, X
 } from "lucide-react";
 import "./WheelSettings.css";
+// ✅ Importer le service
+import { getWheelSettings, updateWheelSettings, toggleWheelGame } from "../../services/wheelService";
 
 interface WheelSettings {
   isActive: boolean;
@@ -22,36 +24,58 @@ export default function WheelSettings() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // ✅ CHARGER LES SETTINGS AVEC LE SERVICE
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/wheel-settings');
-        if (response.ok) {
-          const data = await response.json();
-          setSettings(data);
-        }
+        const data = await getWheelSettings();
+        setSettings(data);
       } catch (error) {
         console.error('Erreur chargement settings:', error);
+        setError('Impossible de charger les paramètres');
       }
     };
     fetchSettings();
   }, []);
 
+  // ✅ SAUVEGARDER AVEC LE SERVICE
   const handleSave = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const response = await fetch('/api/wheel-settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-      if (response.ok) {
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
-      }
+      await updateWheelSettings(settings);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+      
+      // Émettre un événement pour mettre à jour le bouton flottant
+      window.dispatchEvent(new CustomEvent('wheelSettingsUpdated', { 
+        detail: settings 
+      }));
     } catch (error) {
       console.error('Erreur sauvegarde:', error);
+      setError('Erreur lors de la sauvegarde');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ TOGGLE AVEC LE SERVICE
+  const handleToggle = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await toggleWheelGame(!settings.isActive);
+      setSettings(prev => ({ ...prev, isActive: result.isActive }));
+      
+      // Émettre un événement pour mettre à jour le bouton flottant
+      window.dispatchEvent(new CustomEvent('wheelSettingsUpdated', { 
+        detail: result 
+      }));
+    } catch (error) {
+      console.error('Erreur toggle:', error);
+      setError('Erreur lors du changement de statut');
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +139,8 @@ export default function WheelSettings() {
             </div>
             <button
               className={`toggle-premium ${settings.isActive ? 'active' : ''}`}
-              onClick={() => setSettings(prev => ({ ...prev, isActive: !prev.isActive }))}
+              onClick={handleToggle}
+              disabled={isLoading}
             >
               <div className="toggle-track-premium">
                 <div className="toggle-thumb-premium">
@@ -125,6 +150,13 @@ export default function WheelSettings() {
             </button>
           </div>
         </div>
+
+        {/* ✅ AFFICHER LES ERREURS */}
+        {error && (
+          <div className="settings-error">
+            ⚠️ {error}
+          </div>
+        )}
 
         {/* Corps du formulaire */}
         <div className="settings-body-premium">
