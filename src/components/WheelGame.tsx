@@ -37,7 +37,7 @@ const REWARDS: Reward[] = [
   { id: "canette-1", label: "Canette de jus", emoji: "🥤", color: "#4FC3F7", probability: 30, description: "Une canette de jus frais offerte", tier: "common" },
   { id: "accompagnement-1", label: "Accompagnement offert", emoji: "🍚", color: "#81C784", probability: 25, description: "Un accompagnement au choix offert", tier: "common" },
   { id: "supplement-1", label: "Supplément offert", emoji: "🧂", color: "#FFD54F", probability: 20, description: "Un supplément au choix offert", tier: "common" },
-  { id: "ailes-1", label: "Ailes de poulet", emoji: "🍗", color: "#FF8A65", probability: 15, description: "6 ailes de poulet offertes", tier: "common" },
+  { id: "ailes-1", label: "Ailes de poulet", emoji: "🍗", color: "#FF8A65", probability: 15, description: "3 ailes de poulet offertes", tier: "common" },
   { id: "mafe-1", label: "Mafé Poulet", emoji: "🍛", color: "#FF6B35", probability: 1, description: "Un délicieux Mafé Poulet offert", tier: "rare" },
   { id: "yassa-1", label: "Yassa Poulet", emoji: "🍋", color: "#66BB6A", probability: 1, description: "Un Yassa Poulet parfumé offert", tier: "rare" },
   { id: "tchiep-1", label: "Tchiep Poulet", emoji: "🍲", color: "#AB47BC", probability: 1, description: "Un Tchiep Poulet traditionnel offert", tier: "rare" },
