@@ -9,7 +9,8 @@ import {
   ListPlus,
   PlusSquare,
   Smartphone,
-  Gift // ← AJOUT pour le jeu de la roue
+  Gift, // ← AJOUT pour le jeu de la roue
+  Newspaper // ← AJOUT pour le blog
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
@@ -40,6 +41,12 @@ export default function Sidebar() {
       path: "/admin/wheel", 
       icon: <Gift size={22} />, 
       label: "🎡 Jeu de la Roue" 
+    },
+    // 📰 NOUVEAU - Blog
+    { 
+      path: "/admin/blog", 
+      icon: <Newspaper size={22} />, 
+      label: "Blog" 
     },
   ];
 

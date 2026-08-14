@@ -1,751 +1,1093 @@
-import { useState, useEffect, useMemo, useCallback, useRef, useId } from "react";
-import { X, Gift, Sparkles, RotateCcw, ChevronDown, Calendar, ExternalLink } from "lucide-react";
-import "./WheelGame.css";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useCart } from "../context/CartContext";
+import { 
+  Loader2, X, Utensils, GlassWater, 
+  Check, PlusCircle, Sparkles, MinusCircle,
+  Clock, CreditCard, Gift, Flame,
+  Star, Eye, Award, Search, ArrowRight,
+  Heart, Zap, ChefHat, Tv, CalendarClock,
+} from "lucide-react";
+import "./menu.css";
+import BillPopup from "../components/BillPopup";
+import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
-// ==================== CONSTANTES ====================
-const GOOGLE_REVIEW_URL = "https://search.google.com/local/writereview?placeid=ChIJC5K8D1L75UcRLFLJMr2OF14";
-const REVIEW_CONFIRMED_KEY = "wheel_review_confirmed";
-const PENDING_REWARD_KEY = "wheel_pending_reward";
-const PENDING_REWARD_EXPIRY_KEY = "wheel_pending_reward_expiry";
-const SPIN_COUNT_KEY = "wheel_spin_count";
-const LAST_SPIN_KEY = "wheel_last_spin";
+// --- CONFIGURATION ---
+const isLocal = window.location.hostname === "localhost";
+const BASE_URL = isLocal 
+  ? "http://localhost:5000/api" 
+  : "https://signature-backend-alpha.vercel.app/api";
 
-// Icône Google officielle
-function GoogleIcon({ size = 20 }: { size?: number }) {
+const API_URL = `${BASE_URL}/menu?public=true`;
+const SUPP_API = `${BASE_URL}/supplements?public=true`;
+
+//  --- FONCTION POUR FORMATER LE MESSAGE D'OUVERTURE ---
+const formatNextOpeningMessage = (nextInfo: string | null): string | null => {
+  if (!nextInfo) return null;
+  
+  const lowerNextInfo = nextInfo.toLowerCase();
+  
+  // Cas particuliers
+  if (lowerNextInfo.includes("aujourd'hui") || lowerNextInfo.includes("ce soir")) {
+    return `d'${nextInfo}`;
+  }
+  
+  // Si le premier caractère est une voyelle
+  const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
+  const firstChar = lowerNextInfo.charAt(0);
+  
+  if (vowels.includes(firstChar)) {
+    return `d'${nextInfo}`;
+  }
+  
+  return `de ${nextInfo}`;
+};
+
+// --- BANNIÈRE SERVICE VERROUILLÉ ---
+const ServiceLockedBanner = ({
+  serviceLabel,
+  nextInfo,
+  onUnlock,
+}: {
+  serviceLabel: string;
+  nextInfo: string | null;
+  onUnlock: () => void;
+}) => {
+  const formattedMessage = formatNextOpeningMessage(nextInfo);
+  
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
-      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
-      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
-      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
-    </svg>
-  );
-}
-
-// ==================== CONFIGURATION DES RÉCOMPENSES ====================
-interface Reward {
-  id: string;
-  label: string;
-  emoji: string;
-  color: string;
-  probability: number;
-  description: string;
-  tier: "common" | "rare" | "legendary";
-}
-
-const REWARDS: Reward[] = [
-  { id: "canette-1", label: "Canette de jus", emoji: "🥤", color: "#4FC3F7", probability: 30, description: "Une canette de jus frais offerte", tier: "common" },
-  { id: "accompagnement-1", label: "Accompagnement offert", emoji: "🍚", color: "#81C784", probability: 25, description: "Un accompagnement au choix offert", tier: "common" },
-  { id: "supplement-1", label: "Supplément offert", emoji: "🧂", color: "#FFD54F", probability: 20, description: "Un supplément au choix offert", tier: "common" },
-  { id: "ailes-1", label: "Ailes de poulet", emoji: "🍗", color: "#FF8A65", probability: 15, description: "6 ailes de poulet offertes", tier: "common" },
-  { id: "mafe-1", label: "Mafé Poulet", emoji: "🍛", color: "#FF6B35", probability: 1, description: "Un délicieux Mafé Poulet offert", tier: "rare" },
-  { id: "yassa-1", label: "Yassa Poulet", emoji: "🍋", color: "#66BB6A", probability: 1, description: "Un Yassa Poulet parfumé offert", tier: "rare" },
-  { id: "tchiep-1", label: "Tchiep Poulet", emoji: "🍲", color: "#AB47BC", probability: 1, description: "Un Tchiep Poulet traditionnel offert", tier: "rare" },
-  { id: "brochette-1", label: "Brochettes viande", emoji: "🥩", color: "#EF5350", probability: 1, description: "4 brochettes de viande offertes", tier: "rare" },
-  { id: "tilapia-1", label: "Tilapia frit", emoji: "🐟", color: "#42A5F5", probability: 1, description: "Un Tilapia frit croustillant offert", tier: "rare" },
-  { id: "reduction-20", label: "-20€ sur la note", emoji: "💰", color: "#FFD700", probability: 1, description: "20€ de réduction sur votre addition", tier: "legendary" },
-];
-
-const NUM_SEGMENTS = REWARDS.length;
-const SEGMENT_ANGLE = 360 / NUM_SEGMENTS;
-const CENTER = 150;
-const RADIUS = 140;
-
-// Paliers
-const WARMUP_SPINS = 20;
-const LEGENDARY_UNLOCK = 50;
-const RARE_CHANCE = 0.05;
-const LEGENDARY_CHANCE = 0.001;
-
-// ==================== HELPERS GÉOMÉTRIE ====================
-function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
-  const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-}
-
-function describeSegmentPath(index: number) {
-  const start = index * SEGMENT_ANGLE;
-  const end = start + SEGMENT_ANGLE;
-  const p1 = polarToCartesian(CENTER, CENTER, RADIUS, start);
-  const p2 = polarToCartesian(CENTER, CENTER, RADIUS, end);
-  const largeArc = SEGMENT_ANGLE > 180 ? 1 : 0;
-  return `M ${CENTER} ${CENTER} L ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} Z`;
-}
-
-// ==================== TIRAGE PONDÉRÉ ====================
-function pickWeighted(pool: Reward[]): Reward {
-  const total = pool.reduce((sum, r) => sum + r.probability, 0);
-  let roll = Math.random() * total;
-  for (const reward of pool) {
-    if (roll < reward.probability) return reward;
-    roll -= reward.probability;
-  }
-  return pool[pool.length - 1];
-}
-
-const COMMON_POOL = REWARDS.filter((r) => r.tier === "common");
-const RARE_POOL = REWARDS.filter((r) => r.tier === "rare");
-const LEGENDARY_POOL = REWARDS.filter((r) => r.tier === "legendary");
-
-function getRandomReward(spinCount: number, isTestMode: boolean): Reward {
-  if (isTestMode) {
-    const roll = Math.random();
-    if (roll < 0.05) return pickWeighted(LEGENDARY_POOL);
-    if (roll < 0.2) return pickWeighted(RARE_POOL);
-    return pickWeighted(COMMON_POOL);
-  }
-
-  if (spinCount < WARMUP_SPINS) return pickWeighted(COMMON_POOL);
-
-  const roll = Math.random();
-  if (spinCount >= LEGENDARY_UNLOCK && roll < LEGENDARY_CHANCE) return pickWeighted(LEGENDARY_POOL);
-  if (roll < RARE_CHANCE) return pickWeighted(RARE_POOL);
-  return pickWeighted(COMMON_POOL);
-}
-
-// ==================== CONFETTIS ====================
-interface ConfettiPiece {
-  id: number;
-  left: number;
-  delay: number;
-  duration: number;
-  drift: number;
-  size: number;
-  color: string;
-}
-
-const CONFETTI_COLORS = ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#FF6BFF", "#D4AF37", "#F5E6A3"];
-
-function makeConfetti(count: number): ConfettiPiece[] {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: Math.random() * 100,
-    delay: Math.random() * 0.4,
-    duration: 2.4 + Math.random() * 1.4,
-    drift: (Math.random() - 0.5) * 80,
-    size: 5 + Math.random() * 5,
-    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-  }));
-}
-
-// ==================== PROPS ====================
-interface WheelGameProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onWin?: (reward: Reward) => void;
-  isTestMode?: boolean;
-}
-
-// ==================== COMPOSANT PRINCIPAL ====================
-export default function WheelGame({ isOpen, onClose, onWin, isTestMode = false }: WheelGameProps) {
-  const [rotation, setRotation] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const [hasSpun, setHasSpun] = useState(false);
-  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
-  const [canSpin, setCanSpin] = useState(true);
-  const [nextSpinDate, setNextSpinDate] = useState<string | null>(null);
-  const [spinCount, setSpinCount] = useState(0);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  // États pour le flux
-  const [hasOpenedReviewLink, setHasOpenedReviewLink] = useState(false);
-  const [pendingReward, setPendingReward] = useState<Reward | null>(null);
-  const [pendingRewardExpiry, setPendingRewardExpiry] = useState<number | null>(null);
-  const [rewardRevealed, setRewardRevealed] = useState(false);
-  const [showReviewGateAfterSpin, setShowReviewGateAfterSpin] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
-  const [isRewardExpired, setIsRewardExpired] = useState(false);
-
-  const resultHeadingId = useId();
-  const modalRef = useRef<HTMLDivElement>(null);
-  const wheelRef = useRef<SVGGElement>(null);
-  const confettiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingRewardRef = useRef<Reward | null>(null);
-  const scrollTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  // ==================== PRÉFÉRENCE "MOUVEMENT RÉDUIT" ====================
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(query.matches);
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    query.addEventListener("change", handler);
-    return () => query.removeEventListener("change", handler);
-  }, []);
-
-  // ==================== VÉRIFIER LES RÉCOMPENSES EN ATTENTE ====================
-  const checkPendingReward = useCallback(() => {
-    const storedReward = localStorage.getItem(PENDING_REWARD_KEY);
-    const storedExpiry = localStorage.getItem(PENDING_REWARD_EXPIRY_KEY);
-    
-    if (storedReward && storedExpiry) {
-      const expiry = parseInt(storedExpiry, 10);
-      const now = Date.now();
-      
-      if (now < expiry) {
-        const reward = JSON.parse(storedReward);
-        setPendingReward(reward);
-        setPendingRewardExpiry(expiry);
-        setShowReviewGateAfterSpin(true);
-        setRewardRevealed(false);
-        setIsRewardExpired(false);
-        setTimeRemaining(Math.floor((expiry - now) / 1000));
-        return true;
-      } else {
-        localStorage.removeItem(PENDING_REWARD_KEY);
-        localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
-        setPendingReward(null);
-        setPendingRewardExpiry(null);
-        setShowReviewGateAfterSpin(false);
-        setRewardRevealed(false);
-        setIsRewardExpired(true);
-      }
-    }
-    return false;
-  }, []);
-
-  // ==================== VÉRIFICATION DU TOUR DISPONIBLE ====================
-  const checkAvailability = useCallback(() => {
-    if (isTestMode) {
-      setCanSpin(true);
-      return;
-    }
-
-    const hasPending = checkPendingReward();
-    if (hasPending) {
-      setCanSpin(false);
-      return;
-    }
-
-    const lastSpin = localStorage.getItem(LAST_SPIN_KEY);
-    const today = new Date().toDateString();
-    const count = parseInt(localStorage.getItem(SPIN_COUNT_KEY) || "0", 10);
-    setSpinCount(count);
-
-    if (lastSpin === today) {
-      setCanSpin(false);
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + 1);
-      setNextSpinDate(nextDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }));
-    } else {
-      setCanSpin(true);
-    }
-  }, [isTestMode, checkPendingReward]);
-
-  useEffect(() => {
-    if (isOpen) checkAvailability();
-  }, [isOpen, checkAvailability]);
-
-  // ==================== TIMER POUR LE TEMPS RESTANT ====================
-  useEffect(() => {
-    if (!pendingReward || !pendingRewardExpiry || rewardRevealed) return;
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const remaining = Math.max(0, Math.floor((pendingRewardExpiry - now) / 1000));
-      setTimeRemaining(remaining);
-      
-      if (remaining <= 0) {
-        clearInterval(interval);
-        localStorage.removeItem(PENDING_REWARD_KEY);
-        localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
-        setPendingReward(null);
-        setPendingRewardExpiry(null);
-        setShowReviewGateAfterSpin(false);
-        setRewardRevealed(false);
-        setIsRewardExpired(true);
-        checkAvailability();
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [pendingReward, pendingRewardExpiry, rewardRevealed, checkAvailability]);
-
-  // ==================== LANCER LA ROUE ====================
-  const spinWheel = useCallback(() => {
-    if (isSpinning || hasSpun || !canSpin) return;
-
-    if (!isTestMode) {
-      localStorage.setItem(LAST_SPIN_KEY, new Date().toDateString());
-    }
-
-    const newSpinCount = spinCount + 1;
-    if (!isTestMode) {
-      localStorage.setItem(SPIN_COUNT_KEY, String(newSpinCount));
-    }
-    setSpinCount(newSpinCount);
-
-    const reward = getRandomReward(newSpinCount, isTestMode);
-    pendingRewardRef.current = reward;
-
-    const rewardIndex = REWARDS.findIndex((r) => r.id === reward.id);
-    const targetMidAngle = rewardIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-    const desiredFinalMod = ((-targetMidAngle % 360) + 360) % 360;
-    const currentMod = ((rotation % 360) + 360) % 360;
-    const diff = ((desiredFinalMod - currentMod + 360) % 360);
-    const extraSpins = prefersReducedMotion ? 1 : 5 + Math.floor(Math.random() * 4);
-    const newRotation = rotation + extraSpins * 360 + diff;
-
-    setIsSpinning(true);
-    setSelectedReward(null);
-    setShowResult(false);
-    setConfetti([]);
-    setShowReviewGateAfterSpin(false);
-    setRewardRevealed(false);
-    setIsRewardExpired(false);
-    setRotation(newRotation);
-  }, [isSpinning, hasSpun, canSpin, isTestMode, spinCount, rotation, prefersReducedMotion]);
-
-  // ==================== FIN DE ROTATION ====================
-  const handleTransitionEnd = useCallback(() => {
-    if (!isSpinning) return;
-    const reward = pendingRewardRef.current;
-    setIsSpinning(false);
-    setHasSpun(true);
-    if (!reward) return;
-    
-    if (!isTestMode) {
-      const expiry = Date.now() + 3600000;
-      localStorage.setItem(PENDING_REWARD_KEY, JSON.stringify(reward));
-      localStorage.setItem(PENDING_REWARD_EXPIRY_KEY, String(expiry));
-      setPendingReward(reward);
-      setPendingRewardExpiry(expiry);
-      setTimeRemaining(3600);
-      setShowReviewGateAfterSpin(true);
-      setRewardRevealed(false);
-      setIsRewardExpired(false);
-      setSelectedReward(null);
-    } else {
-      setSelectedReward(reward);
-      setShowResult(true);
-      if (onWin) onWin(reward);
-    }
-  }, [isSpinning, isTestMode, onWin]);
-
-  // ==================== RÉVÉLER LA RÉCOMPENSE ====================
-  const revealReward = useCallback(() => {
-    if (pendingReward) {
-      setSelectedReward(pendingReward);
-      setShowResult(true);
-      setRewardRevealed(true);
-      setShowReviewGateAfterSpin(false);
-      
-      if (onWin) onWin(pendingReward);
-      
-      if (pendingReward.tier === "rare" || pendingReward.tier === "legendary") {
-        setConfetti(makeConfetti(pendingReward.tier === "legendary" ? 60 : 36));
-        if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
-        confettiTimeoutRef.current = setTimeout(() => setConfetti([]), 3600);
-      }
-    }
-  }, [pendingReward, onWin]);
-
-  // ==================== RÉINITIALISER ====================
-  const resetGame = useCallback(() => {
-    setHasSpun(false);
-    setSelectedReward(null);
-    setShowResult(false);
-    setConfetti([]);
-    setShowReviewGateAfterSpin(false);
-    setRewardRevealed(false);
-    setIsRewardExpired(false);
-    localStorage.removeItem(PENDING_REWARD_KEY);
-    localStorage.removeItem(PENDING_REWARD_EXPIRY_KEY);
-    setPendingReward(null);
-    setPendingRewardExpiry(null);
-    checkAvailability();
-  }, [checkAvailability]);
-
-  // ==================== FORMATER LE TEMPS ====================
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // ==================== OUVRIR LE LIEN AVIS ====================
-  const openReviewLink = () => {
-    window.open(GOOGLE_REVIEW_URL, "_blank", "noopener,noreferrer");
-    setHasOpenedReviewLink(true);
-  };
-
-  // ==================== FERMER AVEC ÉCHAP ====================
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [isOpen, onClose]);
-
-  // ==================== SEGMENTS DE LA ROUE ====================
-  const segments = useMemo(
-    () =>
-      REWARDS.map((reward, index) => {
-        const midAngle = index * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-        const labelPos = polarToCartesian(CENTER, CENTER, RADIUS * 0.68, midAngle);
-        return {
-          reward,
-          path: describeSegmentPath(index),
-          midAngle,
-          labelPos,
-        };
-      }),
-    []
-  );
-
-  // ==================== EFFET DE SCROLL ====================
-  useEffect(() => {
-    scrollTimersRef.current.forEach(clearTimeout);
-    scrollTimersRef.current = [];
-
-    if (!isOpen || prefersReducedMotion) return;
-
-    const t1 = setTimeout(() => {
-      const modal = modalRef.current;
-      if (!modal) return;
-      modal.scrollTo({ top: 130, behavior: "smooth" });
-
-      const t2 = setTimeout(() => {
-        modal.scrollTo({ top: 0, behavior: "smooth" });
-      }, 750);
-      scrollTimersRef.current.push(t2);
-    }, 450);
-    scrollTimersRef.current.push(t1);
-
-    return () => {
-      scrollTimersRef.current.forEach(clearTimeout);
-      scrollTimersRef.current = [];
-    };
-  }, [isOpen, prefersReducedMotion]);
-
-  // ==================== NETTOYAGE CONFETTIS ====================
-  useEffect(() => () => {
-    if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
-  }, []);
-
-  if (!isOpen) return null;
-
-  const statusLabel = !canSpin ? "⏳ Attente" : hasSpun ? "✅ Joué" : "🎯 Prêt";
-  const statusColor = hasSpun ? "#9a9a9a" : canSpin ? "#4ade80" : "#f87171";
-
-  // ==================== RENDU DU GATE POST-SPIN ====================
-  const renderPostSpinReviewGate = () => {
-    if (!showReviewGateAfterSpin || !pendingReward || rewardRevealed) return null;
-
-    return (
-      <div className="review-gate post-spin">
-        <div className="review-gate-icon" aria-hidden="true">
-          <span style={{ fontSize: '2.5rem' }}>❓</span>
+    <div className="service-locked-banner">
+      <div className="locked-banner-content">
+        <div className="locked-icon-wrap">
+          <CalendarClock size={36} className="locked-icon" />
         </div>
-        <h3>🎉 Vous avez gagné quelque chose !</h3>
-        <p className="review-gate-cta-line">
-          Laissez un avis Google pour découvrir votre récompense
-        </p>
-        <div className="reward-preview">
-          <span className="reward-preview-emoji">❓</span>
-          <span className="reward-preview-label">???</span>
-        </div>
-        <p style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '0.5rem' }}>
-          ⏱️ {formatTime(timeRemaining)} restant avant expiration
-        </p>
-        <button className="review-gate-btn" onClick={openReviewLink}>
-          <GoogleIcon size={18} />
-          <span>Laisser un avis Google</span>
-          <ExternalLink size={14} />
-        </button>
-        <button
-          className={`review-confirm-btn ${!hasOpenedReviewLink ? "disabled" : ""}`}
-          onClick={() => {
-            if (hasOpenedReviewLink) {
-              localStorage.setItem(REVIEW_CONFIRMED_KEY, "true");
-              revealReward();
-            }
-          }}
-          disabled={!hasOpenedReviewLink}
-        >
-          {hasOpenedReviewLink ? "✅ J'ai laissé mon avis, révéler !" : "🔑 Ouvrez d'abord le lien ci-dessus"}
-        </button>
-        {!hasOpenedReviewLink && (
-          <p className="review-gate-hint">
-            🔑 Ouvrez d'abord le lien ci-dessus pour débloquer ce bouton.
+        <div className="locked-text">
+          <h3 className="locked-title">Service {serviceLabel} non disponible</h3>
+          {nextInfo && (
+            <p className="locked-subtitle">
+              Le service en salle sera disponible à partir{" "}
+              <strong>{formattedMessage}</strong>
+            </p>
+          )}
+          <p className="locked-hint">
+            Cliquez sur "Voir la carte & préparer" pour débloquer l'aperçu et préparer votre commande.
           </p>
-        )}
-      </div>
-    );
-  };
-
-  // ==================== RENDU DU RÉSULTAT ====================
-  const renderResult = () => {
-    if (!showResult || !selectedReward) return null;
-
-    return (
-      <div className={`wheel-result ${selectedReward.tier === "legendary" ? "legendary-result" : ""}`}>
-        <div className={`result-card tier-${selectedReward.tier}`} style={{ borderColor: selectedReward.color }}>
-          <div className="result-icon" style={{ background: selectedReward.color }} aria-hidden="true">
-            {selectedReward.emoji}
-          </div>
-          <div className="result-content">
-            <h4 id={resultHeadingId}>🎊 Gagné : {selectedReward.label}</h4>
-            <p>{selectedReward.description}</p>
-            <div className="result-badge">
-              {selectedReward.tier === "legendary" && "👑 "}
-              {selectedReward.tier === "rare" && "⭐ "}
-              <Sparkles size={12} />
-              <span>Récompense débloquée</span>
-            </div>
-          </div>
         </div>
-        <p className="claim-reminder">
-          📌 Merci pour votre avis ! Votre récompense est valable 1 heure.
-        </p>
-      </div>
-    );
-  };
-
-  // ==================== RENDU PRINCIPAL ====================
-  return (
-    <div className="wheel-game-overlay" onClick={onClose}>
-      <div
-        className="wheel-game-modal"
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="wheel-game-title"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* HEADER */}
-        <div className="wheel-game-header">
-          <div className="header-icon" aria-hidden="true">
-            <Gift size={22} color="#D4AF37" />
-          </div>
-          <h2 id="wheel-game-title">Tentez votre chance</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Fermer">
-            <X size={20} />
-          </button>
-        </div>
-
-        {isTestMode && (
-          <div className="test-mode-badge">
-            <span>🧪 Mode test</span>
-            <span className="test-hint">Tours illimités · rareté augmentée</span>
-          </div>
-        )}
-
-        {/* GATE POST-SPIN */}
-        {renderPostSpinReviewGate()}
-
-        {/* Message d'expiration */}
-        {isRewardExpired && !showReviewGateAfterSpin && (
-          <div className="waiting-banner" style={{ borderColor: '#f87171', color: '#f87171' }}>
-            <span>⏰</span>
-            <span>Votre récompense a expiré. Vous pouvez rejouer demain.</span>
-          </div>
-        )}
-
-        {/* Contenu principal */}
-        {!showReviewGateAfterSpin && (
-          <>
-            {!canSpin && !isTestMode && !pendingReward && (
-              <div className="waiting-banner">
-                <Calendar size={16} />
-                <span>
-                  Prochain tour disponible le <strong>{nextSpinDate}</strong>
-                </span>
-              </div>
-            )}
-
-            {!hasSpun && !showResult && canSpin && (
-              <div className="scroll-indicator" aria-hidden="true">
-                <ChevronDown size={16} className="scroll-chevron" />
-                <span>Découvrez les récompenses</span>
-              </div>
-            )}
-
-            {/* STATS */}
-            <div className="wheel-stats">
-              <div className="stat-item">
-                <span className="stat-label">Statut</span>
-                <span className="stat-value" style={{ fontSize: "0.95rem", color: statusColor }}>
-                  {statusLabel}
-                </span>
-              </div>
-              <div className="stat-divider" />
-              <div className="stat-item">
-                <span className="stat-label">Tentatives</span>
-                <span className="stat-value">{spinCount}</span>
-              </div>
-            </div>
-
-            {/* ROUE */}
-            <div className="wheel-container">
-              <div className="wheel-wrapper">
-                <div className="wheel-pointer" aria-hidden="true">
-                  <div className="pointer-triangle" />
-                  <div className="pointer-dot" />
-                </div>
-
-                <svg viewBox="0 0 300 300" className="wheel-svg" role="img" aria-label="Roue de récompenses">
-                  <defs>
-                    <radialGradient id="hubGradient" cx="35%" cy="30%" r="70%">
-                      <stop offset="0%" stopColor="#FFE082" />
-                      <stop offset="55%" stopColor="#D4AF37" />
-                      <stop offset="100%" stopColor="#8B6914" />
-                    </radialGradient>
-                  </defs>
-
-                  <g
-                    ref={wheelRef}
-                    className="wheel-rotor"
-                    style={{
-                      transform: `rotate(${rotation}deg)`,
-                      transitionDuration: isSpinning ? (prefersReducedMotion ? "0.6s" : `${4.6 + (rotation % 3) * 0.1}s`) : "0s",
-                    }}
-                    onTransitionEnd={handleTransitionEnd}
-                  >
-                    {segments.map(({ reward, path, midAngle, labelPos }) => (
-                      <g key={reward.id}>
-                        <path d={path} fill={reward.color} stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" />
-                        <text
-                          x={labelPos.x}
-                          y={labelPos.y}
-                          transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y})`}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          fontSize="22"
-                          className="wheel-emoji"
-                        >
-                          {reward.emoji}
-                        </text>
-                        {reward.tier !== "common" && (
-                          <text
-                            x={labelPos.x}
-                            y={labelPos.y + 18}
-                            transform={`rotate(${midAngle} ${labelPos.x} ${labelPos.y + 18})`}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fontSize="9"
-                            fill="#fff"
-                            className="wheel-tier-mark"
-                          >
-                            {reward.tier === "legendary" ? "⭐" : "✦"}
-                          </text>
-                        )}
-                      </g>
-                    ))}
-                  </g>
-
-                  <circle cx={CENTER} cy={CENTER} r="48" fill="url(#hubGradient)" stroke="rgba(255,255,255,0.25)" strokeWidth="2" />
-                  <text x={CENTER} y={CENTER - 6} textAnchor="middle" className="hub-title">
-                    Signature
-                  </text>
-                  <text x={CENTER} y={CENTER + 14} textAnchor="middle" className="hub-subtitle">
-                    ✨ Tourne ✨
-                  </text>
-                </svg>
-
-                {/* CONFETTIS */}
-                {confetti.length > 0 && (
-                  <div className="confetti-layer" aria-hidden="true">
-                    {confetti.map((c) => (
-                      <span
-                        key={c.id}
-                        className="confetti-piece"
-                        style={{
-                          left: `${c.left}%`,
-                          width: c.size,
-                          height: c.size * 1.5,
-                          backgroundColor: c.color,
-                          animationDelay: `${c.delay}s`,
-                          animationDuration: `${c.duration}s`,
-                          // @ts-ignore
-                          "--drift": `${c.drift}px`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* BOUTON LANCER */}
-            <button
-              className={`spin-btn ${isSpinning ? "spinning" : ""} ${hasSpun || !canSpin ? "disabled" : ""}`}
-              onClick={spinWheel}
-              disabled={isSpinning || hasSpun || !canSpin}
-            >
-              {!canSpin && !isTestMode ? (
-                <>
-                  <Calendar size={18} />
-                  <span>Attendez le prochain tour</span>
-                </>
-              ) : isSpinning ? (
-                <span>La roue tourne…</span>
-              ) : hasSpun ? (
-                <>
-                  <RotateCcw size={18} />
-                  <span>{isTestMode ? "Rejouer" : "Tour terminé"}</span>
-                </>
-              ) : (
-                <>
-                  <Gift size={18} />
-                  <span>Faire tourner</span>
-                </>
-              )}
-            </button>
-
-            {/* RÉSULTAT */}
-            <div aria-live="polite">
-              {renderResult()}
-            </div>
-
-            {isTestMode && hasSpun && (
-              <button className="reset-btn" onClick={resetGame}>
-                <RotateCcw size={16} />
-                <span>Nouveau test</span>
-              </button>
-            )}
-
-            {/* LISTE DES RÉCOMPENSES */}
-            <div className="rewards-list">
-              <div className="rewards-header">
-                <h4>Récompenses possibles</h4>
-                <span className="rewards-badge">
-                  <Sparkles size={12} />
-                  {REWARDS.length} gains
-                </span>
-              </div>
-              <div className="rewards-grid">
-                <div className="reward-group-label">Courantes</div>
-                {COMMON_POOL.map((reward) => (
-                  <div key={reward.id} className="reward-item">
-                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                    <span className="reward-name">{reward.label}</span>
-                  </div>
-                ))}
-
-                <div className="reward-group-label">Rares</div>
-                {RARE_POOL.map((reward) => (
-                  <div key={reward.id} className="reward-item rare">
-                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                    <span className="reward-name">{reward.label}</span>
-                  </div>
-                ))}
-
-                <div className="reward-group-label">Légendaire</div>
-                {LEGENDARY_POOL.map((reward) => (
-                  <div key={reward.id} className="reward-item legendary">
-                    <span className="reward-emoji" aria-hidden="true">{reward.emoji}</span>
-                    <span className="reward-name">{reward.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+        <button className="locked-cta-btn" onClick={onUnlock}>
+          <span>Voir la carte &amp; préparer</span>
+          <ArrowRight size={18} />
+        </button>
       </div>
     </div>
+  );
+};
+
+// --- COMPOSANT VOYANT DE STATUT AVEC PROGRESSION ---
+const OrderStatusBadge = ({ status }: { status: string }) => {
+  const statusConfig: Record<string, { label: string, color: string, icon: any, gradient: string, progress?: number }> = {
+    in_cart: { 
+      label: "À régler", 
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
+      icon: <CreditCard size={12} />,
+      progress: 0
+    },
+    pending: { 
+      label: "En attente", 
+      color: "#F39C12",
+      gradient: "linear-gradient(135deg, #F39C12, #E67E22)",
+      icon: <Clock size={12} />,
+      progress: 25
+    },
+    cooking: { 
+      label: "En cuisine", 
+      color: "#E74C3C",
+      gradient: "linear-gradient(135deg, #E74C3C, #C0392B)",
+      icon: <Flame size={12} />,
+      progress: 50
+    },
+    done: { 
+      label: "Prêt", 
+      color: "#27AE60",
+      gradient: "linear-gradient(135deg, #27AE60, #1E8449)",
+      icon: <Sparkles size={12} />,
+      progress: 100
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <div className="order-status-badge-premium" style={{ background: config.gradient }}>
+      <div className="status-icon">{config.icon}</div>
+      <span>{config.label}</span>
+      {config.progress !== undefined && config.progress < 100 && (
+        <div className="status-progress">
+          <div className="status-progress-bar" style={{ width: `${config.progress}%` }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- COMPOSANT OFFRE SPÉCIALE AMÉLIORÉ ---
+const OfferBadge = ({ quantity, requiredQuantity }: { quantity: number; requiredQuantity: number }) => (
+  <div className="offer-badge-enhanced">
+    <Gift size={10} />
+    <span>+{Math.floor(quantity / requiredQuantity)} offerte(s)</span>
+  </div>
+);
+
+// --- COMPOSANT NOTE GASTRONOMIQUE AVEC ANIMATION ---
+const GastronomicNote = ({ note, size = 10 }: { note: number; size?: number }) => (
+  <div className="gastro-note-enhanced">
+    {[...Array(5)].map((_, i) => (
+      <Star 
+        key={i} 
+        size={size} 
+        className={`gastro-star ${i < note ? "filled" : "empty"}`}
+        fill={i < note ? "#D4AF37" : "none"}
+      />
+    ))}
+    <span className="gastro-note-value">{note}.0</span>
+  </div>
+);
+
+// --- COMPOSANT TIMER DE PRÉPARATION ---
+const PreparationTimer = ({ minutes }: { minutes: number }) => (
+  <div className="prep-timer-premium">
+    <Clock size={12} />
+    <span>{minutes} min</span>
+  </div>
+);
+
+// --- FONCTION SCROLL AMÉLIORÉE ---
+const scrollToDrawer = (id: string) => {
+  setTimeout(() => {
+    const element = document.getElementById(`drawer-${id}`);
+    if (element) {
+      const card = element.closest('.menu-card-enhanced');
+      if (card) {
+        const cardRect = card.getBoundingClientRect();
+        const scrollTarget = window.scrollY + cardRect.top - 100;
+        window.scrollTo({ top: scrollTarget + 120, behavior: 'smooth' });
+      } else {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      element.classList.add('drawer-highlight');
+      setTimeout(() => element.classList.remove('drawer-highlight'), 1000);
+    }
+  }, 150);
+};
+
+// --- INTERFACES ---
+interface Category {
+  _id: string;
+  name: string;
+  univers: "Cuisine" | "Boissons";
+  active: boolean;
+}
+
+interface Accompaniment {
+  _id: string;
+  name: string;
+  active: boolean;
+}
+
+interface Plat {
+  _id: string;
+  name: string;
+  price: number;
+  category: Category;
+  description: string;
+  image: string;
+  showInMenuJour: boolean;
+  showInMenuSoir: boolean;
+  hasAccompaniment: boolean;
+  accompaniments: Accompaniment[]; 
+  allowSupplements: boolean;
+  offer?: {
+    enabled: boolean;
+    requiredQuantity: number;
+    offerPrice: number;
+  };
+  gastronomicNote?: number;
+  preparationTime?: number;
+  calories?: number;
+  spicy?: boolean;
+  vegetarian?: boolean;
+  vegan?: boolean;
+  glutenFree?: boolean;
+}
+
+interface Supplement {
+  _id: string;
+  name: string;
+  price: number;
+  active: boolean;
+  category?: string;
+}
+
+// Composant Lock
+const Lock = ({ size = 14 }: { size?: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+  </svg>
+);
+
+export default function Menu() {
+  // ─── HORAIRES ───────────────────────────────────────────────
+  const { isJourOpen, nextJourInfo, currentPeriod } = useRestaurantHours();
+  const [unlocked, setUnlocked] = useState(false);
+
+  // La carte est disponible si :
+  // - Soit le service est ouvert (isJourOpen = true)
+  // - Soit l'utilisateur a volontairement débloqué (unlocked = true)
+  const isJourAvailable = isJourOpen || unlocked;
+
+  const { 
+    cart, 
+    addToCart, 
+    addSupplementToLine, 
+    removeSupplementFromLine, 
+    removeFromCart, 
+    updateLineAccompaniment,
+    getItemQuantity
+  } = useCart();
+
+  const clientId = localStorage.getItem("signature_client_id");
+
+  const [period] = useState<"JOUR" | "SOIR">("JOUR"); 
+  const [univers, setUnivers] = useState<"Cuisine" | "Boissons">("Cuisine");
+  const [filter, setFilter] = useState<string>("Tous");
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+  const [selectingAccId, setSelectingAccId] = useState<string | null>(null);
+  const [addedSuppId, setAddedSuppId] = useState<string | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [quickViewId, setQuickViewId] = useState<string | null>(null);
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
+  const [hasPendingBill, setHasPendingBill] = useState(false);
+
+  const isAnyDrawerOpen = selectingAccId !== null;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
+  const lastScrollY = useRef(0);
+
+  // Fonction de déblocage
+  const handleUnlock = useCallback(() => {
+    console.log("🔓 Déverrouillage manuel de la carte");
+    setUnlocked(true);
+    setTimeout(() => {
+      const menuGrid = document.querySelector('.menu-grid-enhanced');
+      if (menuGrid) {
+        menuGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setScrollDirection("down");
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection("up");
+      }
+      lastScrollY.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isAnyDrawerOpen && isMobile) {
+        const drawer = document.querySelector('.customization-drawer-enhanced.open');
+        const target = e.target as HTMLElement;
+        if (drawer && !drawer.contains(target) && !target.closest('.add-btn')) {
+          setSelectingAccId(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isAnyDrawerOpen, isMobile]);
+
+  const triggerBounceHint = useCallback(() => {
+    const drawerContent = document.querySelector('.customization-drawer-enhanced.open .drawer-content-enhanced');
+    if (drawerContent) {
+      drawerContent.classList.remove('hint-active');
+      void (drawerContent as HTMLElement).offsetWidth; 
+      drawerContent.classList.add('hint-active');
+      setTimeout(() => drawerContent.classList.remove('hint-active'), 800);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectingAccId) {
+      const timer = setTimeout(() => triggerBounceHint(), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [selectingAccId, triggerBounceHint]);
+
+  // --- DATA FETCHERS ---
+  const { data: allPlats, isLoading: isLoadingMenu } = useQuery<Plat[]>({
+    queryKey: ['full-catalog'],
+    queryFn: async () => {
+      const response = await axios.get(API_URL);
+      return response.data.data;
+    },
+    staleTime: 1000 * 60 * 30, 
+  });
+
+  const { data: supplementsList, isLoading: isLoadingSupps } = useQuery<Supplement[]>({
+    queryKey: ['menu-supplements'],
+    queryFn: async () => {
+      const response = await axios.get(SUPP_API);
+      return response.data.data;
+    },
+    staleTime: 1000 * 60 * 30,
+  });
+
+  const { data: activeOrders = [], refetch: refetchOrders } = useQuery({
+    queryKey: ["active-orders", clientId],
+    queryFn: async () => {
+      if (!clientId) return [];
+      const response = await axios.get(`${BASE_URL}/orders/track/${clientId}`);
+      return response.data.orders || [];
+    },
+    refetchInterval: 10000, 
+    enabled: !!clientId
+  });
+
+  useEffect(() => {
+    if (clientId) refetchOrders();
+  }, [clientId, cart.length, refetchOrders]);
+
+  useEffect(() => {
+    const now = Date.now();
+    const justArchivedOrder = activeOrders.find((order: any) => {
+      if (order.status !== "archived") return false;
+      const archivedDate = new Date(order.updatedAt || order.createdAt).getTime();
+      return (now - archivedDate) < 5000;
+    });
+    if (justArchivedOrder && cart.length > 0) {
+      cart.forEach((item: any) => { removeFromCart(item.cartItemId); });
+      showToast("✓ Commande terminée, merci !", "success");
+    }
+  }, [activeOrders]);
+
+  // --- FILTRAGE ---
+  const platsDeLaPeriode = useMemo(() => {
+    if (!allPlats) return [];
+    return period === "JOUR" 
+      ? allPlats.filter(p => p.showInMenuJour) 
+      : allPlats.filter(p => p.showInMenuSoir);
+  }, [allPlats, period]);
+
+  const supplementsDisponibles = useMemo(() => 
+    (supplementsList?.filter(s => s.active) || []).sort((a, b) => a.name.localeCompare(b.name)), 
+  [supplementsList]);
+
+  const currentCategories = useMemo(() => [
+    "Tous",
+    ...Array.from(new Set(
+      platsDeLaPeriode
+        .filter(p => p.category?.univers === univers)
+        .map(p => p.category?.name)
+        .filter(Boolean)
+    ))
+  ], [platsDeLaPeriode, univers]);
+
+  const platsFiltres = useMemo(() => {
+    let filtered = platsDeLaPeriode.filter(p => {
+      const matchUnivers = p.category?.univers === univers;
+      if (!matchUnivers) return false;
+      if (filter === "Tous") return true;
+      return p.category?.name === filter;
+    });
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(term) || 
+        p.description.toLowerCase().includes(term)
+      );
+    }
+    return filtered;
+  }, [platsDeLaPeriode, univers, filter, searchTerm]);
+
+  const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
+    const colors = { success: "#27ae60", error: "#e74c3c", info: "#3498db", warning: "#f39c12" };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      background:${colors[type]};color:white;padding:12px 24px;border-radius:10px;
+      font-size:0.9rem;font-weight:600;z-index:10000;
+      box-shadow:0 4px 20px rgba(0,0,0,0.25);
+      z-index:10001;
+    `;
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; setTimeout(() => toast.remove(), 300); }, 3500);
+  };
+
+  // --- ACTIONS CORRIGÉES ---
+  const handleAddClick = (plat: Plat, currentQty: number) => {
+    // ✅ Si service FERMÉ et NON DÉBLOQUÉ → bloquer
+    if (!isJourOpen && !unlocked) {
+      showToast(
+        nextJourInfo
+          ? `🔒 Carte verrouillée. Cliquez sur "Voir la carte & préparer" pour débloquer.`
+          : "🍽️ Service non disponible pour le moment.",
+        "warning"
+      );
+      return;
+    }
+    
+    // ✅ Service fermé mais DÉBLOQUÉ → on continue (ajout au panier)
+    // ✅ Service ouvert → on continue (ajout au panier)
+    
+    if (hasPendingBill) {
+      showToast("⚠️ Votre addition est en cours — réglez-la avant de commander à nouveau", "error");
+      return;
+    }
+    
+    if (isAnyDrawerOpen && selectingAccId !== plat._id) {
+      setSelectingAccId(null);
+      setTimeout(() => handleAddClick(plat, currentQty), 300);
+      return;
+    }
+
+    const result = addToCart(
+      { 
+        id: plat._id, name: plat.name, price: plat.price, image: plat.image,
+        type: period, supplements: [], offer: plat.offer 
+      }, 
+      period
+    );
+
+    if (result === "LOCK_ERROR") {
+      showToast("Votre panier contient déjà des produits d'un autre service", "error");
+      return;
+    }
+
+    const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+    const hasSupps = plat.allowSupplements;
+    const willHaveOffer = plat.offer?.enabled && (currentQty + 1) >= plat.offer.requiredQuantity;
+
+    if (activeAccs.length > 0 || hasSupps || willHaveOffer) {
+      setSelectingAccId(plat._id);
+      scrollToDrawer(plat._id);
+    } else {
+      showToast(`✓ ${plat.name} ajouté au panier`, "success");
+    }
+  };
+
+  const handleRemoveOne = (itemsInCart: any[], platName: string) => {
+    if (itemsInCart.length > 0) {
+      const lastItem = itemsInCart[itemsInCart.length - 1];
+      removeFromCart(lastItem.cartItemId);
+      showToast(`✓ ${platName} retiré du panier`, "info");
+    }
+  };
+
+  const toggleLike = (platId: string) => {
+    setLikedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platId)) { 
+        newSet.delete(platId); 
+        showToast("Retiré de vos favoris", "info"); 
+      } else { 
+        newSet.add(platId); 
+        showToast("Ajouté à vos favoris", "success"); 
+      }
+      return newSet;
+    });
+  };
+
+  if (isLoadingMenu) {
+    return (
+      <div className="menu-loading-enhanced">
+        <div className="loading-spiral">
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-ring"></div>
+          <div className="spiral-logo">S</div>
+        </div>
+        <p className="loading-text">Signature prépare sa carte gastronomique...</p>
+        <div className="loading-progress-bar">
+          <div className="loading-progress-fill"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── SI LE SERVICE N'EST PAS DISPONIBLE ET PAS DÉVERROUILLÉ → CARTE BLOQUÉE ───
+  if (!isJourAvailable) {
+    return (
+      <section className="menu-section-enhanced">
+        {/* HERO SECTION */}
+        <div className="menu-hero-cinematic">
+          <div className="hero-video-backdrop">
+            <div className="hero-gradient-overlay"></div>
+            <div className="hero-particles-container">
+              {[...Array(30)].map((_, i) => (
+                <div key={i} className="hero-particle" style={{ 
+                  '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
+                  '--duration': `${5 + Math.random() * 10}s`
+                } as React.CSSProperties} />
+              ))}
+            </div>
+          </div>
+          <div className="hero-content-cinematic">
+            <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
+            <h1 className="hero-title-cinematic">
+              L'Art de la<span className="gold-gradient"> Table Signature</span>
+            </h1>
+            <div className="hero-separator-cinematic">
+              <div className="separator-line gold"></div>
+              <ChefHat size={28} className="separator-icon" />
+              <div className="separator-line gold"></div>
+            </div>
+            <p className="hero-description-cinematic">
+              Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+              Découvrez l'excellence gastronomique réinventée
+            </p>
+          </div>
+        </div>
+
+        {/* BANNIÈRE VERROUILLAGE - serviceLabel dynamique */}
+        <ServiceLockedBanner
+          serviceLabel={currentPeriod === "SOIR" ? "du Soir" : "Déjeuner"}
+          nextInfo={nextJourInfo}
+          onUnlock={handleUnlock}
+        />
+
+        {/* LA CARTE EST AFFICHÉE MAIS EN MODE LECTURE SEULE (boutons désactivés) */}
+        <div className="controls-bar-enhanced visible">
+          <div className="controls-container">
+            <div className="search-wrapper">
+              <Search className="search-icon" size={18} />
+              <input 
+                type="text" placeholder="Rechercher un plat, une saveur..."
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input-enhanced"
+              />
+              {searchTerm && (
+                <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
+              )}
+            </div>
+            <div className="univers-tabs">
+              <button className={`univers-tab ${univers === "Cuisine" ? "active" : ""}`} onClick={() => setUnivers("Cuisine")}>
+                <Utensils size={18} /><span>Cuisine</span>
+              </button>
+              <button className={`univers-tab ${univers === "Boissons" ? "active" : ""}`} onClick={() => setUnivers("Boissons")}>
+                <GlassWater size={18} /><span>Boissons</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="categories-bar-enhanced">
+          <div className="categories-scroll">
+            {currentCategories.map((cat, idx) => (
+              <button key={idx} className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat)}>
+                <span className="chip-text">{cat}</span>
+                {filter === cat && <div className="chip-active-indicator" />}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Carte en lecture seule (commandes désactivées) */}
+        <div className="menu-grid-enhanced menu-readonly">
+          {platsFiltres.map((plat, index) => (
+            <div key={plat._id} className="menu-card-enhanced readonly" style={{ animationDelay: `${index * 0.03}s` }}>
+              <div className="card-perspective">
+                <div className="card-front-enhanced">
+                  <div className="card-media">
+                    <div className="media-wrapper">
+                      {plat.image ? (
+                        <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
+                      ) : (
+                        <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
+                      )}
+                      <div className="media-overlay"></div>
+                    </div>
+                    <div className="price-chip">
+                      <span className="price-symbol">€</span>
+                      <span className="price-amount">{plat.price.toFixed(2)}</span>
+                    </div>
+                    <div className="card-badges">
+                      {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                      {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                      {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
+                    </div>
+                  </div>
+                  <div className="card-content">
+                    <div className="card-header">
+                      <div className="category-tag">{plat.category?.name}</div>
+                      {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
+                    </div>
+                    <h3 className="plat-title">{plat.name}</h3>
+                    <div className="title-underline"></div>
+                    <p className="plat-description">
+                      {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
+                    </p>
+                    {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
+                    <div className="card-footer">
+                      <button
+                        className="add-btn readonly-order-btn"
+                        onClick={() => showToast(
+                          nextJourInfo 
+                            ? `🔒 Cliquez sur "Voir la carte & préparer" pour débloquer` 
+                            : "🍽️ Service non disponible",
+                          "warning"
+                        )}
+                      >
+                        <Lock size={14} />
+                        <span>Carte verrouillée</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <BillPopup onBillPending={setHasPendingBill} />
+      </section>
+    );
+  }
+
+  // ─── AFFICHAGE DÉVERROUILLÉ (service ouvert OU utilisateur a cliqué) ───
+  return (
+    <section className="menu-section-enhanced">
+
+      {/* ✅ BANNIÈRE SERVICE OUVERT - dynamique avec weekend */}
+      {isJourOpen && (
+        <div className="restaurant-open-banner">
+          <Clock size={18} />
+          <span>
+            {(() => {
+              const day = new Date().getDay();
+              // Weekend (Samedi ou Dimanche) : SERVICE EN CONTINU
+              if (day === 0 || day === 6) {
+                return "SERVICE EN CONTINU • 12h00 - 23h00";
+              }
+              // Soir en semaine
+              if (currentPeriod === "SOIR") {
+                return "SERVICE DU SOIR EN COURS • 18h00 - 23h00";
+              }
+              // Jour en semaine
+              return "SERVICE DÉJEUNER EN COURS • 12h00 - 15h00";
+            })()}
+          </span>
+        </div>
+      )}
+
+      {/* BANNIÈRE MODE PRÉPARATION (déverrouillé manuellement mais service fermé) */}
+      {!isJourOpen && unlocked && (
+        <div className="restaurant-preview-banner">
+          <Eye size={18} />
+          <span>
+            🔓 Mode préparation — Vous pouvez préparer votre commande.
+          </span>
+        </div>
+      )}
+
+      {isAnyDrawerOpen && (
+        <div 
+          className={isMobile ? "drawer-overlay-mobile" : "drawer-overlay-premium"} 
+          onClick={() => setSelectingAccId(null)} 
+        />
+      )}
+
+      {/* HERO SECTION */}
+      <div className="menu-hero-cinematic">
+        <div className="hero-video-backdrop">
+          <div className="hero-gradient-overlay"></div>
+          <div className="hero-particles-container">
+            {[...Array(30)].map((_, i) => (
+              <div key={i} className="hero-particle" style={{ 
+                '--delay': `${i * 0.3}s`, '--x': `${Math.random() * 100}%`,
+                '--duration': `${5 + Math.random() * 10}s`
+              } as React.CSSProperties} />
+            ))}
+          </div>
+        </div>
+        <div className="hero-content-cinematic">
+          <div className="hero-badge-cinematic"><Award size={16} /><span> ⭐⭐⭐</span></div>
+          <h1 className="hero-title-cinematic">
+            L'Art de la<span className="gold-gradient"> Table Signature</span>
+          </h1>
+          <div className="hero-separator-cinematic">
+            <div className="separator-line gold"></div>
+            <ChefHat size={28} className="separator-icon" />
+            <div className="separator-line gold"></div>
+          </div>
+          <p className="hero-description-cinematic">
+            Une symphonie de saveurs où chaque met raconte une histoire unique<br />
+            Découvrez l'excellence gastronomique réinventée
+          </p>
+          <div className="hero-stats-cinematic">
+            <div className="hero-stat"><span className="stat-number">15+</span><span className="stat-label">Plats Signature</span></div>
+            <div className="hero-stat"><span className="stat-number">100%</span><span className="stat-label">Produits Frais</span></div>
+            <div className="hero-stat"><span className="stat-number">⭐ 4.9</span><span className="stat-label">Notes Clients</span></div>
+          </div>
+          <div className="hero-cta-cinematic">
+            <button className="cta-primary" onClick={() => {
+              document.querySelector('.menu-grid-enhanced')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              <span>Découvrir la carte</span><ArrowRight size={18} />
+            </button>
+            <button className="cta-secondary"><span>Réservation</span><Tv size={16} /></button>
+          </div>
+        </div>
+        <div className="hero-scroll-indicator">
+          <div className="scroll-mouse"><div className="scroll-wheel"></div></div>
+          <span>Scroll</span>
+        </div>
+      </div>
+
+      {/* BARRE DE CONTRÔLE STICKY */}
+      <div className={`controls-bar-enhanced ${scrollDirection === "up" ? "visible" : "hidden"}`}>
+        <div className="controls-container">
+          <div className="search-wrapper">
+            <Search className="search-icon" size={18} />
+            <input 
+              type="text" placeholder="Rechercher un plat, une saveur..."
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input-enhanced"
+            />
+            {searchTerm && (
+              <button className="search-clear" onClick={() => setSearchTerm("")}><X size={14} /></button>
+            )}
+          </div>
+          <div className="univers-tabs">
+            <button 
+              className={`univers-tab ${univers === "Cuisine" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Cuisine")}
+            >
+              <Utensils size={18} /><span>Cuisine</span>
+            </button>
+            <button 
+              className={`univers-tab ${univers === "Boissons" ? "active" : ""} ${isAnyDrawerOpen ? "disabled" : ""}`} 
+              onClick={() => !isAnyDrawerOpen && setUnivers("Boissons")}
+            >
+              <GlassWater size={18} /><span>Boissons</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* CATÉGORIES */}
+      <div className="categories-bar-enhanced">
+        <div className="categories-scroll">
+          {currentCategories.map((cat, idx) => (
+            <button 
+              key={idx} 
+              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
+              onClick={() => setFilter(cat)}
+            >
+              <span className="chip-text">{cat}</span>
+              {filter === cat && <div className="chip-active-indicator" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {searchTerm && (
+        <div className="search-results-enhanced">
+          <div className="results-info"><Sparkles size={14} /><span>{platsFiltres.length} résultat(s)</span></div>
+          <button className="clear-search" onClick={() => setSearchTerm("")}><X size={14} />Effacer</button>
+        </div>
+      )}
+
+      {/* GRILLE DES PLATS - VERSION DÉBLOQUÉE AVEC COMMANDES ACTIVES */}
+      <div className="menu-grid-enhanced">
+        {platsFiltres.length > 0 ? (
+          platsFiltres.map((plat, index) => {
+            const quantityInCart = getItemQuantity(plat._id);
+            const itemsInCart = cart.filter((i) => i.id === plat._id);
+            const lastItemAdded = itemsInCart[itemsInCart.length - 1];
+            const isFlipped = flippedId === plat._id;
+            const isExpanding = selectingAccId === plat._id;
+            const isHovered = hoveredCard === plat._id;
+            const activeAccs = plat.accompaniments?.filter((a) => a.active) || [];
+            const isLiked = likedItems.has(plat._id);
+
+            let orderMatch = activeOrders.find((order: any) =>
+              order.items.some((item: any) => item.productId === plat._id)
+            );
+            let currentStatus = null;
+            if (orderMatch) {
+              const status = orderMatch.status;
+              const lastUpdate = new Date(orderMatch.updatedAt || orderMatch.createdAt).getTime();
+              const now = Date.now();
+              if (status !== "archived" && !(status === "done" && now - lastUpdate > 600000)) {
+                currentStatus = status;
+              }
+            }
+            if (!orderMatch && quantityInCart > 0) currentStatus = "in_cart";
+
+            return (
+              <div 
+                key={plat._id} 
+                className={`menu-card-enhanced ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
+                onMouseEnter={() => setHoveredCard(plat._id)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
+                <div className={`card-perspective ${isFlipped ? "flipped" : ""}`}>
+                  
+                  {/* FACE AVANT */}
+                  <div className="card-front-enhanced">
+                    <div className="card-media">
+                      {currentStatus && <OrderStatusBadge status={currentStatus} />}
+                      <div className="card-badges">
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (
+                          <OfferBadge quantity={quantityInCart} requiredQuantity={plat.offer.requiredQuantity} />
+                        )}
+                        {plat.spicy && <div className="badge spicy"><Flame size={10} /> Épicé</div>}
+                        {plat.vegetarian && <div className="badge veg">🌱 Végétarien</div>}
+                        {plat.glutenFree && <div className="badge gluten">🚫 Gluten Free</div>}
+                      </div>
+                      <div className="media-wrapper">
+                        {plat.image ? (
+                          <img src={plat.image} alt={plat.name} className="card-image-enhanced" loading="lazy" />
+                        ) : (
+                          <div className="image-placeholder-enhanced"><Utensils size={32} /></div>
+                        )}
+                        <div className="media-overlay"></div>
+                      </div>
+                      <div className="price-chip">
+                        <span className="price-symbol">€</span>
+                        <span className="price-amount">{plat.price.toFixed(2)}</span>
+                      </div>
+                      <div className="card-actions-floating">
+                        <button 
+                          className={`action-btn like-btn ${isLiked ? "active" : ""}`}
+                          onClick={() => toggleLike(plat._id)}
+                        >
+                          <Heart size={16} fill={isLiked ? "#E74C3C" : "none"} />
+                        </button>
+                        <button 
+                          className="action-btn view-btn"
+                          onClick={() => setQuickViewId(quickViewId === plat._id ? null : plat._id)}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="card-content">
+                      <div className="card-header">
+                        <div className="category-tag">{plat.category?.name}</div>
+                        {plat.gastronomicNote && <GastronomicNote note={plat.gastronomicNote} size={12} />}
+                      </div>
+                      <h3 className="plat-title">{plat.name}</h3>
+                      <div className="title-underline"></div>
+                      <p className="plat-description">
+                        {plat.description.length > 90 ? `${plat.description.substring(0, 90)}...` : plat.description}
+                      </p>
+                      {plat.preparationTime && <PreparationTimer minutes={plat.preparationTime} />}
+                      
+                      <div className="card-footer">
+                        <div className="quantity-controls">
+                          {quantityInCart > 0 && !isExpanding && isJourOpen && (
+                            <button className="qty-btn remove" onClick={() => handleRemoveOne(itemsInCart, plat.name)}>
+                              <MinusCircle size={18} />
+                            </button>
+                          )}
+                          {quantityInCart > 0 && <span className="qty-badge">{quantityInCart}</span>}
+                          <button
+                            className={`add-btn ${isExpanding ? "configuring" : ""} ${quantityInCart > 0 ? "has-items" : ""} ${!isJourOpen ? "preview-mode" : ""}`}
+                            onClick={() => handleAddClick(plat, quantityInCart)}
+                          >
+                            {isExpanding ? (
+                              <><Loader2 className="spin" size={16} /><span>Configuration...</span></>
+                            ) : !isJourOpen ? (
+                              <><Clock size={16} /><span>Préparer</span></>
+                            ) : (
+                              <><PlusCircle size={18} /><span>{quantityInCart > 0 ? "Ajouter" : "Commander"}</span></>
+                            )}
+                          </button>
+                        </div>
+                        <button className="details-link" onClick={() => setFlippedId(plat._id)}>
+                          <span>Détails</span><ArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* TIROIR DE PERSONNALISATION */}
+                    <div id={`drawer-${plat._id}`} className={`customization-drawer-enhanced ${isExpanding ? "open" : ""}`}>
+                      <div className="drawer-handle-bar"></div>
+                      <div className="drawer-header-enhanced">
+                        <div className="drawer-title">
+                          <Sparkles size={16} color="#D4AF37" />
+                          <span>Personnalisez votre expérience</span>
+                        </div>
+                        <button className="drawer-close" onClick={() => setSelectingAccId(null)}><X size={18} /></button>
+                      </div>
+
+                      <div className="drawer-content-enhanced">
+                        {plat.offer?.enabled && quantityInCart >= plat.offer.requiredQuantity && (() => {
+                          const nbLots = Math.floor(quantityInCart / plat.offer.requiredQuantity);
+                          const reste = quantityInCart % plat.offer.requiredQuantity;
+                          const prixPromo = (nbLots * plat.offer.offerPrice) + (reste * plat.price);
+                          const economie = (plat.price * quantityInCart) - prixPromo;
+                          return (
+                            <div className="offer-card">
+                              <div className="offer-icon"><Gift size={20} /></div>
+                              <div className="offer-info">
+                                <div className="offer-title">Offre Signature Activée !</div>
+                                <div className="offer-price">
+                                  {quantityInCart} × {plat.name}
+                                  <span className="offer-savings">Économie : {economie.toFixed(2)}€</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {activeAccs.length > 0 && lastItemAdded && (
+                          <div className="drawer-section">
+                            <label className="section-title"><Utensils size={14} />Accompagnement</label>
+                            <div className="options-grid">
+                              {["Aucun", "Standard", ...activeAccs.map(a => a.name)].map(accName => (
+                                <button
+                                  key={accName}
+                                  className={`option ${lastItemAdded.chosenAccompaniment === accName ? "selected" : ""}`}
+                                  onClick={() => { updateLineAccompaniment(lastItemAdded.cartItemId, accName); triggerBounceHint(); }}
+                                >
+                                  {accName}
+                                  {lastItemAdded.chosenAccompaniment === accName && <Check size={12} />}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {plat.allowSupplements && lastItemAdded && (
+                          <div className="drawer-section">
+                            <label className="section-title"><PlusCircle size={14} />Extras & Suppléments</label>
+                            <div className="supplements-list">
+                              {isLoadingSupps ? (
+                                <div className="supp-loader"><Loader2 className="spin" size={24} /></div>
+                              ) : (
+                                supplementsDisponibles.map(supp => {
+                                  const count = lastItemAdded.supplements?.filter(s => s.id === supp._id).length || 0;
+                                  return (
+                                    <div key={supp._id} className="supplement-item">
+                                      <div className="supp-info">
+                                        <span className="supp-name">{supp.name}</span>
+                                        <span className="supp-price">+{supp.price}€</span>
+                                      </div>
+                                      <div className="supp-quantity">
+                                        {count > 0 && (
+                                          <button className="supp-qty-btn" onClick={() => removeSupplementFromLine(lastItemAdded.cartItemId, supp._id)}>
+                                            <MinusCircle size={16} />
+                                          </button>
+                                        )}
+                                        {count > 0 && <span className="supp-count">{count}</span>}
+                                        <button 
+                                          className="supp-qty-btn add"
+                                          onClick={() => {
+                                            addSupplementToLine(lastItemAdded.cartItemId, { id: supp._id, name: supp.name, price: supp.price });
+                                            setAddedSuppId(supp._id);
+                                            triggerBounceHint();
+                                            setTimeout(() => setAddedSuppId(null), 600);
+                                          }}
+                                        >
+                                          <PlusCircle size={16} className={addedSuppId === supp._id ? "added-animation" : ""} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <button className="drawer-confirm" onClick={() => setSelectingAccId(null)}>
+                          <Check size={18} /><span>Valider ma sélection</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* FACE ARRIÈRE */}
+                  <div className="card-back-enhanced">
+                    <button className="back-close" onClick={() => setFlippedId(null)}><X size={18} /></button>
+                    <div className="back-scroll">
+                      <div className="back-image"><img src={plat.image} alt={plat.name} /></div>
+                      <div className="back-details">
+                        <div className="back-category">{plat.category?.name}</div>
+                        <h2 className="back-title">{plat.name}</h2>
+                        <div className="back-price-large">{plat.price.toFixed(2)}€</div>
+                        <div className="back-info-grid">
+                          {plat.gastronomicNote && (
+                            <div className="info-item"><Star size={14} /><span>Note : {plat.gastronomicNote}/5</span></div>
+                          )}
+                          {plat.preparationTime && (
+                            <div className="info-item"><Clock size={14} /><span>Préparation : {plat.preparationTime} min</span></div>
+                          )}
+                          {plat.calories && (
+                            <div className="info-item"><Zap size={14} /><span>Calories : {plat.calories} kcal</span></div>
+                          )}
+                        </div>
+                        <div className="back-divider"></div>
+                        <p className="back-description-full">{plat.description}</p>
+                        <div className="back-tags">
+                          {plat.spicy && <span className="tag spicy">🌶️ Épicé</span>}
+                          {plat.vegetarian && <span className="tag veg">🌱 Végétarien</span>}
+                          {plat.vegan && <span className="tag vegan">🌿 Vegan</span>}
+                          {plat.glutenFree && <span className="tag gluten">🚫 Sans gluten</span>}
+                        </div>
+                        <div className="back-actions">
+                          <button 
+                            className="order-now-btn" 
+                            onClick={() => { setFlippedId(null); handleAddClick(plat, quantityInCart); }}
+                          >
+                            {isJourOpen ? "Commander maintenant" : "Préparer ma commande"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <div className="empty-state-enhanced">
+            <div className="empty-animation">
+              <Utensils size={64} strokeWidth={1} />
+              <div className="empty-sparkles">
+                <Sparkles className="sparkle-1" size={24} />
+                <Sparkles className="sparkle-2" size={16} />
+              </div>
+            </div>
+            <h3>Aucun résultat trouvé</h3>
+            <p>Nous n'avons pas trouvé de plat correspondant à votre recherche</p>
+            <button className="reset-filters" onClick={() => { setFilter("Tous"); setSearchTerm(""); }}>
+              Réinitialiser les filtres
+            </button>
+          </div>
+        )}
+      </div>
+
+      <BillPopup onBillPending={setHasPendingBill} />
+    </section>
   );
 }
