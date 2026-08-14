@@ -22,8 +22,8 @@ import InstallButton from './components/InstallButton';
 import SocialFloatingButton from './components/SocialFloatingButton';
 
 // 🆕 IMPORTS BLOG
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
+import BlogPage from "./pages/BlogPage";
+import BlogArticle from "./pages/BlogArticle";
 
 // 🎡 IMPORTS JEU DE LA ROUE
 import FloatingWheelButton from "./components/FloatingWheelButton";
@@ -43,6 +43,7 @@ import AccompanimentManager from "./admin/pages/AccompanimentManager";
 import SupplementManager from "./admin/pages/SupplementAdmin";
 import TableManager from "./admin/pages/TableManager";
 import WheelSettings from "./admin/pages/WheelSettings"; // 🎡 Page admin du jeu
+import BlogManager from "./admin/pages/BlogManager"; // 📰 NOUVEAU - Page admin du blog
 
 // 2. Création du client de cache
 const queryClient = new QueryClient({
@@ -166,8 +167,8 @@ export default function AppRouter() {
                       <Route path="/carte" element={<CarteRestaurant />} />
                       <Route path="/menu" element={<Menu />} />
                       <Route path="/menu-soir" element={<MenuSoir />} />
-                      <Route path="/blog" element={<Blog />} />
-                      <Route path="/blog/:slug" element={<BlogPost />} />
+                      <Route path="/blog" element={<BlogPage />} />
+<Route path="/blog/:slug" element={<BlogArticle />} />
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
@@ -192,6 +193,7 @@ export default function AppRouter() {
               <Route path="appearance" element={<Appearance />} />
               <Route path="social" element={<SocialHub />} />
               <Route path="wheel" element={<WheelSettings />} /> {/* 🎡 Page admin du jeu */}
+              <Route path="blog" element={<BlogManager />} /> {/* 📰 NOUVEAU - Page admin du blog */}
             </Route>
           </Routes>
         </Router>
