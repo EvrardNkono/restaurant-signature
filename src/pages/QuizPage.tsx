@@ -141,6 +141,8 @@ export default function QuizPage() {
   const [wheelResult, setWheelResult] = useState<{ lot: Lot; code: string } | null>(null);
   const [wheelLots, setWheelLots] = useState<Lot[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
+  // ✅ NOUVEAU - État du jeu
+  const [isGameActive, setIsGameActive] = useState(false);
 
   // ============================================================
   // INITIALISATION
@@ -153,6 +155,15 @@ export default function QuizPage() {
 
         // 1. Récupérer la session active
         const sessionRes = await axios.get(`${API_URL}/session/active`);
+
+        // ✅ Vérifier si le jeu est activé
+        if (!sessionRes.data.jeuActif) {
+          setError("Le jeu n'est pas disponible pour le moment. Revenez plus tard !");
+          setLoading(false);
+          return;
+        }
+
+        setIsGameActive(true);
 
         // 2. Récupérer les questions de la session
         const questionsRes = await axios.get(
@@ -258,6 +269,14 @@ export default function QuizPage() {
     try {
       setLoading(true);
       const sessionRes = await axios.get(`${API_URL}/session/active`);
+      
+      // ✅ Vérifier si le jeu est toujours activé
+      if (!sessionRes.data.jeuActif) {
+        setError("Le jeu n'est pas disponible pour le moment. Revenez plus tard !");
+        setLoading(false);
+        return;
+      }
+      
       const questionsRes = await axios.get(
         `${API_URL}/questions/${sessionRes.data._id}`
       );
@@ -327,7 +346,27 @@ export default function QuizPage() {
     );
   }
 
-  // --- Écran d'erreur ---
+  // --- Écran du jeu désactivé ---
+  if (error && error.includes("n'est pas disponible")) {
+    return (
+      <div className="quiz-page">
+        <header className="quiz-header">
+          <h1 className="quiz-title">🧑‍🍳 LA QUESTION DU CHEF</h1>
+        </header>
+        <div className="quiz-disabled">
+          <div className="disabled-icon">⏸️</div>
+          <h2>Le jeu est temporairement indisponible</h2>
+          <p>Revenez plus tard pour tenter de gagner des lots exclusifs !</p>
+          <button className="btn-retour" onClick={() => navigate("/")}>
+            Retourner à l'accueil
+          </button>
+        </div>
+        <BottomNav active="quiz" />
+      </div>
+    );
+  }
+
+  // --- Écran d'erreur général ---
   if (error) {
     return (
       <div className="quiz-error">

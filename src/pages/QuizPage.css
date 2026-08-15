@@ -533,7 +533,62 @@
   color: #666;
 }
 
-/* ----- LOADING ----- */
+/* ============================================================
+   JEU DÉSACTIVÉ - NOUVEAU
+   ============================================================ */
+.quiz-disabled {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 50vh;
+  background: white;
+  border-radius: 12px;
+  margin: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.quiz-disabled .disabled-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  color: #999;
+}
+
+.quiz-disabled h2 {
+  font-size: 24px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.quiz-disabled p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  max-width: 320px;
+}
+
+.btn-retour {
+  padding: 12px 32px;
+  background: #d4af37;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retour:hover {
+  background: #c49a2a;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   LOADING
+   ============================================================ */
 .quiz-loading {
   display: flex;
   flex-direction: column;
@@ -691,5 +746,19 @@
   .wheel-display {
     width: 240px;
     height: 240px;
+  }
+  .quiz-disabled {
+    padding: 40px 16px;
+    margin: 12px;
+  }
+  .quiz-disabled h2 {
+    font-size: 20px;
+  }
+  .quiz-disabled .disabled-icon {
+    font-size: 48px;
+  }
+  .btn-retour {
+    padding: 10px 24px;
+    font-size: 14px;
   }
 }

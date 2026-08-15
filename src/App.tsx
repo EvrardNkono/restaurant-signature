@@ -81,6 +81,7 @@ export default function AppRouter() {
   const [showQuizPopup, setShowQuizPopup] = useState(false);
   const [isQuizActive, setIsQuizActive] = useState(false);
   const [popupShown, setPopupShown] = useState(false);
+  const [isGameActive, setIsGameActive] = useState(false); // ✅ NOUVEAU
 
   // Charger l'état du jeu de la roue
   useEffect(() => {
@@ -95,7 +96,7 @@ export default function AppRouter() {
     fetchSettings();
   }, []);
 
-  // Vérifier si le quiz est actif et afficher le popup
+  // Vérifier si le quiz est actif ET que le jeu est activé
   useEffect(() => {
     const checkQuizStatus = async () => {
       // Ne vérifier que si le popup n'a pas déjà été affiché
@@ -109,28 +110,31 @@ export default function AppRouter() {
         const sessionRes = await axios.get(`${QUIZ_API_URL}/session/active`);
         if (sessionRes.data && sessionRes.data.active) {
           setIsQuizActive(true);
+          // ✅ Vérifier si le jeu est activé
+          setIsGameActive(sessionRes.data.jeuActif || false);
         }
       } catch (error) {
         // Pas de session active, le quiz est désactivé
         setIsQuizActive(false);
+        setIsGameActive(false);
       }
     };
 
     checkQuizStatus();
   }, []);
 
-  // Afficher le popup après un délai si le quiz est actif
+  // Afficher le popup seulement si le quiz est actif ET que le jeu est activé
   useEffect(() => {
-    if (isQuizActive && !popupShown) {
+    if (isQuizActive && isGameActive && !popupShown) {
       const timer = setTimeout(() => {
         setShowQuizPopup(true);
         setPopupShown(true);
         sessionStorage.setItem("quiz_popup_shown", "true");
-      }, 1500); // Attendre 1.5s pour que la page se charge
+      }, 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [isQuizActive, popupShown]);
+  }, [isQuizActive, isGameActive, popupShown]);
 
   // Fermeture du popup
   const handlePopupClose = () => {
@@ -206,7 +210,7 @@ export default function AppRouter() {
                   {/* Popup publicitaire existant */}
                   <AdPopup />
                   
-                  {/* 🧑‍🍳 NOUVEAU - Popup du Quiz "La Question du Chef" */}
+                  {/* 🧑‍🍳 Popup du Quiz "La Question du Chef" (s'affiche uniquement si le jeu est activé) */}
                   {showQuizPopup && <QuizPopup onClose={handlePopupClose} />}
 
                   <Navbar />
@@ -239,7 +243,7 @@ export default function AppRouter() {
                       <Route path="/panier" element={<Cart />} />
                       <Route path="/order-success" element={<OrderSuccess />} />
                       
-                      {/* 🧑‍🍳 NOUVEAU - Route du Quiz */}
+                      {/* 🧑‍🍳 Route du Quiz */}
                       <Route path="/quiz" element={<QuizPage />} />
                     </Routes>
                   </main>
@@ -263,7 +267,7 @@ export default function AppRouter() {
               <Route path="wheel" element={<WheelSettings />} /> {/* 🎡 Page admin du jeu */}
               <Route path="blog" element={<BlogManager />} /> {/* 📰 Page admin du blog */}
               
-              {/* 🧑‍🍳 NOUVEAU - Page admin du Quiz */}
+              {/* 🧑‍🍳 Page admin du Quiz */}
               <Route path="quiz" element={<QuizManagement />} />
             </Route>
           </Routes>
