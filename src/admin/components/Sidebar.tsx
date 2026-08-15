@@ -9,8 +9,9 @@ import {
   ListPlus,
   PlusSquare,
   Smartphone,
-  Gift, // ← AJOUT pour le jeu de la roue
-  Newspaper // ← AJOUT pour le blog
+  Gift, // 🎡 Jeu de la roue
+  Newspaper, // 📰 Blog
+  Brain // 🧑‍🍳 NOUVEAU - Quiz "La Question du Chef"
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
@@ -36,17 +37,26 @@ export default function Sidebar() {
     { path: "/admin/appearance", icon: <ImageIcon />, label: "Apparence & Pub" }, 
     { path: "/admin/social", icon: <Zap size={22} />, label: "Social Broadcaster" }, 
     { path: "/admin/orders", icon: <ShoppingBag />, label: "Commandes" },
-    // 🎡 NOUVEAU - Jeu de la Roue
+    
+    // 🎡 Jeu de la Roue
     { 
       path: "/admin/wheel", 
       icon: <Gift size={22} />, 
       label: "🎡 Jeu de la Roue" 
     },
-    // 📰 NOUVEAU - Blog
+    
+    // 📰 Blog
     { 
       path: "/admin/blog", 
       icon: <Newspaper size={22} />, 
       label: "Blog" 
+    },
+    
+    // 🧑‍🍳 NOUVEAU - Quiz "La Question du Chef"
+    { 
+      path: "/admin/quiz", 
+      icon: <Brain size={22} />, 
+      label: "🧑‍🍳 La Question du Chef" 
     },
   ];
 
