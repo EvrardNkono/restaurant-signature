@@ -25,11 +25,16 @@ import SocialFloatingButton from './components/SocialFloatingButton';
 import BlogPage from "./pages/BlogPage";
 import BlogArticle from "./pages/BlogArticle";
 
+// 🆕 IMPORTS QUIZ
+import QuizPage from "./pages/QuizPage";
+import QuizPopup from "./components/QuizPopup";
+
 // 🎡 IMPORTS JEU DE LA ROUE
 import FloatingWheelButton from "./components/FloatingWheelButton";
 import WheelGame from "./components/WheelGame";
 import { useState, useEffect } from "react";
 import { getWheelSettings } from "./services/wheelService";
+import axios from "axios";
 
 // Imports Administration
 import AdminLayout from "./admin/components/AdminLayout";
@@ -43,7 +48,8 @@ import AccompanimentManager from "./admin/pages/AccompanimentManager";
 import SupplementManager from "./admin/pages/SupplementAdmin";
 import TableManager from "./admin/pages/TableManager";
 import WheelSettings from "./admin/pages/WheelSettings"; // 🎡 Page admin du jeu
-import BlogManager from "./admin/pages/BlogManager"; // 📰 NOUVEAU - Page admin du blog
+import BlogManager from "./admin/pages/BlogManager"; // 📰 Page admin du blog
+import QuizManagement from "./admin/pages/QuizManagement"; // 🧑‍🍳 NOUVEAU - Page admin du quiz
 
 // 2. Création du client de cache
 const queryClient = new QueryClient({
@@ -59,11 +65,24 @@ if (window.location.protocol === 'http:' && window.location.hostname !== 'localh
     window.location.href = window.location.href.replace('http:', 'https:');
 }
 
+// Configuration du Quiz
+const isLocal = window.location.hostname === "localhost";
+const BASE_URL = isLocal
+  ? "http://localhost:5000/api"
+  : "https://signature-backend-alpha.vercel.app/api";
+
+const QUIZ_API_URL = `${BASE_URL}/quiz`;
+
 export default function AppRouter() {
   const [showWheel, setShowWheel] = useState(false);
   const [isWheelActive, setIsWheelActive] = useState(true);
 
-  // Charger l'état du jeu
+  // --- STATE DU QUIZ POPUP ---
+  const [showQuizPopup, setShowQuizPopup] = useState(false);
+  const [isQuizActive, setIsQuizActive] = useState(false);
+  const [popupShown, setPopupShown] = useState(false);
+
+  // Charger l'état du jeu de la roue
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -76,12 +95,53 @@ export default function AppRouter() {
     fetchSettings();
   }, []);
 
+  // Vérifier si le quiz est actif et afficher le popup
+  useEffect(() => {
+    const checkQuizStatus = async () => {
+      // Ne vérifier que si le popup n'a pas déjà été affiché
+      const hasPopupBeenShown = sessionStorage.getItem("quiz_popup_shown");
+      if (hasPopupBeenShown) {
+        setPopupShown(true);
+        return;
+      }
+
+      try {
+        const sessionRes = await axios.get(`${QUIZ_API_URL}/session/active`);
+        if (sessionRes.data && sessionRes.data.active) {
+          setIsQuizActive(true);
+        }
+      } catch (error) {
+        // Pas de session active, le quiz est désactivé
+        setIsQuizActive(false);
+      }
+    };
+
+    checkQuizStatus();
+  }, []);
+
+  // Afficher le popup après un délai si le quiz est actif
+  useEffect(() => {
+    if (isQuizActive && !popupShown) {
+      const timer = setTimeout(() => {
+        setShowQuizPopup(true);
+        setPopupShown(true);
+        sessionStorage.setItem("quiz_popup_shown", "true");
+      }, 1500); // Attendre 1.5s pour que la page se charge
+
+      return () => clearTimeout(timer);
+    }
+  }, [isQuizActive, popupShown]);
+
+  // Fermeture du popup
+  const handlePopupClose = () => {
+    setShowQuizPopup(false);
+  };
+
   const handleWin = (reward: any) => {
     // 🎉 Action quand l'utilisateur gagne
     console.log('🎉 Gagné:', reward.label);
     
     // ✅ Notification plus élégante que alert()
-    // Tu peux remplacer par une toast notification
     const toast = document.createElement('div');
     toast.style.cssText = `
       position: fixed;
@@ -143,7 +203,12 @@ export default function AppRouter() {
               path="/*"
               element={
                 <>
+                  {/* Popup publicitaire existant */}
                   <AdPopup />
+                  
+                  {/* 🧑‍🍳 NOUVEAU - Popup du Quiz "La Question du Chef" */}
+                  {showQuizPopup && <QuizPopup onClose={handlePopupClose} />}
+
                   <Navbar />
                   <FloatingOrder />
                   <InstallButton />
@@ -155,11 +220,11 @@ export default function AppRouter() {
                   )}
 
                   <WheelGame 
-  isOpen={showWheel}
-  onClose={() => setShowWheel(false)}
-  onWin={handleWin}
-  isTestMode={false}
-/>
+                    isOpen={showWheel}
+                    onClose={() => setShowWheel(false)}
+                    onWin={handleWin}
+                    isTestMode={false}
+                  />
 
                   <main>
                     <Routes>
@@ -168,11 +233,14 @@ export default function AppRouter() {
                       <Route path="/menu" element={<Menu />} />
                       <Route path="/menu-soir" element={<MenuSoir />} />
                       <Route path="/blog" element={<BlogPage />} />
-<Route path="/blog/:slug" element={<BlogArticle />} />
+                      <Route path="/blog/:slug" element={<BlogArticle />} />
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
                       <Route path="/order-success" element={<OrderSuccess />} />
+                      
+                      {/* 🧑‍🍳 NOUVEAU - Route du Quiz */}
+                      <Route path="/quiz" element={<QuizPage />} />
                     </Routes>
                   </main>
                   <Chatbot />
@@ -193,7 +261,10 @@ export default function AppRouter() {
               <Route path="appearance" element={<Appearance />} />
               <Route path="social" element={<SocialHub />} />
               <Route path="wheel" element={<WheelSettings />} /> {/* 🎡 Page admin du jeu */}
-              <Route path="blog" element={<BlogManager />} /> {/* 📰 NOUVEAU - Page admin du blog */}
+              <Route path="blog" element={<BlogManager />} /> {/* 📰 Page admin du blog */}
+              
+              {/* 🧑‍🍳 NOUVEAU - Page admin du Quiz */}
+              <Route path="quiz" element={<QuizManagement />} />
             </Route>
           </Routes>
         </Router>
