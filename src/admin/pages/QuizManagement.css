@@ -1,0 +1,1097 @@
+/* ============================================================
+   QUIZ ADMIN - STYLES
+   ============================================================ */
+
+/* ----- LOADING ----- */
+.quiz-admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #4a2c1e;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.spin-gold {
+  color: #d4af37;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ----- PAGE ----- */
+.quiz-admin-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ----- HEADER ----- */
+.quiz-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #eee;
+}
+
+.quiz-admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #d4af37;
+  border-radius: 12px;
+  color: white;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f5f0ea;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4a2c1e;
+  transition: all 0.2s ease;
+}
+
+.btn-refresh:hover {
+  background: #e8d5c4;
+}
+
+/* ----- TABS ----- */
+.quiz-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f5f0ea;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+
+.quiz-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.quiz-tab:hover {
+  color: #4a2c1e;
+}
+
+.quiz-tab.active {
+  background: white;
+  color: #d4af37;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ----- SECTION TITLES ----- */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.section-subtitle {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+/* ----- SESSION SELECTOR ----- */
+.session-selector {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
+
+.session-selector-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #4a2c1e;
+  margin-bottom: 12px;
+}
+
+.session-selector-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 2px solid #eee;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.session-chip:hover {
+  border-color: #d4af37;
+}
+
+.session-chip.active {
+  border-color: #d4af37;
+  background: #fdf8f0;
+}
+
+.session-chip.active-session {
+  border-left: 3px solid #27ae60;
+}
+
+.session-chip.inactive-session {
+  opacity: 0.6;
+}
+
+.session-name {
+  font-weight: 500;
+}
+
+.session-badge {
+  font-size: 12px;
+}
+
+.session-count {
+  font-size: 11px;
+  color: #999;
+  background: #f5f0ea;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.session-chip.add-session {
+  border: 2px dashed #d4af37;
+  color: #d4af37;
+  background: transparent;
+}
+
+.session-chip.add-session:hover {
+  background: #fdf8f0;
+}
+
+/* ----- SESSION FORM ----- */
+.session-form {
+  margin-top: 12px;
+  padding: 16px;
+  background: #faf7f2;
+  border-radius: 8px;
+}
+
+.session-form h4 {
+  margin: 0 0 12px 0;
+  color: #4a2c1e;
+}
+
+.session-form-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.session-form-group input {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.session-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ----- SESSION CARD ----- */
+.session-management {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.session-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.session-card-header:hover {
+  background: #faf7f2;
+}
+
+.session-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.session-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.session-status-dot.active {
+  background: #27ae60;
+}
+
+.session-status-dot.inactive {
+  background: #999;
+}
+
+.session-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.session-card-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #999;
+}
+
+.session-card-count {
+  font-size: 12px;
+  background: #f5f0ea;
+  padding: 2px 10px;
+  border-radius: 10px;
+  color: #666;
+}
+
+.session-card-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.session-action-btn:hover {
+  background: #f5f0ea;
+  color: #4a2c1e;
+}
+
+.session-action-btn.danger:hover {
+  background: #fee;
+  color: #e74c3c;
+}
+
+.session-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #999;
+}
+
+/* ----- SESSION BODY ----- */
+.session-card-body {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #f5f0ea;
+}
+
+/* ----- QUESTIONS LIST ----- */
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.question-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #faf7f2;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.question-item:hover {
+  background: #f5f0ea;
+}
+
+.question-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  background: #d4af37;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.question-content {
+  flex: 1;
+}
+
+.question-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 6px 0;
+}
+
+.question-answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.answer-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 2px 8px;
+  background: white;
+  border-radius: 4px;
+  color: #666;
+}
+
+.answer-chip.correct {
+  background: #d4edda;
+  color: #155724;
+}
+
+.question-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.action-btn-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.action-btn-sm:hover {
+  background: #e8d5c4;
+  color: #4a2c1e;
+}
+
+.action-btn-sm.danger:hover {
+  background: #fee;
+  color: #e74c3c;
+}
+
+/* ----- QUESTION FORM ----- */
+.question-form {
+  background: #faf7f2;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.question-form h4 {
+  margin: 0 0 12px 0;
+  color: #4a2c1e;
+  font-size: 14px;
+}
+
+.question-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.question-form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.form-group input,
+.form-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #d4af37;
+}
+
+.question-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ----- BUTTONS ----- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-gold {
+  background: #d4af37;
+  color: white;
+}
+
+.btn-gold:hover {
+  background: #c49a2a;
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.btn-ghost:hover {
+  background: #f5f0ea;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+/* ============================================================
+   TAB LOTS
+   ============================================================ */
+
+.lots-header {
+  margin-bottom: 20px;
+}
+
+.lots-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.lots-stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.lots-stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.lots-stat-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.lot-form-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+
+.lot-form-card h4 {
+  margin: 0 0 16px 0;
+  color: #4a2c1e;
+}
+
+.lot-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.lot-form-grid .checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lot-form-grid .checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.lot-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ----- LOTS LIST ----- */
+.lots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lot-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid #27ae60;
+}
+
+.lot-item.inactive {
+  border-left-color: #999;
+  opacity: 0.6;
+}
+
+.lot-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lot-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.lot-status-dot.active {
+  background: #27ae60;
+}
+
+.lot-status-dot.inactive {
+  background: #999;
+}
+
+.lot-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.lot-description {
+  font-size: 13px;
+  color: #666;
+  margin: 2px 0 0 0;
+}
+
+.lot-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.lot-prob {
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.lot-type {
+  color: #666;
+}
+
+.lot-item-right {
+  display: flex;
+  gap: 4px;
+}
+
+/* ----- PROBABILITY ALERT ----- */
+.probability-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.probability-alert.ok {
+  background: #d4edda;
+  color: #155724;
+}
+
+.probability-alert.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* ============================================================
+   TAB STATS
+   ============================================================ */
+
+.stats-header {
+  margin-bottom: 20px;
+}
+
+.stats-grid-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-card-admin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.stat-icon-admin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.stat-icon-admin.gold { background: #fdf8f0; color: #d4af37; }
+.stat-icon-admin.blue { background: #e8f4fd; color: #3498db; }
+.stat-icon-admin.green { background: #d4edda; color: #27ae60; }
+.stat-icon-admin.orange { background: #fff3cd; color: #f39c12; }
+
+.stat-value-admin {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.stat-label-admin {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ----- SCORE DISTRIBUTION ----- */
+.stats-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+
+.stats-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.score-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.score-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  min-width: 36px;
+}
+
+.score-bar-track {
+  flex: 1;
+  height: 20px;
+  background: #f5f0ea;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+.score-bar-fill.good {
+  background: linear-gradient(90deg, #d4af37, #f5d77b);
+}
+
+.score-bar-fill.bad {
+  background: #e8d5c4;
+}
+
+.score-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ----- LOTS DISTRIBUTION ----- */
+.lots-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lot-dist-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f5f0ea;
+}
+
+.lot-dist-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.lot-dist-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.empty-text {
+  color: #999;
+  font-size: 14px;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
+}
+
+.toast.success { background: #d4edda; color: #155724; }
+.toast.error { background: #f8d7da; color: #721c24; }
+.toast.info { background: #d1ecf1; color: #0c5460; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.modal-body {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  white-space: pre-line;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-cancel {
+  padding: 8px 16px;
+  background: #f5f0ea;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+}
+
+.modal-cancel:hover {
+  background: #e8d5c4;
+}
+
+.modal-confirm {
+  padding: 8px 16px;
+  background: #d4af37;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+}
+
+.modal-confirm:hover {
+  background: #c49a2a;
+}
+
+/* ============================================================
+   EMPTY STATES
+   ============================================================ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-state-small {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 14px;
+}
+
+.empty-hint {
+  font-size: 12px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .quiz-admin-page {
+    padding: 12px;
+  }
+
+  .quiz-admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .quiz-tabs {
+    flex-wrap: wrap;
+  }
+
+  .quiz-tab {
+    flex: 1;
+    justify-content: center;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .question-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lot-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .session-card-left {
+    flex-wrap: wrap;
+  }
+
+  .session-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .session-card-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .question-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .question-actions {
+    justify-content: flex-end;
+  }
+
+  .stats-grid-admin {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .session-selector-list {
+    flex-direction: column;
+  }
+
+  .session-chip {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -1,0 +1,287 @@
+/* ============================================================
+   QUIZ POPUP - STYLES
+   ============================================================ */
+
+.quiz-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease;
+  padding: 20px;
+}
+
+.quiz-popup-overlay.closing {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+.quiz-popup-card {
+  background: linear-gradient(145deg, #ffffff, #faf7f2);
+  border-radius: 24px;
+  padding: 40px 36px 32px;
+  max-width: 520px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.5s ease;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+}
+
+.quiz-popup-card.closing {
+  animation: slideDown 0.3s ease forwards;
+}
+
+/* ----- BOUTON FERMER ----- */
+.quiz-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+.quiz-popup-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+  transform: rotate(90deg);
+}
+
+/* ----- ICÔNE ----- */
+.quiz-popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #d4af37, #c49a2a);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+}
+
+/* ----- TITRE ----- */
+.quiz-popup-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.quiz-popup-title .highlight {
+  color: #d4af37;
+  background: linear-gradient(135deg, #d4af37, #f5d77b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----- SOUS-TITRE ----- */
+.quiz-popup-subtitle {
+  font-size: 15px;
+  color: #666;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.quiz-popup-subtitle strong {
+  color: #4a2c1e;
+}
+
+/* ----- RÈGLES ----- */
+.quiz-popup-rules {
+  background: #f5f0ea;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.rule-item:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.rule-icon {
+  font-size: 16px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.rule-text strong {
+  color: #2c1810;
+}
+
+/* ----- BOUTONS ----- */
+.quiz-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.btn-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #d4af37, #c49a2a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
+}
+
+.btn-play:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.45);
+}
+
+.btn-play:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.btn-skip {
+  padding: 12px 20px;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-skip:hover {
+  color: #666;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ----- FOOTER ----- */
+.quiz-popup-footer {
+  text-align: center;
+  font-size: 13px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .quiz-popup-card {
+    padding: 28px 20px 24px;
+    border-radius: 18px;
+  }
+
+  .quiz-popup-title {
+    font-size: 20px;
+  }
+
+  .quiz-popup-subtitle {
+    font-size: 14px;
+  }
+
+  .btn-play {
+    font-size: 15px;
+    padding: 14px 20px;
+  }
+
+  .quiz-popup-rules {
+    padding: 12px 14px;
+  }
+
+  .rule-item {
+    font-size: 13px;
+    padding: 5px 0;
+  }
+
+  .quiz-popup-icon {
+    width: 52px;
+    height: 52px;
+  }
+
+  .quiz-popup-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+}
