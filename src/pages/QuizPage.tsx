@@ -146,7 +146,9 @@ export default function QuizPage() {
   // `const [ setIsGameActive] = useState(false)` liait setIsGameActive
   // à la VALEUR (false), pas au setter → setIsGameActive(true) plantait
   // au build avec "Type 'Boolean' has no call signatures".
-  const [isGameActive, setIsGameActive] = useState(false);
+  // La valeur elle-même n'est utilisée nulle part dans ce composant, donc
+  // on ne la nomme pas (virgule vide) pour éviter TS6133 "declared but never read".
+  const [, setIsGameActive] = useState(false);
 
   // ============================================================
   // INITIALISATION
