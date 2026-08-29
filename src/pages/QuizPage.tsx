@@ -142,7 +142,7 @@ export default function QuizPage() {
   const [wheelLots, setWheelLots] = useState<Lot[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   // ✅ NOUVEAU - État du jeu
-  const [isGameActive, setIsGameActive] = useState(false);
+  const [ setIsGameActive] = useState(false);
 
   // ============================================================
   // INITIALISATION
