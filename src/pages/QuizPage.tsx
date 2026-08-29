@@ -142,7 +142,11 @@ export default function QuizPage() {
   const [wheelLots, setWheelLots] = useState<Lot[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   // ✅ NOUVEAU - État du jeu
-  const [ setIsGameActive] = useState(false);
+  // FIX: il manquait le premier élément du tableau déstructuré.
+  // `const [ setIsGameActive] = useState(false)` liait setIsGameActive
+  // à la VALEUR (false), pas au setter → setIsGameActive(true) plantait
+  // au build avec "Type 'Boolean' has no call signatures".
+  const [isGameActive, setIsGameActive] = useState(false);
 
   // ============================================================
   // INITIALISATION
@@ -269,14 +273,14 @@ export default function QuizPage() {
     try {
       setLoading(true);
       const sessionRes = await axios.get(`${API_URL}/session/active`);
-      
+
       // ✅ Vérifier si le jeu est toujours activé
       if (!sessionRes.data.jeuActif) {
         setError("Le jeu n'est pas disponible pour le moment. Revenez plus tard !");
         setLoading(false);
         return;
       }
-      
+
       const questionsRes = await axios.get(
         `${API_URL}/questions/${sessionRes.data._id}`
       );
