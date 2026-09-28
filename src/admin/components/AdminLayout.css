@@ -1,234 +1,32 @@
 /* src/admin/components/AdminLayout.css */
 
 .admin-layout {
-  display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #F3F5F2;
 }
 
-/* Sidebar fixe */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 260px;
-  height: 100vh;
-  z-index: 100;
-  background: var(--terracotta-dark, #2D2422);
-  transition: all 0.3s ease;
-}
-
-/* Contenu principal - CORRIGÉ */
+/* Laisse la place à la barre de navigation fixe (64 px) */
 .admin-main-content {
-  flex: 1;
-  margin-left: 260px; /* Desktop */
   min-height: 100vh;
-  width: calc(100% - 260px);
- 
+  padding-top: 64px;
 }
 
-.admin-topbar {
-  background: white;
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-gold, rgba(212, 175, 55, 0.2));
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  width: 100%;
-}
-
-.admin-topbar h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--terracotta-dark, #2D2422);
-  margin: 0;
-}
-
-.admin-user-info {
-  font-size: 0.85rem;
-  color: var(--text-light, #6B5B57);
-  background: #f5f0e8;
-  padding: 6px 14px;
-  border-radius: 30px;
-}
-
-/* Conteneur des pages - CORRIGÉ */
 .admin-page-container {
-  padding: 24px;
   width: 100%;
-  max-width: 100%;
-  
-  box-sizing: border-box;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
 }
 
-/* === RESPONSIVE === */
-
-/* Tablettes */
-@media (max-width: 992px) {
-  .sidebar {
-    width: 80px;
-  }
-  
-  .admin-main-content {
-    margin-left: 80px;
-    width: calc(100% - 80px);
-  }
-  
-  .admin-page-container {
-    padding: 20px;
-  }
+@media (max-width: 1024px) {
+  .admin-page-container { padding: 24px 16px 40px; }
 }
 
-/* Mobiles */
+/* Mobile : barre fine en haut (56 px) et dock de navigation en bas */
 @media (max-width: 768px) {
-  .sidebar {
-    transform: translateX(-100%);
-    width: 260px;
-  }
-  
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-  
   .admin-main-content {
-    margin-left: 0;
-    width: 100%;
+    padding-top: 56px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
-  
-  .admin-page-container {
-    padding: 16px;
-  }
-  
-  .admin-topbar {
-    padding: 12px 16px;
-  }
-}
-
-/* Très petits mobiles */
-@media (max-width: 480px) {
-  .admin-page-container {
-    padding: 12px;
-  }
-}
-
-/* Ajouter à la fin du fichier AdminLayout.css */
-
-.admin-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* Style pour le composant AdminNotifications dans le topbar */
-.admin-notifications-card {
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: none;
-  box-shadow: none;
-}
-
-.admin-notif-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #f5f0e8;
-  color: #2D2422;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-}
-
-.admin-notif-btn.active {
-  background: #2D2422;
-  color: #D4AF37;
-  border-color: #D4AF37;
-}
-
-.admin-notif-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
-}
-
-.admin-notif-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.admin-notif-warning,
-.admin-notif-success {
-  display: none; /* Caché dans le topbar, trop petit */
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .admin-topbar-right {
-    gap: 8px;
-  }
-  
-  .admin-notif-btn span {
-    display: none; /* Cache le texte sur mobile, ne garde que l'icône */
-  }
-  
-  .admin-notif-btn {
-    padding: 8px;
-  }
-  
-  .admin-user-info {
-    display: none; /* Cache le texte admin sur très petit mobile */
-  }
-}
-
-/* ============================================================
-   FIX - ESPACE BLANC ENTRE 768px ET 992px
-   ============================================================ */
-
-/* Corrige la transition brutale entre les breakpoints */
-@media (min-width: 769px) and (max-width: 992px) {
-  /* Assure que la sidebar reste à 80px sans transformation */
-  .sidebar {
-    width: 80px !important;
-    transform: none !important;
-    position: fixed !important;
-  }
-  
-  /* Fixe la marge du contenu principal */
-  .admin-main-content {
-    margin-left: 80px !important;
-    width: calc(100% - 80px) !important;
-  }
-  
-  /* Assure que le conteneur des pages prend toute la largeur */
-  .admin-page-container {
-    width: 100% !important;
-    padding: 20px !important;
-    overflow-x: visible !important;
-  }
-  
-  /* Force l'affichage correct de la grille des commandes */
-  .orders-page {
-    width: 100% !important;
-  }
-  
-  .orders-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* Transition plus douce pour la sidebar */
-.sidebar,
-.admin-main-content {
-  transition: all 0.3s ease;
-}
-
-/* Empêche les sauts brusques de contenu */
-.admin-page-container {
-  transition: padding 0.3s ease;
+  .admin-page-container { padding: 20px 16px 24px; }
 }
