@@ -1,96 +1,87 @@
 // src/admin/pages/Dashboard.tsx
-import { useState, useEffect } from "react";
-import { 
-  Sun, Moon, LayoutGrid, 
-  ShoppingBag, DollarSign, 
-  TrendingUp, Calendar, AlertCircle, Clock, CheckCircle,
-  ListOrdered, Utensils, Truck, ToggleLeft, ToggleRight,
-  RefreshCw, Download, FileSpreadsheet, Package
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  Sun, Moon, LayoutGrid, Truck, RefreshCw, Download,
+  FileSpreadsheet, Images, Package, Check, AlertTriangle,
 } from "lucide-react";
 import axios from "axios";
 import "./Dashboard.css";
-import InstallButtonAdmin from '../components/InstallButtonAdmin';
+import InstallButtonAdmin from "../components/InstallButtonAdmin";
 
 const isLocal = window.location.hostname === "localhost";
-const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
+const BASE_API = isLocal
+  ? "http://localhost:5000/api"
+  : "https://signature-backend-alpha.vercel.app/api";
 
-// Déclaration du type JSZip pour TypeScript
-declare global {
-  interface Window {
-    JSZip: any;
-  }
-}
+type Toast = { type: "success" | "error"; text: string } | null;
+type ExportKind = "images" | "csv" | "all" | null;
+type Mode = "JOUR" | "SOIR" | "CARTE";
+
+const MODES: { id: Mode; label: string; preview: string; icon: typeof Sun }[] = [
+  { id: "JOUR", label: "Midi", preview: "Menu du midi", icon: Sun },
+  { id: "SOIR", label: "Soir", preview: "Menu du soir", icon: Moon },
+  { id: "CARTE", label: "Carte complète", preview: "Tous les produits", icon: LayoutGrid },
+];
+
+const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 
 export default function Dashboard() {
-  const [displayMode, setDisplayMode] = useState("JOUR");
-  
-  // États pour les vraies données
-  const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-    cookingOrders: 0,
-    doneOrders: 0
-  });
+  const [stats, setStats] = useState({ total: 0, revenue: 0, pending: 0, cooking: 0, done: 0 });
   const [loading, setLoading] = useState(true);
-  
-  // État pour la disponibilité des livraisons
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [displayMode, setDisplayMode] = useState<Mode>("JOUR");
+
   const [deliveryAvailable, setDeliveryAvailable] = useState(true);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
-  const [settingsMessage, setSettingsMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
-  // États pour les exports
-  const [exportingImages, setExportingImages] = useState(false);
-  const [exportingData, setExportingData] = useState(false);
-  const [exportingComplete, setExportingComplete] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0, status: '' });
-  const [totalImagesCount, setTotalImagesCount] = useState(0);
 
-  // === RÉCUPÉRATION DES COMMANDES DEPUIS L'API ===
-  const fetchDashboardStats = async () => {
+  const [exporting, setExporting] = useState<ExportKind>(null);
+  const [progress, setProgress] = useState(0);
+  const [imagesCount, setImagesCount] = useState(0);
+
+  const [toast, setToast] = useState<Toast>(null);
+  const toastTimer = useRef<number | undefined>(undefined);
+
+  const notify = useCallback((type: "success" | "error", text: string) => {
+    window.clearTimeout(toastTimer.current);
+    setToast({ type, text });
+    toastTimer.current = window.setTimeout(() => setToast(null), 3500);
+  }, []);
+
+  // ---------- Données ----------
+  const fetchStats = useCallback(async () => {
     try {
       const res = await axios.get(`${BASE_API}/orders`);
-      const orders = res.data.data;
-      
-      const totalOrders = orders.length;
-      
-      const totalRevenue = orders
-        .filter((o: any) => o.status === "done" || o.status === "archived")
-        .reduce((acc: number, curr: any) => acc + parseFloat(curr.total || 0), 0);
-      
-      const pendingOrders = orders.filter((o: any) => o.status === "pending").length;
-      const cookingOrders = orders.filter((o: any) => o.status === "cooking").length;
-      const doneOrders = orders.filter((o: any) => o.status === "done").length;
-      
+      const orders: any[] = res.data.data ?? [];
+      const count = (s: string) => orders.filter((o) => o.status === s).length;
       setStats({
-        totalOrders,
-        totalRevenue,
-        pendingOrders,
-        cookingOrders,
-        doneOrders
+        total: orders.length,
+        revenue: orders
+          .filter((o) => o.status === "done" || o.status === "archived")
+          .reduce((acc, o) => acc + parseFloat(o.total || 0), 0),
+        pending: count("pending"),
+        cooking: count("cooking"),
+        done: count("done"),
       });
+      setUpdatedAt(new Date());
     } catch (err) {
       console.error("Erreur chargement dashboard:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
-  // Récupérer le nombre total d'images - CORRIGÉ
   const fetchImagesCount = async () => {
     try {
-      // ✅ CORRECTION : changer images-list en images/list
       const res = await axios.get(`${BASE_API}/export/images/list`);
-      if (res.data.success) {
-        setTotalImagesCount(res.data.count || 0);
-      }
-    } catch (err) {
-      console.error("Erreur chargement nombre d'images:", err);
-      setTotalImagesCount(0);
+      if (res.data.success) setImagesCount(res.data.count || 0);
+    } catch {
+      setImagesCount(0);
     }
   };
 
-  // Récupérer les paramètres actuels
   const fetchSettings = async () => {
     try {
       const res = await axios.get(`${BASE_API}/settings`);
@@ -102,464 +93,269 @@ export default function Dashboard() {
     }
   };
 
-  // Basculer l'état des livraisons
-  const toggleDeliveryAvailability = async () => {
+  const toggleDelivery = async () => {
     setDeliveryLoading(true);
-    setSettingsMessage(null);
-    
+    const next = !deliveryAvailable;
     try {
-      const newState = !deliveryAvailable;
-      const res = await axios.put(`${BASE_API}/settings`, {
-        deliveryAvailable: newState
-      });
-      
-      if (res.data.success) {
-        setDeliveryAvailable(newState);
-        setSettingsMessage({
-          type: 'success',
-          text: newState ? '✓ Livraisons activées' : '✓ Livraisons désactivées'
-        });
-        
-        setTimeout(() => setSettingsMessage(null), 3000);
-      } else {
-        throw new Error("Réponse invalide");
-      }
+      const res = await axios.put(`${BASE_API}/settings`, { deliveryAvailable: next });
+      if (!res.data.success) throw new Error("Réponse invalide");
+      setDeliveryAvailable(next);
+      notify("success", next ? "Livraisons activées" : "Livraisons désactivées");
     } catch (err) {
       console.error("Erreur mise à jour:", err);
-      setSettingsMessage({
-        type: 'error',
-        text: '❌ Erreur lors de la modification'
-      });
-      setTimeout(() => setSettingsMessage(null), 3000);
+      notify("error", "Modification impossible. Réessayez.");
     } finally {
       setDeliveryLoading(false);
     }
   };
 
-  // ==================== EXPORT DES IMAGES UNIQUEMENT ====================
-  const exportImagesOnly = async () => {
-    setExportingImages(true);
-    setDownloadProgress({ current: 0, total: 0, status: 'Préparation du téléchargement...' });
-    
+  // ---------- Exports ----------
+  const download = async (kind: Exclude<ExportKind, null>, path: string, fallback: string) => {
+    setExporting(kind);
+    setProgress(0);
     try {
-      setDownloadProgress({ current: 0, total: 0, status: 'Téléchargement des images...' });
-      
-      const response = await axios.get(`${BASE_API}/export/images/all`, {
-        responseType: 'blob'
+      const res = await axios.get(`${BASE_API}${path}`, {
+        responseType: "blob",
+        onDownloadProgress: (e) => {
+          if (e.total) setProgress(Math.round((e.loaded * 100) / e.total));
+        },
       });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      let filename = fallback;
+      const cd: string | undefined = res.headers["content-disposition"];
+      const match = cd?.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+      if (match?.[1]) filename = decodeURIComponent(match[1]);
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
       link.href = url;
-      
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = `signature_images_${Date.now()}.zip`;
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename=(.+)/);
-        if (match && match[1]) filename = match[1];
-      }
-      
-      link.setAttribute('download', filename);
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
-      setDownloadProgress({ current: 100, total: 100, status: 'Terminé !' });
-      setTimeout(() => setDownloadProgress({ current: 0, total: 0, status: '' }), 2000);
-      
-    } catch (error) {
-      console.error('❌ Erreur export images:', error);
-      alert('❌ Erreur lors du téléchargement des images');
+      notify("success", "Export téléchargé");
+    } catch (err) {
+      console.error("Erreur export:", err);
+      notify("error", "Export impossible. Réessayez dans un instant.");
     } finally {
-      setExportingImages(false);
+      setExporting(null);
+      setProgress(0);
     }
   };
 
-  // ==================== EXPORT DES DONNÉES CSV ====================
-  const exportDataOnly = async () => {
-    setExportingData(true);
-    
-    try {
-      const response = await axios.get(`${BASE_API}/export/plats-data`, {
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `plats_catalogue_${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      
-    } catch (error) {
-      console.error('❌ Erreur export données:', error);
-      alert('❌ Erreur lors du téléchargement des données');
-    } finally {
-      setExportingData(false);
-    }
-  };
-
-  // ==================== EXPORT COMPLET (IMAGES + CSV) ====================
-  const exportComplete = async () => {
-    setExportingComplete(true);
-    setDownloadProgress({ current: 0, total: 0, status: 'Préparation de l\'export complet...' });
-    
-    try {
-      setDownloadProgress({ current: 10, total: 100, status: 'Génération du fichier ZIP...' });
-      
-      const response = await axios.get(`${BASE_API}/export/complete`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setDownloadProgress({ 
-              current: percent, 
-              total: 100, 
-              status: `Téléchargement... ${percent}%` 
-            });
-          }
-        }
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = `signature_complet_${Date.now()}.zip`;
-      if (contentDisposition) {
-        const match = contentDisposition.match(/filename=(.+)/);
-        if (match && match[1]) filename = match[1];
-      }
-      
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      
-      setDownloadProgress({ current: 100, total: 100, status: 'Terminé !' });
-      setTimeout(() => setDownloadProgress({ current: 0, total: 0, status: '' }), 3000);
-      
-    } catch (error) {
-      console.error('❌ Erreur export complet:', error);
-      alert('❌ Erreur lors de l\'export complet. Vérifiez la console.');
-    } finally {
-      setExportingComplete(false);
-    }
-  };
-
+  // ---------- Effets ----------
   useEffect(() => {
-    fetchDashboardStats();
+    fetchStats();
     fetchSettings();
     fetchImagesCount();
-    const interval = setInterval(fetchDashboardStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
-  
+
+    // Polling 30 s, en pause quand l'onglet est masqué
+    let id: number | undefined;
+    const start = () => { id = window.setInterval(fetchStats, 30000); };
+    const stop = () => window.clearInterval(id);
+    const onVisibility = () => {
+      stop();
+      if (!document.hidden) { fetchStats(); start(); }
+    };
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
+  }, [fetchStats]);
+
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' })
-        .then(reg => console.log('✅ Admin SW enregistré:', reg.scope))
-        .catch(err => console.error('❌ Admin SW erreur:', err));
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/admin-sw.js", { scope: "/admin/" })
+        .catch((err) => console.error("Admin SW erreur:", err));
     }
   }, []);
 
-  const formattedRevenue = new Intl.NumberFormat('fr-FR', { 
-    style: 'currency', 
-    currency: 'EUR' 
-  }).format(stats.totalRevenue);
+  // ---------- Rendu ----------
+  const value = (v: string | number) => (loading ? <span className="db-skeleton" /> : v);
+  const pipelineTotal = stats.pending + stats.cooking + stats.done || 1;
+  const pipeline = [
+    { key: "pending", label: "En attente", n: stats.pending },
+    { key: "cooking", label: "En cuisine", n: stats.cooking },
+    { key: "done", label: "Prêtes ou servies", n: stats.done },
+  ];
+  const today = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long", day: "numeric", month: "long",
+  });
+  const activeMode = MODES.find((m) => m.id === displayMode)!;
+  const busy = exporting !== null;
 
   return (
-    <div className="modern-dashboard">
-      <div className="modern-header">
+    <div className="db">
+      <header className="db-head">
         <div>
-          <h1 className="modern-title">Tableau de bord</h1>
-          <p className="modern-subtitle">Bienvenue dans votre espace de gestion</p>
+          <p className="db-date">{today}</p>
+          <h1 className="db-title">Tableau de bord</h1>
         </div>
-        <div className="date-badge">
-          <Calendar size={16} />
-          <span>{new Date().toLocaleDateString('fr-FR')}</span>
-        </div>
-      </div>
+        <button
+          className="db-refresh"
+          onClick={() => { setRefreshing(true); fetchStats(); }}
+          disabled={refreshing}
+          aria-label="Actualiser les chiffres"
+        >
+          <RefreshCw size={16} className={refreshing ? "db-spin" : ""} />
+          <span>
+            {updatedAt
+              ? `Mis à jour à ${updatedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
+              : "Actualiser"}
+          </span>
+        </button>
+      </header>
 
-      <div className="stats-grid">
-        {/* Carte Commandes */}
-        <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <ShoppingBag size={20} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">{loading ? "..." : stats.totalOrders}</span>
-            <span className="stat-label">Total commandes</span>
-          </div>
-          <div className="stat-trend positive">
-            <ListOrdered size={14} />
-            <span>En temps réel</span>
-          </div>
-        </div>
-
-        {/* Carte Chiffre d'affaires */}
-        <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <DollarSign size={20} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">{loading ? "..." : formattedRevenue}</span>
-            <span className="stat-label">Chiffre d'affaires</span>
-          </div>
-          <div className="stat-trend positive">
-            <TrendingUp size={14} />
-            <span>Total encaissé</span>
-          </div>
+      {/* Chiffres clés */}
+      <section className="db-kpis" aria-label="Chiffres clés">
+        <div className="db-lead">
+          <span className="db-lead-label">Chiffre d'affaires encaissé</span>
+          <strong className="db-lead-value">{value(eur.format(stats.revenue))}</strong>
+          <span className="db-lead-sub">
+            {loading ? "" : `sur ${stats.total} commande${stats.total > 1 ? "s" : ""} au total`}
+          </span>
         </div>
 
-        {/* Carte En attente */}
-        <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <Clock size={20} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">{loading ? "..." : stats.pendingOrders}</span>
-            <span className="stat-label">En attente</span>
-          </div>
-          <div className="stat-trend">
-            <AlertCircle size={14} />
-            <span>À traiter</span>
-          </div>
-        </div>
-
-        {/* Carte En cuisine */}
-        <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <Utensils size={20} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">{loading ? "..." : stats.cookingOrders}</span>
-            <span className="stat-label">En cuisine</span>
-          </div>
-          <div className="stat-trend">
-            <Clock size={14} />
-            <span>En préparation</span>
-          </div>
-        </div>
-
-        {/* Carte Prêtes */}
-        <div className="stat-card">
-          <div className="stat-icon-wrapper">
-            <CheckCircle size={20} />
-          </div>
-          <div className="stat-info">
-            <span className="stat-value">{loading ? "..." : stats.doneOrders}</span>
-            <span className="stat-label">Prêtes / Servies</span>
-          </div>
-          <div className="stat-trend positive">
-            <CheckCircle size={14} />
-            <span>À archiver</span>
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION CONFIGURATION LIVRAISON */}
-      <div className="delivery-config-section">
-        <div className="delivery-config-header">
-          <Truck size={20} className="delivery-icon" />
-          <h2 className="section-title-modern">Configuration des livraisons</h2>
-        </div>
-        
-        <div className="delivery-config-card">
-          <div className="delivery-config-row">
-            <div className="delivery-config-info">
-              <div className="delivery-config-label">
-                <span className="label-icon">🚚</span>
-                <span className="label-title">Service de livraison</span>
-              </div>
-              <p className="delivery-config-description">
-                Activez ou désactivez la livraison pour tous les clients
-              </p>
-            </div>
-            
-            <div className="delivery-config-control">
-              <button 
-                className={`delivery-toggle-admin ${deliveryAvailable ? 'active' : 'inactive'}`}
-                onClick={toggleDeliveryAvailability}
-                disabled={deliveryLoading}
-              >
-                {deliveryLoading ? (
-                  <RefreshCw size={20} className="spinning" />
-                ) : deliveryAvailable ? (
-                  <>
-                    <ToggleRight size={24} />
-                    <span>Activé</span>
-                  </>
-                ) : (
-                  <>
-                    <ToggleLeft size={24} />
-                    <span>Désactivé</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-          
-          {settingsMessage && (
-            <div className={`delivery-config-message ${settingsMessage.type}`}>
-              {settingsMessage.text}
-            </div>
-          )}
-          
-          <div className="delivery-config-status">
-            <div className={`status-badge ${deliveryAvailable ? 'status-active' : 'status-inactive'}`}>
-              {deliveryAvailable ? '🟢 Livraisons ouvertes' : '🔴 Livraisons fermées'}
-            </div>
-            {!deliveryAvailable && (
-              <p className="status-warning">
-                ⚠️ Les clients ne pourront pas sélectionner la livraison tant que ce service est désactivé
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION EXPORT COMPLET - IMAGES + DONNÉES */}
-      <div className="export-section">
-        <div className="delivery-config-header">
-          <Package size={20} className="delivery-icon" />
-          <h2 className="section-title-modern">Export complet</h2>
-        </div>
-        
-        <div className="export-card">
-          <div className="export-info">
-            <p className="export-description">
-              📦 Exportez TOUT en un seul fichier ZIP : images + catalogue CSV + documentation
-            </p>
-            <ul className="export-list">
-              <li>🖼️ Toutes les images des plats (nommées par nom de plat)</li>
-              <li>📄 Fichier CSV avec : nom, description, prix, catégorie, univers, disponibilité</li>
-              <li>📖 Fichier README avec instructions</li>
-              <li>📊 Métadonnées JSON</li>
-            </ul>
-            <p className="export-note">
-              <small>💡 Idéal pour créer un catalogue papier ou importer dans un autre système</small>
-            </p>
-          </div>
-          
-          <button 
-            className="export-complete-btn"
-            onClick={exportComplete}
-            disabled={exportingComplete}
-          >
-            {exportingComplete ? (
-              <>
-                <RefreshCw size={20} className="spinning" />
-                <span>{downloadProgress.status || 'Préparation...'}</span>
-              </>
-            ) : (
-              <>
-                <Download size={20} />
-                <span>📦 Télécharger TOUT (images + catalogue)</span>
-              </>
-            )}
-          </button>
-          
-          {exportingComplete && downloadProgress.current > 0 && downloadProgress.current < 100 && (
-            <div className="download-progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${downloadProgress.current}%` }}
+        <div className="db-pipeline">
+          <div className="db-bar" role="img" aria-label="Répartition des commandes en cours">
+            {pipeline.map((p) => (
+              <span
+                key={p.key}
+                className={`db-bar-seg db-${p.key}`}
+                style={{ flexGrow: p.n }}
               />
-              <span className="progress-text">{downloadProgress.current}%</span>
+            ))}
+          </div>
+          <ul className="db-steps">
+            {pipeline.map((p) => (
+              <li key={p.key}>
+                <span className={`db-dot db-${p.key}`} aria-hidden="true" />
+                <span className="db-step-n">{value(p.n)}</span>
+                <span className="db-step-l">{p.label}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="db-hint">
+            {stats.pending > 0
+              ? `${stats.pending} commande${stats.pending > 1 ? "s" : ""} à prendre en charge`
+              : "Aucune commande en attente"}
+          </p>
+        </div>
+      </section>
+
+      <div className="db-grid">
+        {/* Livraison */}
+        <section className="db-panel">
+          <div className="db-panel-head">
+            <Truck size={18} aria-hidden="true" />
+            <h2>Livraison</h2>
+          </div>
+          <div className="db-switch-row">
+            <div>
+              <p className="db-strong">{deliveryAvailable ? "Livraisons ouvertes" : "Livraisons fermées"}</p>
+              <p className="db-muted">
+                {deliveryAvailable
+                  ? "Les clients peuvent choisir la livraison."
+                  : "Les clients ne peuvent plus choisir la livraison."}
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* SECTION EXPORTS SÉPARÉS */}
-      <div className="exports-separate-section">
-        <div className="delivery-config-header">
-          <FileSpreadsheet size={20} className="delivery-icon" />
-          <h2 className="section-title-modern">Exports séparés</h2>
-        </div>
-        
-        <div className="exports-separate-grid">
-          {/* Export images uniquement */}
-          <div className="export-card-small">
-            <div className="export-card-icon">🖼️</div>
-            <h3>Images uniquement</h3>
-            <p>Téléchargez toutes les images des plats</p>
-            <button 
-              className="export-small-btn images-btn"
-              onClick={exportImagesOnly}
-              disabled={exportingImages}
+            <button
+              role="switch"
+              aria-checked={deliveryAvailable}
+              aria-label="Service de livraison"
+              className={`db-switch ${deliveryAvailable ? "on" : ""}`}
+              onClick={toggleDelivery}
+              disabled={deliveryLoading}
             >
-              {exportingImages ? (
-                <RefreshCw size={16} className="spinning" />
-              ) : (
-                <Download size={16} />
-              )}
-              <span>{exportingImages ? 'Téléchargement...' : 'ZIP des images'}</span>
+              <span className="db-switch-knob" />
             </button>
-            <small>{totalImagesCount || '0'} images disponibles</small>
           </div>
+        </section>
 
-          {/* Export CSV uniquement */}
-          <div className="export-card-small">
-            <div className="export-card-icon">📊</div>
-            <h3>Catalogue CSV</h3>
-            <p>Téléchargez les données au format Excel</p>
-            <button 
-              className="export-small-btn data-btn"
-              onClick={exportDataOnly}
-              disabled={exportingData}
-            >
-              {exportingData ? (
-                <RefreshCw size={16} className="spinning" />
-              ) : (
-                <FileSpreadsheet size={16} />
-              )}
-              <span>{exportingData ? 'Génération...' : 'Télécharger CSV'}</span>
-            </button>
-            <small>Ouvrable avec Excel</small>
+        {/* Mode d'affichage */}
+        <section className="db-panel">
+          <div className="db-panel-head">
+            <LayoutGrid size={18} aria-hidden="true" />
+            <h2>Menu affiché</h2>
           </div>
-        </div>
+          <div className="db-segment" role="group" aria-label="Mode d'affichage du menu">
+            {MODES.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                aria-pressed={displayMode === id}
+                className={displayMode === id ? "active" : ""}
+                onClick={() => setDisplayMode(id)}
+              >
+                <Icon size={16} aria-hidden="true" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+          <p className="db-muted">Aperçu : {activeMode.preview}</p>
+        </section>
       </div>
 
-      <div className="mode-section">
-        <h2 className="section-title-modern">Mode d'affichage du menu</h2>
-        
-        <div className="mode-toggles">
-          <button 
-            className={`mode-btn ${displayMode === 'JOUR' ? 'active' : ''}`}
-            onClick={() => setDisplayMode('JOUR')}
+      {/* Exports */}
+      <section className="db-panel db-export">
+        <div className="db-panel-head">
+          <Package size={18} aria-hidden="true" />
+          <h2>Exporter le catalogue</h2>
+        </div>
+        <p className="db-muted db-export-text">
+          Images des plats, fichier CSV (nom, description, prix, catégorie, disponibilité) et
+          métadonnées, prêts pour un catalogue papier ou une autre application.
+        </p>
+
+        <div className="db-actions">
+          <button
+            className="db-btn db-btn-primary"
+            disabled={busy}
+            onClick={() => download("all", "/export/complete", `signature_complet_${Date.now()}.zip`)}
           >
-            <Sun size={18} />
-            <span>Service Midi</span>
+            {exporting === "all" ? <RefreshCw size={16} className="db-spin" /> : <Download size={16} />}
+            <span>{exporting === "all" ? "Préparation…" : "Tout exporter (ZIP)"}</span>
           </button>
-          <button 
-            className={`mode-btn ${displayMode === 'SOIR' ? 'active' : ''}`}
-            onClick={() => setDisplayMode('SOIR')}
+          <button
+            className="db-btn"
+            disabled={busy}
+            onClick={() => download("images", "/export/images/all", `signature_images_${Date.now()}.zip`)}
           >
-            <Moon size={18} />
-            <span>Service Soir</span>
+            {exporting === "images" ? <RefreshCw size={16} className="db-spin" /> : <Images size={16} />}
+            <span>Images ({imagesCount})</span>
           </button>
-          <button 
-            className={`mode-btn ${displayMode === 'CARTE' ? 'active' : ''}`}
-            onClick={() => setDisplayMode('CARTE')}
+          <button
+            className="db-btn"
+            disabled={busy}
+            onClick={() => download("csv", "/export/plats-data", `plats_catalogue_${Date.now()}.csv`)}
           >
-            <LayoutGrid size={18} />
-            <span>Carte totale</span>
+            {exporting === "csv" ? <RefreshCw size={16} className="db-spin" /> : <FileSpreadsheet size={16} />}
+            <span>Catalogue CSV</span>
           </button>
         </div>
-        
-        <div className="mode-preview">
-          <p>Aperçu actuel : <strong>{displayMode === 'JOUR' ? 'Menu du Midi' : displayMode === 'SOIR' ? 'Menu du Soir' : 'Tous les produits'}</strong></p>
-          <div className="preview-bar"></div>
-        </div>
-      </div>
+
+        {busy && (
+          <div
+            className="db-progress"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <span style={{ width: progress > 0 ? `${progress}%` : "35%" }} className={progress > 0 ? "" : "indeterminate"} />
+          </div>
+        )}
+      </section>
+
       <InstallButtonAdmin />
+
+      <div className="db-toast-zone" role="status" aria-live="polite">
+        {toast && (
+          <div className={`db-toast ${toast.type}`}>
+            {toast.type === "success" ? <Check size={16} /> : <AlertTriangle size={16} />}
+            <span>{toast.text}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
