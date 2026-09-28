@@ -172,7 +172,7 @@ export default function Dashboard() {
 
   // ---------- Rendu ----------
   const value = (v: string | number) => (loading ? <span className="db-skeleton" /> : v);
-  const pipelineTotal = stats.pending + stats.cooking + stats.done || 1;
+  
   const pipeline = [
     { key: "pending", label: "En attente", n: stats.pending },
     { key: "cooking", label: "En cuisine", n: stats.cooking },
