@@ -1,0 +1,88 @@
+/* src/admin/components/WhatsAppPanel.css */
+.wa-panel {
+    --ink: #12211C;
+    --paper: #F3F5F2;
+    --line: #DFE4DE;
+    --muted: #64716B;
+    --brass: #B48A3C;
+    --brass-soft: #D9BC80;
+    --danger: #B5453A;
+    --ok: #2E7D5B;
+  
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 16px 96px; /* place pour le dock mobile */
+    font-family: 'Manrope', system-ui, sans-serif;
+    color: var(--ink);
+  }
+  .wa-panel *, .wa-panel *::before, .wa-panel *::after { box-sizing: border-box; }
+  
+  .wa-head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .wa-head h1 { margin: 0; font: 600 1.5rem 'Fraunces', Georgia, serif; letter-spacing: -.01em; }
+  .wa-head p { margin: 2px 0 0; color: var(--muted); font-size: .85rem; }
+  .wa-head-icon {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    display: grid; place-items: center; background: var(--ink); color: var(--brass-soft);
+  }
+  
+  .wa-msg { padding: 10px 14px; border-radius: 12px; background: #FBF3E2; border: 1px solid var(--brass-soft); font-size: .88rem; }
+  
+  .wa-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+  .wa-card h2 { margin: 0 0 12px; font-size: 1rem; font-weight: 700; }
+  .wa-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .wa-card-top h2 { margin: 0; }
+  
+  .wa-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wa-input {
+    flex: 1; min-width: 150px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--paper);
+    font: 500 .9rem 'Manrope', sans-serif; color: var(--ink);
+  }
+  .wa-input:focus { outline: 2px solid var(--brass); outline-offset: 1px; background: #fff; }
+  .wa-textarea { width: 100%; min-height: 110px; resize: vertical; display: block; margin-top: 8px; }
+  .wa-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .78rem; }
+  
+  .wa-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 16px; border: none; border-radius: 999px; cursor: pointer;
+    background: var(--ink); color: #fff; font: 600 .88rem 'Manrope', sans-serif;
+    transition: opacity .2s, background .2s;
+  }
+  .wa-btn:hover { opacity: .88; }
+  .wa-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .wa-btn.is-ghost { background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+  .wa-btn.is-primary { margin-top: 16px; background: var(--brass); color: var(--ink); }
+  
+  .wa-details { margin-top: 12px; }
+  .wa-details summary { cursor: pointer; color: var(--brass); font-weight: 600; font-size: .88rem; }
+  .wa-details .wa-btn { margin-top: 8px; }
+  
+  .wa-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: .85rem; font-weight: 600; }
+  
+  .wa-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; }
+  .wa-contact { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+  .wa-contact.is-off { opacity: .45; }
+  .wa-contact-text { display: flex; flex-direction: column; flex: 1; line-height: 1.3; min-width: 0; }
+  .wa-contact-text strong { font-size: .9rem; }
+  .wa-contact-text small { color: var(--muted); font-size: .78rem; }
+  .wa-empty { padding: 16px 4px; color: var(--muted); font-size: .88rem; }
+  
+  .wa-badge { padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+  .wa-badge.is-ok { background: #E3F2EA; color: var(--ok); }
+  .wa-badge.is-fail { background: #F7E4E1; color: var(--danger); }
+  
+  .wa-icon-btn {
+    display: inline-grid; place-items: center; width: 32px; height: 32px;
+    border: none; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer;
+    transition: all .2s;
+  }
+  .wa-icon-btn:hover { background: var(--danger); color: #fff; }
+  
+  .wa-media { margin-top: 12px; }
+  .wa-file { display: inline-flex; align-items: center; gap: 4px; font-size: .85rem; color: var(--muted); }
+  
+  .wa-bar { height: 10px; margin: 10px 0 6px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+  .wa-bar-fill { height: 100%; border-radius: 999px; background: var(--brass); transition: width .4s; }
+  
+  .wa-panel :is(button, input, textarea, summary):focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .wa-panel * { transition: none !important; } }

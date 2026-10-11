@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Utensils, Image as ImageIcon, ShoppingBag, LogOut, Zap,
   Tags, ListPlus, PlusSquare, Smartphone, Gift, Newspaper, Brain,
-  Megaphone, Search, ChevronDown,
+  Megaphone, Search, ChevronDown, MessageCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import "./Sidebar.css";
@@ -13,7 +13,7 @@ import "./Sidebar.css";
 type Item = { path: string; icon: LucideIcon; label: string; hint: string };
 type Group = { id: string; label: string; icon: LucideIcon; items: Item[] };
 
-// 12 entrées regroupées en 3 univers, selon le moment où on s'en sert
+// 13 entrées regroupées en 3 univers, selon le moment où on s'en sert
 const GROUPS: Group[] = [
   {
     id: "service",
@@ -43,6 +43,7 @@ const GROUPS: Group[] = [
     items: [
       { path: "/admin/appearance", icon: ImageIcon, label: "Apparence et pub", hint: "Visuels et bannières" },
       { path: "/admin/social", icon: Zap, label: "Social Broadcaster", hint: "Publier sur les réseaux" },
+      { path: "/admin/whatsapp", icon: MessageCircle, label: "WhatsApp", hint: "Message à plusieurs clients" },
       { path: "/admin/blog", icon: Newspaper, label: "Blog", hint: "Articles du site" },
       { path: "/admin/wheel", icon: Gift, label: "Jeu de la roue", hint: "Lots et participations" },
       { path: "/admin/quiz", icon: Brain, label: "La question du chef", hint: "Quiz pour les clients" },
