@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Send, Trash2, Paperclip, X, UserPlus } from "lucide-react";
+import { API, waFetch } from "./waApi";
 import "./WhatsAppPanel.css";
-
-const API = import.meta.env.VITE_WA_API || "http://localhost:4000/api/whatsapp";
 
 type Contact = { _id: string; phone: string; name: string; optOut: boolean; lastStatus: string };
 type Status = { running: boolean; total: number; done: number; sent: number; failed: number };
@@ -20,19 +19,22 @@ export default function WhatsAppPanel() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
-    const r = await fetch(`${API}/contacts`);
+    const r = await waFetch(`${API}/contacts`);
+    if (!r.ok) throw new Error("Erreur de chargement");
     setContacts(await r.json());
   };
 
   useEffect(() => {
-    load().catch(() => setMsg("Serveur WhatsApp injoignable (node whatsapp/app.js est-il lancé ?)"));
+    load().catch(() =>
+      setMsg("Serveur WhatsApp injoignable. S'il dormait, attends une minute et recharge la page.")
+    );
   }, []);
 
   // Suivi de l'envoi en cours
   useEffect(() => {
     if (!status?.running) return;
     const t = setInterval(async () => {
-      const s: Status = await (await fetch(`${API}/status`)).json();
+      const s: Status = await (await waFetch(`${API}/status`)).json();
       setStatus(s);
       if (!s.running) load();
     }, 2000);
@@ -54,7 +56,7 @@ export default function WhatsAppPanel() {
     setSelected(allSelected ? new Set() : new Set(sendable.map((c) => c._id)));
 
   const post = async (list: { phone: string; name?: string }[]) => {
-    const r = await fetch(`${API}/contacts`, {
+    const r = await waFetch(`${API}/contacts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contacts: list }),
@@ -86,7 +88,7 @@ export default function WhatsAppPanel() {
   };
 
   const remove = async (id: string) => {
-    await fetch(`${API}/contacts/${id}`, { method: "DELETE" });
+    await waFetch(`${API}/contacts/${id}`, { method: "DELETE" });
     setSelected((prev) => {
       const n = new Set(prev);
       n.delete(id);
@@ -105,7 +107,7 @@ export default function WhatsAppPanel() {
     fd.append("ids", JSON.stringify([...selected]));
     if (media) fd.append("media", media);
 
-    const r = await fetch(`${API}/send`, { method: "POST", body: fd });
+    const r = await waFetch(`${API}/send`, { method: "POST", body: fd });
     const d = await r.json();
     if (!r.ok) return setMsg(d.error || "Erreur d'envoi");
     setMsg("");

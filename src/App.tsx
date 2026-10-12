@@ -50,7 +50,7 @@ import TableManager from "./admin/pages/TableManager";
 import WheelSettings from "./admin/pages/WheelSettings"; // 🎡 Page admin du jeu
 import BlogManager from "./admin/pages/BlogManager"; // 📰 Page admin du blog
 import QuizManagement from "./admin/pages/QuizManagement"; // 🧑‍🍳 NOUVEAU - Page admin du quiz
-import WhatsAppPanel from "./admin/components/WhatsAppPanel"; // 💬 Page admin WhatsApp
+import WhatsAppGate from "./admin/components/WhatsAppGate"; // 💬 Page admin WhatsApp (avec mot de passe)
 
 // 2. Création du client de cache
 const queryClient = new QueryClient({
@@ -271,8 +271,8 @@ export default function AppRouter() {
               {/* 🧑‍🍳 Page admin du Quiz */}
               <Route path="quiz" element={<QuizManagement />} />
 
-              {/* 💬 Page admin WhatsApp */}
-              <Route path="whatsapp" element={<WhatsAppPanel />} />
+              {/* 💬 Page admin WhatsApp (écran de mot de passe, puis panneau) */}
+              <Route path="whatsapp" element={<WhatsAppGate />} />
             </Route>
           </Routes>
         </Router>
