@@ -7,6 +7,7 @@ import Highlights from "../components/home/Highlights";
 import Testimonials from "../components/home/Testimonials";
 import Gallery from "../components/home/Gallery";
 import CtaFinal from "../components/home/CtaFinal";
+import EventSection from "../components/event/EventSection";
 
 // --- FONCTION DE RÉCUPÉRATION GLOBALE ---
 
@@ -46,6 +47,9 @@ export default function Home() {
         subtitle="Chaque plat est une explosion de saveurs, un voyage des sens et une émotion à partager."
         ctaText="Commander"
       />
+
+      {/* ✨ ÉVÉNEMENT — Danys' Prelude (disparaît tout seul après la date) */}
+      <EventSection />
 
       {/* NOTRE SIGNATURE - AVEC EMPILEMENT DES DEUX IMAGES */}
       <Signature

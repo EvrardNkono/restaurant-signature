@@ -1,0 +1,91 @@
+/* =====================================================================
+   THÈME « ROUGE & OR » — repeint le site aux couleurs de l'affiche.
+   Actif UNIQUEMENT quand <body> porte la classe .event-theme
+   (posée par <EventTheme />, côté client seulement, jamais dans /admin).
+   Désactivation : config/event.ts → enabled: false (ou fin de l'événement).
+   Préfixe `body.event-theme` = priorité sur les styles existants, sans !important.
+   ===================================================================== */
+
+body.event-theme {
+  --terracotta: #b3122b;
+  --terracotta-dark: #8e0e22;
+  --dark: #2e050c;
+  --gold-dark: #9c7a1f;
+}
+
+body.event-theme ::selection { background: #b3122b; color: #fff4d2; }
+
+/* ---------- Navbar ---------- */
+body.event-theme .navbar-container {
+  background: linear-gradient(135deg, #4a0a16, #1d0307);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 10px 40px rgba(60, 5, 15, 0.45);
+}
+body.event-theme .logo-text span { color: #fff4d2; }
+body.event-theme .logo-text small { color: #f6e7b0; }
+body.event-theme .logo-badge { background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.55); }
+body.event-theme .nav-links a { color: rgba(255, 244, 210, 0.8); }
+body.event-theme .nav-links a:hover,
+body.event-theme .nav-links a.active { color: #f6e7b0; }
+body.event-theme .nav-links a::after { background: linear-gradient(90deg, #f6e7b0, #d4af37); }
+body.event-theme .nav-phone,
+body.event-theme .google-review-link,
+body.event-theme .cart-link { color: #f6e7b0; background: rgba(212, 175, 55, 0.14); }
+body.event-theme .cart-link:hover { color: #fff; }
+body.event-theme .nav-cta { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c !important; }
+body.event-theme .nav-cta:hover { filter: brightness(1.08); background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); }
+body.event-theme .burger { color: #f6e7b0; }
+body.event-theme .burger:hover { background: rgba(212, 175, 55, 0.18); }
+body.event-theme .mobile-action-primary { background: #6d0f1f; }
+
+/* ---------- Hero (argent → or, espresso → rubis) ---------- */
+body.event-theme .hero-v2 {
+  --espresso: #1d0307;
+  --espresso-2: #5a0b19;
+  --silver-light: #f6e7b0;
+  --silver-mid: #d4af37;
+  --silver-dark: #9c7a1f;
+  --silver-glow: rgba(212, 175, 55, 0.18);
+  --hairline: rgba(212, 175, 55, 0.4);
+  background:
+    radial-gradient(circle at 14% 22%, rgba(232, 116, 30, 0.2), transparent 45%),
+    radial-gradient(circle at 86% 82%, rgba(196, 22, 47, 0.3), transparent 45%),
+    linear-gradient(160deg, #5a0b19, #1d0307);
+}
+body.event-theme .seal-glow { background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, transparent 68%); }
+body.event-theme .hero-v2-cta:hover { background: rgba(212, 175, 55, 0.12); }
+
+/* ---------- Sections claires : champagne chaud + accents rubis ---------- */
+body.event-theme .signature-v3,
+body.event-theme .carousel-section,
+body.event-theme .why-us-section,
+body.event-theme .highlights-section,
+body.event-theme .testimonials-section,
+body.event-theme .cta-final-section {
+  background: linear-gradient(180deg, #fdf6ea, #f7ead4);
+}
+body.event-theme .signature-v3-badge,
+body.event-theme .highlights-badge,
+body.event-theme .why-us-badge { color: #9a1329; }
+body.event-theme .highlight-line,
+body.event-theme .ornament-diamond { background: #c4162f; }
+body.event-theme .highlight-card:hover,
+body.event-theme .testimonial-card:hover { box-shadow: 0 18px 44px rgba(109, 15, 31, 0.18); }
+body.event-theme .carousel-overlay { background: linear-gradient(to bottom, rgba(46, 5, 12, 0.25), rgba(46, 5, 12, 0.8)); }
+
+/* ---------- Galerie « bobine » ---------- */
+body.event-theme .reel-section {
+  --rl-void: #1d0307;
+  --rl-void-soft: #2e050c;
+  --rl-paper: #f6e7b0;
+  --rl-terracotta: #e0b84a;
+  --rl-terracotta-deep: #6d0f1f;
+  --rl-ash: #c9a98a;
+}
+
+/* ---------- Appel à l'action final ---------- */
+body.event-theme .cta-container { background: linear-gradient(135deg, #6d0f1f, #2e050c); }
+
+/* ---------- Footer ---------- */
+body.event-theme .footer { background: linear-gradient(180deg, #2e050c, #1d0307); }
+body.event-theme .footer-bottom { border-color: rgba(212, 175, 55, 0.25); }

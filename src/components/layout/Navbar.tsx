@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { ShoppingBag, Menu, X, Phone, Lock, Newspaper } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import "../../styles/navbar.css";
+import { EVENT, isEventActive } from "../../config/event";
 
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
@@ -114,8 +115,9 @@ export default function Navbar() {
 
   const totalItems = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
-  const navLinks = [
+  const navLinks: { to: string; label: string; icon?: React.ReactNode; event?: boolean }[] = [
     { to: "/", label: "Accueil" },
+    ...(isEventActive() ? [{ to: EVENT.path, label: "Événement", event: true }] : []),
     { to: "/carte", label: "Notre Carte" },
     { to: "/menu", label: "Menu Jour" },
     { to: "/menu-soir", label: "Menu Soir" },
@@ -154,7 +156,7 @@ export default function Navbar() {
               <Link
                 key={link.to}
                 to={link.to}
-                className={location.pathname === link.to ? "active" : ""}
+                className={`${location.pathname === link.to ? "active" : ""} ${link.event ? "nav-event" : ""}`.trim()}
               >
                 {link.icon && <span className="nav-icon">{link.icon}</span>}
                 {link.label}
@@ -258,7 +260,7 @@ export default function Navbar() {
                   key={link.to}
                   to={link.to}
                   onClick={closeMenu}
-                  className={`mobile-link-main ${location.pathname === link.to ? "active" : ""}`}
+                  className={`mobile-link-main ${location.pathname === link.to ? "active" : ""} ${link.event ? "nav-event" : ""}`}
                 >
                   {link.icon && <span className="mobile-link-icon">{link.icon}</span>}
                   {link.label}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Clock, Phone, Mail } from "lucide-react";
 import "./footer.css";
+import EventFooterStrip from "../event/EventFooterStrip";
 
 export default function Footer() {
   
@@ -69,6 +70,8 @@ export default function Footer() {
   };
 
   return (
+    <>
+    <EventFooterStrip />
     <footer className="footer">
       <div className="footer-top-ornament">
         <span className="ornament-line"></span>
@@ -188,5 +191,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

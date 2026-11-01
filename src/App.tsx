@@ -29,6 +29,13 @@ import BlogArticle from "./pages/BlogArticle";
 import QuizPage from "./pages/QuizPage";
 import QuizPopup from "./components/QuizPopup";
 
+// ✨ ÉVÉNEMENT « Danys' Prelude » (tout est piloté par src/config/event.ts)
+import Evenement from "./pages/Evenement";
+import EventTheme from "./components/event/EventTheme";
+import EventBanner from "./components/event/EventBanner";
+import EventPopup from "./components/event/EventPopup";
+import { EVENT } from "./config/event";
+
 // 🎡 IMPORTS JEU DE LA ROUE
 import FloatingWheelButton from "./components/FloatingWheelButton";
 import WheelGame from "./components/WheelGame";
@@ -210,6 +217,11 @@ export default function AppRouter() {
                 <>
                   {/* Popup publicitaire existant */}
                   <AdPopup />
+
+                  {/* ✨ Événement : thème rouge & or + bandeau + popup (client uniquement) */}
+                  <EventTheme />
+                  <EventBanner />
+                  <EventPopup />
                   
                   {/* 🧑‍🍳 Popup du Quiz "La Question du Chef" (s'affiche uniquement si le jeu est activé) */}
                   {showQuizPopup && <QuizPopup onClose={handlePopupClose} />}
@@ -243,6 +255,7 @@ export default function AppRouter() {
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/panier" element={<Cart />} />
                       <Route path="/order-success" element={<OrderSuccess />} />
+                      <Route path={EVENT.path} element={<Evenement />} />
                       
                       {/* 🧑‍🍳 Route du Quiz */}
                       <Route path="/quiz" element={<QuizPage />} />

@@ -3,6 +3,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+// ✨ Événement « Danys' Prelude » — chargés en dernier pour l'emporter sur les styles existants
+import './styles/event.css'
+import './styles/event-theme.css'
 
 // === PWA: Enregistrement du Service Worker ===
 const registerServiceWorker = async () => {

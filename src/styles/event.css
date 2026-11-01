@@ -1,0 +1,255 @@
+/* =====================================================================
+   ÉVÉNEMENT « DANYS' PRELUDE » — composants (bandeau, section, popup…)
+   Palette tirée de l'affiche : rubis profond, or, orange.
+   Tout est préfixé .ev- pour ne rien casser du reste du site.
+   ===================================================================== */
+
+:root {
+  --ev-ruby-950: #1d0307;
+  --ev-ruby-900: #2e050c;
+  --ev-ruby-800: #4a0a16;
+  --ev-ruby-700: #6d0f1f;
+  --ev-ruby-600: #9a1329;
+  --ev-red: #c4162f;
+  --ev-orange: #e8741e;
+  --ev-gold-1: #f6e7b0;
+  --ev-gold-2: #d4af37;
+  --ev-gold-3: #9c7a1f;
+  --ev-gold-grad: linear-gradient(135deg, #f6e7b0 0%, #e0b84a 38%, #b8891f 72%, #f1d98a 100%);
+  --ev-script: 'Great Vibes', 'Allura', 'Playfair Display', cursive;
+  --ev-caps: 'Cinzel', 'Playfair Display', Georgia, serif;
+  --event-banner-h: 38px;
+}
+
+@media (max-width: 600px) {
+  :root { --event-banner-h: 34px; }
+}
+
+/* ---------- Décalage de la page quand le bandeau est visible ---------- */
+body.has-event-banner { padding-top: var(--event-banner-h); }
+body.has-event-banner .navbar { top: var(--event-banner-h); }
+
+/* ---------- Bandeau du haut ---------- */
+.ev-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--event-banner-h);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, var(--ev-ruby-900), var(--ev-ruby-700) 50%, var(--ev-ruby-900));
+  border-bottom: 1px solid rgba(212, 175, 55, 0.55);
+  color: var(--ev-gold-1);
+  overflow: hidden;
+}
+.ev-banner::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(246, 231, 176, 0.22) 50%, transparent 65%);
+  transform: translateX(-100%);
+  animation: ev-shimmer 6s ease-in-out infinite;
+  pointer-events: none;
+}
+.ev-banner-link {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 0 44px 0 16px;
+  color: inherit; text-decoration: none;
+  font-family: var(--ev-caps);
+  font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase;
+}
+.ev-banner-spark { color: var(--ev-gold-2); flex-shrink: 0; }
+.ev-banner-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-banner-text b { font-weight: 700; color: #fff4d2; }
+.ev-banner-sep { margin: 0 10px; color: var(--ev-gold-2); }
+.ev-banner-cta {
+  flex-shrink: 0;
+  padding: 4px 14px; border-radius: 100px;
+  background: var(--ev-gold-grad); color: var(--ev-ruby-900);
+  font-weight: 700; font-size: 0.68rem; letter-spacing: 0.12em;
+}
+.ev-banner-close {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: transparent; border: 0; color: var(--ev-gold-1); cursor: pointer; z-index: 2;
+}
+.ev-banner-close:hover { background: rgba(246, 231, 176, 0.16); }
+.ev-banner-link:focus-visible, .ev-banner-close:focus-visible { outline: 2px solid var(--ev-gold-1); outline-offset: -3px; }
+
+@media (max-width: 760px) {
+  .ev-banner-link { font-size: 0.64rem; letter-spacing: 0.08em; gap: 8px; padding-right: 38px; }
+  .ev-banner-cta { display: none; }
+  .ev-banner-sep { margin: 0 6px; }
+}
+
+/* ---------- Typographie commune ---------- */
+.ev-eyebrow {
+  font-family: var(--ev-caps);
+  font-size: 0.78rem; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--ev-gold-1); margin: 0 0 6px;
+}
+.ev-title { margin: 0; line-height: 1; font-weight: 400; }
+.ev-script {
+  display: block;
+  font-family: var(--ev-script);
+  font-size: clamp(4rem, 9vw, 6.6rem);
+  line-height: 1.05;
+  background: var(--ev-gold-grad);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 4px 18px rgba(212, 175, 55, 0.35));
+  padding: 0 0.1em;
+}
+.ev-prelude {
+  display: block;
+  font-family: var(--ev-caps);
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  letter-spacing: 0.5em; text-transform: uppercase;
+  color: var(--ev-gold-2); margin-top: -4px;
+}
+.ev-kind {
+  font-family: var(--ev-caps);
+  font-size: clamp(1rem, 2.4vw, 1.5rem);
+  letter-spacing: 0.34em; text-transform: uppercase;
+  color: #fff4d2; margin: 18px 0 0;
+}
+.ev-rule {
+  width: 140px; height: 2px; margin: 18px 0;
+  background: linear-gradient(90deg, var(--ev-gold-2), transparent);
+}
+.ev-tagline { color: rgba(255, 244, 210, 0.82); font-size: 1rem; line-height: 1.7; max-width: 46ch; margin: 0 0 18px; }
+.ev-note { margin: 14px 0 0; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ev-gold-1); }
+
+/* ---------- Boutons ---------- */
+.ev-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 24px; border-radius: 100px;
+  font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+.ev-btn--gold { background: var(--ev-gold-grad); color: var(--ev-ruby-900); box-shadow: 0 8px 26px rgba(212, 175, 55, 0.3); }
+.ev-btn--gold:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(212, 175, 55, 0.5); }
+.ev-btn--ghost { background: transparent; color: var(--ev-gold-1); border-color: rgba(212, 175, 55, 0.7); }
+.ev-btn--ghost:hover { background: rgba(212, 175, 55, 0.14); color: #fff4d2; transform: translateY(-2px); }
+.ev-btn:focus-visible { outline: 3px solid var(--ev-gold-1); outline-offset: 3px; }
+.ev-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.ev-actions--center { justify-content: center; }
+
+/* ---------- Compte à rebours ---------- */
+.ev-countdown { display: flex; gap: 10px; margin: 6px 0 4px; flex-wrap: wrap; }
+.ev-count-cell {
+  min-width: 74px; padding: 10px 8px; text-align: center; border-radius: 14px;
+  background: linear-gradient(160deg, rgba(109, 15, 31, 0.9), rgba(29, 3, 7, 0.9));
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.35);
+}
+.ev-count-cell strong { display: block; font-family: var(--ev-caps); font-size: 1.7rem; line-height: 1.1; color: var(--ev-gold-1); font-variant-numeric: tabular-nums; }
+.ev-count-cell span { font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 244, 210, 0.7); }
+.ev-countdown--live { font-family: var(--ev-caps); font-size: 1.2rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ev-gold-1); align-items: center; }
+.ev-live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ev-orange); box-shadow: 0 0 0 0 rgba(232, 116, 30, 0.7); animation: ev-pulse 1.6s infinite; }
+
+/* ---------- Section d'accueil ---------- */
+.ev-section {
+  position: relative; overflow: hidden;
+  padding: 90px 6vw;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(232, 116, 30, 0.22), transparent 42%),
+    radial-gradient(circle at 88% 85%, rgba(196, 22, 47, 0.35), transparent 45%),
+    linear-gradient(160deg, var(--ev-ruby-700), var(--ev-ruby-950));
+  border-top: 1px solid rgba(212, 175, 55, 0.5);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+}
+.ev-section-glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(246, 231, 176, 0.5) 1px, transparent 1.5px);
+  background-size: 46px 46px; opacity: 0.12;
+}
+.ev-section-inner {
+  position: relative; z-index: 1; max-width: 1150px; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(260px, 380px) 1fr; gap: 64px; align-items: center;
+}
+.ev-poster-frame {
+  display: block; padding: 8px; border-radius: 6px;
+  background: var(--ev-gold-grad);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 90px rgba(212, 175, 55, 0.25);
+  transform: rotate(-1.6deg); transition: transform 0.5s ease;
+}
+.ev-poster-frame:hover { transform: rotate(0deg) scale(1.02); }
+.ev-poster-frame img { display: block; width: 100%; height: auto; border-radius: 2px; }
+.ev-section-content { color: #fff4d2; }
+.ev-facts { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 10px; }
+.ev-facts li { display: flex; align-items: center; gap: 12px; color: #fff4d2; font-size: 1rem; }
+.ev-facts svg { color: var(--ev-gold-2); flex-shrink: 0; }
+
+@media (max-width: 860px) {
+  .ev-section { padding: 64px 22px; }
+  .ev-section-inner { grid-template-columns: 1fr; gap: 40px; justify-items: center; text-align: center; }
+  .ev-poster-frame { max-width: 320px; }
+  .ev-rule { margin-left: auto; margin-right: auto; background: linear-gradient(90deg, transparent, var(--ev-gold-2), transparent); }
+  .ev-tagline { margin-left: auto; margin-right: auto; }
+  .ev-facts li { justify-content: center; }
+  .ev-countdown, .ev-actions { justify-content: center; }
+}
+
+/* ---------- Popup ---------- */
+.ev-popup-overlay {
+  position: fixed; inset: 0; z-index: 10050;
+  display: grid; place-items: center; padding: 16px;
+  background: rgba(20, 2, 5, 0.8); backdrop-filter: blur(6px);
+  animation: ev-fade 0.35s ease both;
+}
+.ev-popup {
+  position: relative; width: 100%; max-width: 410px; max-height: 94vh; overflow-y: auto;
+  border-radius: 14px; border: 1.5px solid rgba(212, 175, 55, 0.75);
+  background: linear-gradient(180deg, var(--ev-ruby-800), var(--ev-ruby-950));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 80px rgba(212, 175, 55, 0.2);
+  animation: ev-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.ev-popup-img { display: block; width: 100%; height: auto; }
+.ev-popup-close {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(20, 2, 5, 0.75); color: var(--ev-gold-1); border: 1px solid rgba(212, 175, 55, 0.7); cursor: pointer;
+}
+.ev-popup-close:hover { background: var(--ev-gold-2); color: var(--ev-ruby-900); }
+.ev-popup-close:focus-visible { outline: 3px solid var(--ev-gold-1); outline-offset: 2px; }
+.ev-popup-body { padding: 16px 18px 20px; text-align: center; }
+.ev-popup-date { margin: 0 0 12px; font-family: var(--ev-caps); letter-spacing: 0.12em; color: var(--ev-gold-1); font-size: 0.85rem; text-transform: uppercase; }
+.ev-popup-actions { display: grid; gap: 10px; }
+.ev-popup-note { margin: 12px 0 0; font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ev-orange); }
+
+/* ---------- Bandeau du footer ---------- */
+.ev-footer-strip {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 28px;
+  padding: 18px 5vw; text-align: center;
+  background: linear-gradient(90deg, var(--ev-ruby-900), var(--ev-ruby-700), var(--ev-ruby-900));
+  border-top: 1px solid rgba(212, 175, 55, 0.6);
+  color: rgba(255, 244, 210, 0.9); font-size: 0.9rem;
+}
+.ev-footer-strip p { margin: 0; }
+.ev-footer-script { font-family: var(--ev-script); font-size: 1.9rem; color: var(--ev-gold-1); margin-right: 4px; }
+.ev-footer-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.ev-footer-links a { color: var(--ev-gold-1); font-weight: 600; letter-spacing: 0.06em; text-decoration: underline; text-underline-offset: 4px; }
+.ev-footer-links a:hover { color: #fff; }
+
+/* ---------- Lien « Événement » de la navbar ---------- */
+.nav-links a.nav-event, .mobile-link-main.nav-event { position: relative; }
+.nav-links a.nav-event {
+  padding: 6px 14px; border-radius: 100px;
+  background: var(--ev-gold-grad); color: var(--ev-ruby-900) !important;
+}
+.nav-links a.nav-event::after { display: none; }
+.mobile-link-main.nav-event { color: var(--ev-ruby-600) !important; font-weight: 700; }
+
+/* ---------- Animations ---------- */
+@keyframes ev-shimmer { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes ev-pulse { 70% { box-shadow: 0 0 0 12px rgba(232, 116, 30, 0); } 100% { box-shadow: 0 0 0 0 rgba(232, 116, 30, 0); } }
+@keyframes ev-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ev-pop { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .ev-banner::after, .ev-live-dot, .ev-popup, .ev-popup-overlay { animation: none; }
+  .ev-poster-frame { transition: none; transform: none; }
+}
