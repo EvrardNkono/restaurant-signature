@@ -89,3 +89,62 @@ body.event-theme .cta-container { background: linear-gradient(135deg, #6d0f1f, #
 /* ---------- Footer ---------- */
 body.event-theme .footer { background: linear-gradient(180deg, #2e050c, #1d0307); }
 body.event-theme .footer-bottom { border-color: rgba(212, 175, 55, 0.25); }
+
+/* =====================================================================
+   PAGES CARTE / MENU DU JOUR / MENU DU SOIR — remasterisées
+   ===================================================================== */
+
+/* ---------- Carte ---------- */
+body.event-theme .carte-restaurant {
+  --dark-brown: #2e050c; /* faces arrière des cartes, boutons, modales */
+  background: linear-gradient(180deg, #fdf6ea, #f7ead4);
+}
+body.event-theme .header-overlay-carte { background: linear-gradient(to bottom, rgba(74, 10, 22, 0.45), rgba(20, 2, 5, 0.9)); }
+body.event-theme .header-text-shield-carte { background: rgba(29, 3, 7, 0.78); border-color: rgba(212, 175, 55, 0.55); }
+body.event-theme .univers-selector { background: rgba(46, 5, 12, 0.94); border-color: rgba(212, 175, 55, 0.55); }
+body.event-theme .univers-btn.active,
+body.event-theme .filter-btn.active {
+  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f);
+  color: #2e050c; border-color: #d4af37;
+}
+body.event-theme .filter-btn { border-color: rgba(154, 19, 41, 0.35); color: #2e050c; }
+body.event-theme .filter-btn:hover { border-color: #9a1329; }
+body.event-theme .plat-details-terracotta { background: linear-gradient(180deg, #6d0f1f, #2e050c); }
+body.event-theme .plat-card-outer:hover { filter: drop-shadow(0 18px 30px rgba(109, 15, 31, 0.28)); }
+body.event-theme .price-badge-luxury { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
+body.event-theme .view-more-btn:hover { color: #2e050c; }
+
+/* ---------- Menu du jour ---------- */
+body.event-theme .menu-section-enhanced { background: linear-gradient(180deg, #fdf6ea, #f7ead4); }
+body.event-theme .hero-gradient-overlay { background: linear-gradient(135deg, rgba(74, 10, 22, 0.9) 0%, rgba(20, 2, 5, 0.78) 100%); }
+body.event-theme .hero-badge-cinematic { background: rgba(29, 3, 7, 0.55); border-color: rgba(212, 175, 55, 0.65); }
+body.event-theme .controls-bar-enhanced { background: rgba(253, 246, 234, 0.98); border-bottom-color: rgba(154, 19, 41, 0.25); }
+body.event-theme .search-input-enhanced { background: #fffaf1; border-color: rgba(154, 19, 41, 0.3); }
+body.event-theme .category-chip-enhanced { border-color: rgba(154, 19, 41, 0.3); }
+body.event-theme .univers-tab.active,
+body.event-theme .category-chip-enhanced.active {
+  background: linear-gradient(135deg, #9a1329, #6d0f1f);
+  border-color: #9a1329; color: #fff4d2;
+}
+body.event-theme .chip-active-indicator { background: #f6e7b0; }
+body.event-theme .card-front-enhanced,
+body.event-theme .card-back-enhanced { border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 14px 40px rgba(109, 15, 31, 0.14); }
+body.event-theme .locked-cta-btn { color: #2e050c; }
+
+/* ---------- Menu du soir ---------- */
+body.event-theme .menu-soir-section {
+  --dark-bg: #1d0307;
+  --card-bg: #3a0711;
+  --surface: #4a0a16;
+  --espresso: #1d0307;
+  --espresso-2: #2e050c;
+  --text-muted: #e0c4a4;
+  --terracotta: #b3122b;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(232, 116, 30, 0.16), transparent 40%),
+    radial-gradient(circle at 92% 55%, rgba(196, 22, 47, 0.22), transparent 45%),
+    #1d0307;
+}
+body.event-theme .header-overlay-dark { background: linear-gradient(135deg, rgba(74, 10, 22, 0.88) 0%, rgba(20, 2, 5, 0.82) 100%); }
+body.event-theme .menu-card-outer.soir-variant { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 28px rgba(212, 175, 55, 0.12); }
+body.event-theme .filter-btn-soir { border-color: rgba(212, 175, 55, 0.45); }

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2, Share2, X, Utensils, GlassWater, ArrowRight } from "lucide-react"; 
 import "./carte.css";
+import EventMenuBand from "../components/event/EventMenuBand";
 
 const isLocal = window.location.hostname === "localhost";
 const API_URL = isLocal 
@@ -111,6 +112,9 @@ export default function CarteRestaurant() {
           </div>
         </div>
       </div>
+
+      {/* ✨ Événement : réservez votre soirée */}
+      <EventMenuBand />
 
       <div className="univers-selector-container">
         <div className="univers-selector">

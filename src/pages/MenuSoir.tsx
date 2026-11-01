@@ -8,6 +8,7 @@ import {
   Clock, CreditCard, Eye, ArrowRight, CalendarClock, PenTool,
 } from "lucide-react"; 
 import "./menuSoir.css";
+import EventMenuBand from "../components/event/EventMenuBand";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
@@ -424,6 +425,9 @@ export default function MenuSoir() {
           onUnlock={handleUnlock}
         />
 
+        {/* ✨ Événement : réservez votre soirée */}
+        <EventMenuBand />
+
         <div className="univers-selector-container-soir">
           <div className="univers-selector-soir">
             <button className={`univers-btn-soir ${univers === "Cuisine" ? "active" : ""}`} onClick={() => handleUniversChange("Cuisine")}>
@@ -522,6 +526,9 @@ export default function MenuSoir() {
       {isAnyDrawerOpen && <div className="global-drawer-overlay" onClick={handleCloseDrawer} />}
 
       <MenuSoirHeader />
+
+      {/* ✨ Événement : réservez votre soirée */}
+      <EventMenuBand />
 
       <div className="univers-selector-container-soir">
         <div className="univers-selector-soir">

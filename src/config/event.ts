@@ -12,7 +12,7 @@ export const EVENT = {
   artist: "Danys'",
   name: "Prelude",
   kind: "Dîner Showcase",
-  tagline: "Une soirée d'exception, entre saveurs afro-caribéennes et musique live.",
+  tagline: "Une soirée d'exception au Restaurant Signature, autour de la cuisine afro-caribéenne.",
 
   // Date & heure (heure de Paris — novembre = UTC+01:00)
   startISO: "2026-11-06T19:30:00+01:00",

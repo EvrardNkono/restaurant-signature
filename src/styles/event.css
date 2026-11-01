@@ -253,3 +253,57 @@ body.has-event-banner .navbar { top: var(--event-banner-h); }
   .ev-banner::after, .ev-live-dot, .ev-popup, .ev-popup-overlay { animation: none; }
   .ev-poster-frame { transition: none; transform: none; }
 }
+
+/* ---------- Bandeau « réservez votre soirée » (Carte, Menu jour, Menu soir) ---------- */
+.ev-menu-band {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 14px 26px;
+  width: calc(100% - 32px); max-width: 1100px; margin: 30px auto; padding: 18px 28px;
+  border-radius: 18px; border: 1px solid rgba(212, 175, 55, 0.7);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(232, 116, 30, 0.28), transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(196, 22, 47, 0.35), transparent 50%),
+    linear-gradient(135deg, var(--ev-ruby-700), var(--ev-ruby-950));
+  box-shadow: 0 18px 50px rgba(60, 5, 15, 0.35), inset 0 0 0 1px rgba(246, 231, 176, 0.08);
+  color: #fff4d2; text-align: left;
+}
+.ev-menu-band::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(246, 231, 176, 0.14) 50%, transparent 62%);
+  transform: translateX(-100%); animation: ev-shimmer 7s ease-in-out infinite;
+}
+.ev-menu-band > * { position: relative; }
+.ev-menu-band-poster {
+  display: block; flex-shrink: 0; padding: 3px; border-radius: 4px;
+  background: var(--ev-gold-grad); transform: rotate(-3deg);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5); transition: transform 0.3s ease;
+}
+.ev-menu-band-poster:hover { transform: rotate(0) scale(1.06); }
+.ev-menu-band-poster img { display: block; width: 64px; height: auto; border-radius: 2px; }
+.ev-menu-band-text { flex: 1 1 260px; min-width: 0; }
+.ev-menu-band-text .ev-eyebrow { font-size: 0.68rem; margin-bottom: 2px; }
+.ev-menu-band-title { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+.ev-menu-band-script {
+  font-family: var(--ev-script); font-size: 2.3rem; line-height: 1.1;
+  background: var(--ev-gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding-right: 0.1em;
+}
+.ev-menu-band-kind { font-family: var(--ev-caps); font-size: 0.9rem; letter-spacing: 0.26em; text-transform: uppercase; color: #fff4d2; }
+.ev-menu-band-sub { margin: 4px 0 0; font-size: 0.86rem; color: rgba(255, 244, 210, 0.82); }
+.ev-menu-band-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.ev-menu-band .ev-btn { min-height: 44px; padding: 0 20px; }
+.ev-menu-band .ev-countdown { margin: 0; flex-wrap: nowrap; }
+
+.ev-countdown--compact { gap: 6px; }
+.ev-countdown--compact .ev-count-cell { min-width: 52px; padding: 6px 4px; border-radius: 10px; }
+.ev-countdown--compact .ev-count-cell strong { font-size: 1.15rem; }
+.ev-countdown--compact .ev-count-cell span { font-size: 0.56rem; letter-spacing: 0.14em; }
+
+@media (max-width: 760px) {
+  .ev-menu-band { padding: 16px; text-align: center; margin: 22px auto; }
+  .ev-menu-band-title { justify-content: center; }
+  .ev-menu-band .ev-countdown { display: none; }
+  .ev-menu-band-actions { width: 100%; }
+  .ev-menu-band-actions .ev-btn { flex: 1 1 140px; }
+}
+@media (prefers-reduced-motion: reduce) { .ev-menu-band::before { animation: none; } .ev-menu-band-poster { transition: none; transform: none; } }

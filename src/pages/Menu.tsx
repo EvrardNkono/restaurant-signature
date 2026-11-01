@@ -10,6 +10,7 @@ import {
   Heart, Zap, ChefHat, Tv, CalendarClock,
 } from "lucide-react";
 import "./menu.css";
+import EventMenuBand from "../components/event/EventMenuBand";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
@@ -573,6 +574,9 @@ export default function Menu() {
         />
 
         {/* LA CARTE EST AFFICHÉE MAIS EN MODE LECTURE SEULE (boutons désactivés) */}
+        {/* ✨ Événement : réservez votre soirée */}
+        <EventMenuBand />
+
         <div className="controls-bar-enhanced visible">
           <div className="controls-container">
             <div className="search-wrapper">
@@ -759,6 +763,9 @@ export default function Menu() {
       </div>
 
       {/* BARRE DE CONTRÔLE STICKY */}
+      {/* ✨ Événement : réservez votre soirée */}
+      <EventMenuBand />
+
       <div className={`controls-bar-enhanced ${scrollDirection === "up" ? "visible" : "hidden"}`}>
         <div className="controls-container">
           <div className="search-wrapper">
