@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { isThemeActive } from "../../config/event";
+import { EVENT, isThemeActive } from "../../config/event";
 
 /**
  * Active le thème « rouge & or » (classe `event-theme` sur <body>) sur les pages client.
@@ -9,7 +9,14 @@ export default function EventTheme() {
   useEffect(() => {
     const on = isThemeActive();
     document.body.classList.toggle("event-theme", on);
-    return () => document.body.classList.remove("event-theme");
+    // Petit cachet affiché sur les cartes de plats (texte piloté par config/event.ts)
+    if (on) {
+      document.body.style.setProperty("--ev-stamp", JSON.stringify(`✦ ${EVENT.kind} · ${EVENT.dateShort} ✦`));
+    }
+    return () => {
+      document.body.classList.remove("event-theme");
+      document.body.style.removeProperty("--ev-stamp");
+    };
   }, []);
   return null;
 }

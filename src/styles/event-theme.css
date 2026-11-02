@@ -148,3 +148,88 @@ body.event-theme .menu-soir-section {
 body.event-theme .header-overlay-dark { background: linear-gradient(135deg, rgba(74, 10, 22, 0.88) 0%, rgba(20, 2, 5, 0.82) 100%); }
 body.event-theme .menu-card-outer.soir-variant { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 28px rgba(212, 175, 55, 0.12); }
 body.event-theme .filter-btn-soir { border-color: rgba(212, 175, 55, 0.45); }
+
+/* =====================================================================
+   CARTES DE PRODUITS — « gala » rubis & or, cachet de l'événement
+   (Menu du jour, Menu du soir, Carte, « Nos incontournables » de l'accueil)
+   ===================================================================== */
+
+/* Cachet discret en tête de chaque carte (texte venant de config/event.ts) */
+body.event-theme .menu-card-enhanced .card-content::before,
+body.event-theme .plat-details-terracotta::before,
+body.event-theme .details-container-soir::before,
+body.event-theme .highlight-info::before {
+  content: var(--ev-stamp, none);
+  display: block; text-align: center; margin: 0 0 10px;
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-size: 0.58rem; letter-spacing: 0.26em; text-transform: uppercase;
+  color: #e0b84a; opacity: 0.92;
+}
+
+/* ---------- Menu du jour : cartes ---------- */
+body.event-theme .card-front-enhanced {
+  background: linear-gradient(165deg, #5a0b19 0%, #2e050c 60%, #1d0307 100%);
+  outline: 1px solid rgba(212, 175, 55, 0.55); outline-offset: -8px;
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  box-shadow: 0 16px 44px rgba(60, 5, 15, 0.35), 0 0 0 1px rgba(246, 231, 176, 0.06);
+}
+body.event-theme .menu-card-enhanced:hover .card-front-enhanced {
+  box-shadow: 0 24px 60px rgba(60, 5, 15, 0.5), 0 0 34px rgba(212, 175, 55, 0.28);
+}
+body.event-theme .menu-card-enhanced .media-overlay {
+  background: linear-gradient(to top, rgba(46, 5, 12, 0.92) 0%, rgba(46, 5, 12, 0.25) 45%, transparent 75%);
+}
+body.event-theme .menu-card-enhanced .price-chip {
+  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+body.event-theme .menu-card-enhanced .price-symbol,
+body.event-theme .menu-card-enhanced .price-amount { color: #2e050c; }
+body.event-theme .menu-card-enhanced .category-tag { color: #e0b84a; letter-spacing: 0.2em; }
+body.event-theme .menu-card-enhanced .plat-title { color: #fff4d2; }
+body.event-theme .menu-card-enhanced .title-underline { background: linear-gradient(90deg, transparent, #d4af37, transparent); height: 1px; width: 70%; margin-left: auto; margin-right: auto; }
+body.event-theme .menu-card-enhanced .plat-description { color: rgba(255, 244, 210, 0.78); }
+body.event-theme .menu-card-enhanced .add-btn,
+body.event-theme .menu-card-enhanced .add-btn.has-items,
+body.event-theme .menu-card-enhanced .add-btn.preview-mode {
+  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; border-color: transparent;
+}
+body.event-theme .menu-card-enhanced .qty-btn { background: rgba(212, 175, 55, 0.16); color: #f6e7b0; border: 1px solid rgba(212, 175, 55, 0.6); }
+body.event-theme .menu-card-enhanced .qty-badge { background: #d4af37; color: #2e050c; }
+body.event-theme .menu-card-enhanced .details-link { color: #e0b84a; }
+body.event-theme .menu-card-enhanced .details-link:hover { color: #fff4d2; }
+body.event-theme .card-back-enhanced {
+  background: linear-gradient(160deg, #4a0a16, #1d0307);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+}
+body.event-theme .card-back-enhanced .back-title { color: #fff4d2; }
+body.event-theme .card-back-enhanced .back-description-full { color: rgba(255, 244, 210, 0.82); }
+body.event-theme .order-now-btn { color: #2e050c; }
+
+/* ---------- Menu du soir : cartes ---------- */
+body.event-theme .menu-card-inner { background: linear-gradient(165deg, #4a0a16 0%, #2e050c 60%, #1d0307 100%); }
+body.event-theme .menu-card-outer.soir-variant:hover { box-shadow: 0 22px 54px rgba(0, 0, 0, 0.6), 0 0 38px rgba(212, 175, 55, 0.3); }
+body.event-theme .price-tag-evening { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
+body.event-theme .luxury-offer-ribbon { background: linear-gradient(135deg, #c4162f, #8e0e22); color: #fff4d2; }
+body.event-theme .gold-separator { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
+body.event-theme .card-back-soir { background: linear-gradient(160deg, #4a0a16, #1d0307); }
+
+/* ---------- Carte : cartes de plats ---------- */
+body.event-theme .card-face { background: #2e050c; }
+body.event-theme .plat-img { filter: saturate(1.08) contrast(1.03); }
+body.event-theme .title-underline-gold { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
+body.event-theme .card-footer-ornament-gold { color: #e0b84a; }
+
+/* ---------- Accueil : « Nos incontournables » ---------- */
+body.event-theme .highlight-card {
+  background: linear-gradient(165deg, #5a0b19 0%, #2e050c 65%, #1d0307 100%);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  outline: 1px solid rgba(212, 175, 55, 0.5); outline-offset: -7px;
+  box-shadow: 0 14px 40px rgba(60, 5, 15, 0.3);
+}
+body.event-theme .highlight-card:hover { box-shadow: 0 22px 54px rgba(60, 5, 15, 0.5), 0 0 30px rgba(212, 175, 55, 0.25); }
+body.event-theme .highlight-price-overlay { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
+body.event-theme .highlight-name { color: #fff4d2; }
+body.event-theme .highlight-line { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
+body.event-theme .highlight-corner-gold { border-color: #f6e7b0; }
+body.event-theme .highlights-main-title { color: #2e050c; }
