@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, Send, Trash2, Paperclip, X, UserPlus } from "lucide-react";
 import { API, waFetch } from "./waApi";
@@ -119,11 +120,24 @@ export default function WhatsAppPanel() {
   return (
     <section className="wa-panel">
       <header className="wa-head">
-        <span className="wa-head-icon"><MessageCircle size={20} aria-hidden="true" /></span>
+        <span className="wa-head-icon">
+          <MessageCircle size={20} aria-hidden="true" />
+        </span>
+
         <div>
           <h1>Messages WhatsApp</h1>
           <p>Envoyer un message à plusieurs clients à la fois</p>
         </div>
+
+        <a
+          href="https://whatsapp-server-9z7z.onrender.com/qr?key=902309562f44f7c629ef06d1f29a48f3256562e614e04c16"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="wa-btn wa-qr-btn"
+        >
+          <MessageCircle size={16} aria-hidden="true" />
+          Connecter WhatsApp
+        </a>
       </header>
 
       {msg && <p className="wa-msg" role="status">{msg}</p>}

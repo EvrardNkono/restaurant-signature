@@ -86,3 +86,25 @@
   
   .wa-panel :is(button, input, textarea, summary):focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { .wa-panel * { transition: none !important; } }
+
+  
+.wa-qr-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .wa-head {
+    flex-wrap: wrap;
+  }
+
+  .wa-qr-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
