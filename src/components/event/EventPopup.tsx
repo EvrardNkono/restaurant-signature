@@ -70,6 +70,7 @@ export default function EventPopup() {
           height={906}
         />
         <div className="ev-popup-body">
+          <p className="ev-popup-announce">{EVENT.announce} ✦</p>
           <p className="ev-popup-date">{EVENT.dateLabel} · {EVENT.timeLabel}</p>
           <div className="ev-popup-actions">
             <a className="ev-btn ev-btn--gold" href={`tel:${EVENT.phoneTel}`}>

@@ -22,7 +22,7 @@ export default function EventSection() {
         </Link>
 
         <div className="ev-section-content">
-          <p className="ev-eyebrow">Restaurant Signature présente</p>
+          <p className="ev-eyebrow">{EVENT.announce} · Restaurant Signature présente</p>
           <h2 id="ev-section-title" className="ev-title">
             <span className="ev-script">{EVENT.artist}</span>
             <span className="ev-prelude">{EVENT.name}</span>
@@ -37,6 +37,7 @@ export default function EventSection() {
             <li><MapPin size={18} aria-hidden="true" /> {EVENT.address}</li>
           </ul>
 
+          <p className="ev-countdown-label">Plus que</p>
           <EventCountdown />
 
           <div className="ev-actions">

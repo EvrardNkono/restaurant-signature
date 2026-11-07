@@ -12,13 +12,15 @@ export const EVENT = {
   artist: "Danys'",
   name: "Prelude",
   kind: "Dîner Showcase",
+  announce: "Elle arrive à Melun",
   tagline: "Une soirée d'exception au Restaurant Signature, autour de la cuisine afro-caribéenne.",
 
   // Date & heure (heure de Paris — novembre = UTC+01:00)
-  startISO: "2026-11-06T19:30:00+01:00",
-  endISO: "2026-11-07T03:00:00+01:00", // fin de l'affichage (lendemain 3h)
-  dateLabel: "Vendredi 6 novembre 2026",
-  dateShort: "Ven. 6 novembre",
+  // ⚠ Le 14 novembre 2026 tombe un SAMEDI.
+  startISO: "2026-11-14T19:30:00+01:00",
+  endISO: "2026-11-15T03:00:00+01:00", // fin de l'affichage (dimanche 3h)
+  dateLabel: "Samedi 14 novembre 2026",
+  dateShort: "Sam. 14 novembre",
   timeLabel: "À partir de 19h30",
 
   // Lieu & réservation (repris de l'affiche)
@@ -38,7 +40,7 @@ export const EVENT = {
   // Page dédiée
   path: "/evenement",
 
-  // false = le thème rouge & or s'éteint après l'événement
+  // false = le thème émeraude & or s'éteint après l'événement
   keepThemeAfterEvent: false,
 } as const;
 

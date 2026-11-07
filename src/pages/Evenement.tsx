@@ -89,7 +89,7 @@ export default function Evenement() {
           </div>
 
           <div className="evp-info">
-            <p className="ev-eyebrow">Restaurant Signature présente</p>
+            <p className="ev-eyebrow">{EVENT.announce} · Restaurant Signature présente</p>
             <h1 className="ev-title">
               <span className="ev-script">{EVENT.artist}</span>
               <span className="ev-prelude">{EVENT.name}</span>
@@ -98,6 +98,7 @@ export default function Evenement() {
             <div className="ev-rule" aria-hidden="true" />
             <p className="ev-tagline">{EVENT.tagline}</p>
 
+            <p className="ev-countdown-label">Plus que</p>
             <EventCountdown />
 
             <div className="evp-cards">

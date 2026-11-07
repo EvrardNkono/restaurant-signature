@@ -2,9 +2,9 @@
 .evp {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 10% 15%, rgba(232, 116, 30, 0.22), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(196, 22, 47, 0.32), transparent 45%),
-    linear-gradient(165deg, #5a0b19, #1d0307 70%);
+    radial-gradient(circle at 10% 15%, rgba(212,175,55, 0.22), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(16,163,122, 0.32), transparent 45%),
+    linear-gradient(165deg, #08503a, #031a13 70%);
   color: #fff4d2;
 }
 .evp-hero { padding: 150px 6vw 70px; }
@@ -21,13 +21,13 @@
 .evp-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 22px; }
 .evp-card {
   display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 14px;
-  background: rgba(29, 3, 7, 0.55); border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(3,26,19, 0.55); border: 1px solid rgba(212, 175, 55, 0.4);
 }
 .evp-card svg { color: var(--ev-gold-2); flex-shrink: 0; }
 .evp-card small { display: block; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255, 244, 210, 0.6); }
 .evp-card strong { font-weight: 600; font-size: 0.95rem; color: #fff4d2; }
 .evp-more { text-align: center; padding: 10px 6vw 90px; color: rgba(255, 244, 210, 0.85); }
-.evp-over { min-height: 70vh; display: grid; place-content: center; justify-items: center; gap: 16px; text-align: center; padding: 160px 24px 80px; background: linear-gradient(165deg, #5a0b19, #1d0307); color: #fff4d2; }
+.evp-over { min-height: 70vh; display: grid; place-content: center; justify-items: center; gap: 16px; text-align: center; padding: 160px 24px 80px; background: linear-gradient(165deg, #08503a, #031a13); color: #fff4d2; }
 .evp-script { font-family: var(--ev-script); font-size: clamp(3rem, 8vw, 5rem); margin: 0; background: var(--ev-gold-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 @media (max-width: 860px) {

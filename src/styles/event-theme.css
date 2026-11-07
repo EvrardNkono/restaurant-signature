@@ -1,5 +1,5 @@
 /* =====================================================================
-   THÈME « ROUGE & OR » — repeint le site aux couleurs de l'affiche.
+   THÈME « ÉMERAUDE & OR » — repeint le site aux couleurs de l'affiche.
    Actif UNIQUEMENT quand <body> porte la classe .event-theme
    (posée par <EventTheme />, côté client seulement, jamais dans /admin).
    Désactivation : config/event.ts → enabled: false (ou fin de l'événement).
@@ -7,19 +7,23 @@
    ===================================================================== */
 
 body.event-theme {
-  --terracotta: #b3122b;
-  --terracotta-dark: #8e0e22;
-  --dark: #2e050c;
+  /* Variables globales du site (ivoire → crème émeraude, brun → émeraude profond) */
+  --ivory: #f5f9ee;
+  --charcoal: #04281d;
+  --beige: #e6f0df;
+  --terracotta: #0b7a58;
+  --terracotta-dark: #08603f;
+  --dark: #04281d;
   --gold-dark: #9c7a1f;
 }
 
-body.event-theme ::selection { background: #b3122b; color: #fff4d2; }
+body.event-theme ::selection { background: #0b7a58; color: #fff4d2; }
 
 /* ---------- Navbar ---------- */
 body.event-theme .navbar-container {
-  background: linear-gradient(135deg, #4a0a16, #1d0307);
+  background: linear-gradient(135deg, #063d2c, #031a13);
   border-color: rgba(212, 175, 55, 0.6);
-  box-shadow: 0 10px 40px rgba(60, 5, 15, 0.45);
+  box-shadow: 0 10px 40px rgba(3,35,25, 0.45);
 }
 body.event-theme .logo-text span { color: #fff4d2; }
 body.event-theme .logo-text small { color: #f6e7b0; }
@@ -32,25 +36,25 @@ body.event-theme .nav-phone,
 body.event-theme .google-review-link,
 body.event-theme .cart-link { color: #f6e7b0; background: rgba(212, 175, 55, 0.14); }
 body.event-theme .cart-link:hover { color: #fff; }
-body.event-theme .nav-cta { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c !important; }
+body.event-theme .nav-cta { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d !important; }
 body.event-theme .nav-cta:hover { filter: brightness(1.08); background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); }
 body.event-theme .burger { color: #f6e7b0; }
 body.event-theme .burger:hover { background: rgba(212, 175, 55, 0.18); }
-body.event-theme .mobile-action-primary { background: #6d0f1f; }
+body.event-theme .mobile-action-primary { background: #0a5740; }
 
 /* ---------- Hero (argent → or, espresso → rubis) ---------- */
 body.event-theme .hero-v2 {
-  --espresso: #1d0307;
-  --espresso-2: #5a0b19;
+  --espresso: #031a13;
+  --espresso-2: #08503a;
   --silver-light: #f6e7b0;
   --silver-mid: #d4af37;
   --silver-dark: #9c7a1f;
   --silver-glow: rgba(212, 175, 55, 0.18);
   --hairline: rgba(212, 175, 55, 0.4);
   background:
-    radial-gradient(circle at 14% 22%, rgba(232, 116, 30, 0.2), transparent 45%),
-    radial-gradient(circle at 86% 82%, rgba(196, 22, 47, 0.3), transparent 45%),
-    linear-gradient(160deg, #5a0b19, #1d0307);
+    radial-gradient(circle at 14% 22%, rgba(212,175,55, 0.2), transparent 45%),
+    radial-gradient(circle at 86% 82%, rgba(16,163,122, 0.3), transparent 45%),
+    linear-gradient(160deg, #08503a, #031a13);
 }
 body.event-theme .seal-glow { background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, transparent 68%); }
 body.event-theme .hero-v2-cta:hover { background: rgba(212, 175, 55, 0.12); }
@@ -62,32 +66,32 @@ body.event-theme .why-us-section,
 body.event-theme .highlights-section,
 body.event-theme .testimonials-section,
 body.event-theme .cta-final-section {
-  background: linear-gradient(180deg, #fdf6ea, #f7ead4);
+  background: linear-gradient(180deg, #f5f9ee, #e6f0df);
 }
 body.event-theme .signature-v3-badge,
 body.event-theme .highlights-badge,
-body.event-theme .why-us-badge { color: #9a1329; }
+body.event-theme .why-us-badge { color: #0d7355; }
 body.event-theme .highlight-line,
-body.event-theme .ornament-diamond { background: #c4162f; }
+body.event-theme .ornament-diamond { background: #12a57b; }
 body.event-theme .highlight-card:hover,
-body.event-theme .testimonial-card:hover { box-shadow: 0 18px 44px rgba(109, 15, 31, 0.18); }
-body.event-theme .carousel-overlay { background: linear-gradient(to bottom, rgba(46, 5, 12, 0.25), rgba(46, 5, 12, 0.8)); }
+body.event-theme .testimonial-card:hover { box-shadow: 0 18px 44px rgba(10,87,64, 0.18); }
+body.event-theme .carousel-overlay { background: linear-gradient(to bottom, rgba(4,40,29, 0.25), rgba(4,40,29, 0.8)); }
 
 /* ---------- Galerie « bobine » ---------- */
 body.event-theme .reel-section {
-  --rl-void: #1d0307;
-  --rl-void-soft: #2e050c;
+  --rl-void: #031a13;
+  --rl-void-soft: #04281d;
   --rl-paper: #f6e7b0;
   --rl-terracotta: #e0b84a;
-  --rl-terracotta-deep: #6d0f1f;
+  --rl-terracotta-deep: #0a5740;
   --rl-ash: #c9a98a;
 }
 
 /* ---------- Appel à l'action final ---------- */
-body.event-theme .cta-container { background: linear-gradient(135deg, #6d0f1f, #2e050c); }
+body.event-theme .cta-container { background: linear-gradient(135deg, #0a5740, #04281d); }
 
 /* ---------- Footer ---------- */
-body.event-theme .footer { background: linear-gradient(180deg, #2e050c, #1d0307); }
+body.event-theme .footer { background: linear-gradient(180deg, #04281d, #031a13); }
 body.event-theme .footer-bottom { border-color: rgba(212, 175, 55, 0.25); }
 
 /* =====================================================================
@@ -96,56 +100,56 @@ body.event-theme .footer-bottom { border-color: rgba(212, 175, 55, 0.25); }
 
 /* ---------- Carte ---------- */
 body.event-theme .carte-restaurant {
-  --dark-brown: #2e050c; /* faces arrière des cartes, boutons, modales */
-  background: linear-gradient(180deg, #fdf6ea, #f7ead4);
+  --dark-brown: #04281d; /* faces arrière des cartes, boutons, modales */
+  background: linear-gradient(180deg, #f5f9ee, #e6f0df);
 }
-body.event-theme .header-overlay-carte { background: linear-gradient(to bottom, rgba(74, 10, 22, 0.45), rgba(20, 2, 5, 0.9)); }
-body.event-theme .header-text-shield-carte { background: rgba(29, 3, 7, 0.78); border-color: rgba(212, 175, 55, 0.55); }
-body.event-theme .univers-selector { background: rgba(46, 5, 12, 0.94); border-color: rgba(212, 175, 55, 0.55); }
+body.event-theme .header-overlay-carte { background: linear-gradient(to bottom, rgba(6,61,44, 0.45), rgba(2,18,13, 0.9)); }
+body.event-theme .header-text-shield-carte { background: rgba(3,26,19, 0.78); border-color: rgba(212, 175, 55, 0.55); }
+body.event-theme .univers-selector { background: rgba(4,40,29, 0.94); border-color: rgba(212, 175, 55, 0.55); }
 body.event-theme .univers-btn.active,
 body.event-theme .filter-btn.active {
   background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f);
-  color: #2e050c; border-color: #d4af37;
+  color: #04281d; border-color: #d4af37;
 }
-body.event-theme .filter-btn { border-color: rgba(154, 19, 41, 0.35); color: #2e050c; }
-body.event-theme .filter-btn:hover { border-color: #9a1329; }
-body.event-theme .plat-details-terracotta { background: linear-gradient(180deg, #6d0f1f, #2e050c); }
-body.event-theme .plat-card-outer:hover { filter: drop-shadow(0 18px 30px rgba(109, 15, 31, 0.28)); }
-body.event-theme .price-badge-luxury { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
-body.event-theme .view-more-btn:hover { color: #2e050c; }
+body.event-theme .filter-btn { border-color: rgba(13,115,85, 0.35); color: #04281d; }
+body.event-theme .filter-btn:hover { border-color: #0d7355; }
+body.event-theme .plat-details-terracotta { background: linear-gradient(180deg, #0a5740, #04281d); }
+body.event-theme .plat-card-outer:hover { filter: drop-shadow(0 18px 30px rgba(10,87,64, 0.28)); }
+body.event-theme .price-badge-luxury { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d; }
+body.event-theme .view-more-btn:hover { color: #04281d; }
 
 /* ---------- Menu du jour ---------- */
-body.event-theme .menu-section-enhanced { background: linear-gradient(180deg, #fdf6ea, #f7ead4); }
-body.event-theme .hero-gradient-overlay { background: linear-gradient(135deg, rgba(74, 10, 22, 0.9) 0%, rgba(20, 2, 5, 0.78) 100%); }
-body.event-theme .hero-badge-cinematic { background: rgba(29, 3, 7, 0.55); border-color: rgba(212, 175, 55, 0.65); }
-body.event-theme .controls-bar-enhanced { background: rgba(253, 246, 234, 0.98); border-bottom-color: rgba(154, 19, 41, 0.25); }
-body.event-theme .search-input-enhanced { background: #fffaf1; border-color: rgba(154, 19, 41, 0.3); }
-body.event-theme .category-chip-enhanced { border-color: rgba(154, 19, 41, 0.3); }
+body.event-theme .menu-section-enhanced { background: linear-gradient(180deg, #f5f9ee, #e6f0df); }
+body.event-theme .hero-gradient-overlay { background: linear-gradient(135deg, rgba(6,61,44, 0.9) 0%, rgba(2,18,13, 0.78) 100%); }
+body.event-theme .hero-badge-cinematic { background: rgba(3,26,19, 0.55); border-color: rgba(212, 175, 55, 0.65); }
+body.event-theme .controls-bar-enhanced { background: rgba(253, 246, 234, 0.98); border-bottom-color: rgba(13,115,85, 0.25); }
+body.event-theme .search-input-enhanced { background: #fbfdf7; border-color: rgba(13,115,85, 0.3); }
+body.event-theme .category-chip-enhanced { border-color: rgba(13,115,85, 0.3); }
 body.event-theme .univers-tab.active,
 body.event-theme .category-chip-enhanced.active {
-  background: linear-gradient(135deg, #9a1329, #6d0f1f);
-  border-color: #9a1329; color: #fff4d2;
+  background: linear-gradient(135deg, #0d7355, #0a5740);
+  border-color: #0d7355; color: #fff4d2;
 }
 body.event-theme .chip-active-indicator { background: #f6e7b0; }
 body.event-theme .card-front-enhanced,
-body.event-theme .card-back-enhanced { border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 14px 40px rgba(109, 15, 31, 0.14); }
-body.event-theme .locked-cta-btn { color: #2e050c; }
+body.event-theme .card-back-enhanced { border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 14px 40px rgba(10,87,64, 0.14); }
+body.event-theme .locked-cta-btn { color: #04281d; }
 
 /* ---------- Menu du soir ---------- */
 body.event-theme .menu-soir-section {
-  --dark-bg: #1d0307;
-  --card-bg: #3a0711;
-  --surface: #4a0a16;
-  --espresso: #1d0307;
-  --espresso-2: #2e050c;
+  --dark-bg: #031a13;
+  --card-bg: #052f22;
+  --surface: #063d2c;
+  --espresso: #031a13;
+  --espresso-2: #04281d;
   --text-muted: #e0c4a4;
-  --terracotta: #b3122b;
+  --terracotta: #0b7a58;
   background:
-    radial-gradient(circle at 12% 6%, rgba(232, 116, 30, 0.16), transparent 40%),
-    radial-gradient(circle at 92% 55%, rgba(196, 22, 47, 0.22), transparent 45%),
-    #1d0307;
+    radial-gradient(circle at 12% 6%, rgba(212,175,55, 0.16), transparent 40%),
+    radial-gradient(circle at 92% 55%, rgba(16,163,122, 0.22), transparent 45%),
+    #031a13;
 }
-body.event-theme .header-overlay-dark { background: linear-gradient(135deg, rgba(74, 10, 22, 0.88) 0%, rgba(20, 2, 5, 0.82) 100%); }
+body.event-theme .header-overlay-dark { background: linear-gradient(135deg, rgba(6,61,44, 0.88) 0%, rgba(2,18,13, 0.82) 100%); }
 body.event-theme .menu-card-outer.soir-variant { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 28px rgba(212, 175, 55, 0.12); }
 body.event-theme .filter-btn-soir { border-color: rgba(212, 175, 55, 0.45); }
 
@@ -168,23 +172,23 @@ body.event-theme .highlight-info::before {
 
 /* ---------- Menu du jour : cartes ---------- */
 body.event-theme .card-front-enhanced {
-  background: linear-gradient(165deg, #5a0b19 0%, #2e050c 60%, #1d0307 100%);
+  background: linear-gradient(165deg, #08503a 0%, #04281d 60%, #031a13 100%);
   outline: 1px solid rgba(212, 175, 55, 0.55); outline-offset: -8px;
   border: 1px solid rgba(212, 175, 55, 0.7);
-  box-shadow: 0 16px 44px rgba(60, 5, 15, 0.35), 0 0 0 1px rgba(246, 231, 176, 0.06);
+  box-shadow: 0 16px 44px rgba(3,35,25, 0.35), 0 0 0 1px rgba(246, 231, 176, 0.06);
 }
 body.event-theme .menu-card-enhanced:hover .card-front-enhanced {
-  box-shadow: 0 24px 60px rgba(60, 5, 15, 0.5), 0 0 34px rgba(212, 175, 55, 0.28);
+  box-shadow: 0 24px 60px rgba(3,35,25, 0.5), 0 0 34px rgba(212, 175, 55, 0.28);
 }
 body.event-theme .menu-card-enhanced .media-overlay {
-  background: linear-gradient(to top, rgba(46, 5, 12, 0.92) 0%, rgba(46, 5, 12, 0.25) 45%, transparent 75%);
+  background: linear-gradient(to top, rgba(4,40,29, 0.92) 0%, rgba(4,40,29, 0.25) 45%, transparent 75%);
 }
 body.event-theme .menu-card-enhanced .price-chip {
-  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c;
+  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
 }
 body.event-theme .menu-card-enhanced .price-symbol,
-body.event-theme .menu-card-enhanced .price-amount { color: #2e050c; }
+body.event-theme .menu-card-enhanced .price-amount { color: #04281d; }
 body.event-theme .menu-card-enhanced .category-tag { color: #e0b84a; letter-spacing: 0.2em; }
 body.event-theme .menu-card-enhanced .plat-title { color: #fff4d2; }
 body.event-theme .menu-card-enhanced .title-underline { background: linear-gradient(90deg, transparent, #d4af37, transparent); height: 1px; width: 70%; margin-left: auto; margin-right: auto; }
@@ -192,44 +196,48 @@ body.event-theme .menu-card-enhanced .plat-description { color: rgba(255, 244, 2
 body.event-theme .menu-card-enhanced .add-btn,
 body.event-theme .menu-card-enhanced .add-btn.has-items,
 body.event-theme .menu-card-enhanced .add-btn.preview-mode {
-  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; border-color: transparent;
+  background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d; border-color: transparent;
 }
 body.event-theme .menu-card-enhanced .qty-btn { background: rgba(212, 175, 55, 0.16); color: #f6e7b0; border: 1px solid rgba(212, 175, 55, 0.6); }
-body.event-theme .menu-card-enhanced .qty-badge { background: #d4af37; color: #2e050c; }
+body.event-theme .menu-card-enhanced .qty-badge { background: #d4af37; color: #04281d; }
 body.event-theme .menu-card-enhanced .details-link { color: #e0b84a; }
 body.event-theme .menu-card-enhanced .details-link:hover { color: #fff4d2; }
 body.event-theme .card-back-enhanced {
-  background: linear-gradient(160deg, #4a0a16, #1d0307);
+  background: linear-gradient(160deg, #063d2c, #031a13);
   border: 1px solid rgba(212, 175, 55, 0.7);
 }
 body.event-theme .card-back-enhanced .back-title { color: #fff4d2; }
 body.event-theme .card-back-enhanced .back-description-full { color: rgba(255, 244, 210, 0.82); }
-body.event-theme .order-now-btn { color: #2e050c; }
+body.event-theme .order-now-btn { color: #04281d; }
 
 /* ---------- Menu du soir : cartes ---------- */
-body.event-theme .menu-card-inner { background: linear-gradient(165deg, #4a0a16 0%, #2e050c 60%, #1d0307 100%); }
+body.event-theme .menu-card-inner { background: linear-gradient(165deg, #063d2c 0%, #04281d 60%, #031a13 100%); }
 body.event-theme .menu-card-outer.soir-variant:hover { box-shadow: 0 22px 54px rgba(0, 0, 0, 0.6), 0 0 38px rgba(212, 175, 55, 0.3); }
-body.event-theme .price-tag-evening { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
-body.event-theme .luxury-offer-ribbon { background: linear-gradient(135deg, #c4162f, #8e0e22); color: #fff4d2; }
+body.event-theme .price-tag-evening { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d; }
+body.event-theme .luxury-offer-ribbon { background: linear-gradient(135deg, #12a57b, #08603f); color: #fff4d2; }
 body.event-theme .gold-separator { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
-body.event-theme .card-back-soir { background: linear-gradient(160deg, #4a0a16, #1d0307); }
+body.event-theme .card-back-soir { background: linear-gradient(160deg, #063d2c, #031a13); }
 
 /* ---------- Carte : cartes de plats ---------- */
-body.event-theme .card-face { background: #2e050c; }
+body.event-theme .card-face { background: #04281d; }
 body.event-theme .plat-img { filter: saturate(1.08) contrast(1.03); }
 body.event-theme .title-underline-gold { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
 body.event-theme .card-footer-ornament-gold { color: #e0b84a; }
 
 /* ---------- Accueil : « Nos incontournables » ---------- */
 body.event-theme .highlight-card {
-  background: linear-gradient(165deg, #5a0b19 0%, #2e050c 65%, #1d0307 100%);
+  background: linear-gradient(165deg, #08503a 0%, #04281d 65%, #031a13 100%);
   border: 1px solid rgba(212, 175, 55, 0.7);
   outline: 1px solid rgba(212, 175, 55, 0.5); outline-offset: -7px;
-  box-shadow: 0 14px 40px rgba(60, 5, 15, 0.3);
+  box-shadow: 0 14px 40px rgba(3,35,25, 0.3);
 }
-body.event-theme .highlight-card:hover { box-shadow: 0 22px 54px rgba(60, 5, 15, 0.5), 0 0 30px rgba(212, 175, 55, 0.25); }
-body.event-theme .highlight-price-overlay { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #2e050c; }
+body.event-theme .highlight-card:hover { box-shadow: 0 22px 54px rgba(3,35,25, 0.5), 0 0 30px rgba(212, 175, 55, 0.25); }
+body.event-theme .highlight-price-overlay { background: linear-gradient(135deg, #f6e7b0, #d4af37 60%, #b8891f); color: #04281d; }
 body.event-theme .highlight-name { color: #fff4d2; }
 body.event-theme .highlight-line { background: linear-gradient(90deg, transparent, #d4af37, transparent); }
 body.event-theme .highlight-corner-gold { border-color: #f6e7b0; }
-body.event-theme .highlights-main-title { color: #2e050c; }
+body.event-theme .highlights-main-title { color: #04281d; }
+
+/* Fond de la page entière (html) quand le thème est actif */
+html:has(body.event-theme) { background-color: #f5f9ee; }
+body.event-theme { background-color: #f5f9ee; color: #04281d; }

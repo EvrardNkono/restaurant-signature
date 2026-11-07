@@ -17,7 +17,7 @@ export default function EventMenuBand() {
       </Link>
 
       <div className="ev-menu-band-text">
-        <p className="ev-eyebrow">Réservez votre soirée</p>
+        <p className="ev-eyebrow">{EVENT.announce} · Réservez votre soirée</p>
         <p className="ev-menu-band-title">
           <span className="ev-menu-band-script">{EVENT.artist} {EVENT.name}</span>
           <span className="ev-menu-band-kind">{EVENT.kind}</span>

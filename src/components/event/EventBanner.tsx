@@ -24,7 +24,7 @@ export default function EventBanner() {
         <span className="ev-banner-text">
           <b>{EVENT.artist} {EVENT.name}</b>
           <span className="ev-banner-sep">·</span>
-          {EVENT.kind}
+          {EVENT.announce}
           <span className="ev-banner-sep">·</span>
           <span className="ev-banner-date">{EVENT.dateShort} · 19h30</span>
         </span>

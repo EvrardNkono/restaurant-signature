@@ -10,12 +10,16 @@ export default function EventTheme() {
     const on = isThemeActive();
     document.body.classList.toggle("event-theme", on);
     // Petit cachet affiché sur les cartes de plats (texte piloté par config/event.ts)
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const prevColor = meta?.getAttribute("content") ?? null;
+    if (on && meta) meta.setAttribute("content", "#04281d");
     if (on) {
       document.body.style.setProperty("--ev-stamp", JSON.stringify(`✦ ${EVENT.kind} · ${EVENT.dateShort} ✦`));
     }
     return () => {
       document.body.classList.remove("event-theme");
       document.body.style.removeProperty("--ev-stamp");
+      if (meta && prevColor !== null) meta.setAttribute("content", prevColor);
     };
   }, []);
   return null;

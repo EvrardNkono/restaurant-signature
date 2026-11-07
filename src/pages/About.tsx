@@ -3,6 +3,7 @@ import "./about.css";
 import chefImg from "../assets/images/signature-illustration.png"; 
 import restoImg from "../assets/images/hero.jpg"; 
 
+import EventMenuBand from "../components/event/EventMenuBand";
 export default function About() {
   return (
     <section className="about-page">
@@ -15,6 +16,8 @@ export default function About() {
           <div className="header-double-line"></div>
         </div>
       </div>
+      {/* ✨ Événement : annonce Danys' Prelude */}
+      <EventMenuBand />
 
       <div className="about-container">
         {/* SECTION 1 : HISTOIRE */}

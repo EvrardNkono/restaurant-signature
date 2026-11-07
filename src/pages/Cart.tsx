@@ -22,6 +22,7 @@ import { useRestaurantHours } from "../hooks/useRestaurantHours";
 
 import "./cart.css";
 
+import EventMenuBand from "../components/event/EventMenuBand";
 const isLocal = window.location.hostname === "localhost";
 const BASE_API = isLocal ? "http://localhost:5000/api" : "https://signature-backend-alpha.vercel.app/api";
 
@@ -517,6 +518,8 @@ export default function Cart() {
           <div className="header-double-line"></div>
         </div>
       </div>
+      {/* ✨ Événement : annonce Danys' Prelude */}
+      <EventMenuBand />
 
       {/* ✅ BANNIÈRE D'INFORMATION - dynamique avec weekend */}
       {!isJourOpen && (

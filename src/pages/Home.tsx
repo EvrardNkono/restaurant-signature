@@ -8,6 +8,7 @@ import Testimonials from "../components/home/Testimonials";
 import Gallery from "../components/home/Gallery";
 import CtaFinal from "../components/home/CtaFinal";
 import EventSection from "../components/event/EventSection";
+import EventTicker from "../components/event/EventTicker";
 
 // --- FONCTION DE RÉCUPÉRATION GLOBALE ---
 
@@ -49,6 +50,7 @@ export default function Home() {
       />
 
       {/* ✨ ÉVÉNEMENT — Danys' Prelude (disparaît tout seul après la date) */}
+      <EventTicker />
       <EventSection />
 
       {/* NOTRE SIGNATURE - AVEC EMPILEMENT DES DEUX IMAGES */}

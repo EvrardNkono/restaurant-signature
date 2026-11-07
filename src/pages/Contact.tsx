@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import "./contact.css";
 
+import EventMenuBand from "../components/event/EventMenuBand";
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -58,6 +59,8 @@ const Contact = () => {
           <div className="header-double-line"></div>
         </div>
       </div>
+      {/* ✨ Événement : annonce Danys' Prelude */}
+      <EventMenuBand />
 
       <div className="contact-container">
         <div className="contact-grid">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, ArrowRight, Newspaper } from "lucide-react";
 import axios from "axios";
 import "./BlogPage.css";
+import EventMenuBand from "../components/event/EventMenuBand";
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -103,6 +104,8 @@ export default function BlogPage() {
           </p>
         </div>
       </section>
+      {/* ✨ Événement : annonce Danys' Prelude */}
+      <EventMenuBand />
 
       {/* CONTROLES */}
       <div className="blog-controls-bar">
