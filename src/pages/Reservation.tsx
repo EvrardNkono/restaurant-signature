@@ -11,7 +11,6 @@ const BASE_URL = isLocal
 // ─── RÈGLES D'OUVERTURE (reprises de menu.tsx — à ajuster) ───
 const CLOSED_DAYS: number[] = []; // 0 = dimanche … 6 = samedi. Ex: [1] si fermé le lundi
 const MAX_ONLINE_GUESTS = 10;
-const LAST_SEATING_MINUTES_BEFORE_CLOSE = 60;
 
 const slotsBetween = (from: string, to: string) => {
   const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
