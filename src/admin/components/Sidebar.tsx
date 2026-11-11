@@ -5,9 +5,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Utensils, Image as ImageIcon, ShoppingBag, LogOut, Zap,
   Tags, ListPlus, PlusSquare, Smartphone, Gift, Newspaper, Brain,
-  Megaphone, Search, ChevronDown, MessageCircle,
+  Megaphone, Search, ChevronDown, MessageCircle, CalendarCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import usePendingReservations from "../hooks/usePendingReservations";
 import "./Sidebar.css";
 
 type Item = { path: string; icon: LucideIcon; label: string; hint: string };
@@ -22,6 +23,7 @@ const GROUPS: Group[] = [
     items: [
       { path: "/admin", icon: LayoutDashboard, label: "Tableau de bord", hint: "Chiffres du jour et exports" },
       { path: "/admin/orders", icon: ShoppingBag, label: "Commandes", hint: "Suivre et traiter les commandes" },
+      { path: "/admin/reservations", icon: CalendarCheck, label: "Réservations", hint: "Demandes de table à confirmer" },
       { path: "/admin/tables", icon: Smartphone, label: "Gestion des tables", hint: "Tables et QR codes" },
     ],
   },
@@ -59,6 +61,7 @@ type Props = {
 
 export default function Sidebar({ onLogout, tools }: Props) {
   const { pathname } = useLocation();
+  const pendingResa = usePendingReservations();
   const navigate = useNavigate();
   const [open, setOpen] = useState<string | null>(null);
   const [palette, setPalette] = useState(false);
@@ -147,6 +150,7 @@ export default function Sidebar({ onLogout, tools }: Props) {
                 >
                   <Icon size={18} aria-hidden="true" />
                   <span>{g.label}</span>
+                  {g.id === "service" && pendingResa > 0 && <span className="tn-badge" aria-label={`${pendingResa} réservation(s) à confirmer`}>{pendingResa}</span>}
                   <ChevronDown size={14} className="tn-chev" aria-hidden="true" />
                 </button>
 
@@ -164,6 +168,7 @@ export default function Sidebar({ onLogout, tools }: Props) {
                             <strong>{label}</strong>
                             <small>{hint}</small>
                           </span>
+                          {path === "/admin/reservations" && pendingResa > 0 && <span className="tn-badge">{pendingResa}</span>}
                         </Link>
                       </li>
                     ))}

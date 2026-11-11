@@ -57,6 +57,8 @@ import TableManager from "./admin/pages/TableManager";
 import WheelSettings from "./admin/pages/WheelSettings"; // 🎡 Page admin du jeu
 import BlogManager from "./admin/pages/BlogManager"; // 📰 Page admin du blog
 import QuizManagement from "./admin/pages/QuizManagement"; // 🧑‍🍳 NOUVEAU - Page admin du quiz
+import Reservation from "./pages/Reservation"; // 📅 Réservation de table (public)
+import Reservations from "./admin/pages/Reservations"; // 📅 Réservations (admin)
 import WhatsAppGate from "./admin/components/WhatsAppGate"; // 💬 Page admin WhatsApp (avec mot de passe)
 
 // 2. Création du client de cache
@@ -253,6 +255,7 @@ export default function AppRouter() {
                       <Route path="/blog/:slug" element={<BlogArticle />} />
                       <Route path="/a-propos" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
+                      <Route path="/reservation" element={<Reservation />} />
                       <Route path="/panier" element={<Cart />} />
                       <Route path="/order-success" element={<OrderSuccess />} />
                       <Route path={EVENT.path} element={<Evenement />} />
@@ -276,6 +279,7 @@ export default function AppRouter() {
               <Route path="accompaniments" element={<AccompanimentManager />} /> 
               <Route path="tables" element={<TableManager />} /> 
               <Route path="orders" element={<Orders />} />
+              <Route path="reservations" element={<Reservations />} />
               <Route path="appearance" element={<Appearance />} />
               <Route path="social" element={<SocialHub />} />
               <Route path="wheel" element={<WheelSettings />} /> {/* 🎡 Page admin du jeu */}

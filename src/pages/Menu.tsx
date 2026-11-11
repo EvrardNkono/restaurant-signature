@@ -13,6 +13,7 @@ import "./menu.css";
 import EventMenuBand from "../components/event/EventMenuBand";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
+import { useNavigate } from "react-router-dom";
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -242,6 +243,7 @@ export default function Menu() {
   // ─── HORAIRES ───────────────────────────────────────────────
   const { isJourOpen, nextJourInfo, currentPeriod } = useRestaurantHours();
   const [unlocked, setUnlocked] = useState(false);
+  const navigate = useNavigate();
 
   // La carte est disponible si :
   // - Soit le service est ouvert (isJourOpen = true)
@@ -753,7 +755,7 @@ export default function Menu() {
             }}>
               <span>Découvrir la carte</span><ArrowRight size={18} />
             </button>
-            <button className="cta-secondary"><span>Réservation</span><Tv size={16} /></button>
+            <button className="cta-secondary" onClick={() => navigate("/reservation")}><span>Réservation</span><Tv size={16} /></button>
           </div>
         </div>
         <div className="hero-scroll-indicator">

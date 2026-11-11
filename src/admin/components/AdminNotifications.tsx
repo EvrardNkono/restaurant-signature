@@ -30,7 +30,7 @@ export default function AdminNotifications() {
           body: payload.notification?.body || '',
           icon: '/icons/icon-192x192.png',
           badge: '/icons/icon-72x72.png',
-          tag: 'order-notification',
+          tag: payload.data?.type === 'new_reservation' ? 'reservation-notification' : 'order-notification',
           data: {
             url: ADMIN_URL,
             orderId: payload.data?.orderId || null
@@ -43,6 +43,12 @@ export default function AdminNotifications() {
         notification.onclick = (event) => {
           event.preventDefault();
           notification.close();
+
+          // Réservation : ouvre directement la page Réservations
+          if (payload.data?.type === 'new_reservation') {
+            window.location.href = `${ADMIN_URL}/reservations`;
+            return;
+          }
           
           // Vérifier si on est déjà sur la page admin
           const currentPath = window.location.pathname;

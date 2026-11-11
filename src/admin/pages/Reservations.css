@@ -1,0 +1,95 @@
+/* src/admin/pages/Reservations.css — même thème que Orders.css (fond sombre, accents or) */
+
+.rsv-page {
+  --rsv-bg: var(--bg-page, #1A1210);
+  --rsv-card: var(--bg-card, #2C1F1C);
+  --rsv-gold: var(--gold, #D4AF37);
+  --rsv-gold-bg: var(--gold-bg, rgba(212,175,55,0.12));
+  --rsv-border: var(--border, rgba(255,255,255,0.08));
+  --rsv-text: var(--text-primary, #F5EFE8);
+  --rsv-dim: var(--text-secondary, rgba(245,239,232,0.6));
+  --rsv-green: var(--green, #2ecc71);
+  --rsv-red: var(--red, #e74c3c);
+  --rsv-orange: var(--orange, #e67e22);
+
+  background: var(--rsv-bg);
+  color: var(--rsv-text);
+  border-radius: 18px;
+  padding: 24px;
+  min-height: 60vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  position: relative;
+}
+
+.rsv-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.rsv-head h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--rsv-gold); }
+.rsv-head p { margin: 6px 0 0; color: var(--rsv-dim); font-size: 0.9rem; }
+
+.rsv-sound {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  background: transparent; color: var(--rsv-text); border: 1px solid var(--rsv-border);
+  border-radius: 30px; font: inherit; font-size: 0.85rem; cursor: pointer;
+}
+.rsv-sound[aria-pressed="true"] { border-color: var(--rsv-gold); color: var(--rsv-gold); }
+
+.rsv-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.rsv-tab {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;
+  background: var(--rsv-card); color: var(--rsv-dim); border: 1px solid var(--rsv-border);
+  border-radius: 30px; font: inherit; font-weight: 600; cursor: pointer;
+}
+.rsv-tab.active { background: var(--rsv-gold-bg); color: var(--rsv-gold); border-color: var(--rsv-gold); }
+.rsv-count { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); }
+.rsv-count.alert { background: var(--rsv-red); color: #fff; }
+
+.rsv-empty { color: var(--rsv-dim); text-align: center; padding: 48px 0; }
+
+.rsv-day { margin-top: 24px; }
+.rsv-day h2 { display: flex; align-items: baseline; gap: 12px; margin: 0 0 12px; font-size: 1.05rem; text-transform: capitalize; }
+.rsv-day h2 small { color: var(--rsv-dim); font-weight: 400; font-size: 0.8rem; text-transform: none; }
+
+.rsv-list { display: flex; flex-direction: column; gap: 10px; }
+
+.rsv-card {
+  display: grid; grid-template-columns: 84px 1fr; gap: 16px;
+  background: var(--rsv-card); border: 1px solid var(--rsv-border);
+  border-left: 4px solid var(--rsv-orange); border-radius: 12px; padding: 16px;
+}
+.rsv-card.rsv-confirmed { border-left-color: var(--rsv-green); }
+.rsv-card.rsv-declined { border-left-color: var(--rsv-red); opacity: 0.8; }
+
+.rsv-time { display: flex; align-items: flex-start; gap: 6px; font-size: 1.15rem; font-weight: 700; color: var(--rsv-gold); }
+.rsv-main h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.rsv-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 0.88rem; color: var(--rsv-dim); }
+.rsv-meta span, .rsv-meta a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.rsv-meta a:hover { color: var(--rsv-gold); }
+.rsv-ago { font-size: 0.78rem; opacity: 0.8; }
+.rsv-notes { display: flex; gap: 6px; align-items: flex-start; margin: 10px 0 0; padding: 8px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; font-size: 0.85rem; font-style: italic; }
+
+.rsv-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.rsv-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 16px; border-radius: 10px; border: 1px solid transparent;
+  font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-decoration: none; color: #fff;
+}
+.rsv-btn:disabled { opacity: 0.5; cursor: wait; }
+.rsv-ok { background: #1e8449; }
+.rsv-no { background: #c0392b; }
+.rsv-wa { background: #25D366; color: #08301a; }
+.rsv-ghost { background: transparent; color: var(--rsv-text); border-color: var(--rsv-border); }
+.rsv-ghost:hover { border-color: var(--rsv-gold); color: var(--rsv-gold); }
+.rsv-del:hover { border-color: var(--rsv-red); color: var(--rsv-red); }
+.rsv-btn:focus-visible, .rsv-tab:focus-visible, .rsv-sound:focus-visible { outline: 2px solid var(--rsv-gold); outline-offset: 2px; }
+
+.rsv-toast {
+  position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  max-width: 92vw; padding: 12px 22px; border-radius: 10px; color: #fff; font-weight: 600; font-size: 0.9rem;
+  background: #27ae60; box-shadow: 0 4px 20px rgba(0,0,0,0.35); z-index: 10001; text-align: center;
+}
+.rsv-toast.err { background: #e74c3c; }
+
+@media (max-width: 600px) {
+  .rsv-page { padding: 16px; border-radius: 12px; }
+  .rsv-card { grid-template-columns: 1fr; gap: 8px; }
+  .rsv-actions .rsv-btn { flex: 1 1 100%; padding: 13px 16px; } /* grandes cibles tactiles */
+}
