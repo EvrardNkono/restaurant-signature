@@ -108,3 +108,14 @@
     width: 100%;
   }
 }
+
+
+.wa-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.wa-search .wa-input {
+  flex: 1;
+}

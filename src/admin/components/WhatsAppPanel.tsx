@@ -1,11 +1,14 @@
-
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, Send, Trash2, Paperclip, X, UserPlus } from "lucide-react";
+import { MessageCircle, Send, Trash2, Paperclip, X, UserPlus, Search } from "lucide-react";
 import { API, waFetch } from "./waApi";
 import "./WhatsAppPanel.css";
 
 type Contact = { _id: string; phone: string; name: string; optOut: boolean; lastStatus: string };
 type Status = { running: boolean; total: number; done: number; sent: number; failed: number };
+
+// Minuscules + sans accents, pour une recherche tolérante
+const normalize = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 export default function WhatsAppPanel() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -17,6 +20,7 @@ export default function WhatsAppPanel() {
   const [media, setMedia] = useState<File | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [msg, setMsg] = useState("");
+  const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
@@ -42,7 +46,19 @@ export default function WhatsAppPanel() {
     return () => clearInterval(t);
   }, [status?.running]);
 
-  const sendable = contacts.filter((c) => !c.optOut);
+  // Filtre par nom ou par numéro
+  const q = normalize(query.trim());
+  const qDigits = query.replace(/\D/g, "");
+
+  const filtered = contacts.filter((c) => {
+    if (!q) return true;
+    const byName = normalize(c.name || "").includes(q);
+    const byPhone = qDigits.length > 0 && c.phone.replace(/\D/g, "").includes(qDigits);
+    return byName || byPhone;
+  });
+
+  // "Tout sélectionner" ne concerne que les contacts visibles
+  const sendable = filtered.filter((c) => !c.optOut);
   const allSelected = sendable.length > 0 && sendable.every((c) => selected.has(c._id));
 
   const toggle = (id: string) =>
@@ -54,7 +70,12 @@ export default function WhatsAppPanel() {
     });
 
   const toggleAll = () =>
-    setSelected(allSelected ? new Set() : new Set(sendable.map((c) => c._id)));
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (allSelected) sendable.forEach((c) => n.delete(c._id));
+      else sendable.forEach((c) => n.add(c._id));
+      return n;
+    });
 
   const post = async (list: { phone: string; name?: string }[]) => {
     const r = await waFetch(`${API}/contacts`, {
@@ -164,13 +185,29 @@ export default function WhatsAppPanel() {
 
       <div className="wa-card">
         <div className="wa-card-top">
-          <h2>Contacts ({contacts.length})</h2>
+          <h2>
+            Contacts ({filtered.length}
+            {filtered.length !== contacts.length && `/${contacts.length}`})
+          </h2>
           <label className="wa-check">
             <input type="checkbox" checked={allSelected} onChange={toggleAll} /> Tout sélectionner
           </label>
         </div>
+
+        <div className="wa-search">
+          <Search size={16} aria-hidden="true" />
+          <input
+            className="wa-input"
+            type="search"
+            placeholder="Rechercher par nom ou numéro"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Rechercher un contact"
+          />
+        </div>
+
         <ul className="wa-list">
-          {contacts.map((c) => (
+          {filtered.map((c) => (
             <li key={c._id} className={`wa-contact ${c.optOut ? "is-off" : ""}`}>
               <input type="checkbox" disabled={c.optOut} checked={selected.has(c._id)}
                 onChange={() => toggle(c._id)} aria-label={`Sélectionner ${c.name || c.phone}`} />
@@ -189,7 +226,13 @@ export default function WhatsAppPanel() {
               </button>
             </li>
           ))}
-          {!contacts.length && <li className="wa-empty">Aucun contact pour le moment.</li>}
+          {!filtered.length && (
+            <li className="wa-empty">
+              {contacts.length
+                ? "Aucun contact ne correspond à la recherche."
+                : "Aucun contact pour le moment."}
+            </li>
+          )}
         </ul>
       </div>
 
