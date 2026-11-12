@@ -15,6 +15,7 @@ import Chatbot from "./components/Chatbot";
 import AdPopup from "./components/AdPopup"; 
 import ScrollToTop from "./components/ScrollToTop";
 import FloatingOrder from "./components/home/FloatingOrder";
+import MobileActionBar from "./components/MobileActionBar"; // 📱 Barre Commander / Réserver / Appeler (mobile)
 import { CartProvider } from "./context/CartContext";
 import InstallButton from './components/InstallButton';
 
@@ -230,6 +231,7 @@ export default function AppRouter() {
 
                   <Navbar />
                   <FloatingOrder />
+                  <MobileActionBar />
                   <InstallButton />
                   <SocialFloatingButton />
 
