@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { Fragment, useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart, type CartItem, type CartSupplement } from "../context/CartContext"; 
@@ -11,6 +11,9 @@ import "./menuSoir.css";
 import EventMenuBand from "../components/event/EventMenuBand";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
+import CategoryBar from "../components/menu/CategoryBar";
+import SectionHeading from "../components/menu/SectionHeading";
+import { sortPlatsByCategory } from "../utils/categoryOrder";
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -271,11 +274,11 @@ export default function MenuSoir() {
   ], [platsDuSoir, univers]);
 
   const platsFiltres = useMemo(() => 
-    platsDuSoir.filter(p => {
+    sortPlatsByCategory(platsDuSoir.filter(p => {
       if (p.category?.univers !== univers) return false;
       if (filter === "Tous") return true;
       return p.category?.name === filter;
-    }), 
+    }), univers), // Entrées → Plats → Desserts
   [platsDuSoir, univers, filter]);
 
   // --- ACTIONS ---
@@ -439,21 +442,13 @@ export default function MenuSoir() {
           </div>
         </div>
         
-        <div className="menu-filtres-soir-container">
-          <div className="menu-filtres-track-soir">
-            <div className="menu-filtres-list-soir">
-              {currentCategories.map((cat, idx) => (
-                <button key={idx} className={`filter-btn-soir ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat as string)}>
-                  {cat as string}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <CategoryBar categories={currentCategories as string[]} active={filter} onSelect={setFilter} items={platsDuSoir.filter((p) => p.category?.univers === univers)} univers={univers} variant="dark" />
 
         <div className="menu-grid">
           {platsFiltres.map(plat => (
-            <div key={plat._id} className="menu-card-outer soir-variant readonly-card">
+            <Fragment key={plat._id}>
+            <SectionHeading list={platsFiltres} plat={plat} show={filter === "Tous"} univers={univers} variant="dark" />
+            <div className="menu-card-outer soir-variant readonly-card">
               <div className="menu-card-inner">
                 <div className="card-face-soir card-front-soir">
                   <div className="menu-image-container">
@@ -484,6 +479,7 @@ export default function MenuSoir() {
                 </div>
               </div>
             </div>
+            </Fragment>
           ))}
         </div>
         <BillPopup onBillPending={setHasPendingBill} />
@@ -547,21 +543,7 @@ export default function MenuSoir() {
         </div>
       </div>
 
-      <div className="menu-filtres-soir-container">
-        <div className="menu-filtres-track-soir">
-          <div className="menu-filtres-list-soir">
-            {currentCategories.map((cat, idx) => (
-              <button 
-                key={idx} 
-                className={`filter-btn-soir ${filter === cat ? "active" : ""} ${isAnyDrawerOpen ? "disabled-btn" : ""}`} 
-                onClick={() => !isAnyDrawerOpen && setFilter(cat as string)}
-              >
-                {cat as string}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      <CategoryBar categories={currentCategories as string[]} active={filter} onSelect={setFilter} items={platsDuSoir.filter((p) => p.category?.univers === univers)} univers={univers} variant="dark" disabled={isAnyDrawerOpen} />
 
       <div className="menu-grid">
         {platsFiltres.map(plat => {
@@ -592,7 +574,9 @@ export default function MenuSoir() {
           const drawerItem = tempItem?.id === plat._id ? tempItem : editingItem;
 
           return (
-            <div key={plat._id} className={`menu-card-outer soir-variant ${isExpanding ? "is-expanded" : ""}`}>
+            <Fragment key={plat._id}>
+            <SectionHeading list={platsFiltres} plat={plat} show={filter === "Tous"} univers={univers} variant="dark" />
+            <div className={`menu-card-outer soir-variant ${isExpanding ? "is-expanded" : ""}`}>
               <div className={`menu-card-inner ${isFlipped ? "is-flipped" : ""}`}>
                 
                 <div className="card-face-soir card-front-soir">
@@ -796,6 +780,7 @@ export default function MenuSoir() {
                 </div>
               </div>
             </div>
+            </Fragment>
           );
         })}
       </div>

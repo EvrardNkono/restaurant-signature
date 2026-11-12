@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { Fragment, useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useCart } from "../context/CartContext";
@@ -14,6 +14,9 @@ import EventMenuBand from "../components/event/EventMenuBand";
 import BillPopup from "../components/BillPopup";
 import { useRestaurantHours } from "../hooks/useRestaurantHours";
 import { useNavigate } from "react-router-dom";
+import CategoryBar from "../components/menu/CategoryBar";
+import SectionHeading from "../components/menu/SectionHeading";
+import { sortPlatsByCategory } from "../utils/categoryOrder";
 
 // --- CONFIGURATION ---
 const isLocal = window.location.hostname === "localhost";
@@ -425,7 +428,7 @@ export default function Menu() {
         p.description.toLowerCase().includes(term)
       );
     }
-    return filtered;
+    return sortPlatsByCategory(filtered, univers); // Entrées → Plats → Desserts
   }, [platsDeLaPeriode, univers, filter, searchTerm]);
 
   const showToast = (message: string, type: "success" | "error" | "info" | "warning") => {
@@ -602,21 +605,14 @@ export default function Menu() {
             </div>
           </div>
         </div>
-        <div className="categories-bar-enhanced">
-          <div className="categories-scroll">
-            {currentCategories.map((cat, idx) => (
-              <button key={idx} className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} onClick={() => setFilter(cat)}>
-                <span className="chip-text">{cat}</span>
-                {filter === cat && <div className="chip-active-indicator" />}
-              </button>
-            ))}
-          </div>
-        </div>
+        <CategoryBar categories={currentCategories} active={filter} onSelect={setFilter} items={platsDeLaPeriode.filter((p) => p.category?.univers === univers)} univers={univers} variant="light" />
         
         {/* Carte en lecture seule (commandes désactivées) */}
         <div className="menu-grid-enhanced menu-readonly">
           {platsFiltres.map((plat, index) => (
-            <div key={plat._id} className="menu-card-enhanced readonly" style={{ animationDelay: `${index * 0.03}s` }}>
+            <Fragment key={plat._id}>
+            <SectionHeading list={platsFiltres} plat={plat} show={filter === "Tous" && !searchTerm} univers={univers} variant="light" />
+            <div className="menu-card-enhanced readonly" style={{ animationDelay: `${index * 0.03}s` }}>
               <div className="card-perspective">
                 <div className="card-front-enhanced">
                   <div className="card-media">
@@ -667,6 +663,7 @@ export default function Menu() {
                 </div>
               </div>
             </div>
+            </Fragment>
           ))}
         </div>
         <BillPopup onBillPending={setHasPendingBill} />
@@ -799,20 +796,7 @@ export default function Menu() {
       </div>
 
       {/* CATÉGORIES */}
-      <div className="categories-bar-enhanced">
-        <div className="categories-scroll">
-          {currentCategories.map((cat, idx) => (
-            <button 
-              key={idx} 
-              className={`category-chip-enhanced ${filter === cat ? "active" : ""}`} 
-              onClick={() => setFilter(cat)}
-            >
-              <span className="chip-text">{cat}</span>
-              {filter === cat && <div className="chip-active-indicator" />}
-            </button>
-          ))}
-        </div>
-      </div>
+      <CategoryBar categories={currentCategories} active={filter} onSelect={setFilter} items={platsDeLaPeriode.filter((p) => p.category?.univers === univers)} univers={univers} variant="light" />
 
       {searchTerm && (
         <div className="search-results-enhanced">
@@ -849,8 +833,9 @@ export default function Menu() {
             if (!orderMatch && quantityInCart > 0) currentStatus = "in_cart";
 
             return (
+              <Fragment key={plat._id}>
+              <SectionHeading list={platsFiltres} plat={plat} show={filter === "Tous" && !searchTerm} univers={univers} variant="light" />
               <div 
-                key={plat._id} 
                 className={`menu-card-enhanced ${isExpanding ? "expanded" : ""} ${isHovered ? "hovered" : ""}`}
                 onMouseEnter={() => setHoveredCard(plat._id)}
                 onMouseLeave={() => setHoveredCard(null)}
@@ -1076,6 +1061,7 @@ export default function Menu() {
                   </div>
                 </div>
               </div>
+              </Fragment>
             );
           })
         ) : (

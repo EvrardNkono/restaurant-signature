@@ -149,7 +149,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
+  overflow-x: clip; /* « clip » (et non « hidden ») pour que la barre de catégories reste collée en haut */
 }
 
 /* ==================== HEADER NOCTURNE ==================== */

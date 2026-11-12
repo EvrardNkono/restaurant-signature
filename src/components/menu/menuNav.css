@@ -1,0 +1,90 @@
+/* src/components/menu/menuNav.css */
+
+/* ── Barre de catégories ── */
+.cbar {
+  --cbar-top: 70px;                      /* hauteur de votre barre de navigation : à ajuster si besoin */
+  position: sticky; top: var(--cbar-top); z-index: 99;
+  width: 100%; padding: 4px 0;
+  background: var(--cbar-bg);
+  border-bottom: 1px solid var(--cbar-line);
+}
+.cbar--light {
+  --cbar-bg: rgba(255,255,255,0.97); --cbar-line: rgba(212,175,55,0.3);
+  --cbar-chip: #fff; --cbar-border: rgba(156,122,31,0.55); --cbar-text: #2D2422;
+  --cbar-count-bg: rgba(45,36,34,0.08);
+  --cbar-active-bg: #2D2422; --cbar-active-text: #F6E7B0; --cbar-fade: 255,255,255;
+}
+.cbar--dark {
+  --cbar-bg: rgba(23,17,13,0.97); --cbar-line: rgba(212,175,55,0.35);
+  --cbar-chip: #241A14; --cbar-border: rgba(212,175,55,0.45); --cbar-text: #F3E9D2;
+  --cbar-count-bg: rgba(255,255,255,0.1);
+  --cbar-active-bg: #D4AF37; --cbar-active-text: #17110D; --cbar-fade: 23,17,13;
+}
+
+.cbar-wrap { position: relative; max-width: 1600px; margin: 0 auto; }
+
+/* Dégradés sur les bords : indiquent qu'il y a d'autres catégories à faire défiler */
+.cbar-wrap::before, .cbar-wrap::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 36px; z-index: 2; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s;
+}
+.cbar-wrap::before { left: 0;  background: linear-gradient(90deg, rgb(var(--cbar-fade)), rgba(var(--cbar-fade), 0)); }
+.cbar-wrap::after  { right: 0; background: linear-gradient(270deg, rgb(var(--cbar-fade)), rgba(var(--cbar-fade), 0)); }
+.cbar-wrap.has-left::before, .cbar-wrap.has-right::after { opacity: 1; }
+
+.cbar-scroll {
+  position: relative; display: flex; gap: 8px; padding: 10px 16px;
+  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.cbar-scroll::-webkit-scrollbar { display: none; }
+/* Centré quand tout tient à l'écran, aligné à gauche quand ça défile */
+.cbar-chip:first-child { margin-left: auto; }
+.cbar-chip:last-child { margin-right: auto; }
+
+.cbar-chip {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 46px; padding: 0 16px; border-radius: 999px;
+  font: inherit; font-size: 0.95rem; font-weight: 600; white-space: nowrap; cursor: pointer;
+  background: var(--cbar-chip); color: var(--cbar-text); border: 1.5px solid var(--cbar-border);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+.cbar-chip:hover:not(:disabled):not(.active) { border-color: var(--cbar-active-bg); transform: translateY(-1px); }
+.cbar-chip.active {
+  background: var(--cbar-active-bg); color: var(--cbar-active-text); border-color: var(--cbar-active-bg);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+.cbar-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.cbar-chip:focus-visible, .cbar-arrow:focus-visible { outline: 3px solid #D4AF37; outline-offset: 2px; }
+
+.cbar-count {
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; background: var(--cbar-count-bg);
+}
+.cbar-chip.active .cbar-count { background: rgba(255,255,255,0.2); }
+.cbar--dark .cbar-chip.active .cbar-count { background: rgba(23,17,13,0.18); }
+
+/* Flèches : uniquement avec une souris (sur téléphone on fait glisser le doigt) */
+.cbar-arrow {
+  display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--cbar-border);
+  background: var(--cbar-chip); color: var(--cbar-text); cursor: pointer;
+  align-items: center; justify-content: center;
+}
+.cbar-arrow.left { left: 6px; } .cbar-arrow.right { right: 6px; }
+@media (hover: hover) { .cbar-arrow { display: flex; } }
+
+/* ── Titres de section dans la liste des plats ── */
+.msec-head {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 12px;
+  margin: 2.2rem 0 0.2rem; scroll-margin-top: 150px; color: var(--msec-color);
+}
+.msec-head:first-child { margin-top: 0; }
+.msec-head--light { --msec-color: #2D2422; --msec-accent: #9C7A1F; }
+.msec-head--dark  { --msec-color: #F6E7B0; --msec-accent: #D4AF37; }
+.msec-icon { color: var(--msec-accent); flex-shrink: 0; }
+.msec-title { font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 700; }
+.msec-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--msec-accent), transparent); }
+.msec-count { font-size: 0.8rem; opacity: 0.75; white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) { .cbar-chip { transition: none; } }
