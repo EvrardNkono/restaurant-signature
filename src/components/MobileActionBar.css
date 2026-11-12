@@ -1,0 +1,52 @@
+/* src/components/MobileActionBar.css */
+
+/* ── Boutons du hero (toutes tailles d'écran) ── */
+.hero-v2-howto { margin: 12px 0 0; font-size: 0.85rem; opacity: 0.75; }
+.hero-v2-cta-secondary {
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px;
+  color: inherit; font-size: 0.95rem; text-decoration: underline; text-underline-offset: 4px;
+}
+.hero-v2-cta-secondary:hover { opacity: 0.8; }
+
+/* ── Barre d'actions : mobile uniquement ── */
+.mab { display: none; }
+
+@media (max-width: 768px) {
+  .mab {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 9990;
+    background: rgba(23, 17, 13, 0.97); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 8px 12px calc(10px + env(safe-area-inset-bottom));
+  }
+  .mab-status { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 0 8px; font-size: 0.72rem; color: #B3A488; }
+  .mab-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .mab-dot.on { background: #2ecc71; }
+  .mab-dot.off { background: #e74c3c; }
+
+  .mab-row { display: grid; grid-template-columns: 1.7fr 1fr 1fr; gap: 8px; }
+  .mab-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 48px;
+    border: 1px solid rgba(212, 175, 55, 0.5); border-radius: 12px;
+    color: #F6E7B0; font-size: 0.85rem; font-weight: 600; text-decoration: none;
+  }
+  .mab-primary {
+    background: linear-gradient(135deg, #F6E7B0, #D4AF37 50%, #9C7A1F);
+    border-color: transparent; color: #17110D; font-size: 0.95rem; font-weight: 700;
+  }
+  .mab-btn:focus-visible { outline: 2px solid #F6E7B0; outline-offset: 2px; }
+
+  /* Place pour la barre en bas de page */
+  body.has-action-bar { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+
+  /* Le bouton flottant « Commander » est remplacé par la barre */
+  body.has-action-bar .floating-container { display: none !important; }
+
+  /* Les autres boutons flottants remontent au-dessus de la barre */
+  body.has-action-bar .social-floating-container,
+  body.has-action-bar .floating-wheel-explosive,
+  body.has-action-bar .chat-trigger { bottom: calc(104px + env(safe-area-inset-bottom)) !important; }
+  body.has-action-bar .chat-window { bottom: calc(180px + env(safe-area-inset-bottom)) !important; }
+  body.has-action-bar .install-banner { bottom: calc(170px + env(safe-area-inset-bottom)) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) { .mab-btn { transition: none; } }

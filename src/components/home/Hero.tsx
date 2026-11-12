@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import { ChefHat, PenTool, ArrowRight } from "lucide-react";
+import { useRestaurantHours } from "../../hooks/useRestaurantHours";
+import { getOrderTarget } from "../../utils/orderTarget";
 import "./Hero.css";
 
 const defaultImages = [
@@ -21,6 +24,8 @@ interface HeroProps {
 }
 
 export default function Hero({ title, subtitle, ctaText }: HeroProps) {
+  const navigate = useNavigate();
+  const { currentPeriod } = useRestaurantHours();
   const [heroImages, setHeroImages] = useState<string[]>(defaultImages);
   const [current, setCurrent] = useState(0);
 
@@ -46,9 +51,9 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
     return () => clearInterval(interval);
   }, [heroImages]);
 
+  // Mène directement au menu du moment (au lieu d'ouvrir le petit bouton flottant)
   const handleCtaClick = () => {
-    const event = new CustomEvent("openReservation");
-    window.dispatchEvent(event);
+    navigate(getOrderTarget(currentPeriod));
   };
 
   const goToPreviousImage = () => {
@@ -156,13 +161,17 @@ export default function Hero({ title, subtitle, ctaText }: HeroProps) {
           <button
             className="hero-v2-cta"
             onClick={handleCtaClick}
-            aria-label={`${ctaText} - ouvrir le formulaire de réservation`}
+            aria-label={`${ctaText} - voir le menu et passer commande`}
           >
             <span>{ctaText}</span>
             <span className="cta-circle" aria-hidden="true">
               <ArrowRight size={16} />
             </span>
           </button>
+          <p className="hero-v2-howto">Commandez en ligne en quelques clics</p>
+          <Link to="/reservation" className="hero-v2-cta-secondary">
+            Réserver une table
+          </Link>
         </div>
       </div>
     </section>

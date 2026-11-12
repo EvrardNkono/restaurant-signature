@@ -194,7 +194,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <Link to="/contact" className="nav-cta">
+            <Link to="/reservation" className="nav-cta">
               Réserver
             </Link>
             <button
@@ -284,7 +284,7 @@ export default function Navbar() {
                 <span>Laissez-nous un avis sur Google</span>
               </a>
 
-              <Link to="/contact" onClick={closeMenu} className="mobile-cta">
+              <Link to="/reservation" onClick={closeMenu} className="mobile-cta">
                 Réserver une table
               </Link>
 
